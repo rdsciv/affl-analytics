@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Front Office</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff2d1a%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3ET%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="frame">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark red">T</div>
+      <div>
+        <h1>Front <span>Office</span></h1>
+        <div class="sub" id="page-sub">trades &middot; waivers &middot; free agents</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html" class="on">Trades</a>
+    </nav>
+  </header>
+
+  <div class="picker-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+
+  <section class="kpi-row" id="tx-kpis"></section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Activity By Manager</h2><div class="card-sub">how each manager worked the wire</div></div>
+      </div>
+      <div class="chart-wrap xtall"><canvas id="activity-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Trade Blotter</h2><div class="card-sub" id="trade-sub">every completed trade, both sides</div></div>
+      </div>
+      <div class="trade-list" id="trade-list"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Transaction Log</h2><div class="card-sub" id="log-sub">waiver claims and free-agent moves</div></div>
+      <div class="log-controls">
+        <div class="pp-filters" id="tx-filters"></div>
+        <input id="tx-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search transactions">
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="log-tbl">
+        <thead><tr><th>Wk</th><th>Date</th><th>Manager</th><th>Type</th><th id="bid-th">Bid</th><th>Added</th><th>Dropped</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <button class="pp-more" id="log-more">Show more</button>
+  </section>
+
+  <footer class="foot">AFFL Front Office &middot; transaction history via ESPN Fantasy API</footer>
+</div>
+<script src="chart.umd.min.js?v=1"></script>
+<script src="common.js?v=2"></script>
+<script src="trades.js?v=1"></script>
+</body>
+</html>

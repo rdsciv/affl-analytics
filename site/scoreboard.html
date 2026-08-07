@@ -15,22 +15,32 @@
       <div class="brand-mark">S</div>
       <div>
         <h1>AFFL <span>Scoreboard</span></h1>
-        <div class="sub">every lineup · every week · 2025</div>
+        <div class="sub" id="sb-sub">every lineup · every week</div>
       </div>
     </div>
     <nav class="site-nav">
       <a href="index.html">Dashboard</a>
       <a href="scoreboard.html" class="on">Scoreboard</a>
-      <a href="players.html">PlayerProfiler</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
     </nav>
   </header>
 
-  <div class="week-picker" id="week-picker"></div>
+  <div class="picker-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+  <div class="picker-row">
+    <div class="picker-label">Week</div>
+    <div class="week-picker" id="week-picker"></div>
+  </div>
 
   <section class="sb-grid" id="sb-grid"></section>
 
   <footer class="foot">AFFL Scoreboard &middot; click any player for the full PlayerProfiler breakdown</footer>
 </div>
-<script src="scoreboard.js?v=1"></script>
+<script src="common.js?v=2"></script>
+<script src="scoreboard.js?v=2"></script>
 </body>
 </html>

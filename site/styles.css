@@ -390,3 +390,45 @@ a.sb-name.link:hover { color: var(--blue2); text-decoration: underline; text-und
 .pp-card.cur { border-color: var(--orange); box-shadow: 0 0 14px #ff7a0044; }
 
 @media (max-width: 980px) { .sb-grid { grid-template-columns: 1fr; } .pl-tiles { min-width: 100%; } }
+
+/* ---------- pickers / notices (multi-year) ---------- */
+.picker-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+.picker-label {
+  font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--mut); font-style: italic; flex: 0 0 54px;
+}
+.notice {
+  border: 1px dashed #2c3a52; border-radius: 10px; padding: 14px 16px;
+  color: var(--mut); font-size: 12.5px; line-height: 1.55; background: #0b0e16;
+  grid-column: 1 / -1;
+}
+.loading { color: var(--mut); font-size: 13px; font-style: italic; padding: 24px 4px; grid-column: 1 / -1; }
+.brand-mark.gold { border-color: var(--yellow); box-shadow: 0 0 18px #ffc40088, inset 0 0 14px #ffc40033; }
+.brand-mark.red  { border-color: var(--red);    box-shadow: 0 0 18px #ff2d1a88, inset 0 0 14px #ff2d1a33; }
+
+/* ---------- draft board ---------- */
+#board-tbl .badge { font-size: 9.5px; }
+.badge.steal { background: #93d50022; color: var(--green); }
+.badge.bust  { background: #ff2d1a22; color: #ff6a5a; }
+
+/* ---------- trades ---------- */
+.trade-list { display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+.trade { background: #0b0e16; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.trade-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.trade-wk { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--red); font-style: italic; }
+.trade-date { font-size: 10.5px; color: var(--mut); }
+.trade-body { display: flex; align-items: stretch; gap: 8px; }
+.trade-side { flex: 1; min-width: 0; }
+.trade-team { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; margin-bottom: 5px; }
+.trade-team .mini { width: 20px; height: 20px; flex: 0 0 20px; }
+.trade-got { display: flex; flex-direction: column; gap: 3px; }
+.trade-pl { font-size: 11.5px; color: var(--ink); display: flex; align-items: center; gap: 5px; }
+.trade-swap { display: grid; place-items: center; color: var(--steel); font-size: 15px; font-weight: 900; flex: 0 0 20px; }
+
+/* ---------- transaction log ---------- */
+.log-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.log-controls .pp-filters { margin-bottom: 0; }
+#log-tbl td { white-space: normal; vertical-align: top; }
+.mv { display: flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 1px 0; }
+.mv.add { color: var(--green); }
+.mv.drop { color: #ff8a7a; }

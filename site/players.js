@@ -1,48 +1,41 @@
-/* ============ PlayerProfiler — joined to the AFFL database ============ */
+/* ============ PlayerProfiler — all seasons ============ */
 (async function () {
-  const DATA = await fetch('data.json?v=' + Date.now(), { cache: 'no-store' }).then((r) => r.json());
+  const A = window.AFFL;
   const $ = (s) => document.querySelector(s);
-  const fmt = (n, d = 0) => n.toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
+  await A.boot();
+  A.chartDefaults(Chart);
+  const C = A.C;
+  const fmt = A.fmt;
 
-  const C = { blue: '#2f7bff', steel: '#3a4a63', grid: '#1b243366', mut: '#7d8aa0', ink: '#eef4ff' };
-  Chart.defaults.color = C.mut;
-  Chart.defaults.font.family = '"Avenir Next","Segoe UI",-apple-system,sans-serif';
-  Chart.defaults.font.size = 11;
-  Chart.defaults.plugins.tooltip.backgroundColor = '#05060bf2';
-  Chart.defaults.plugins.tooltip.borderColor = '#1c2536';
-  Chart.defaults.plugins.tooltip.borderWidth = 1;
-  Chart.defaults.plugins.tooltip.titleColor = C.ink;
+  let year = A.years()[0];
+  let YD = null, T = {}, cur = null, chart = null;
+  const PP = { q: '', pos: 'ALL', limit: 24 };
 
-  const PLAYERS = DATA.nextgen.players;
-  const T25 = {};
-  DATA.seasons['2025'].teams.forEach((t) => { T25[t.id] = t; });
-  const tName = (id) => (T25[id] || { name: '?' }).name;
-
-  const initials = (n) => n.split(' ').map((x) => x[0]).join('').slice(0, 2);
-  const hsHTML = (p, cls) => p.hs
-    ? `<img class="${cls}" src="${p.hs}" alt="" onerror="this.outerHTML='<div class=&quot;${cls} fb&quot;>${initials(p.name)}</div>'">`
-    : `<div class="${cls} fb">${initials(p.name)}</div>`;
-
-  let chart = null;
-  let cur = null;
+  const tName = (id) => (T[id] || { name: '?' }).name;
 
   function loadPlayer(pid, push) {
-    const p = PLAYERS.find((x) => x.pid === pid) || PLAYERS[0];
+    const p = YD.players.find((x) => x.pid === pid) || YD.players[0];
+    if (!p) {
+      $('#pl-hero').innerHTML = A.notice(`No player data stored for ${year}. ESPN retains weekly lineups from 2018 on.`);
+      $('#pl-log tbody').innerHTML = '';
+      $('#pl-journey').innerHTML = '';
+      if (chart) { chart.destroy(); chart = null; }
+      return;
+    }
     cur = p;
-    if (push) history.pushState(null, '', '?pid=' + p.pid);
-    document.title = `${p.name} — PlayerProfiler`;
+    if (push) history.pushState(null, '', `?year=${year}&pid=${p.pid}`);
+    document.title = `${p.name} ${year} — PlayerProfiler`;
 
-    // hero
     const stat = (v, l) => `<div class="pp-stat"><b>${v}</b><span>${l}</span></div>`;
     $('#pl-hero').innerHTML = `
       <div class="pl-hero-inner">
-        ${hsHTML(p, 'pl-hs')}
+        ${A.headshotHTML(p, 'pl-hs')}
         <div class="pl-id">
           <h2 class="pl-name">${p.name}</h2>
           <div class="pl-tags">
             <span class="badge pos-${p.pos}">${p.pos}</span>
             <span class="pl-nfl">${p.nfl || 'NFL'}</span>
-            <span class="pl-team">finished with ${tName(p.mainTeam)}</span>
+            <span class="pl-team">${year} · finished with ${tName(p.mainTeam)}</span>
           </div>
         </div>
         <div class="pp-stats pl-tiles">
@@ -57,25 +50,27 @@
         </div>
       </div>`;
 
-    // journey
     const items = [];
-    items.push(p.draft
-      ? { i: '🔨', t: `Auctioned for $${p.draft.bid}`, d: `to ${tName(p.draft.teamId)} on draft night` }
-      : { i: '🧙', t: 'Undrafted', d: 'entered the AFFL through the waiver wire' });
-    const teamsSeen = [...new Set(p.wk.map((w) => w[3]))];
-    items.push({ i: '🏠', t: teamsSeen.length > 1 ? `${teamsSeen.length} AFFL homes` : 'One-team player', d: teamsSeen.map(tName).join(' → ') });
+    if (p.draft) {
+      items.push(YD.draft.auction
+        ? { i: '🔨', t: `Auctioned for $${p.draft.bid}`, d: `to ${tName(p.draft.teamId)}${p.draft.keeper ? ' as a keeper' : ''}` }
+        : { i: '🔨', t: `Drafted ${p.draft.round}.${p.draft.overall}`, d: `by ${tName(p.draft.teamId)}` });
+    } else {
+      items.push({ i: '🧙', t: 'Undrafted', d: 'entered the AFFL through the waiver wire' });
+    }
+    const seen = [...new Set(p.wk.map((w) => w[3]))];
+    items.push({ i: '🏠', t: seen.length > 1 ? `${seen.length} AFFL homes` : 'One-team player', d: seen.map(tName).join(' → ') });
     const best = [...p.wk].sort((a, b) => b[1] - a[1])[0];
-    if (best) items.push({ i: '💥', t: `Best week: ${fmt(best[1], 1)} pts`, d: `Week ${best[0]}${best[5] ? ' vs ' + best[5] : ''}${best[2] ? '' : ' — left on the bench!'}` });
+    if (best) items.push({ i: '💥', t: `Best week: ${fmt(best[1], 1)} pts`, d: `Week ${best[0]}${best[5] ? ' vs ' + best[5] : ''}${best[2] ? '' : ' — benched!'}` });
     items.push({ i: '📊', t: `${fmt(p.stPts, 1)} pts delivered in lineups`, d: `across ${p.starts} start${p.starts === 1 ? '' : 's'}` });
     $('#pl-journey').innerHTML = items.map((x) => `
       <li><div class="story-ico" style="background:#2f7bff18">${x.i}</div>
       <div class="story-txt"><div class="t">${x.t}</div><div class="d">${x.d}</div></div></li>`).join('');
 
-    // game log
     $('#pl-log tbody').innerHTML = p.wk.map((w) => {
       const [wk, pts, st, tid, slot, opp, yds, td, tgt, epa] = w;
       return `<tr class="${st ? '' : 'benched'}">
-        <td><strong>W${wk}</strong>${wk > 14 ? ' 🏆' : ''}</td>
+        <td><strong>W${wk}</strong>${wk > YD.regWeeks ? ' 🏆' : ''}</td>
         <td>${opp || '—'}</td>
         <td class="own">${tName(tid)}</td>
         <td><span class="sb-slot ${st ? 'started' : ''}">${slot}</span></td>
@@ -87,7 +82,6 @@
       </tr>`;
     }).join('');
 
-    // chart
     if (chart) chart.destroy();
     chart = new Chart($('#pl-chart'), {
       type: 'bar',
@@ -115,24 +109,25 @@
     });
   }
 
-  /* ---- database grid ---- */
-  const PP = { q: '', pos: 'ALL', limit: 24 };
   function filtered() {
     const q = PP.q.toLowerCase();
-    return PLAYERS.filter((p) =>
+    return YD.players.filter((p) =>
       (PP.pos === 'ALL' || p.pos === PP.pos) && (!q || p.name.toLowerCase().includes(q)));
   }
+
   function renderGrid() {
     const rows = filtered();
     $('#pp-grid').innerHTML = rows.slice(0, PP.limit).map((p) => `
       <div class="pp-card${cur && p.pid === cur.pid ? ' cur' : ''}" data-pid="${p.pid}">
-        ${hsHTML(p, 'pp-hs')}
+        ${A.headshotHTML(p, 'pp-hs')}
         <div>
           <div class="pp-nm">${p.name}</div>
           <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · ${tName(p.mainTeam).slice(0, 16)}</div>
         </div>
         <div class="pp-pts"><b>${fmt(p.tot, 1)}</b><span>season pts</span></div>
-      </div>`).join('') || '<div class="card-sub">No players match.</div>';
+      </div>`).join('') ||
+      A.notice(YD.players.length ? 'No players match.' :
+        `ESPN does not retain weekly lineups for ${year}, so there are no player profiles. Try 2018 or later.`);
     $('#pp-more').style.display = rows.length > PP.limit ? 'block' : 'none';
     document.querySelectorAll('.pp-card').forEach((el) =>
       el.addEventListener('click', () => {
@@ -141,6 +136,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }));
   }
+
   const POSES = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DST'];
   $('#pp-filters').innerHTML = POSES.map((p) =>
     `<button class="pp-chip${p === 'ALL' ? ' on' : ''}" data-pos="${p}">${p}</button>`).join('');
@@ -153,12 +149,21 @@
   $('#pp-search').addEventListener('input', (e) => { PP.q = e.target.value; PP.limit = 24; renderGrid(); });
   $('#pp-more').addEventListener('click', () => { PP.limit += 24; renderGrid(); });
 
-  /* ---- boot: deep link from scoreboard/dashboard ---- */
-  const pid = +new URLSearchParams(location.search).get('pid');
-  loadPlayer(pid || PLAYERS[0].pid, false);
-  renderGrid();
+  async function pick(y, pid) {
+    year = y;
+    cur = null;
+    PP.limit = 24;
+    YD = await A.loadYear(y);
+    T = A.teams(y);
+    A.yearPicker($('#year-picker'), year, (yy) => pick(yy), (i) => i.players ? '' : '*');
+    loadPlayer(pid || (YD.players[0] || {}).pid, false);
+    renderGrid();
+  }
+
+  const qs = new URLSearchParams(location.search);
+  await pick(+qs.get('year') || A.years()[0], +qs.get('pid') || null);
   window.addEventListener('popstate', () => {
-    const pid2 = +new URLSearchParams(location.search).get('pid');
-    if (pid2) { loadPlayer(pid2, false); renderGrid(); }
+    const q2 = new URLSearchParams(location.search);
+    pick(+q2.get('year') || year, +q2.get('pid') || null);
   });
 })();

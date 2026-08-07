@@ -1,15 +1,35 @@
 # AFFL Analytics
 
-Three joined static sites for a 12-team ESPN fantasy football league (est. 2014), built from the
+Five joined static pages for a 12-team ESPN fantasy football league (est. 2014), built from the
 ESPN Fantasy API and joined to real NFL data via [nflverse](https://github.com/nflverse/nflverse-data).
 
 **Live:** https://rdsciv.github.io/affl-analytics/
 
 | Page | What's on it |
 | --- | --- |
-| **Dashboard** (`index.html`) | Season KPIs, weekly scoring waves, standings, schedule-luck index, Next Gen Lab (lineup IQ, draft ROI, position DNA, starter EPA), Player Profiler grid, Fantasy Genius report cards, all-time records back to 2014 |
-| **Scoreboard** (`scoreboard.html`) | Every matchup of all 17 weeks with complete lineups — slot, player, NFL team, points, collapsible bench. Every player name links into the profiler |
-| **PlayerProfiler** (`players.html`) | Per-player hero card, weekly production chart, AFFL journey, and a full game log joining fantasy scoring to real NFL box scores (yards, TDs, targets, EPA) |
+| **Dashboard** (`index.html`) | Season KPIs, weekly scoring waves, standings, schedule-luck index, Next Gen Lab (lineup IQ, draft ROI, position DNA, starter EPA), Fantasy Genius report cards, all-time records back to 2014 |
+| **Scoreboard** (`scoreboard.html`) | Every matchup of **every season**, week by week, with complete lineups — slot, player, NFL team, points, collapsible bench. Every player name links into the profiler |
+| **Players** (`players.html`) | Per-player hero card, weekly production chart, AFFL journey, and a full game log joining fantasy scoring to real NFL box scores (yards, TDs, targets, EPA) — for any season |
+| **Draft** (`draft.html`) | Every draft since 2014. Auction or snake auto-detected; position spend allocation, points-per-dollar efficiency, steals/busts, and the full searchable board |
+| **Front Office** (`trades.html`) | Trade blotter showing both sides of every completed trade, waiver/free-agent log, and per-manager wire activity |
+
+All five pages share a season picker and lazy-load one bundle per year.
+
+## Data availability
+
+ESPN's retention differs by data type, so the site adapts per season rather than
+pretending the gaps aren't there:
+
+| Data | Seasons | Notes |
+| --- | --- | --- |
+| Standings, schedules, scores | 2014–2025 | full history |
+| Drafts | 2014–2025 | snake in 2014–15, auction from 2016 |
+| Weekly lineups (who started whom) | 2018–2025 | ESPN does not retain rosters before 2018 |
+| Transactions & trades | 2018–2025 | waivers, free agents, trades, vetoes |
+| NFL advanced stats (nflverse) | 2018–2025 | joined `espn_id` → `gsis_id` |
+
+Years with partial data are marked `*` in the season pickers and the affected
+panels explain what's missing instead of rendering empty.
 
 ## Notable metrics
 
@@ -29,14 +49,27 @@ cp .env.example .env    # then fill in ESPN_SWID and ESPN_S2 from your browser c
 ./fetch.sh
 ```
 
-`fetch.sh` pulls the current season, all league history, all 17 weekly boxscores, the draft, and the
-nflverse weekly stats + rosters, then runs both processors:
+`fetch.py` pulls every season — league core, drafts, weekly boxscores, transactions, and the
+nflverse weekly stats + rosters. Raw boxscores are ~2.5 MB each, so it reduces every week to
+`(playerId, slot, points)` while fetching; a full season of lineups lands in ~250 KB instead of ~42 MB.
 
-- `process.py` → league/franchise/all-time analytics, plus ESPN member GUID anonymization
-- `process_players.py` → player analytics, game logs, and `scoreboard.json`
+Then three processors run:
 
-Output is `site/data.json` and `site/scoreboard.json`. The site is fully static — no build step,
-no external requests at runtime (Chart.js and all team logos are vendored locally).
+- `process.py` → league / franchise / all-time analytics, plus ESPN member GUID anonymization
+- `process_players.py` → the current-season deep-dive blocks on the dashboard
+- `process_seasons.py` → one bundle per season in `site/years/{year}.json`, plus the
+  `site/index_years.json` manifest the front end reads first
+
+The site is fully static — no build step and no external requests at runtime (Chart.js and every
+team logo are vendored locally; only NFL headshots are remote, and they fall back to initials).
+
+### Reconstructing trades
+
+ESPN records the players on a `TRADE_PROPOSAL` and emits `TRADE_ACCEPT` as a bare status event
+pointing back via `relatedTransactionId` — which frequently references a superseded counter-offer.
+`process_seasons.py` resolves each accept through its own items, then its related proposal, then the
+nearest earlier proposal involving that team, and finally dedupes by the exact set of players moved
+so one trade can't be counted twice.
 
 ## Local preview
 

@@ -15,32 +15,26 @@ POS = {1: 'QB', 2: 'RB', 3: 'WR', 4: 'TE', 5: 'K', 16: 'DST'}
 BENCH, IR = 20, 21
 REG_WEEKS = 14  # weeks 1-14 regular season, 15-17 playoffs
 
+SEASON = 2025
+BENCH_SLOTS = {'BN', 'IR'}
+
 def load_boxscores():
-    """rows: (week, teamId, playerId, name, pos, slot, pts, started)"""
+    """Read the compact per-season bundle written by fetch.py."""
+    box = json.load(open(f'{DATA}/box_{SEASON}.json'))
+    meta = box['players']            # pid(str) -> [name, pos, nflTeam]
     rows = []
-    for wk in range(1, 18):
-        d = json.load(open(f'{DATA}/box_w{wk}.json'))
-        for g in d['schedule']:
-            if g['matchupPeriodId'] != wk:
-                continue
+    for wk_s, games in box['weeks'].items():
+        wk = int(wk_s)
+        for g in games:
             for side in ('home', 'away'):
-                s = g.get(side)
-                if not s:
-                    continue
-                roster = s.get('rosterForCurrentScoringPeriod')
-                if not roster:
-                    continue
-                for e in roster['entries']:
-                    ppe = e['playerPoolEntry']
-                    p = ppe['player']
-                    pts = ppe.get('appliedStatTotal', 0) or 0
-                    slot = e['lineupSlotId']
+                s = g[side]
+                for pid, slot, pts in s['roster']:
+                    m = meta.get(str(pid), ['?', '?', ''])
                     rows.append({
-                        'week': wk, 'teamId': s['teamId'],
-                        'pid': p['id'], 'name': p['fullName'],
-                        'pos': POS.get(p.get('defaultPositionId'), '?'),
-                        'slot': slot, 'pts': round(pts, 2),
-                        'started': slot not in (BENCH, IR),
+                        'week': wk, 'teamId': s['tid'],
+                        'pid': pid, 'name': m[0], 'pos': m[1],
+                        'slot': slot, 'pts': pts,
+                        'started': slot not in BENCH_SLOTS,
                     })
     return rows
 
@@ -115,15 +109,15 @@ def main():
         mvps[tid]['pts'] = round(mvps[tid]['pts'], 1)
 
     # ---------- draft ROI (auction) ----------
-    draft = json.load(open(f'{DATA}/draft_2025.json'))['draftDetail']['picks']
+    draft = json.load(open(f'{DATA}/draft_{SEASON}.json'))['picks']
     rostered_pts = defaultdict(float)  # pid -> pts while on any roster (all weeks)
     for r in rows:
         rostered_pts[r['pid']] += r['pts']
     picks = []
     for pk in draft:
-        pid = pk['playerId']
+        pid = pk['pid']
         picks.append({
-            'pid': pid, 'teamId': pk['teamId'], 'bid': pk['bidAmount'],
+            'pid': pid, 'teamId': pk['tid'], 'bid': pk['bid'],
             'name': pname.get(pid, f'#{pid}'), 'pos': ppos.get(pid, '?'),
             'pts': round(rostered_pts.get(pid, 0), 1),
         })
@@ -142,13 +136,13 @@ def main():
 
     # ---------- nflverse join ----------
     espn_to_gsis = {}
-    with open(f'{DATA}/roster_2025.csv') as f:
+    with open(f'{DATA}/roster_{SEASON}.csv') as f:
         for row in csv.DictReader(f):
             if row.get('espn_id') and row.get('gsis_id'):
                 espn_to_gsis[row['espn_id']] = row['gsis_id']
 
     nfl = defaultdict(dict)  # gsis -> week -> stats row
-    with open(f'{DATA}/stats_player_week_2025.csv') as f:
+    with open(f'{DATA}/stats_player_week_{SEASON}.csv') as f:
         for row in csv.DictReader(f):
             if row['season_type'] != 'REG':
                 continue
@@ -237,7 +231,7 @@ def main():
 
     # roster meta: espn_id -> NFL team & headshot
     nfl_meta = {}
-    with open(f'{DATA}/roster_2025.csv') as f:
+    with open(f'{DATA}/roster_{SEASON}.csv') as f:
         for row in csv.DictReader(f):
             if row.get('espn_id'):
                 hs = row.get('headshot_url', '')
@@ -314,7 +308,7 @@ def main():
         if wk <= REG_WEEKS:
             wk_opt[(tid, wk)] = optimal_points(entries)
             wk_act[(tid, wk)] = round(sum(e['pts'] for e in entries if e['started']), 2)
-    league_raw = json.load(open(f'{DATA}/league_2025.json'))
+    league_raw = json.load(open(f'{DATA}/league_{SEASON}.json'))
     if isinstance(league_raw, list):
         league_raw = league_raw[0]
     whatif = {tid: {'w': 0, 'l': 0} for tid in teams25}
@@ -405,46 +399,6 @@ def main():
             'waiverPts': round(waiver_by_team.get(tid, 0), 1),
         })
     report.sort(key=lambda x: -x['gpa'])
-
-    # ---- scoreboard.json: every matchup, every roster, every week ----
-    sb_weeks = {}
-    sb_players = {}
-    for wk in range(1, 18):
-        d = json.load(open(f'{DATA}/box_w{wk}.json'))
-        games = []
-        for g in d['schedule']:
-            if g['matchupPeriodId'] != wk:
-                continue
-            sides = {}
-            for side in ('home', 'away'):
-                s = g.get(side)
-                if not s:
-                    continue
-                roster = s.get('rosterForCurrentScoringPeriod')
-                entries = []
-                if roster:
-                    for e in roster['entries']:
-                        ppe = e['playerPoolEntry']
-                        p = ppe['player']
-                        pid = p['id']
-                        entries.append([pid, SLOT_LABEL.get(e['lineupSlotId'], '?'),
-                                        round(ppe.get('appliedStatTotal', 0) or 0, 1)])
-                        if pid not in sb_players:
-                            meta = nfl_meta.get(str(pid), {})
-                            sb_players[pid] = [p['fullName'], POS.get(p.get('defaultPositionId'), '?'),
-                                               meta.get('nfl', '')]
-                sides[side] = {'tid': s['teamId'],
-                               'pts': round(s.get('totalPoints', 0) or 0, 1),
-                               'roster': entries}
-            if 'home' in sides and 'away' in sides and (sides['home']['pts'] or sides['away']['pts']):
-                games.append({'tier': g.get('playoffTierType', 'NONE'),
-                              'home': sides['home'], 'away': sides['away']})
-        if games:
-            sb_weeks[wk] = games
-    json.dump({'weeks': sb_weeks, 'players': {str(k): v for k, v in sb_players.items()}},
-              open(os.path.join(HERE, 'site', 'scoreboard.json'), 'w'))
-    print('scoreboard.json:', round(os.path.getsize(os.path.join(HERE, 'site', 'scoreboard.json')) / 1024, 1), 'KB,',
-          len(sb_players), 'players,', sum(len(v) for v in sb_weeks.values()), 'games')
 
     site['nextgen'] = {
         'year': 2025,
