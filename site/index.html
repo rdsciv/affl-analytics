@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Analytics</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff2e9a%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="frame">
+
+  <!-- ============ HEADER ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div>
+        <h1>AFFL <span>Analytics</span></h1>
+        <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html" class="on">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">PlayerProfiler</a>
+    </nav>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hs-value" id="hs-total">–</div>
+        <div class="hs-label">reg-season points</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-value accent" id="hs-games">–</div>
+        <div class="hs-label">reg-season games</div>
+      </div>
+    </div>
+    <div class="season-picker" id="season-picker"></div>
+  </header>
+
+  <!-- ============ KPI DONUT ROW ============ -->
+  <section class="kpi-row" id="kpi-row"></section>
+
+  <!-- ============ MAIN GRID ============ -->
+  <section class="main-grid">
+    <div class="card chart-card">
+      <div class="card-head">
+        <div>
+          <h2>Weekly Scoring</h2>
+          <div class="card-sub">league high / average / low &middot; regular season</div>
+        </div>
+        <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+      </div>
+      <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
+    </div>
+
+    <aside class="card side-card">
+      <div class="card-head"><h2>Season Story</h2></div>
+      <div class="champ-spot" id="champ-spot"></div>
+      <ul class="story-list" id="story-list"></ul>
+      <div class="side-total"><span>league total</span><strong id="side-total">–</strong></div>
+    </aside>
+  </section>
+
+  <!-- ============ SECOND ROW ============ -->
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Points Per Week</h2><div class="card-sub">average score by team</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="bar-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>The Race</h2><div class="card-sub">cumulative wins &middot; top four finishers</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="race-chart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ STANDINGS + LUCK ============ -->
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Final Standings</h2><div class="card-sub" id="standings-sub">including playoffs</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="standings-tbl">
+          <thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th><th>Avg</th><th>All-Play</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Luck Index</h2><div class="card-sub">actual wins minus schedule-adjusted expected wins</div></div>
+      </div>
+      <div class="chart-wrap fill"><canvas id="luck-chart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ NEXT GEN LAB ============ -->
+  <div class="section-break"><h2>Next Gen Lab <span>2025 · joined to nflverse</span></h2></div>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Lineup IQ</h2><div class="card-sub">points started vs perfect lineups &middot; wasted on the bench</div></div>
+      </div>
+      <div class="chart-wrap xtall"><canvas id="lineup-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Draft War Room</h2><div class="card-sub">auction ROI &middot; points scored while rostered, per dollar bid</div></div>
+      </div>
+      <div class="mini-tables">
+        <div>
+          <h3 class="g">Biggest Steals</h3>
+          <table class="tbl" id="steals-tbl"><tbody></tbody></table>
+        </div>
+        <div>
+          <h3 class="r">Biggest Busts</h3>
+          <table class="tbl" id="busts-tbl"><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="draft-note" id="draft-note"></div>
+    </div>
+  </section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Position DNA</h2><div class="card-sub">where each team's started points came from</div></div>
+      </div>
+      <div class="chart-wrap xtall"><canvas id="dna-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Starter EPA</h2><div class="card-sub">real NFL expected points added by your starters &middot; via nflverse</div></div>
+      </div>
+      <div class="chart-wrap xtall"><canvas id="epa-chart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Elite Company</h2><div class="card-sub">top started scorers with real NFL advanced context &middot; EPA, WOPR, target share</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="spotlight-tbl">
+        <thead><tr><th>Player</th><th>Pos</th><th>Started By</th><th>Fantasy Pts</th><th>PPG</th><th>NFL EPA</th><th>WOPR</th><th>Tgt Share</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ PLAYER PROFILER ============ -->
+  <div class="section-break"><h2>Player Profiler <span>2025 · every rostered player · nflverse joined</span></h2></div>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>The Database</h2><div class="card-sub">tap any player for the full profile &middot; fantasy production joined to real NFL data</div></div>
+      <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
+    </div>
+    <div class="pp-filters" id="pp-filters"></div>
+    <div class="pp-grid" id="pp-grid"></div>
+    <button class="pp-more" id="pp-more">Show more</button>
+  </section>
+
+  <!-- ============ FANTASY GENIUS ============ -->
+  <div class="section-break"><h2>Fantasy Genius <span>manager skill, separated from luck</span></h2></div>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Manager Report Card</h2><div class="card-sub">graded on the three true skills — drafting, lineup setting, waiver work &middot; luck listed separately</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="report-tbl">
+        <thead><tr><th>Manager</th><th>Draft</th><th>Lineups</th><th>Waivers</th><th>Luck</th><th>Skill GPA</th><th>Genius Verdict</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>The What-If Machine</h2><div class="card-sub">final regular-season standings if every manager started a perfect lineup every week</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="whatif-tbl">
+          <thead><tr><th>#</th><th>Team</th><th>Perfect W-L</th><th>Actual W-L</th><th>Fate</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Waiver Wire Wizardry</h2><div class="card-sub">best undrafted pickups by points actually started</div></div>
+      </div>
+      <ul class="story-list" id="waiver-list"></ul>
+    </div>
+  </section>
+
+  <!-- ============ ALL-TIME ============ -->
+  <div class="section-break"><h2>All-Time <span>2014 – 2025</span></h2></div>
+
+  <section class="timeline" id="timeline"></section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Franchise Records</h2><div class="card-sub">every owner, every season</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="franchise-tbl">
+          <thead><tr><th>Owner</th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>🏆</th><th>PF</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Points by Era</h2><div class="card-sub">season points-for &middot; active franchises</div></div>
+      </div>
+      <div class="chart-wrap era"><canvas id="era-chart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="card h2h-card">
+    <div class="card-head">
+      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins, row owner vs column owner &middot; active members</div></div>
+    </div>
+    <div class="table-scroll"><table class="tbl h2h" id="h2h-tbl"></table></div>
+  </section>
+
+  <footer class="foot">AFFL Analytics &middot; data via ESPN Fantasy API &middot; seasons 2014–2025</footer>
+</div>
+
+<script src="chart.umd.min.js?v=1"></script>
+<script src="app.js?v=3"></script>
+</body>
+</html>

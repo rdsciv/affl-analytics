@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Scoreboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%232f7bff%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3ES%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="frame">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div>
+        <h1>AFFL <span>Scoreboard</span></h1>
+        <div class="sub">every lineup · every week · 2025</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html" class="on">Scoreboard</a>
+      <a href="players.html">PlayerProfiler</a>
+    </nav>
+  </header>
+
+  <div class="week-picker" id="week-picker"></div>
+
+  <section class="sb-grid" id="sb-grid"></section>
+
+  <footer class="foot">AFFL Scoreboard &middot; click any player for the full PlayerProfiler breakdown</footer>
+</div>
+<script src="scoreboard.js?v=1"></script>
+</body>
+</html>

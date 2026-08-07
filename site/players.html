@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlayerProfiler — AFFL</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff7a00%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="frame">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark orange">P</div>
+      <div>
+        <h1>Player<span>Profiler</span></h1>
+        <div class="sub">nfl game logs &middot; advanced stats &middot; affl usage</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html" class="on">PlayerProfiler</a>
+    </nav>
+  </header>
+
+  <!-- selected player -->
+  <section class="card pl-hero" id="pl-hero"></section>
+
+  <section class="second-grid pl-detail">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Weekly Fantasy Production</h2><div class="card-sub">blue = started in an AFFL lineup &middot; gray = benched</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="pl-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>AFFL Journey</h2><div class="card-sub">how this player moved through the league</div></div>
+      </div>
+      <ul class="story-list" id="pl-journey"></ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Game Log</h2><div class="card-sub">fantasy scoring joined to real NFL box-score data via nflverse</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="pl-log">
+        <thead><tr><th>Wk</th><th>Opp</th><th>AFFL Team</th><th>Slot</th><th>Fan Pts</th><th>Yds</th><th>TD</th><th>Tgt</th><th>EPA</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- database -->
+  <div class="section-break"><h2>The Database <span>every rostered player · 2025</span></h2></div>
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile above</div></div>
+      <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
+    </div>
+    <div class="pp-filters" id="pp-filters"></div>
+    <div class="pp-grid" id="pp-grid"></div>
+    <button class="pp-more" id="pp-more">Show more</button>
+  </section>
+
+  <footer class="foot">PlayerProfiler &middot; joined to the AFFL database &middot; data via ESPN Fantasy API + nflverse</footer>
+</div>
+<script src="chart.umd.min.js?v=1"></script>
+<script src="players.js?v=1"></script>
+</body>
+</html>

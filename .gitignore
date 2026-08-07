@@ -1,0 +1,9 @@
+# credentials — never commit
+.env
+
+# raw API dumps + nflverse CSVs (regenerate with ./fetch.sh)
+data/*.json
+data/*.csv
+!data/logo_map.json
+
+.DS_Store
