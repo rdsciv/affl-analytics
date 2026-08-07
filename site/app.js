@@ -44,7 +44,7 @@
     const cls = size === 'mini' ? 'mini' : 'avatar';
     if (team.logo && /^(https?:|logos\/)/.test(team.logo)) {
       return `<img class="${cls}" src="${team.logo}" alt="" loading="lazy"
-        onerror="this.outerHTML='<div class=&quot;${cls} ${size === 'mini' ? '' : 'fallback'}&quot;>${initial}</div>'">`;
+        onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} ${size === 'mini' ? '' : 'fallback'}&quot;>${initial}</div>'">`;
     }
     return `<div class="${cls} ${size === 'mini' ? '' : 'fallback'}">${initial}</div>`;
   }
@@ -64,7 +64,8 @@
 
   /* ================= state ================= */
   const years = Object.keys(DATA.seasons).map(Number).sort((a, b) => a - b);
-  let curYear = DATA.latest;
+  const qsYear = +new URLSearchParams(location.search).get('year');
+  let curYear = years.includes(qsYear) ? qsYear : DATA.latest;
   let spotlightId = null;
 
   const S = () => DATA.seasons[String(curYear)];
@@ -76,7 +77,16 @@
       .map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`)
       .join('');
     document.querySelectorAll('.season-chip').forEach((b) =>
-      b.addEventListener('click', () => { curYear = +b.dataset.y; spotlightId = null; renderSeason(); }));
+      b.addEventListener('click', () => {
+        curYear = +b.dataset.y;
+        history.replaceState(null, '', '?year=' + curYear);
+        spotlightId = null;
+        PP.q = ''; PP.pos = 'ALL'; PP.limit = 20;
+        const s = $('#pp-search'); if (s) s.value = '';
+        document.querySelectorAll('.pp-chip').forEach((x) =>
+          x.classList.toggle('on', x.dataset.pos === 'ALL'));
+        renderSeason();
+      }));
   }
 
   /* ================= KPI row ================= */
@@ -394,17 +404,54 @@
     $('#h2h-tbl').innerHTML = head + body;
   }
 
-  /* ================= next gen lab (2025, static) ================= */
-  const NG = DATA.nextgen;
-  const T25 = {};
-  DATA.seasons['2025'].teams.forEach((t) => { T25[t.id] = t; });
+  /* ================= next gen lab (per season) =================
+     NG and T25 are reassigned every time the season changes; every renderer
+     below reads them, so all lower sections follow the picker. */
+  let NG = null;
+  let T25 = {};
   const tName25 = (id) => (T25[id] || { name: '?' }).name;
   const shortName25 = (id) => {
     const n = tName25(id);
     return n.length > 17 ? n.slice(0, 16) + '…' : n;
   };
+  const yearCache = new Map();
+  async function loadYearBundle(y) {
+    if (!yearCache.has(y)) {
+      yearCache.set(y, await fetch(`years/${y}.json?v=` + Date.now(),
+        { cache: 'no-store' }).then((r) => r.json()));
+    }
+    NG = yearCache.get(y);
+    T25 = {};
+    (DATA.seasons[String(y)] || { teams: [] }).teams.forEach((t) => { T25[t.id] = t; });
+    return NG;
+  }
+  const noLineups = (msg) =>
+    `<div class="notice">${msg || `ESPN does not retain weekly lineups for ${curYear}, so this needs 2018 or later.`}</div>`;
+  /** Hide a chart card's canvas and show a notice in its place. Safe to call
+      repeatedly — on a second no-data season the canvas is already gone. */
+  function chartNotice(sel, msg) {
+    const id = sel.slice(1);
+    const wrap = document.querySelector(`[data-canvas="${id}"]`)
+      || ($(sel) && $(sel).closest('.chart-wrap'));
+    if (!wrap) return;
+    if (charts[sel]) { charts[sel].destroy(); delete charts[sel]; }
+    wrap.innerHTML = noLineups(msg);
+    wrap.classList.add('as-notice');
+  }
+  /** Restore a canvas that a previous season replaced with a notice. */
+  function ensureCanvas(sel) {
+    const id = sel.slice(1);
+    if ($(sel)) return true;
+    const wrap = document.querySelector(`[data-canvas="${id}"]`);
+    if (!wrap) return false;
+    wrap.classList.remove('as-notice');
+    wrap.innerHTML = `<canvas id="${id}"></canvas>`;
+    return true;
+  }
 
   function renderLineupIQ() {
+    if (!NG.hasRosters || !NG.lineupIQ.length) return chartNotice('#lineup-chart');
+    if (!ensureCanvas('#lineup-chart')) return;
     const rows = NG.lineupIQ;
     mkChart('#lineup-chart', {
       type: 'bar',
@@ -442,31 +489,44 @@
   }
 
   function renderDraft() {
-    const d = NG.draft;
+    const d = NG.draftValue;
+    const auction = NG.draft.auction;
+    if (!d.steals.length) {
+      $('#steals-tbl tbody').innerHTML =
+        `<tr><td class="own">No scoring data stored for ${curYear} — see the Draft page for the board.</td></tr>`;
+      $('#busts-tbl tbody').innerHTML = '';
+      $('#draft-note').innerHTML =
+        `${NG.draft.board.length} picks recorded (${auction ? 'auction' : 'snake'}), but ESPN keeps no weekly scoring this far back, so returns can't be graded.`;
+      return;
+    }
     const row = (p, cls) => `
       <tr>
-        <td><strong>${p.name}</strong> <span class="badge pos-${p.pos}">${p.pos}</span><div class="own">${shortName25(p.teamId)}</div></td>
-        <td>$${p.bid}</td>
+        <td><strong>${p.name}</strong> <span class="badge pos-${p.pos}">${p.pos}</span><div class="own">${shortName25(p.tid)}</div></td>
+        <td>${auction ? '$' + (p.bid || 0) : '#' + p.overall}</td>
         <td><span class="badge ${cls}">${fmt(p.pts, 0)} pts</span></td>
       </tr>`;
     $('#steals-tbl tbody').innerHTML = d.steals.slice(0, 5).map((p) => row(p, 'steal')).join('');
     $('#busts-tbl tbody').innerHTML = d.busts.slice(0, 5).map((p) => row(p, 'bust')).join('');
     const best = d.teamEff[0], worst = d.teamEff[d.teamEff.length - 1];
-    $('#draft-note').innerHTML =
-      `Sharpest auction: <strong>${tName25(best.teamId)}</strong> — ${best.ppd} pts per dollar on a $${best.spent} board. ` +
-      `Loosest wallet: <strong>${tName25(worst.teamId)}</strong> at ${worst.ppd} pts/$.`;
+    $('#draft-note').innerHTML = auction
+      ? `Sharpest auction: <strong>${tName25(best.teamId)}</strong> — ${best.ppd} pts per dollar on a $${best.spent} board. ` +
+        `Loosest wallet: <strong>${tName25(worst.teamId)}</strong> at ${worst.ppd} pts/$.`
+      : `Best haul: <strong>${tName25(best.teamId)}</strong> pulled ${fmt(best.pts, 0)} pts out of their picks; ` +
+        `<strong>${tName25(worst.teamId)}</strong> managed ${fmt(worst.pts, 0)}.`;
   }
 
   function renderDNA() {
-    const order = [...NG.lineupIQ].sort((a, b) =>
-      (T25[a.teamId].finalRank || 99) - (T25[b.teamId].finalRank || 99)).map((r) => r.teamId);
+    if (!NG.hasRosters || !Object.keys(NG.posDNA).length) return chartNotice('#dna-chart');
+    if (!ensureCanvas('#dna-chart')) return;
+    const order = Object.keys(NG.posDNA).map(Number).sort((a, b) =>
+      ((T25[a] || {}).finalRank || 99) - ((T25[b] || {}).finalRank || 99));
     const POS_COLORS = { QB: C.blue, RB: C.green, WR: C.orange, TE: C.gold, K: C.ice, DST: C.steel };
     mkChart('#dna-chart', {
       type: 'bar',
       data: {
         labels: order.map(shortName25),
         datasets: Object.keys(POS_COLORS).map((p) => ({
-          label: p, data: order.map((tid) => (NG.posDNA[tid] || {})[p] || 0),
+          label: p, data: order.map((tid) => (NG.posDNA[String(tid)] || {})[p] || 0),
           backgroundColor: POS_COLORS[p], stack: 'dna', maxBarThickness: 34,
         })),
       },
@@ -482,6 +542,8 @@
   }
 
   function renderEPA() {
+    if (!NG.hasRosters || !NG.franchiseAdv.length) return chartNotice('#epa-chart');
+    if (!ensureCanvas('#epa-chart')) return;
     const rows = NG.franchiseAdv;
     mkChart('#epa-chart', {
       type: 'bar',
@@ -515,8 +577,11 @@
   }
 
   function renderSpotlight() {
-    const mvpPid = {};
-    Object.entries(NG.mvps).forEach(([tid, m]) => { mvpPid[m.name] = true; });
+    if (!NG.spotlight.length) {
+      $('#spotlight-tbl tbody').innerHTML =
+        `<tr><td colspan="8">${noLineups()}</td></tr>`;
+      return;
+    }
     $('#spotlight-tbl tbody').innerHTML = NG.spotlight.map((p, i) => `
       <tr>
         <td><strong>${p.name}</strong>${i === 0 ? ' 👑' : ''}</td>
@@ -532,10 +597,11 @@
 
   /* ================= player profiler ================= */
   const PP = { q: '', pos: 'ALL', limit: 20 };
+  let profilerWired = false;
 
   function ppCardHTML(p, i) {
     const hs = p.hs
-      ? `<img class="pp-hs" src="${p.hs}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
+      ? `<img class="pp-hs" src="${p.hs}" alt="" loading="lazy" onerror="if(this.parentNode)this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
       : `<div class="pp-hs fb">${p.name.split(' ').map(x => x[0]).join('').slice(0, 2)}</div>`;
     return `<div class="pp-card" data-pid="${p.pid}">
       ${hs}
@@ -549,7 +615,7 @@
 
   function ppFiltered() {
     const q = PP.q.toLowerCase();
-    return NG.players.filter((p) =>
+    return (NG.players || []).filter((p) =>
       (PP.pos === 'ALL' || p.pos === PP.pos) &&
       (!q || p.name.toLowerCase().includes(q)));
   }
@@ -557,13 +623,15 @@
   function renderProfiler() {
     const rows = ppFiltered();
     $('#pp-grid').innerHTML = rows.slice(0, PP.limit).map(ppCardHTML).join('') ||
-      '<div class="card-sub">No players match.</div>';
+      (NG.players && NG.players.length ? '<div class="card-sub">No players match.</div>' : noLineups());
     $('#pp-more').style.display = rows.length > PP.limit ? 'block' : 'none';
     document.querySelectorAll('.pp-card').forEach((el) =>
       el.addEventListener('click', () => openProfile(+el.dataset.pid)));
   }
 
   function initProfiler() {
+    if (profilerWired) { renderProfiler(); return; }
+    profilerWired = true;
     const POSES = ['ALL', 'QB', 'RB', 'WR', 'TE', 'K', 'DST'];
     $('#pp-filters').innerHTML = POSES.map((p) =>
       `<button class="pp-chip${p === PP.pos ? ' on' : ''}" data-pos="${p}">${p}</button>`).join('');
@@ -580,15 +648,17 @@
 
   let sparkChart = null;
   function openProfile(pid) {
-    const p = NG.players.find((x) => x.pid === pid);
+    const p = (NG.players || []).find((x) => x.pid === pid);
     if (!p) return;
     const ov = document.createElement('div');
     ov.className = 'pp-overlay';
     const hs = p.hs
-      ? `<img class="pp-hs" src="${p.hs}" alt="" onerror="this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
+      ? `<img class="pp-hs" src="${p.hs}" alt="" onerror="if(this.parentNode)this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
       : `<div class="pp-hs fb">${p.name.split(' ').map(x => x[0]).join('').slice(0, 2)}</div>`;
     const draft = p.draft
-      ? `Auctioned to <strong>${tName25(p.draft.teamId)}</strong> for <strong>$${p.draft.bid}</strong>`
+      ? (NG.draft.auction
+          ? `Auctioned to <strong>${tName25(p.draft.teamId)}</strong> for <strong>$${p.draft.bid}</strong>`
+          : `Drafted <strong>${p.draft.round}.${String(p.draft.overall).padStart(2, '0')}</strong> by <strong>${tName25(p.draft.teamId)}</strong>`)
       : '<strong>Undrafted</strong> — a waiver-wire pickup';
     const stat = (v, l) => `<div class="pp-stat"><b>${v}</b><span>${l}</span></div>`;
     ov.innerHTML = `<div class="pp-modal">
@@ -611,7 +681,7 @@
         ${stat(`${p.boom}<span style="font-size:12px;color:var(--mut)">/</span>${p.bust}`, 'boom / bust wks')}
       </div>
       <div class="pp-spark"><canvas id="pp-spark-canvas"></canvas></div>
-      <div class="pp-journey">${draft}. Started ${p.starts} week${p.starts === 1 ? '' : 's'}, producing <strong>${fmt(p.stPts, 1)} pts</strong> in AFFL lineups. <a href="players.html?pid=${p.pid}" style="color:var(--blue2);font-weight:700">Full profile →</a></div>
+      <div class="pp-journey">${draft}. Started ${p.starts} week${p.starts === 1 ? '' : 's'}, producing <strong>${fmt(p.stPts, 1)} pts</strong> in AFFL lineups. <a href="players.html?year=${curYear}&pid=${p.pid}" style="color:var(--blue2);font-weight:700">Full profile →</a></div>
     </div>`;
     document.body.appendChild(ov);
     const close = () => { if (sparkChart) { sparkChart.destroy(); sparkChart = null; } ov.remove(); };
@@ -651,6 +721,11 @@
   }
 
   function renderReport() {
+    if (!NG.report.length) {
+      $('#report-tbl tbody').innerHTML = `<tr><td colspan="7">${noLineups(
+        `Grading needs weekly lineups, which ESPN does not keep for ${curYear}.`)}</td></tr>`;
+      return;
+    }
     $('#report-tbl tbody').innerHTML = NG.report.map((r, i) => {
       const t = T25[r.teamId];
       return `<tr>
@@ -666,6 +741,10 @@
   }
 
   function renderWhatIf() {
+    if (!NG.whatif.length) {
+      $('#whatif-tbl tbody').innerHTML = `<tr><td colspan="5">${noLineups()}</td></tr>`;
+      return;
+    }
     $('#whatif-tbl tbody').innerHTML = NG.whatif.map((w) => {
       const t = T25[w.teamId];
       const d = w.actRank - w.optRank;
@@ -683,6 +762,10 @@
   }
 
   function renderWaiver() {
+    if (!NG.waiver.length) {
+      $('#waiver-list').innerHTML = `<li>${noLineups()}</li>`;
+      return;
+    }
     $('#waiver-list').innerHTML = NG.waiver.map((w, i) => `
       <li>
         <div class="story-ico" style="background:#93d50018">${['🧙','🎩','✨','🪄','🔮','🃏','🎯','⭐'][i] || '⭐'}</div>
@@ -695,8 +778,22 @@
   }
 
   /* ================= orchestrate ================= */
-  function renderSeason() {
+  function sectionLabels() {
+    const lineups = NG.hasRosters;
+    $('#lab-year').textContent = lineups
+      ? `${curYear} · joined to nflverse`
+      : `${curYear} · no lineup data stored`;
+    $('#profiler-year').textContent = lineups
+      ? `${curYear} · every rostered player · nflverse joined`
+      : `${curYear} · unavailable`;
+    $('#genius-year').textContent = lineups
+      ? `${curYear} · manager skill, separated from luck`
+      : `${curYear} · unavailable`;
+  }
+
+  async function renderSeason() {
     renderPicker();
+    await loadYearBundle(curYear);
     renderKPIs();
     renderArea();
     renderSide();
@@ -704,18 +801,19 @@
     renderRace();
     renderStandings();
     renderLuck();
+    sectionLabels();
+    renderLineupIQ();
+    renderDraft();
+    renderDNA();
+    renderEPA();
+    renderSpotlight();
+    initProfiler();
+    renderReport();
+    renderWhatIf();
+    renderWaiver();
   }
 
-  renderSeason();
-  initProfiler();
-  renderReport();
-  renderWhatIf();
-  renderWaiver();
-  renderLineupIQ();
-  renderDraft();
-  renderDNA();
-  renderEPA();
-  renderSpotlight();
+  await renderSeason();
   renderTimeline();
   renderFranchises();
   renderEra();

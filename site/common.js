@@ -51,7 +51,7 @@ window.AFFL = (function () {
     const ini = initials((t && t.name) || '?');
     if (t && t.logo && /^(https?:|logos\/)/.test(t.logo)) {
       return `<img class="${cls}" src="${t.logo}" alt="" loading="lazy"
-        onerror="this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
+        onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
     }
     return `<div class="${cls} fb">${ini}</div>`;
   }
@@ -60,7 +60,7 @@ window.AFFL = (function () {
     const ini = initials(p.name);
     if (p.hs) {
       return `<img class="${cls}" src="${p.hs}" alt="" loading="lazy"
-        onerror="this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
+        onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
     }
     return `<div class="${cls} fb">${ini}</div>`;
   }

@@ -127,7 +127,7 @@ def slot_counts_from_settings(league):
     return m
 
 # ------------------------------------------------------------------ per year
-def process_year(year, league, alias):
+def process_year(year, league, season_teams):
     box = load(f'{DATA}/box_{year}.json') or {'weeks': {}, 'players': {}}
     draft = load(f'{DATA}/draft_{year}.json') or {'picks': []}
     txd = load(f'{DATA}/tx_{year}.json') or {'tx': []}
@@ -412,6 +412,193 @@ def process_year(year, league, alias):
                  'pos': pmeta.get(pid, {}).get('pos', '?')}
                 for pid, n in sorted(add_counts.items(), key=lambda x: -x[1])[:10]]
 
+    # ================= dashboard analytics (per season) =================
+    # These used to be computed for 2025 only, which froze the dashboard's lower
+    # half on that year no matter which season was picked. Everything below is
+    # derived from this season's own data.
+    tinfo = {t['id']: t for t in (season_teams or [])}
+    n_teams = len(tinfo) or len(team_ids) or 1
+
+    # ---- position DNA: where each team's started points came from ----
+    dna = defaultdict(lambda: defaultdict(float))
+    for wk, tid, pid, slot, pts, started in rows:
+        if started and wk <= reg_weeks:
+            dna[tid][pmeta.get(pid, {}).get('pos', '?')] += pts
+    pos_dna = {str(tid): {p: round(v, 1) for p, v in d.items()} for tid, d in dna.items()}
+
+    # ---- per-team NFL advanced totals from started players ----
+    adv = defaultdict(lambda: {'epa': 0.0, 'air': 0.0, 'wopr': 0.0, 'woprN': 0,
+                               'matched': 0, 'starts': 0})
+    for wk, tid, pid, slot, pts, started in rows:
+        if not started or wk > reg_weeks:
+            continue
+        pos = pmeta.get(pid, {}).get('pos', '?')
+        if pos == 'DST':
+            continue
+        a = adv[tid]
+        a['starts'] += 1
+        gsis = e2g.get(str(pid))
+        st = nflstats.get(gsis, {}).get(wk) if gsis else None
+        if not st:
+            continue
+        a['matched'] += 1
+        a['epa'] += fnum(st, 'passing_epa') + fnum(st, 'rushing_epa') + fnum(st, 'receiving_epa')
+        a['air'] += fnum(st, 'receiving_air_yards')
+        w = fnum(st, 'wopr')
+        if w:
+            a['wopr'] += w
+            a['woprN'] += 1
+    franchise_adv = sorted(
+        [{'teamId': tid, 'epa': round(a['epa'], 1), 'air': int(a['air']),
+          'wopr': round(a['wopr'] / a['woprN'], 3) if a['woprN'] else 0,
+          'matchRate': round(a['matched'] / max(1, a['starts']), 3)}
+         for tid, a in adv.items()],
+        key=lambda x: -x['epa'])
+
+    # ---- started points per (team, player) -> MVPs, spotlight, waiver value ----
+    started_by = defaultdict(float)
+    for wk, tid, pid, slot, pts, started in rows:
+        if started:
+            started_by[(tid, pid)] += pts
+    mvps = {}
+    for (tid, pid), pts in started_by.items():
+        if tid not in mvps or pts > mvps[tid]['pts']:
+            m = pmeta.get(pid, {})
+            mvps[tid] = {'pid': pid, 'name': m.get('name', '?'),
+                         'pos': m.get('pos', '?'), 'pts': round(pts, 1)}
+
+    by_player = defaultdict(float)
+    for (tid, pid), pts in started_by.items():
+        by_player[pid] += pts
+    pidx = {p['pid']: p for p in players}
+    spotlight = []
+    for pid, pts in sorted(by_player.items(), key=lambda x: -x[1]):
+        p = pidx.get(pid)
+        if not p or p['pos'] in ('DST', 'K'):
+            continue
+        spotlight.append({'name': p['name'], 'pos': p['pos'], 'teamId': p['mainTeam'],
+                          'pts': round(pts, 1), 'ppg': p['ppg'], 'epa': p['epa'],
+                          'wopr': p['wopr'], 'tsh': p['tsh']})
+        if len(spotlight) >= 12:
+            break
+
+    # ---- draft value: steals, busts, per-team efficiency ----
+    auction_draft = auction
+    named_board = [b for b in board if b['pid'] and b['pts'] is not None]
+    for b in named_board:
+        b['ppd'] = round(b['pts'] / max(1, b['bid'] or 1), 2)
+    steals = sorted([b for b in named_board if (b['bid'] or 0) >= 1 or not auction_draft],
+                    key=lambda x: -x['ppd'])[:8]
+    busts = sorted([b for b in named_board if (b['bid'] or 0) >= 20],
+                   key=lambda x: x['ppd'])[:8] if auction_draft else \
+            sorted([b for b in named_board if (b['overall'] or 99) <= 24],
+                   key=lambda x: x['pts'])[:8]
+    spend = defaultdict(lambda: [0, 0.0])
+    for b in board:
+        spend[b['tid']][0] += b['bid'] or 0
+        spend[b['tid']][1] += b['pts'] or 0
+    draft_eff = sorted([{'teamId': t, 'spent': v[0], 'pts': round(v[1], 1),
+                         'ppd': round(v[1] / max(1, v[0]), 2)} for t, v in spend.items()],
+                       key=lambda x: -x['ppd'])
+
+    # ---- what-if: standings if everyone started a perfect lineup ----
+    whatif_rows = []
+    if has_rosters:
+        wk_opt, wk_act = {}, {}
+        for (wk, tid), ents in week_team.items():
+            if wk > reg_weeks:
+                continue
+            wk_opt[(tid, wk)] = optimal_points(
+                [(pmeta.get(pid, {}).get('pos', '?'), p) for pid, _, p, _ in ents], slots)
+            wk_act[(tid, wk)] = round(sum(p for _, _, p, st in ents if st), 2)
+        wif = defaultdict(lambda: {'w': 0, 'l': 0})
+        act = defaultdict(lambda: {'w': 0, 'l': 0})
+        for wk_s, games in box.get('weeks', {}).items():
+            wk = int(wk_s)
+            if wk > reg_weeks:
+                continue
+            for g in games:
+                h, a = g['home']['tid'], g['away']['tid']
+                if (h, wk) not in wk_opt or (a, wk) not in wk_opt:
+                    continue
+                ho, ao = wk_opt[(h, wk)], wk_opt[(a, wk)]
+                if ho != ao:
+                    wif[h if ho > ao else a]['w'] += 1
+                    wif[a if ho > ao else h]['l'] += 1
+                hp, ap = g['home']['pts'], g['away']['pts']
+                if hp != ap:
+                    act[h if hp > ap else a]['w'] += 1
+                    act[a if hp > ap else h]['l'] += 1
+        ids = [t for t in tinfo] or sorted(wif)
+        pf = {t: tinfo.get(t, {}).get('pf', 0) for t in ids}
+        act_order = sorted(ids, key=lambda t: (-act[t]['w'], -pf[t]))
+        opt_order = sorted(ids, key=lambda t: (-wif[t]['w'], -(iq.get(t, {}).get('optimal', 0))))
+        whatif_rows = sorted([{
+            'teamId': t, 'actW': act[t]['w'], 'actL': act[t]['l'],
+            'optW': wif[t]['w'], 'optL': wif[t]['l'],
+            'actRank': act_order.index(t) + 1, 'optRank': opt_order.index(t) + 1,
+        } for t in ids], key=lambda x: x['optRank'])
+
+    # ---- waiver value: undrafted players' started points ----
+    drafted_ids = {b['pid'] for b in board if b['pid']}
+    waiver_by_team = defaultdict(float)
+    for wk, tid, pid, slot, pts, started in rows:
+        if started and wk <= reg_weeks and pid not in drafted_ids:
+            waiver_by_team[tid] += pts
+    waiver_players = defaultdict(float)
+    for (tid, pid), pts in started_by.items():
+        if pid not in drafted_ids:
+            waiver_players[pid] += pts
+    waiver_top = []
+    for pid, pts in sorted(waiver_players.items(), key=lambda x: -x[1])[:8]:
+        p = pidx.get(pid) or pmeta.get(pid, {})
+        waiver_top.append({'name': p.get('name', '?'), 'pos': p.get('pos', '?'),
+                           'stPts': round(pts, 1), 'nfl': p.get('nfl', ''),
+                           'teamId': (pidx.get(pid) or {}).get('mainTeam')})
+
+    # ---- manager report card: the three true skills, luck kept separate ----
+    report = []
+    if has_rosters:
+        def ranks(pairs, high_is_good=True):
+            srt = sorted(pairs, key=lambda x: -x[1] if high_is_good else x[1])
+            return {tid: i + 1 for i, (tid, _) in enumerate(srt)}
+        ids = [t for t in tinfo] or sorted(iq)
+        dr = {d['teamId']: d['ppd'] for d in draft_eff}
+        draft_rank = ranks([(t, dr.get(t, 0)) for t in ids])
+        lineup_rank = ranks([(t, iq.get(t, {}).get('eff', 0)) for t in ids])
+        waiver_rank = ranks([(t, waiver_by_team.get(t, 0)) for t in ids])
+        luck_rank = ranks([(t, tinfo.get(t, {}).get('luck', 0)) for t in ids])
+
+        def grade(rank):
+            pct = (rank - 1) / max(1, n_teams - 1)
+            for cut, g in ((0.09, 'A+'), (0.2, 'A'), (0.32, 'B+'), (0.45, 'B'),
+                           (0.6, 'C+'), (0.75, 'C'), (0.88, 'D'), (2, 'F')):
+                if pct <= cut:
+                    return g
+        GPA = {'A+': 4.3, 'A': 4.0, 'B+': 3.3, 'B': 3.0, 'C+': 2.3, 'C': 2.0, 'D': 1.0, 'F': 0.0}
+        GOOD = {'draft': 'drafted like a genius', 'lineup': 'set lineups like a surgeon',
+                'waiver': 'owned the waiver wire'}
+        BAD = {'draft': 'lit auction money on fire', 'lineup': 'benched the wrong guys',
+               'waiver': 'ignored free agents'}
+        for t in ids:
+            gd, gl, gw = grade(draft_rank[t]), grade(lineup_rank[t]), grade(waiver_rank[t])
+            gpa = round((GPA[gd] + GPA[gl] + GPA[gw]) / 3, 2)
+            skill = {'draft': draft_rank[t], 'lineup': lineup_rank[t], 'waiver': waiver_rank[t]}
+            best, worst = min(skill, key=skill.get), max(skill, key=skill.get)
+            top_third, bot_third = max(2, n_teams // 3), n_teams - max(2, n_teams // 3)
+            if skill[best] <= top_third and skill[worst] >= bot_third:
+                verdict = f'{GOOD[best].capitalize()}, but {BAD[worst]}.'
+            elif gpa >= 3.5:
+                verdict = 'Complete performance across the board.'
+            elif gpa >= 2.5:
+                verdict = 'Solid fundamentals, no fatal flaw.'
+            else:
+                verdict = 'A rebuilding year on every front.'
+            report.append({'teamId': t, 'gDraft': gd, 'gLineup': gl, 'gWaiver': gw,
+                           'gLuck': grade(luck_rank[t]), 'gpa': gpa, 'verdict': verdict,
+                           'waiverPts': round(waiver_by_team.get(t, 0), 1)})
+        report.sort(key=lambda x: -x['gpa'])
+
     # ---- scoreboard (drop roster arrays where empty to save bytes) ----
     weeks_out = {}
     for wk_s, games in box.get('weeks', {}).items():
@@ -437,6 +624,14 @@ def process_year(year, league, alias):
         'trades': trades,
         'usesFaab': uses_faab,
         'topAdds': top_adds,
+        'posDNA': pos_dna,
+        'franchiseAdv': franchise_adv,
+        'mvps': {str(k): v for k, v in mvps.items()},
+        'spotlight': spotlight,
+        'draftValue': {'steals': steals, 'busts': busts, 'teamEff': draft_eff},
+        'whatif': whatif_rows,
+        'waiver': waiver_top,
+        'report': report,
         'txCounts': dict(counts),
         'txByTeam': {str(k): v for k, v in per_team.items()},
     }
@@ -454,12 +649,10 @@ def process_year(year, league, alias):
 def main():
     site = json.load(open(os.path.join(SITE, 'data.json')))
     years = sorted(int(y) for y in site['seasons'])
-    # rebuild GUID->alias map the same way process.py does, for team owner joins
-    alias = None
     manifest = []
     for year in years:
         league = load(f'{DATA}/league_{year}.json')
-        info = process_year(year, league, alias)
+        info = process_year(year, league, site['seasons'][str(year)]['teams'])
         manifest.append(info)
         flags = []
         if info['hasRosters']: flags.append('lineups')

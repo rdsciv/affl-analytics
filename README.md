@@ -53,12 +53,15 @@ cp .env.example .env    # then fill in ESPN_SWID and ESPN_S2 from your browser c
 nflverse weekly stats + rosters. Raw boxscores are ~2.5 MB each, so it reduces every week to
 `(playerId, slot, points)` while fetching; a full season of lineups lands in ~250 KB instead of ~42 MB.
 
-Then three processors run:
+Then two processors run:
 
 - `process.py` → league / franchise / all-time analytics, plus ESPN member GUID anonymization
-- `process_players.py` → the current-season deep-dive blocks on the dashboard
-- `process_seasons.py` → one bundle per season in `site/years/{year}.json`, plus the
+  → `site/data.json` (small; loaded by every page)
+- `process_seasons.py` → one self-contained bundle per season in `site/years/{year}.json`, plus the
   `site/index_years.json` manifest the front end reads first
+
+Every season-specific panel on every page reads its year's bundle, so switching the season picker
+updates the whole page rather than just the standings.
 
 The site is fully static — no build step and no external requests at runtime (Chart.js and every
 team logo are vendored locally; only NFL headshots are remote, and they fall back to initials).

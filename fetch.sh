@@ -21,7 +21,6 @@ if [[ "$STEP" != "process" ]]; then
 fi
 
 python3 process.py          # league / franchise / all-time -> site/data.json
-python3 process_players.py  # 2025 deep-dive blocks appended to site/data.json
 python3 process_seasons.py  # per-season bundles -> site/years/*.json
 
 echo "done — site/data.json + site/years/*.json rebuilt"

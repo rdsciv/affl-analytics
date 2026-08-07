@@ -432,3 +432,8 @@ a.sb-name.link:hover { color: var(--blue2); text-decoration: underline; text-und
 .mv { display: flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 1px 0; }
 .mv.add { color: var(--green); }
 .mv.drop { color: #ff8a7a; }
+
+/* a chart slot showing a "no data for this season" notice instead of a canvas */
+.chart-wrap.as-notice { height: auto; min-height: 120px; display: grid; place-items: center; }
+.chart-wrap.as-notice .notice { width: 100%; }
+#waiver-list .notice { margin: 4px 0; }

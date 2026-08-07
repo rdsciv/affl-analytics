@@ -101,14 +101,14 @@
   </section>
 
   <!-- ============ NEXT GEN LAB ============ -->
-  <div class="section-break"><h2>Next Gen Lab <span>2025 · joined to nflverse</span></h2></div>
+  <div class="section-break"><h2>Next Gen Lab <span id="lab-year">joined to nflverse</span></h2></div>
 
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
         <div><h2>Lineup IQ</h2><div class="card-sub">points started vs perfect lineups &middot; wasted on the bench</div></div>
       </div>
-      <div class="chart-wrap xtall"><canvas id="lineup-chart"></canvas></div>
+      <div class="chart-wrap xtall" data-canvas="lineup-chart"><canvas id="lineup-chart"></canvas></div>
     </div>
     <div class="card">
       <div class="card-head">
@@ -133,13 +133,13 @@
       <div class="card-head">
         <div><h2>Position DNA</h2><div class="card-sub">where each team's started points came from</div></div>
       </div>
-      <div class="chart-wrap xtall"><canvas id="dna-chart"></canvas></div>
+      <div class="chart-wrap xtall" data-canvas="dna-chart"><canvas id="dna-chart"></canvas></div>
     </div>
     <div class="card">
       <div class="card-head">
         <div><h2>Starter EPA</h2><div class="card-sub">real NFL expected points added by your starters &middot; via nflverse</div></div>
       </div>
-      <div class="chart-wrap xtall"><canvas id="epa-chart"></canvas></div>
+      <div class="chart-wrap xtall" data-canvas="epa-chart"><canvas id="epa-chart"></canvas></div>
     </div>
   </section>
 
@@ -156,7 +156,7 @@
   </section>
 
   <!-- ============ PLAYER PROFILER ============ -->
-  <div class="section-break"><h2>Player Profiler <span>2025 · every rostered player · nflverse joined</span></h2></div>
+  <div class="section-break"><h2>Player Profiler <span id="profiler-year">every rostered player</span></h2></div>
 
   <section class="card">
     <div class="card-head">
@@ -169,7 +169,7 @@
   </section>
 
   <!-- ============ FANTASY GENIUS ============ -->
-  <div class="section-break"><h2>Fantasy Genius <span>manager skill, separated from luck</span></h2></div>
+  <div class="section-break"><h2>Fantasy Genius <span id="genius-year">manager skill, separated from luck</span></h2></div>
 
   <section class="card">
     <div class="card-head">
@@ -239,6 +239,6 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
