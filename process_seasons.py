@@ -11,7 +11,7 @@ import json
 import csv
 import os
 import re
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
@@ -320,10 +320,12 @@ def process_year(year, league, season_teams):
                         'pos': m.get('pos', '?')})
         return out
 
-    moves, trades, accepts = [], [], []
-    proposals = [x for x in txd.get('tx', []) if x['type'] == 'TRADE_PROPOSAL' and x.get('items')]
-    per_team = defaultdict(lambda: {'waiver': 0, 'fa': 0, 'drop': 0, 'trades': 0,
-                                    'proposed': 0, 'declined': 0, 'vetoed': 0, 'spent': 0})
+    moves, trades = [], []
+    # Deliberately no proposal/decline counters here: ESPN stamps transactions
+    # with the EXECUTING team, and this league's commissioner pushes trades
+    # through for other managers, which inflated his team ~4x. Waiver and
+    # free-agent attribution is safe (verified: executing team == receiving team).
+    per_team = defaultdict(lambda: {'waiver': 0, 'fa': 0, 'drop': 0, 'trades': 0, 'spent': 0})
     counts = defaultdict(int)
 
     for t in txd.get('tx', []):
@@ -344,55 +346,71 @@ def process_year(year, league, season_teams):
                 moves.append({'type': typ, 'tid': t['tid'], 'wk': t['wk'],
                               'bid': t['bid'] or 0, 'date': t['date'],
                               'add': adds, 'drop': drops})
-        elif typ == 'TRADE_PROPOSAL':
-            pt['proposed'] += 1
-        elif typ == 'TRADE_DECLINE':
-            pt['declined'] += 1
-        elif typ == 'TRADE_VETO':
-            pt['vetoed'] += 1
-        elif typ == 'TRADE_ACCEPT':
-            accepts.append(t)
 
-    # Resolve each accept to the players that moved. ESPN's relatedTransactionId
-    # often points at a superseded counter-offer, so fall back to the nearest
-    # earlier proposal involving that team. Trades are then deduped by the exact
-    # set of players moved, since a single trade can emit several accept events.
-    WINDOW_MS = 7 * 86400000
+    # ---- trades, derived from actual roster movement ----
+    # The transaction feed cannot be trusted for trade attribution: `teamId` is
+    # the team that EXECUTED the record, and this league's commissioner pushes
+    # trades through on other managers' behalf, so his team was being credited
+    # for trades he merely rubber-stamped. Worse, most TRADE_ACCEPT events carry
+    # no items and point at a superseded counter-offer, so any team-anchored
+    # guess inherits the same bias.
+    #
+    # Weekly rosters are ground truth: if a player is on team A one week and
+    # team B the next, and no waiver/free-agent claim explains it, he was traded.
+    # Requiring movement in BOTH directions between the same pair identifies a
+    # genuine swap. The feed is then used only to date the trade.
+    owner_by_week = defaultdict(dict)
+    for wk, tid, pid, slot, pts, started in rows:
+        owner_by_week[pid][wk] = tid
 
-    def resolve(a):
-        if a.get('items'):
-            return a['items']
-        rel = by_id.get(a.get('rel'))
-        if rel and rel.get('items'):
-            return rel['items']
+    wire_events = set()
+    for m in moves:
+        for a in m['add']:
+            wire_events.add((a['pid'], m['wk']))
+            wire_events.add((a['pid'], m['wk'] + 1))
+
+    transitions = []
+    for pid, byw in owner_by_week.items():
+        wks = sorted(byw)
+        for a_wk, b_wk in zip(wks, wks[1:]):
+            if byw[a_wk] != byw[b_wk] and (pid, b_wk) not in wire_events:
+                transitions.append({'pid': pid, 'from': byw[a_wk], 'to': byw[b_wk], 'wk': b_wk})
+
+    # index feed items so a detected swap can be given a real timestamp
+    feed_dates = []
+    for t in txd.get('tx', []):
+        pids = {i['pid'] for i in (t.get('items') or []) if i.get('pid')}
+        if pids and t.get('date'):
+            feed_dates.append((pids, t['wk'], t['date']))
+
+    def trade_date(pids, wk):
         best = None
-        for p in proposals:
-            if not (a['date'] and p['date']) or not (0 <= a['date'] - p['date'] <= WINDOW_MS):
+        for fp, fwk, fdate in feed_dates:
+            if not (pids & fp):
                 continue
-            teams = {i.get('from') for i in p['items']} | {i.get('to') for i in p['items']}
-            if a['tid'] not in teams:
-                continue
-            gap = a['date'] - p['date']
-            if best is None or gap < best[0]:
-                best = (gap, p['items'])
-        return best[1] if best else []
+            gap = abs((fwk or 0) - wk)
+            if gap <= 2 and (best is None or gap < best[0]):
+                best = (gap, fdate)
+        return best[1] if best else None
 
-    seen_trades = set()
-    for a in accepts:
-        items = named(resolve(a))
+    by_week_pair = defaultdict(list)
+    for tr in transitions:
+        by_week_pair[(tr['wk'], frozenset((tr['from'], tr['to'])))].append(tr)
+
+    trades = []
+    for (wk, pair), items in sorted(by_week_pair.items(), key=lambda x: x[0][0]):
+        directions = {(i['from'], i['to']) for i in items}
+        if len(directions) < 2:
+            continue          # one-way move — a drop/add, not a swap
         sides = defaultdict(list)
         for i in items:
-            if i['to']:
-                sides[i['to']].append(i)
-        if len(sides) < 2:
-            continue
-        sig = (a['wk'], frozenset(i['pid'] for i in items))
-        if sig in seen_trades:
-            continue
-        seen_trades.add(sig)
-        trades.append({'wk': a['wk'], 'date': a['date'],
-                       'sides': [{'tid': tid, 'got': v} for tid, v in sides.items()]})
-    trades.sort(key=lambda t: (t['date'] or 0))
+            m = pmeta.get(i['pid'], {})
+            sides[i['to']].append({'pid': i['pid'],
+                                   'name': m.get('name', f"Player {i['pid']}"),
+                                   'pos': m.get('pos', '?')})
+        pids = {i['pid'] for i in items}
+        trades.append({'wk': wk, 'date': trade_date(pids, wk),
+                       'sides': [{'tid': tid, 'got': got} for tid, got in sides.items()]})
 
     for tr in trades:
         for s in tr['sides']:
@@ -608,6 +626,15 @@ def process_year(year, league, season_teams):
             'away': {'tid': g['away']['tid'], 'pts': g['away']['pts'], 'roster': g['away']['roster']},
         } for g in games]
 
+    biggest = max(trades, key=lambda t: sum(len(s['got']) for s in t['sides'])) if trades else None
+    moved = Counter()
+    for tr in trades:
+        for s in tr['sides']:
+            for g in s['got']:
+                moved[(g['pid'], g['name'], g['pos'])] += 1
+    most_traded = [{'name': k[1], 'pos': k[2], 'n': n}
+                   for k, n in moved.most_common(5) if n > 1]
+
     bundle = {
         'year': year,
         'regWeeks': reg_weeks,
@@ -623,6 +650,10 @@ def process_year(year, league, season_teams):
         'moves': moves,
         'trades': trades,
         'usesFaab': uses_faab,
+        'biggestSwap': ({'wk': biggest['wk'],
+                         'n': sum(len(s['got']) for s in biggest['sides']),
+                         'teams': [s['tid'] for s in biggest['sides']]} if biggest else None),
+        'mostTraded': most_traded,
         'topAdds': top_adds,
         'posDNA': pos_dna,
         'franchiseAdv': franchise_adv,

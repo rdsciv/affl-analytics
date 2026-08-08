@@ -31,8 +31,9 @@
     const spend = entries.reduce((a, e) => a + e.spent, 0);
     const topTrader = [...entries].sort((a, b) => b.trades - a.trades)[0];
     const topWire = [...entries].sort((a, b) => (b.waiver + b.fa) - (a.waiver + a.fa))[0];
-    const proposals = entries.reduce((a, e) => a + e.proposed, 0);
     const accepted = YD.trades.length;
+    const swap = YD.biggestSwap;
+    const churn = (YD.mostTraded || [])[0];
 
     const cards = [
       { n: '01 · TRADES', color: C.red, pct: Math.min(1, accepted / 40),
@@ -40,11 +41,14 @@
         desc: topTrader && topTrader.trades
           ? `<strong>${tName(topTrader.tid)}</strong> was busiest with ${topTrader.trades}`
           : 'no trades this season' },
-      { n: '02 · OFFERS', color: C.orange,
-        pct: proposals ? Math.min(1, accepted / proposals) : 0,
-        label: proposals ? Math.round((accepted / proposals) * 100) + '%' : '—',
-        title: 'Offer Success Rate',
-        desc: `<strong>${fmt(proposals)} offers</strong> pitched league-wide · only ${accepted} were accepted` },
+      { n: '02 · BLOCKBUSTER', color: C.orange,
+        pct: swap ? Math.min(1, swap.n / 8) : 0,
+        label: swap ? String(swap.n) : '—',
+        title: 'Biggest Swap',
+        desc: swap
+          ? `<strong>${swap.n} players</strong> changed hands in one Week ${swap.wk} deal between ` +
+            swap.teams.map((t) => tName(t)).join(' and ')
+          : 'no trades this season' },
       { n: '03 · THE WIRE', color: C.green, pct: Math.min(1, (waivers + fas) / 600),
         label: fmt(waivers + fas), title: 'Wire Moves',
         desc: topWire ? `<strong>${tName(topWire.tid)}</strong> made ${topWire.waiver + topWire.fa} of them` : '' },
@@ -53,6 +57,12 @@
             label: '$' + fmt(spend), title: 'Waiver Spend',
             desc: `<strong>${fmt(waivers)} claims</strong> across the season` }
         : (() => {
+            if (churn) {
+              return { n: '04 · HOT POTATO', color: C.gold,
+                pct: Math.min(1, churn.n / 4), label: String(churn.n),
+                title: 'Most-Traded Player',
+                desc: `<strong>${churn.name}</strong> was traded ${churn.n} separate times` };
+            }
             const t = (YD.topAdds || [])[0];
             return { n: '04 · MOST CHASED', color: C.gold,
               pct: t ? Math.min(1, t.n / 12) : 0, label: t ? String(t.n) : '—',
@@ -88,7 +98,9 @@
           legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle' } },
           tooltip: { callbacks: { afterBody: (items) => {
             const r = rows[items[0].dataIndex];
-            return `${r.proposed} offers sent · ${r.declined} declined · $${r.spent} spent`;
+            const parts = [`${r.waiver + r.fa} wire moves`, `${r.drop} drops`, `${r.trades} trades`];
+            if (YD.usesFaab) parts.push(`$${r.spent} spent`);
+            return parts.join(' · ');
           } } },
         },
         scales: {
