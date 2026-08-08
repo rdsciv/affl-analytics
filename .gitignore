@@ -7,3 +7,8 @@ data/*.csv
 !data/logo_map.json
 
 .DS_Store
+
+# built warehouse (rebuild with: python3 build_db.py)
+affl.db
+affl.db-wal
+affl.db-shm
