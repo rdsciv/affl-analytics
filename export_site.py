@@ -100,7 +100,7 @@ def export_year(con, year):
                c.nfl_team AS nfl, ROUND(c.cap_hit) AS cap, h.wks AS weeks
           FROM held h
           JOIN dim_player p   ON p.player_id = h.player_id
-          JOIN fact_cap_hit c ON c.season = ? AND c.player_id = h.player_id
+          JOIN v_player_cap c ON c.season = ? AND c.player_id = h.player_id
          WHERE h.rn = 1
          ORDER BY c.cap_hit DESC LIMIT 12""", (year, year))
 
