@@ -12,3 +12,7 @@ data/*.csv
 affl.db
 affl.db-wal
 affl.db-shm
+
+# scraped Spotrac page cache — large, and their content, not ours.
+# regenerate with: python3 fetch_spotrac.py 2018 ... 2025
+data/spotrac/
