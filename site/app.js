@@ -489,7 +489,7 @@
   }
 
   function renderDraft() {
-    const d = NG.draftValue;
+    const d = NG.draftValue || { steals: [], busts: [], teamEff: [] };
     const auction = NG.draft.auction;
     if (!d.steals.length) {
       $('#steals-tbl tbody').innerHTML =
@@ -499,20 +499,22 @@
         `${NG.draft.board.length} picks recorded (${auction ? 'auction' : 'snake'}), but ESPN keeps no weekly scoring this far back, so returns can't be graded.`;
       return;
     }
+    // points above replacement, from v_draft_value
     const row = (p, cls) => `
       <tr>
         <td><strong>${p.name}</strong> <span class="badge pos-${p.pos}">${p.pos}</span><div class="own">${shortName25(p.tid)}</div></td>
         <td>${auction ? '$' + (p.bid || 0) : '#' + p.overall}</td>
-        <td><span class="badge ${cls}">${fmt(p.pts, 0)} pts</span></td>
+        <td><span class="badge ${cls}">${p.par >= 0 ? '+' : ''}${fmt(p.par, 0)} PAR</span></td>
       </tr>`;
     $('#steals-tbl tbody').innerHTML = d.steals.slice(0, 5).map((p) => row(p, 'steal')).join('');
     $('#busts-tbl tbody').innerHTML = d.busts.slice(0, 5).map((p) => row(p, 'bust')).join('');
     const best = d.teamEff[0], worst = d.teamEff[d.teamEff.length - 1];
+    if (!best) { $('#draft-note').innerHTML = ''; return; }
     $('#draft-note').innerHTML = auction
-      ? `Sharpest auction: <strong>${tName25(best.teamId)}</strong> — ${best.ppd} pts per dollar on a $${best.spent} board. ` +
-        `Loosest wallet: <strong>${tName25(worst.teamId)}</strong> at ${worst.ppd} pts/$.`
-      : `Best haul: <strong>${tName25(best.teamId)}</strong> pulled ${fmt(best.pts, 0)} pts out of their picks; ` +
-        `<strong>${tName25(worst.teamId)}</strong> managed ${fmt(worst.pts, 0)}.`;
+      ? `Sharpest auction: <strong>${tName25(best.teamId)}</strong> — ${fmt(best.par, 0)} points above replacement ` +
+        `on a $${fmt(best.spent)} board (${best.parPerDollar}/$). ` +
+        `Loosest wallet: <strong>${tName25(worst.teamId)}</strong> at ${worst.parPerDollar}/$.`
+      : `Best haul: <strong>${tName25(best.teamId)}</strong> pulled ${fmt(best.par, 0)} points above replacement out of their picks.`;
   }
 
   function renderDNA() {
@@ -715,6 +717,61 @@
     });
   }
 
+  /* ================= nfl payroll (Spotrac) ================= */
+  function renderCap() {
+    const cap = NG.nflCap || {};
+    const rows = cap.final || [];
+    const money = (n) => '$' + (n / 1e6).toFixed(1) + 'M';
+    if (!rows.length) {
+      chartNotice('#cap-chart', `No NFL cap data loaded for ${curYear} yet.`);
+      $('#cap-tbl tbody').innerHTML =
+        `<tr><td colspan="5">${noLineups(`No NFL cap data loaded for ${curYear} yet.`)}</td></tr>`;
+      return;
+    }
+    if (!ensureCanvas('#cap-chart')) return;
+    $('#cap-sub').textContent =
+      'cap carried by the final-week roster · bench vs starters · via Spotrac';
+    mkChart('#cap-chart', {
+      type: 'bar',
+      data: {
+        labels: rows.map((r) => shortName25(r.teamId)),
+        datasets: [
+          { label: 'Starters', data: rows.map((r) => (r.startersCap || 0) / 1e6),
+            backgroundColor: '#ffc400cc', stack: 'c', maxBarThickness: 16 },
+          { label: 'Bench', data: rows.map((r) => ((r.totalCap || 0) - (r.startersCap || 0)) / 1e6),
+            backgroundColor: '#3a4a63cc', stack: 'c', maxBarThickness: 16 },
+        ],
+      },
+      options: {
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle' } },
+          tooltip: { callbacks: {
+            label: (c) => `${c.dataset.label}: $${c.parsed.x.toFixed(1)}M`,
+            afterBody: (items) => {
+              const r = rows[items[0].dataIndex];
+              return `${r.matched} players · ${money(r.totalCap)} total · priciest ${money(r.maxCap)}`;
+            },
+          } },
+        },
+        scales: {
+          x: { stacked: true, grid: { color: C.grid }, border: { display: false },
+               title: { display: true, text: '$M of NFL cap' } },
+          y: { stacked: true, grid: { display: false }, border: { display: false } },
+        },
+      },
+    });
+    $('#cap-tbl tbody').innerHTML = (cap.topPlayers || []).map((p) => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td><span class="badge pos-${p.pos}">${p.pos}</span></td>
+        <td class="own">${p.nfl || '—'}</td>
+        <td>${shortName25(p.teamId)}<div class="own">${p.weeks} wk${p.weeks === 1 ? '' : 's'} rostered</div></td>
+        <td><strong>$${(p.cap / 1e6).toFixed(1)}M</strong></td>
+      </tr>`).join('');
+  }
+
   /* ================= fantasy genius ================= */
   function gradeChip(g) {
     return `<span class="grade g${g[0]}">${g}</span>`;
@@ -807,6 +864,7 @@
     renderDNA();
     renderEPA();
     renderSpotlight();
+    renderCap();
     initProfiler();
     renderReport();
     renderWhatIf();

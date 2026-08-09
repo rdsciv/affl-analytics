@@ -296,6 +296,49 @@ def load_contracts(con):
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
     return len(rows)
 
+def load_cap_hits(con):
+    """Spotrac cap tables. Resolve each row to an ESPN player_id by name within
+    the same NFL team + season, which is how the AFFL roster join happens."""
+    import glob, re
+
+    def norm(n):
+        n = (n or '').lower()
+        n = re.sub(r"[.'`\u2019]", '', n)
+        n = re.sub(r'\s+(jr|sr|ii|iii|iv|v)$', '', n)
+        return re.sub(r'\s+', ' ', n).strip()
+
+    total = matched = 0
+    for path in sorted(glob.glob(f'{DATA}/cap_*.json')):
+        season = int(os.path.basename(path).split('_')[1].split('.')[0])
+        # espn players active that season, indexed by (nfl_team, normalised name)
+        idx, by_name = {}, defaultdict(list)
+        for pid, name, team in con.execute("""
+                SELECT p.player_id, p.name, ps.nfl_team
+                  FROM dim_player p JOIN player_season ps
+                    ON ps.player_id = p.player_id AND ps.season = ?""", (season,)):
+            idx[(team or '', norm(name))] = pid
+            by_name[norm(name)].append(pid)
+
+        rows = []
+        for r in json.load(open(path)):
+            key = (r['nfl_team'], norm(r['player_name']))
+            pid = idx.get(key)
+            if pid is None:
+                # fall back to a league-wide unique name (handles mid-season trades)
+                cands = by_name.get(norm(r['player_name']) or '', [])
+                pid = cands[0] if len(cands) == 1 else None
+            if pid is not None:
+                matched += 1
+            rows.append((season, r['nfl_team'], r['player_name'], pid, r.get('position'),
+                         r.get('cap_hit'), r.get('base_salary'), r.get('signing_bonus'),
+                         r.get('dead_cap'), r.get('cap_pct')))
+        total += len(rows)
+        con.executemany("""INSERT OR REPLACE INTO fact_cap_hit
+            (season, nfl_team, player_name, player_id, position, cap_hit,
+             base_salary, signing_bonus, dead_cap, cap_pct)
+            VALUES (?,?,?,?,?,?,?,?,?,?)""", rows)
+    return total, matched
+
 # ---------------------------------------------------------------- verification
 CHECKS = [
     ("seasons", "SELECT COUNT(*) FROM dim_season"),
@@ -363,6 +406,8 @@ def main():
     print(f'  trades {tr:,} ({it:,} items)')
     print(f'  nfl player-weeks {load_nfl_weeks(con):,}')
     print(f'  contracts {load_contracts(con):,}')
+    ncap, nmatch = load_cap_hits(con)
+    print(f'  cap hits {ncap:,} ({nmatch:,} resolved to an AFFL-known player)')
     con.commit()
     con.execute('ANALYZE')
     con.commit()

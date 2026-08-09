@@ -23,8 +23,13 @@
       </svg><div class="pct" style="color:${color}">${label}</div></div>`;
   }
 
-  /** value = points per dollar (auction) or points per pick slot (snake) */
+  /** Draft value is points ABOVE REPLACEMENT per dollar, computed in SQL
+      (v_draft_value). Raw points/$ is positionally biased: a replacement QB
+      already scores ~248, so any cheap QB looked like an infinite steal while
+      genuinely scarce stud RBs graded as mediocre. */
   const scored = () => YD.draft.board.filter((p) => p.pts != null);
+  const DV = () => YD.draftValue || { steals: [], busts: [], teamEff: [], baselines: [] };
+  const parIndex = () => DV().parByOverall || {};
 
   function renderKPIs() {
     const board = YD.draft.board;
@@ -46,10 +51,14 @@
         label: auction ? '$' + priciest.bid : '1.01',
         title: auction ? 'Priciest Buy' : 'First Overall',
         desc: `<strong>${priciest.name}</strong>${priciest.pts != null ? ` · returned ${fmt(priciest.pts, 0)} pts` : ''}` },
-      best && { n: '03 · BEST VALUE', color: C.green,
-        pct: 1, label: auction ? `${fmt(best.pts / Math.max(1, best.bid || 1), 0)}x` : fmt(best.pts, 0),
-        title: 'Steal Of The Draft',
-        desc: `<strong>${best.name}</strong> · ${auction ? `$${best.bid || 0} → ` : ''}${fmt(best.pts, 0)} pts` },
+      (DV().steals || [])[0] && (() => {
+        const s = DV().steals[0];
+        return { n: '03 · BEST VALUE', color: C.green, pct: 1,
+          label: '+' + fmt(s.par, 0),
+          title: 'Steal Of The Draft',
+          desc: `<strong>${s.name}</strong> · ${auction ? `$${s.bid || 0} → ` : ''}` +
+                `${fmt(s.par, 0)} pts above replacement (${fmt(s.parPerDollar, 1)}/$)` };
+      })(),
       withPts.length && { n: '04 · HIT RATE', color: C.blue, pct: hit,
         label: Math.round(hit * 100) + '%', title: 'Draft Hit Rate',
         desc: `<strong>${withPts.filter((p) => p.pts >= 100).length} of ${withPts.length}</strong> drafted players cleared 100 points` },
@@ -128,20 +137,26 @@
 
   function renderValue() {
     const auction = YD.draft.auction;
-    const withPts = scored();
-    const val = (p) => auction ? p.pts / Math.max(1, p.bid || 1) : p.pts;
-    const steals = [...withPts].filter((p) => auction ? (p.bid || 0) >= 1 : (p.overall || 99) > 60)
-      .sort((a, b) => val(b) - val(a)).slice(0, 6);
-    const busts = [...withPts].filter((p) => auction ? (p.bid || 0) >= 20 : (p.overall || 99) <= 24)
-      .sort((a, b) => val(a) - val(b)).slice(0, 6);
+    const { steals, busts, baselines } = DV();
     const row = (p, cls) => `<tr>
       <td><strong>${p.name}</strong> <span class="badge pos-${p.pos}">${p.pos}</span>
         <div class="own">${short(p.tid)}</div></td>
       <td>${auction ? '$' + (p.bid || 0) : '#' + p.overall}</td>
-      <td><span class="badge ${cls}">${fmt(p.pts, 0)} pts</span></td></tr>`;
+      <td><span class="badge ${cls}">${p.par >= 0 ? '+' : ''}${fmt(p.par, 0)}</span>
+        <div class="own">${fmt(p.pts, 0)} pts</div></td></tr>`;
     const none = `<tr><td colspan="3" class="own">ESPN stores no weekly scoring for ${year}, so returns can't be graded.</td></tr>`;
-    $('#steals-tbl tbody').innerHTML = steals.map((p) => row(p, 'steal')).join('') || none;
-    $('#busts-tbl tbody').innerHTML = busts.map((p) => row(p, 'bust')).join('') || '';
+    $('#steals-tbl tbody').innerHTML = (steals || []).map((p) => row(p, 'steal')).join('') || none;
+    $('#busts-tbl tbody').innerHTML = (busts || []).map((p) => row(p, 'bust')).join('') || '';
+
+    // show the baseline so the number is auditable rather than magic
+    const el = $('#baseline-note');
+    if (el) {
+      el.innerHTML = (baselines || []).length
+        ? 'Replacement level this season — ' + baselines.map((b) =>
+            `<strong>${b.position}</strong> ${fmt(b.baseline, 0)}`).join(' · ') +
+          '. Value is points above that line, per dollar.'
+        : '';
+    }
   }
 
   function renderBoard() {
@@ -157,14 +172,13 @@
     $('#board-sub').textContent =
       `${YD.draft.board.length} picks · ${auction ? 'auction' : 'snake'}${YD.hasRosters ? '' : ' · no scoring data stored for this season'}`;
 
+    const pidx = parIndex();
     $('#board-tbl tbody').innerHTML = rows.slice(0, S.limit).map((p) => {
       let badge = '<td class="own">—</td>';
-      if (p.pts != null && auction) {
-        const v = p.pts / Math.max(1, p.bid || 1);
-        const good = avgVal && v >= avgVal;
-        badge = `<td><span class="badge ${good ? 'steal' : 'bust'}">${v.toFixed(1)}/$</span></td>`;
-      } else if (p.pts != null) {
-        badge = `<td>${p.pts >= 100 ? '<span class="badge steal">hit</span>' : '<span class="badge bust">miss</span>'}</td>`;
+      const par = pidx[String(p.overall)];
+      if (par != null) {
+        badge = `<td><span class="badge ${par >= 0 ? 'steal' : 'bust'}">` +
+                `${par >= 0 ? '+' : ''}${fmt(par, 0)}</span></td>`;
       }
       return `<tr>
         <td><span class="rank-pill${p.overall === 1 ? ' gold' : ''}">${p.overall}</span></td>

@@ -340,3 +340,23 @@ FROM (SELECT DISTINCT season, team_id, player_id FROM fact_roster_week) r
 JOIN dim_team  t ON t.season = r.season AND t.team_id = r.team_id
 JOIN fact_cap_hit c ON c.season = r.season AND c.player_id = r.player_id
 GROUP BY r.season, r.team_id;
+
+-- Season-long cap sums count everyone who ever passed through a roster, which
+-- rewards churn. This is the cap carried by the roster as it stood in the final
+-- week -- "what my team is actually worth".
+DROP VIEW IF EXISTS v_team_nfl_cap_final;
+CREATE VIEW v_team_nfl_cap_final AS
+WITH last_wk AS (
+  SELECT season, MAX(week) AS week FROM fact_roster_week GROUP BY season
+)
+SELECT r.season, r.team_id, t.name AS team_name,
+       COUNT(DISTINCT r.player_id)                AS players_matched,
+       ROUND(SUM(c.cap_hit))                      AS total_cap_hit,
+       ROUND(AVG(c.cap_hit))                      AS avg_cap_hit,
+       ROUND(MAX(c.cap_hit))                      AS priciest_cap_hit,
+       ROUND(SUM(CASE WHEN r.started = 1 THEN c.cap_hit END)) AS starters_cap_hit
+FROM fact_roster_week r
+JOIN last_wk l      ON l.season = r.season AND l.week = r.week
+JOIN dim_team t     ON t.season = r.season AND t.team_id = r.team_id
+JOIN fact_cap_hit c ON c.season = r.season AND c.player_id = r.player_id
+GROUP BY r.season, r.team_id;

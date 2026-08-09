@@ -112,7 +112,7 @@
     </div>
     <div class="card">
       <div class="card-head">
-        <div><h2>Draft War Room</h2><div class="card-sub">auction ROI &middot; points scored while rostered, per dollar bid</div></div>
+        <div><h2>Draft War Room</h2><div class="card-sub">auction ROI as points <em>above replacement</em> per dollar &middot; positionally fair</div></div>
       </div>
       <div class="mini-tables">
         <div>
@@ -140,6 +140,26 @@
         <div><h2>Starter EPA</h2><div class="card-sub">real NFL expected points added by your starters &middot; via nflverse</div></div>
       </div>
       <div class="chart-wrap xtall" data-canvas="epa-chart"><canvas id="epa-chart"></canvas></div>
+    </div>
+  </section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>NFL Payroll</h2><div class="card-sub" id="cap-sub">real NFL salary-cap dollars carried by each roster &middot; via Spotrac</div></div>
+      </div>
+      <div class="chart-wrap xtall" data-canvas="cap-chart"><canvas id="cap-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Most Expensive Men</h2><div class="card-sub">the priciest NFL contracts anyone rostered this season</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="cap-tbl">
+          <thead><tr><th>Player</th><th>Pos</th><th>NFL</th><th>Rostered By</th><th>2025 Cap Hit</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -239,6 +259,6 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>
