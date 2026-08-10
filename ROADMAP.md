@@ -98,6 +98,38 @@ subquery version pushed the site export from 1.3s to over two minutes.
     inferred, in its own table with confidence scores. If not: ship those years
     team-level only and document why.
 
+## Data sources — decided, so it stops being an open question
+
+| Source | Verdict |
+| --- | --- |
+| **nflverse** (nflfastR's data releases) | **Use — already in.** Free, redistributable, back to 1999, and it updates within about a day of games, so "not a live API" is not a practical limit for a weekly league site. |
+| **Spotrac** | **Use — already in.** Cap hits 2018–2025, crawled politely per robots.txt. |
+| **Over The Cap** (via nflverse) | Use for contract value/APY, but the bulk release stops at 2022. |
+| **Sportradar / Genius Sports** | **No.** Enterprise licensing. The only thing they add over nflverse is player tracking, and the price is not remotely justified by a no-revenue league dashboard. |
+| **SportsDataIO** | **No.** Same reasoning at a smaller price. Its projections would be the draw, not its stats, and we care about what happened rather than what was projected. |
+| **Amazon QuickSight / Amazon Q** | **No, and actively wrong for this project.** It needs an AWS account, IAM, capacity or per-seat licensing, and embedding a QuickSight dashboard publicly means auth and cost. That directly contradicts the requirement: a plain shared link, no auth. It also adds exactly the kind of hosted dependency that has sunk previous attempts. |
+| **NFL Next Gen Stats internals** (the NFL IQ data) | Not accessible, as expected. `nflverse` already republishes the public NGS aggregates (separation, cushion, YAC over expected) from 2016. Raw tracking and mph are not obtainable. |
+
+## Ideas borrowed from NFL IQ (worth building)
+
+NFL IQ's real mechanic is not prettier charts, it is *modelling the market instead
+of picking an expert* — aggregating thousands of mock drafts into probability
+distributions. The AFFL analogue is stronger, because the league has something no
+public tool has: **twelve years of its own auction prices**, which are revealed
+preference from the same twelve managers.
+
+- **Market arbitrage map** (`v_market_tier`, built): PAR returned per dollar by
+  position and price tier. Early read — mid-tier RBs are where the league's money
+  dies (\$25–49 RBs average **−16 PAR** while \$25–49 WRs return **+14**), while
+  \$10–24 QBs are the best value bucket in the league.
+- **Manager edge vs the league's own market** (`v_manager_market`, built): each
+  pick scored against what the league typically got at that position and price.
+- **Season simulation** — Monte Carlo from each team's score distribution to give
+  playoff odds by week, so History can say "you were 12% in week 10 and still made
+  it" rather than only reporting the outcome.
+- **Ripple / counterfactual** — recompute the standings without a given trade. All
+  lineups exist from 2018, so trade impact on wins is directly computable.
+
 ## Phase 5 — Extras / backlog
 
 - DuckDB-WASM public query console

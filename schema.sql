@@ -432,3 +432,72 @@ CREATE TABLE IF NOT EXISTS dim_scoring (
   points          REAL NOT NULL,
   PRIMARY KEY (season, stat_id)
 );
+
+-- ===========================================================================
+-- The AFFL auction market, treated as a market.
+--
+-- Inspired by how NFL IQ models the draft: don't trust one opinion, model the
+-- consensus. Twelve years of auction prices are revealed preference -- what this
+-- specific league of twelve managers actually pays for production. Comparing
+-- price paid against PAR delivered exposes where the market is systematically
+-- wrong, which is an edge no public tool can have because it is your league's
+-- own price history.
+--
+-- Read WITHIN a price tier, across positions. Comparing across tiers is
+-- misleading: cheap picks are bench flyers that sit far below replacement by
+-- construction, so their PAR/$ is dominated by that, not by market error.
+-- ===========================================================================
+DROP VIEW IF EXISTS v_market_tier;
+CREATE VIEW v_market_tier AS
+SELECT CASE WHEN bid >= 50 THEN '$50+'
+            WHEN bid >= 25 THEN '$25-49'
+            WHEN bid >= 10 THEN '$10-24'
+            ELSE '$1-9' END                       AS price_tier,
+       CASE WHEN bid >= 50 THEN 4 WHEN bid >= 25 THEN 3
+            WHEN bid >= 10 THEN 2 ELSE 1 END      AS tier_rank,
+       position,
+       COUNT(*)                                   AS picks,
+       ROUND(AVG(bid), 1)                         AS avg_bid,
+       ROUND(AVG(par), 1)                         AS avg_par,
+       ROUND(AVG(par) / NULLIF(AVG(bid), 0), 2)   AS par_per_dollar
+FROM v_draft_value
+WHERE bid > 0 AND par IS NOT NULL
+  AND position IN ('QB', 'RB', 'WR', 'TE')
+GROUP BY price_tier, tier_rank, position;
+
+-- Per-manager skill vs the league's OWN market.
+--
+-- An earlier version summed raw PAR/$ per manager and made everyone look awful
+-- (-1.6 to -2.5), because a roster is mostly $1 bench flyers that sit far below
+-- replacement by construction. That measured roster shape, not skill.
+--
+-- This compares each pick against what the league typically got for that same
+-- position at that same price tier. Positive edge = you beat your own league's
+-- market. That is the only version of this number that means anything.
+DROP VIEW IF EXISTS v_pick_edge;
+CREATE VIEW v_pick_edge AS
+SELECT dv.season, dv.team_id, dv.player_id, dv.name, dv.position, dv.bid, dv.par,
+       CASE WHEN dv.bid >= 50 THEN '$50+' WHEN dv.bid >= 25 THEN '$25-49'
+            WHEN dv.bid >= 10 THEN '$10-24' ELSE '$1-9' END AS price_tier,
+       mt.avg_par                                            AS market_par,
+       ROUND(dv.par - mt.avg_par, 1)                         AS edge
+FROM v_draft_value dv
+JOIN v_market_tier mt
+  ON mt.position = dv.position
+ AND mt.price_tier = CASE WHEN dv.bid >= 50 THEN '$50+' WHEN dv.bid >= 25 THEN '$25-49'
+                          WHEN dv.bid >= 10 THEN '$10-24' ELSE '$1-9' END
+WHERE dv.bid > 0 AND dv.par IS NOT NULL
+  AND dv.position IN ('QB', 'RB', 'WR', 'TE');
+
+DROP VIEW IF EXISTS v_manager_market;
+CREATE VIEW v_manager_market AS
+SELECT t.member_id, m.display_name,
+       COUNT(*)                                  AS picks,
+       ROUND(SUM(e.bid))                         AS spent,
+       ROUND(SUM(e.edge), 1)                     AS total_edge,
+       ROUND(AVG(e.edge), 1)                     AS edge_per_pick,
+       ROUND(SUM(e.edge) / NULLIF(SUM(e.bid), 0), 3) AS edge_per_dollar
+FROM v_pick_edge e
+JOIN dim_team   t ON t.season = e.season AND t.team_id = e.team_id
+JOIN dim_member m ON m.member_id = t.member_id
+GROUP BY t.member_id;
