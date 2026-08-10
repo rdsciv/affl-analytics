@@ -151,10 +151,14 @@
     // show the baseline so the number is auditable rather than magic
     const el = $('#baseline-note');
     if (el) {
+      const note = DV().computed
+        ? ' ESPN kept no lineups this season, so season points are <strong>computed</strong> ' +
+          'from NFL stats under this year\'s scoring rules — kickers and D/ST are excluded.'
+        : '';
       el.innerHTML = (baselines || []).length
         ? 'Replacement level this season — ' + baselines.map((b) =>
             `<strong>${b.position}</strong> ${fmt(b.baseline, 0)}`).join(' · ') +
-          '. Value is points above that line, per dollar.'
+          '. Value is points above that line, per dollar.' + note
         : '';
     }
   }

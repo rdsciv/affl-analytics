@@ -278,12 +278,43 @@ UNION ALL SELECT season, 'TE', team_count * COALESCE(slot_te,1) FROM dim_season
 UNION ALL SELECT season, 'K',  team_count * COALESCE(slot_k,1)  FROM dim_season
 UNION ALL SELECT season, 'DST',team_count * COALESCE(slot_dst,1) FROM dim_season;
 
+
+-- ===========================================================================
+-- Computed fantasy points, for seasons where ESPN kept no weekly lineups.
+--
+-- ESPN retains lineups only from 2018, so v_player_season (which reads
+-- fact_roster_week) is empty for 2014-2017 and every downstream metric --
+-- replacement level, draft PAR -- came out NULL for those years. nflverse has
+-- weekly NFL stats back to 1999 and validate_scoring.py proves this engine
+-- reproduces ESPN's own points at 96-99.8% exact, so season totals CAN be
+-- computed for the early seasons without knowing anybody's lineup.
+--
+-- MATERIALIZED, not a view: doing this as correlated subqueries over 208k
+-- player-weeks made the site export take minutes. build_db.py fills it.
+-- Bucketing is applied per week (as ESPN scored it) and then summed.
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS fact_player_season_points (
+  season          INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  total_points    REAL NOT NULL,
+  is_computed     INTEGER NOT NULL,   -- 1 = derived from NFL stats, not ESPN
+  PRIMARY KEY (season, player_id)
+);
+
+-- Actual where ESPN gave it to us, computed where it didn't. `is_computed`
+-- keeps the distinction visible so the UI can label reconstructed numbers.
+DROP VIEW IF EXISTS v_player_season_any;
+CREATE VIEW v_player_season_any AS
+SELECT sp.season, sp.player_id, p.name, p.position, sp.total_points, sp.is_computed
+FROM fact_player_season_points sp
+JOIN dim_player p ON p.player_id = sp.player_id;
+
 DROP VIEW IF EXISTS v_pos_rank;
 CREATE VIEW v_pos_rank AS
 SELECT season, position, player_id, name, total_points,
        ROW_NUMBER() OVER (PARTITION BY season, position
                           ORDER BY total_points DESC) AS pos_rank
-FROM v_player_season
+FROM v_player_season_any
 WHERE position IS NOT NULL;
 
 -- SQLite forbids a correlated reference in OFFSET, so rank first then join on
@@ -303,7 +334,7 @@ FROM v_starter_demand d;
 DROP VIEW IF EXISTS v_replacement_fa;
 CREATE VIEW v_replacement_fa AS
 SELECT ps.season, ps.position, MAX(ps.total_points) AS fa_points
-FROM v_player_season ps
+FROM v_player_season_any ps
 WHERE ps.position IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM fact_draft_pick dp
                    WHERE dp.season = ps.season AND dp.player_id = ps.player_id)
@@ -333,7 +364,7 @@ SELECT dp.season, dp.overall, dp.round, dp.pick_in_round, dp.team_id,
        ROUND(ps.total_points / MAX(dp.bid, 1), 2)                          AS points_per_dollar
 FROM fact_draft_pick dp
 JOIN dim_player p        ON p.player_id = dp.player_id
-LEFT JOIN v_player_season ps ON ps.season = dp.season AND ps.player_id = dp.player_id
+LEFT JOIN v_player_season_any ps ON ps.season = dp.season AND ps.player_id = dp.player_id
 LEFT JOIN v_baseline rl ON rl.season = dp.season AND rl.position = p.position;
 
 -- A player traded mid-season appears on BOTH NFL teams' cap tables (the old club

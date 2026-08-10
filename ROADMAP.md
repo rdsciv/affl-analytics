@@ -68,6 +68,12 @@ To close out MVP:
 
 Gate: step 5 must pass before any pre-2018 player-level work.
 
+**Done in Phase 1 beyond the original plan:** `fact_player_season_points` gives
+every player a season total for all 12 seasons — ESPN's own where lineups exist,
+computed from NFL stats where they don't — which unlocked draft value and PAR for
+2014–2017. Materialised as a table rather than a view, because the correlated
+subquery version pushed the site export from 1.3s to over two minutes.
+
 ## Phase 2 — Advanced receiving + TD luck
 
 6. `v_receiving_usage`: aDOT, RACR, target share, air-yards share, WOPR per

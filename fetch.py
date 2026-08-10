@@ -241,9 +241,11 @@ def main():
             print(f'  {y}: {n} transactions, {trades} completed trades')
 
     if only in ('all', 'nflverse'):
+        # every season, not just those with ESPN lineups: pre-2018 fantasy points
+        # are computed from these stats (see v_player_season_calc)
         print('== nflverse ==')
         with ThreadPoolExecutor(max_workers=3) as ex:
-            for y, msg in ex.map(fetch_nflverse, roster_years):
+            for y, msg in ex.map(fetch_nflverse, years):
                 print(f'  {y}: {msg}')
 
     print('done')

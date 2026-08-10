@@ -36,14 +36,19 @@ def export_year(con, year):
         SELECT position, demand, ROUND(rank_based,1) AS rankBased,
                ROUND(best_undrafted,1) AS bestUndrafted,
                ROUND(baseline_points,1) AS baseline
-          FROM v_baseline WHERE season = ? ORDER BY baseline_points DESC""", (year,))
+          FROM v_baseline WHERE season = ? AND baseline_points > 0
+         ORDER BY baseline_points DESC""", (year,))
 
     dv = rows(con, """
-        SELECT player_id AS pid, name, position AS pos, team_id AS tid, bid, overall,
-               is_keeper AS keeper, ROUND(total_points,1) AS pts, ROUND(par,1) AS par,
-               par_per_dollar AS parPerDollar, points_per_dollar AS ptsPerDollar
-          FROM v_draft_value
-         WHERE season = ? AND total_points IS NOT NULL""", (year,))
+        SELECT dv.player_id AS pid, dv.name, dv.position AS pos, dv.team_id AS tid,
+               dv.bid, dv.overall, dv.is_keeper AS keeper,
+               ROUND(dv.total_points,1) AS pts, ROUND(dv.par,1) AS par,
+               dv.par_per_dollar AS parPerDollar, dv.points_per_dollar AS ptsPerDollar,
+               COALESCE(ps.is_computed, 0) AS computed
+          FROM v_draft_value dv
+          LEFT JOIN v_player_season_any ps
+                 ON ps.season = ? AND ps.player_id = dv.player_id
+         WHERE dv.season = ? AND dv.total_points IS NOT NULL""", (year, year))
 
     auction = bool(bundle.get('auctionDraft'))
     # A steal has to actually beat replacement; ranking by PAR/$ alone would put
@@ -108,9 +113,13 @@ def export_year(con, year):
     # the sixteen rows that make the steals/busts lists
     par_by_overall = {str(d['overall']): d['par'] for d in dv if d['par'] is not None}
 
+    # If the season's points had to be computed from NFL stats (pre-2018, where
+    # ESPN kept no lineups), say so rather than passing it off as ESPN's own.
+    computed_season = bool(dv) and all(d['computed'] for d in dv)
     bundle['draftValue'] = {'steals': steals, 'busts': busts, 'teamEff': eff,
                             'auction': auction, 'baselines': baselines,
-                            'parByOverall': par_by_overall}
+                            'parByOverall': par_by_overall,
+                            'computed': computed_season}
     bundle['power'] = power
     bundle['luckFG'] = luck
     bundle['nflCap'] = {'byTeam': cap, 'final': capFinal, 'topPlayers': capTop}

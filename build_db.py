@@ -43,7 +43,8 @@ def init(con):
 def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
               'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
-              'fact_cap_hit', 'player_season', 'dim_player', 'dim_team',
+              'fact_cap_hit', 'fact_player_season_points', 'player_season',
+              'dim_player', 'dim_team',
               'dim_member', 'dim_scoring', 'dim_season'):
         con.execute(f'DELETE FROM {t}')
 
@@ -409,6 +410,59 @@ def load_scoring(con):
     con.execute("UPDATE dim_season SET yardage_mode = 'FRACTIONAL' WHERE season >= 2019")
     return len(rows) + filled
 
+def load_player_season_points(con):
+    """Season fantasy totals per player: ESPN's own where lineups exist, computed
+    from nflverse under dim_scoring where they don't (pre-2018).
+
+    Materialised because the equivalent view -- correlated subqueries over 208k
+    player-weeks -- made the site export take minutes.
+    """
+    modes = dict(con.execute('SELECT season, yardage_mode FROM dim_season'))
+    rules = defaultdict(dict)
+    for season, sid, pts in con.execute('SELECT season, stat_id, points FROM dim_scoring'):
+        rules[season][sid] = pts
+
+    # 1) actual, from ESPN's own weekly points
+    actual = {}
+    for season, pid, tot in con.execute("""
+            SELECT season, player_id, ROUND(SUM(points), 1)
+              FROM fact_roster_week GROUP BY season, player_id"""):
+        actual[(season, pid)] = tot
+
+    # 2) computed, for skill players in seasons with no lineups
+    gsis_to_pid = {}
+    for pid, g, pos in con.execute(
+            "SELECT player_id, gsis_id, position FROM dim_player WHERE gsis_id IS NOT NULL"):
+        if pos in ('QB', 'RB', 'WR', 'TE'):
+            gsis_to_pid[g] = pid
+
+    computed = defaultdict(float)
+    for row in con.execute("""
+            SELECT season, gsis_id, pass_yards, pass_tds, interceptions, rush_yards,
+                   rush_tds, rec_yards, rec_tds, receptions, fumbles_lost, two_pt
+              FROM fact_nfl_week"""):
+        season, g = row[0], row[1]
+        pid = gsis_to_pid.get(g)
+        if pid is None:
+            continue
+        k = rules.get(season, {})
+        py, pt, i, ry, rt, cy, ct, rc, fl, tp = row[2:]
+        if modes.get(season) == 'BUCKET':
+            yards = int(py // 25) + int(ry // 10) + int(cy // 10)
+        else:
+            yards = py * k.get(3, 0) + ry * k.get(24, 0) + cy * k.get(42, 0)
+        computed[(season, pid)] += (yards + pt * k.get(4, 0) + i * k.get(20, 0)
+                                   + rt * k.get(25, 0) + ct * k.get(43, 0)
+                                   + rc * k.get(53, 0) + fl * k.get(72, 0)
+                                   + tp * k.get(26, 0))
+
+    rows = [(s, p, t, 0) for (s, p), t in actual.items()]
+    rows += [(s, p, round(t, 1), 1) for (s, p), t in computed.items()
+             if (s, p) not in actual]
+    con.executemany("""INSERT OR REPLACE INTO fact_player_season_points
+        (season, player_id, total_points, is_computed) VALUES (?,?,?,?)""", rows)
+    return sum(1 for r in rows if not r[3]), sum(1 for r in rows if r[3])
+
 # ---------------------------------------------------------------- verification
 CHECKS = [
     ("seasons", "SELECT COUNT(*) FROM dim_season"),
@@ -424,6 +478,7 @@ CHECKS = [
     ("nfl player-weeks", "SELECT COUNT(*) FROM fact_nfl_week"),
     ("contracts", "SELECT COUNT(*) FROM fact_contract"),
     ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
+    ("player-seasons", "SELECT COUNT(*) FROM fact_player_season_points"),
     ("cap hits", "SELECT COUNT(*) FROM fact_cap_hit"),
 ]
 
@@ -478,6 +533,8 @@ def main():
     print(f'  trades {tr:,} ({it:,} items)')
     print(f'  nfl player-weeks {load_nfl_weeks(con):,}')
     print(f'  contracts {load_contracts(con):,}')
+    na, nc = load_player_season_points(con)
+    print(f'  player-seasons {na + nc:,} ({nc:,} computed from NFL stats)')
     ncap, nmatch = load_cap_hits(con)
     print(f'  cap hits {ncap:,} ({nmatch:,} resolved to an AFFL-known player)')
     con.commit()
