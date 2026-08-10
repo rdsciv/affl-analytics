@@ -24,7 +24,12 @@ CREATE TABLE IF NOT EXISTS dim_season (
   has_tx          INTEGER NOT NULL DEFAULT 0,
   uses_faab       INTEGER NOT NULL DEFAULT 0,
   slot_qb INTEGER, slot_rb INTEGER, slot_wr INTEGER,
-  slot_te INTEGER, slot_flex INTEGER, slot_dst INTEGER, slot_k INTEGER
+  slot_te INTEGER, slot_flex INTEGER, slot_dst INTEGER, slot_k INTEGER,
+  -- How ESPN converted yardage to points that season. Determined empirically by
+  -- validate_scoring.py: 2018 and earlier floor yardage to whole points
+  -- (floor(yds/25) passing, floor(yds/10) rush+rec); 2019 onward awards
+  -- fractional points per yard. Getting this wrong costs ~0.5 pts per player-week.
+  yardage_mode    TEXT NOT NULL DEFAULT 'FRACTIONAL'
 );
 
 CREATE TABLE IF NOT EXISTS dim_member (
@@ -158,6 +163,9 @@ CREATE TABLE IF NOT EXISTS fact_nfl_week (
   rec_yards  REAL, rec_tds  REAL, receptions REAL, targets REAL,
   air_yards  REAL, target_share REAL, wopr REAL,
   epa        REAL,
+  -- scoring inputs: without these, recomputed points miss INT/fumble/2pt terms
+  interceptions REAL, fumbles_lost REAL, two_pt REAL,
+  sacks_suffered REAL, air_yards_share REAL, racr REAL, pacr REAL,
   PRIMARY KEY (season, week, gsis_id)
 );
 
@@ -382,3 +390,14 @@ JOIN last_wk l      ON l.season = r.season AND l.week = r.week
 JOIN dim_team t     ON t.season = r.season AND t.team_id = r.team_id
 JOIN v_player_cap c ON c.season = r.season AND c.player_id = r.player_id
 GROUP BY r.season, r.team_id;
+
+-- League scoring rules, per season. Scoring is NOT constant across AFFL history
+-- (19 rules 2014-2019, 20 from 2020, 25 in 2025), so any recomputation of
+-- fantasy points from raw NFL stats must join on season.
+CREATE TABLE IF NOT EXISTS dim_scoring (
+  season          INTEGER NOT NULL,
+  stat_id         INTEGER NOT NULL,
+  stat_name       TEXT,
+  points          REAL NOT NULL,
+  PRIMARY KEY (season, stat_id)
+);

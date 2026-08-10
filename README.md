@@ -40,6 +40,13 @@ panels explain what's missing instead of rendering empty.
 - **What-If Machine** — final standings if every manager had started a perfect lineup every week.
 - **Manager Report Card** — A+–F grades on the three true skills (draft, lineups, waivers), with luck graded separately.
 
+## Docs
+
+- **[SPEC.md](SPEC.md)** — verified data availability per season, field inventory,
+  metric formulas, and what is genuinely not obtainable
+- **[ROADMAP.md](ROADMAP.md)** — phased plan and the stack decision
+- **[METRICS.md](METRICS.md)** — metric catalog benchmarked against FantasyGenius
+
 ## Rebuilding the data
 
 Credentials are read from a gitignored `.env` — never committed.
@@ -59,6 +66,14 @@ Then two processors run:
   → `site/data.json` (small; loaded by every page)
 - `process_seasons.py` → one self-contained bundle per season in `site/years/{year}.json`, plus the
   `site/index_years.json` manifest the front end reads first
+
+Then the warehouse and its exports:
+
+```bash
+python3 build_db.py           # load everything into affl.db, with integrity checks
+python3 validate_scoring.py   # gate: reproduce ESPN's points from raw NFL stats
+python3 export_site.py        # write SQL-computed metrics into the site bundles
+```
 
 Every season-specific panel on every page reads its year's bundle, so switching the season picker
 updates the whole page rather than just the standings.

@@ -44,7 +44,7 @@ def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
               'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
               'fact_cap_hit', 'player_season', 'dim_player', 'dim_team',
-              'dim_member', 'dim_season'):
+              'dim_member', 'dim_scoring', 'dim_season'):
         con.execute(f'DELETE FROM {t}')
 
 # ------------------------------------------------------------------ load core
@@ -261,12 +261,20 @@ def load_nfl_weeks(con):
                          fnum(r, 'receiving_yards'), fnum(r, 'receiving_tds'),
                          fnum(r, 'receptions'), fnum(r, 'targets'),
                          fnum(r, 'receiving_air_yards'), fnum(r, 'target_share'), fnum(r, 'wopr'),
-                         fnum(r, 'passing_epa') + fnum(r, 'rushing_epa') + fnum(r, 'receiving_epa')))
+                         fnum(r, 'passing_epa') + fnum(r, 'rushing_epa') + fnum(r, 'receiving_epa'),
+                         fnum(r, 'passing_interceptions'),
+                         fnum(r, 'sack_fumbles_lost') + fnum(r, 'rushing_fumbles_lost')
+                           + fnum(r, 'receiving_fumbles_lost'),
+                         fnum(r, 'passing_2pt_conversions') + fnum(r, 'rushing_2pt_conversions')
+                           + fnum(r, 'receiving_2pt_conversions'),
+                         fnum(r, 'sacks_suffered'), fnum(r, 'air_yards_share'),
+                         fnum(r, 'racr'), fnum(r, 'pacr')))
     con.executemany("""INSERT OR REPLACE INTO fact_nfl_week
         (season, week, gsis_id, opponent, pass_yards, pass_tds, completions, attempts,
          rush_yards, rush_tds, carries, rec_yards, rec_tds, receptions, targets,
-         air_yards, target_share, wopr, epa)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
+         air_yards, target_share, wopr, epa,
+         interceptions, fumbles_lost, two_pt, sacks_suffered, air_yards_share, racr, pacr)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
     return len(rows)
 
 def load_contracts(con):
@@ -339,6 +347,68 @@ def load_cap_hits(con):
             VALUES (?,?,?,?,?,?,?,?,?,?)""", rows)
     return total, matched
 
+STAT_NAMES = {
+    0: 'passAtt', 1: 'passComp', 3: 'passYds', 4: 'passTD', 19: 'pass2pt', 20: 'passInt',
+    23: 'rushAtt', 24: 'rushYds', 25: 'rushTD', 26: 'rush2pt',
+    41: 'recTgt', 42: 'recYds', 43: 'recTD', 44: 'rec2pt', 53: 'rec',
+    63: 'fumRecTD', 72: 'fumLost',
+    74: 'fg0_39', 77: 'fg40_49', 80: 'fg50', 85: 'fgMiss', 86: 'xp', 88: 'xpMiss',
+    89: 'ptsAllowed0', 90: 'ptsAllowed1_6', 91: 'ptsAllowed7_13', 92: 'ptsAllowed14_17',
+    93: 'defTD', 95: 'defInt', 96: 'defFumRec', 97: 'defBlk', 98: 'defSaf', 99: 'defSack',
+    101: 'krTD', 102: 'prTD', 103: 'fumRetTD', 104: 'intRetTD',
+    120: 'ptsAllowed28_34', 121: 'ptsAllowed35_45', 122: 'ptsAllowed46plus',
+    123: 'ptsAllowed18_21', 124: 'ptsAllowed22_27',
+    198: 'yardsAllowedBucket', 201: 'defTD2', 206: 'misc206', 209: 'misc209',
+}
+
+def load_scoring(con):
+    """Scoring changes between seasons, so this is keyed by season and is the
+    basis for recomputing points from raw stats (needed for pre-2018)."""
+    rows = []
+    for year in range(2014, 2026):
+        d = load(f'{DATA}/settings_{year}.json')
+        if not d:
+            continue
+        sc = ((d.get('settings') or {}).get('scoringSettings') or {})
+        for it in sc.get('scoringItems', []):
+            pts = it.get('points') or 0
+            if pts:
+                rows.append((year, it['statId'], STAT_NAMES.get(it['statId']), pts))
+    con.executemany("""INSERT OR REPLACE INTO dim_scoring
+        (season, stat_id, stat_name, points) VALUES (?,?,?,?)""", rows)
+
+    # ESPN's stored 2018 settings omit the yardage rules (statIds 3/24/42) even
+    # though the league clearly used them -- recomputed points come out ~6-19
+    # short without them. Backfill from the nearest season that has them; the
+    # validation script proves the assumption (2018 goes 0.6% -> 99%+ exact).
+    have = {(s, sid) for s, sid in con.execute('SELECT season, stat_id FROM dim_scoring')}
+    seasons = [r[0] for r in con.execute('SELECT season FROM dim_season ORDER BY season')]
+    filled = 0
+    for season in seasons:
+        for sid in (3, 24, 42):
+            if (season, sid) in have:
+                continue
+            donor = min((s for s in seasons if (s, sid) in have),
+                        key=lambda s: (abs(s - season), s), default=None)
+            if donor is None:
+                continue
+            pts, name = con.execute(
+                'SELECT points, stat_name FROM dim_scoring WHERE season=? AND stat_id=?',
+                (donor, sid)).fetchone()
+            con.execute("""INSERT OR REPLACE INTO dim_scoring
+                (season, stat_id, stat_name, points) VALUES (?,?,?,?)""",
+                (season, sid, name, pts))
+            filled += 1
+    if filled:
+        print(f'    backfilled {filled} missing yardage rules from neighbouring seasons')
+
+    # 2018 and earlier floor yardage to whole points; 2019+ is fractional.
+    # Proven empirically -- see validate_scoring.py (2018: 96.2% exact bucketed
+    # vs 6.6% fractional; 2019: the reverse).
+    con.execute("UPDATE dim_season SET yardage_mode = 'BUCKET'     WHERE season <= 2018")
+    con.execute("UPDATE dim_season SET yardage_mode = 'FRACTIONAL' WHERE season >= 2019")
+    return len(rows) + filled
+
 # ---------------------------------------------------------------- verification
 CHECKS = [
     ("seasons", "SELECT COUNT(*) FROM dim_season"),
@@ -353,6 +423,7 @@ CHECKS = [
     ("trades", "SELECT COUNT(*) FROM fact_trade"),
     ("nfl player-weeks", "SELECT COUNT(*) FROM fact_nfl_week"),
     ("contracts", "SELECT COUNT(*) FROM fact_contract"),
+    ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
     ("cap hits", "SELECT COUNT(*) FROM fact_cap_hit"),
 ]
 
@@ -397,6 +468,7 @@ def main():
     wipe(con)
 
     load_seasons_and_teams(con, site)
+    print(f'  scoring rules {load_scoring(con):,}')
     npl, nrw = load_players_and_rosters(con)
     print(f'  players {npl:,} · roster-weeks {nrw:,}')
     print(f'  matchup sides {load_matchups(con):,}')
