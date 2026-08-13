@@ -62,6 +62,9 @@ async def ws_handler(websocket):
             try:
                 data = json.loads(message)
                 log.info(f"Received from client: {data}")
+                # Broadcast non-state commands to all clients
+                if isinstance(data, dict) and data.get('type') != 'state':
+                    await broadcast(data)
             except json.JSONDecodeError:
                 log.warning(f"Invalid JSON from client: {message}")
     except websockets.exceptions.ConnectionClosed:

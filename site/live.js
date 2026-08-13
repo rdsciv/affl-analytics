@@ -7,7 +7,8 @@
   let currentYear = 2025;
   let currentChart = 'standings';
   let currentTeam = null;
-  let yearData = null;
+  let season = null;  // from AFFL.data.seasons[year]
+  let yearData = null;  // from years/{year}.json
   let chartInstance = null;
 
   const yearSelect = document.getElementById('yearSelect');
@@ -134,10 +135,19 @@
 
   // ============ DATA ============
   async function loadYearData(year) {
+    // Load season data from data.json
+    season = AFFL.data.seasons[String(year)];
+    if (!season) {
+      season = { teams: [], regWeeks: [] };
+    }
+    
+    // Load year-specific data from years/{year}.json
     yearData = await AFFL.loadYear(year);
-    const teams = yearData.teams || [];
+    
+    // Populate team selector with teams from season
+    const teams = season.teams || [];
     teamSelect.innerHTML = '<option value="">All Teams</option>' +
-      teams.map(t => `<option value="${t.abbrev}">${t.name}</option>`).join('');
+      teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
     if (currentTeam) teamSelect.value = currentTeam;
   }
 
@@ -152,7 +162,11 @@
 
     // Update highlight UI
     if (currentTeam) {
-      const team = yearData.teams.find(t => t.abbrev === currentTeam || t.name === currentTeam);
+      const team = season.teams.find(t => 
+        t.id === currentTeam || 
+        t.abbrev === currentTeam || 
+        t.name === currentTeam
+      );
       highlightInfo.classList.remove('no-highlight');
       highlightTeam.textContent = team ? team.name : currentTeam;
     } else {
@@ -199,13 +213,13 @@
 
   // ============ CHART RENDERERS ============
   function renderStandings() {
-    const teams = [...yearData.teams].sort((a, b) => (b.wins - a.wins) || (b.pf - a.pf));
+    const teams = [...season.teams].sort((a, b) => (b.wins - a.wins) || (b.pf - a.pf));
     const labels = teams.map(t => t.abbrev || t.name.substring(0, 4).toUpperCase());
     const wins = teams.map(t => t.wins);
     const losses = teams.map(t => t.losses);
     
-    const colors = teams.map((t, i) => 
-      currentTeam && (t.abbrev === currentTeam || t.name === currentTeam) 
+    const colors = teams.map((t) => 
+      currentTeam && (t.id === currentTeam || t.abbrev === currentTeam || t.name === currentTeam)
         ? AFFL.C.orange 
         : AFFL.C.blue
     );
@@ -242,16 +256,16 @@
   }
 
   function renderLuck() {
-    if (!yearData.teams[0] || yearData.teams[0].luck === undefined) {
+    if (!season.teams[0] || season.teams[0].luck === undefined) {
       showNotice('Luck data is not available for this season.');
       return;
     }
-    const teams = [...yearData.teams].sort((a, b) => (b.luck || 0) - (a.luck || 0));
+    const teams = [...season.teams].sort((a, b) => (b.luck || 0) - (a.luck || 0));
     const labels = teams.map(t => t.abbrev || t.name.substring(0, 4).toUpperCase());
     const luck = teams.map(t => t.luck || 0);
     
     const colors = teams.map((t) => {
-      if (currentTeam && (t.abbrev === currentTeam || t.name === currentTeam)) {
+      if (currentTeam && (t.id === currentTeam || t.abbrev === currentTeam || t.name === currentTeam)) {
         return AFFL.C.orange;
       }
       return (t.luck || 0) >= 0 ? AFFL.C.green : AFFL.C.red;
@@ -292,18 +306,22 @@
   }
 
   function renderWeekly() {
-    const teams = yearData.teams || [];
+    const teams = season.teams || [];
     if (!teams.length || !teams[0].weekly) {
       showNotice('Weekly scoring data is not available for this season.');
       return;
     }
 
-    const regWeeks = yearData.regWeeks || [];
+    const regWeeks = season.regWeeks || [];
     const labels = regWeeks.map(w => `Week ${w}`);
     
     let datasets;
     if (currentTeam) {
-      const team = teams.find(t => t.abbrev === currentTeam || t.name === currentTeam);
+      const team = teams.find(t => 
+        t.id === currentTeam || 
+        t.abbrev === currentTeam || 
+        t.name === currentTeam
+      );
       if (!team) {
         showNotice(`Team "${currentTeam}" not found.`);
         return;
@@ -319,9 +337,9 @@
       }];
     } else {
       // Show average, max, min
-      const wkAvg = yearData.wkAvg || [];
-      const wkMax = yearData.wkMax || [];
-      const wkMin = yearData.wkMin || [];
+      const wkAvg = season.wkAvg || [];
+      const wkMax = season.wkMax || [];
+      const wkMin = season.wkMin || [];
       datasets = [
         { label: 'Avg', data: wkAvg, borderColor: AFFL.C.blue, borderWidth: 2, tension: 0.3 },
         { label: 'Max', data: wkMax, borderColor: AFFL.C.green, borderWidth: 2, tension: 0.3, borderDash: [5, 5] },
@@ -345,19 +363,180 @@
   }
 
   function renderLineupIQ() {
-    // Lineup IQ = starting efficiency from year bundle
-    // For now check if we have the data (2018+) and show notice if missing
-    showNotice('Lineup IQ chart implementation requires lineup efficiency data from the year bundle.');
+    if (!yearData.lineupIQ || !yearData.lineupIQ.length) {
+      showNotice('Lineup IQ data is not available for this season.');
+      return;
+    }
+    
+    // Join lineupIQ with team names
+    const data = yearData.lineupIQ.map(iq => {
+      const team = season.teams.find(t => t.id === iq.teamId);
+      return { ...iq, team };
+    }).filter(d => d.team).sort((a, b) => (b.eff || 0) - (a.eff || 0));
+    
+    const labels = data.map(d => d.team.abbrev || d.team.name.substring(0, 4).toUpperCase());
+    const efficiency = data.map(d => (d.eff || 0) * 100);
+    
+    const colors = data.map((d) => 
+      currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)
+        ? AFFL.C.orange
+        : AFFL.C.blue
+    );
+
+    chartInstance = new Chart(mainCanvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Efficiency %',
+          data: efficiency,
+          backgroundColor: colors,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const d = data[ctx.dataIndex];
+                return [
+                  `Efficiency: ${AFFL.fmt(d.eff * 100, 1)}%`,
+                  `Actual: ${AFFL.fmt(d.actual, 1)}`,
+                  `Optimal: ${AFFL.fmt(d.optimal, 1)}`,
+                  `Wasted: ${AFFL.fmt(d.wasted, 1)}`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, max: 100, grid: { color: AFFL.C.grid } }
+        }
+      }
+    });
   }
 
   function renderDraftPAR() {
-    // Draft PAR / steals-busts from year bundle
-    showNotice('Draft PAR data is not yet computed in the year bundles. Check back when draft analysis is exported.');
+    if (!yearData.draftValue || !yearData.draftValue.teamEff || !yearData.draftValue.teamEff.length) {
+      showNotice('Draft PAR data is not available for this season.');
+      return;
+    }
+    
+    const data = yearData.draftValue.teamEff.map(dv => {
+      const team = season.teams.find(t => t.id === dv.teamId);
+      return { ...dv, team };
+    }).filter(d => d.team).sort((a, b) => (b.par || 0) - (a.par || 0));
+    
+    const labels = data.map(d => d.team.abbrev || d.team.name.substring(0, 4).toUpperCase());
+    const par = data.map(d => d.par || 0);
+    
+    const colors = data.map((d) => {
+      if (currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)) {
+        return AFFL.C.orange;
+      }
+      return (d.par || 0) >= 0 ? AFFL.C.green : AFFL.C.red;
+    });
+
+    chartInstance = new Chart(mainCanvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Draft PAR',
+          data: par,
+          backgroundColor: colors,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const d = data[ctx.dataIndex];
+                return [
+                  `PAR: ${AFFL.fmt(d.par, 1)}`,
+                  `Points: ${AFFL.fmt(d.pts, 1)}`,
+                  `Spent: $${AFFL.fmt(d.spent, 0)}`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: AFFL.C.grid } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
   }
 
   function renderPayroll() {
-    // NFL payroll from year bundle
-    showNotice('NFL payroll data is not included in the current year bundles.');
+    if (!yearData.nflCap || !yearData.nflCap.byTeam || !yearData.nflCap.byTeam.length) {
+      showNotice('NFL payroll data is not available for this season.');
+      return;
+    }
+    
+    const data = yearData.nflCap.byTeam.map(cap => {
+      const team = season.teams.find(t => t.id === cap.teamId);
+      return { ...cap, team };
+    }).filter(d => d.team).sort((a, b) => (b.totalCap || 0) - (a.totalCap || 0));
+    
+    const labels = data.map(d => d.team.abbrev || d.team.name.substring(0, 4).toUpperCase());
+    const totalCap = data.map(d => (d.totalCap || 0) / 1000000);  // Convert to millions
+    
+    const colors = data.map((d) => 
+      currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)
+        ? AFFL.C.orange
+        : AFFL.C.blue
+    );
+
+    chartInstance = new Chart(mainCanvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Total Cap ($M)',
+          data: totalCap,
+          backgroundColor: colors,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const d = data[ctx.dataIndex];
+                return [
+                  `Total: $${AFFL.fmt(d.totalCap / 1000000, 1)}M`,
+                  `Avg: $${AFFL.fmt(d.avgCap / 1000000, 2)}M`,
+                  `Max: $${AFFL.fmt(d.maxCap / 1000000, 2)}M`,
+                  `Players: ${d.matched}`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { beginAtZero: true, grid: { color: AFFL.C.grid } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
   }
 
 })();

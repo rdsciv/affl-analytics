@@ -209,31 +209,29 @@ async def handle_call_tool(context, params):
                 )
             ])
         
-        year_file = YEARS_DIR / f"{year}.json"
-        try:
-            with open(year_file) as f:
-                year_data = json.load(f)
-            
-            teams = sorted(year_data.get('teams', []), 
-                          key=lambda t: (-t.get('wins', 0), -t.get('pf', 0)))
-            
-            lines = [f"=== {year} AFFL Standings ===\n"]
-            for i, team in enumerate(teams, 1):
-                name = team.get('name', 'Unknown')
-                abbrev = team.get('abbrev', '???')
-                wins = team.get('wins', 0)
-                losses = team.get('losses', 0)
-                pf = team.get('pf', 0)
-                pa = team.get('pa', 0)
-                lines.append(f"{i:2d}. {abbrev:4s} {name:30s} {wins:2d}-{losses:2d}  PF:{pf:7.1f}  PA:{pa:7.1f}")
-            
+        # Read from data.json seasons
+        season = league_data.get('seasons', {}).get(str(year))
+        if not season:
             return types.CallToolResult(content=[
-                types.TextContent(type="text", text="\n".join(lines))
+                types.TextContent(type="text", text=f"Error: No season data for {year}")
             ])
-        except Exception as e:
-            return types.CallToolResult(content=[
-                types.TextContent(type="text", text=f"Error loading standings for {year}: {e}")
-            ])
+        
+        teams = sorted(season.get('teams', []), 
+                      key=lambda t: (-t.get('wins', 0), -t.get('pf', 0)))
+        
+        lines = [f"=== {year} AFFL Standings ===\n"]
+        for i, team in enumerate(teams, 1):
+            name = team.get('name', 'Unknown')
+            abbrev = team.get('abbrev', '???')
+            wins = team.get('wins', 0)
+            losses = team.get('losses', 0)
+            pf = team.get('pf', 0)
+            pa = team.get('pa', 0)
+            lines.append(f"{i:2d}. {abbrev:4s} {name:30s} {wins:2d}-{losses:2d}  PF:{pf:7.1f}  PA:{pa:7.1f}")
+        
+        return types.CallToolResult(content=[
+            types.TextContent(type="text", text="\n".join(lines))
+        ])
     
     elif name == "affl_open":
         return types.CallToolResult(content=[
