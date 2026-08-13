@@ -18,7 +18,7 @@
   --steel: #3a4a63;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { color-scheme: dark; }
+html { color-scheme: dark; overflow-x: hidden; }
 body {
   background:
     radial-gradient(1100px 520px at 85% -12%, #10306633, transparent 60%),
@@ -27,6 +27,7 @@ body {
   color: var(--ink);
   font-family: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 .frame { max-width: 1280px; margin: 0 auto; padding: 28px 28px 60px; }
 
@@ -43,7 +44,7 @@ body {
   display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
   padding: 6px 4px 22px;
 }
-.brand { display: flex; align-items: center; gap: 14px; margin-right: auto; }
+.brand { display: flex; align-items: center; gap: 14px; }
 .brand-mark {
   width: 48px; height: 48px; border-radius: 12px;
   background: linear-gradient(140deg, #123, #0a0c12 60%);
@@ -66,7 +67,7 @@ body {
 .hs-value.accent { color: var(--yellow); }
 .hs-label { color: var(--mut); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; }
 
-.season-picker { display: flex; gap: 6px; flex-wrap: wrap; max-width: 430px; justify-content: flex-end; }
+.season-picker { display: flex; gap: 6px; flex-wrap: wrap; max-width: 430px; }
 .season-chip {
   border: 1px solid var(--line); background: transparent; color: var(--mut);
   border-radius: 6px; padding: 5px 11px; font-size: 12px; font-weight: 700;
@@ -318,7 +319,7 @@ body {
 @media (max-width: 720px) { .pp-grid { grid-template-columns: 1fr; } .pp-stats { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------- site nav (joins the three sites) ---------- */
-.site-nav { display: flex; gap: 8px; margin-left: auto; }
+.site-nav { display: flex; gap: 8px; flex-wrap: wrap; }
 .site-nav a {
   color: var(--mut); text-decoration: none; font-size: 12px; font-weight: 800;
   font-style: italic; text-transform: uppercase; letter-spacing: .08em;
