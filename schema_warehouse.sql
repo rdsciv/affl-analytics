@@ -19,7 +19,7 @@ FROM (
            ORDER BY CASE WHEN c.nfl_team = ps.nfl_team THEN 0 ELSE 1 END,
                     c.cap_hit DESC) AS rn
     FROM nfl.fact_cap_hit c
-    LEFT JOIN player_season ps
+    LEFT JOIN nfl.player_season ps
       ON ps.season = c.season AND ps.player_id = c.player_id
    WHERE c.player_id IS NOT NULL
 )
@@ -73,5 +73,5 @@ JOIN dim_player p ON p.player_id = r.player_id
 JOIN dim_team t ON t.season = r.season AND t.team_id = r.team_id
 LEFT JOIN nfl.fact_nfl_week n ON n.season = r.season AND n.week = r.week
                                 AND n.gsis_id = p.gsis_id
-LEFT JOIN nfl.fact_cap_hit c ON c.season = r.season AND c.player_id = r.player_id
+LEFT JOIN v_player_cap c ON c.season = r.season AND c.player_id = r.player_id
 WHERE r.started = 1 AND p.position IN ('QB','RB','WR','TE');

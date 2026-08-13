@@ -20,7 +20,6 @@ nfl.db-shm
 # regenerate with: python3 fetch_spotrac.py 2018 ... 2025
 data/spotrac/
 
-# lab build output
+# lab build output and data
 site/lab/
 lab/node_modules/
-lab/public/started_vs_nfl.json

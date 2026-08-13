@@ -11,7 +11,8 @@ import sqlite3
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB_AFFL = os.path.join(HERE, 'affl.db')
 DB_NFL = os.path.join(HERE, 'nfl.db')
-OUT = os.path.join(HERE, 'lab', 'public', 'started_vs_nfl.json')
+# Output to site/lab/ where the built lab page will be
+OUT = os.path.join(HERE, 'site', 'lab', 'started_vs_nfl.json')
 
 def export():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)

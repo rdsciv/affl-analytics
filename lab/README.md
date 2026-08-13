@@ -5,13 +5,13 @@ TanStack Charts proof-of-concept demonstrating the AFFL ⋈ NFL join.
 ## What It Does
 
 Displays **started fantasy points vs NFL EPA** (2018–2025) in both:
-- A D3 scatter chart (filterable by season, position, minimum points)
-- A TanStack Table (sortable, shows full stats including cap hit)
+- A TanStack Charts scatter chart (filterable by season, position, minimum points)
+- A TanStack React Table (sortable, shows full stats including cap hit)
 
 Each row joins AFFL roster data to NFL data via `dim_player.gsis_id`:
 - AFFL: who started, fantasy points scored
 - NFL: EPA, passing/rushing/receiving stats
-- Spotrac: NFL cap hit
+- Spotrac: NFL cap hit (via v_player_cap, deduplicated for traded players)
 
 Query: `v_started_vs_nfl` view across both databases.
 
@@ -31,13 +31,14 @@ npm run dev
 npm run build
 ```
 
-The built output goes directly into `site/lab/` where GitHub Pages will serve it.
+The built output goes directly into `site/lab/` where GitHub Pages will serve it at `/affl-analytics/lab/`.
 
 ## Stack
 
+- React 19
+- TanStack Charts ^0.11.2
+- TanStack React Table ^9.1.2
+- TypeScript
 - Vite (static build, no server runtime)
-- D3 for scatter chart
-- TanStack Table Core for sortable table (vanilla JS, no React)
-- Vanilla JS (no framework)
 
-This pattern is the charting path forward, proven in [dienasty-history](https://github.com/rdsciv/dienasty-history). The existing five site pages stay Chart.js; migration is not in this PR's scope.
+This matches the proven pattern from [dienasty-history](https://github.com/rdsciv/dienasty-history). This is the charting path forward. The existing five site pages stay Chart.js; migration is not in this PR's scope.
