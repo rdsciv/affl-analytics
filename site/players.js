@@ -122,7 +122,7 @@
         ${A.headshotHTML(p, 'pp-hs')}
         <div>
           <div class="pp-nm">${p.name}</div>
-          <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · ${tName(p.mainTeam).slice(0, 16)}</div>
+          <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · <span class="pp-team">${tName(p.mainTeam)}</span></div>
         </div>
         <div class="pp-pts"><b>${fmt(p.tot, 1)}</b><span>season pts</span></div>
       </div>`).join('') ||

@@ -609,7 +609,7 @@
       ${hs}
       <div>
         <div class="pp-nm">${p.name}</div>
-        <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · ${shortName25(p.mainTeam)}</div>
+        <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · <span class="pp-team">${tName25(p.mainTeam)}</span></div>
       </div>
       <div class="pp-pts"><b>${fmt(p.tot, 1)}</b><span>season pts</span></div>
     </div>`;
@@ -722,6 +722,7 @@
     const cap = NG.nflCap || {};
     const rows = cap.final || [];
     const money = (n) => '$' + (n / 1e6).toFixed(1) + 'M';
+    $('#cap-year-th').textContent = `${curYear} Cap Hit`;
     if (!rows.length) {
       chartNotice('#cap-chart', `No NFL cap data loaded for ${curYear} yet.`);
       $('#cap-tbl tbody').innerHTML =
@@ -871,6 +872,8 @@
     renderWaiver();
   }
 
+  $('#hs-total').textContent = 'Loading ' + curYear + '…';
+  $('#hs-games').textContent = '';
   await renderSeason();
   renderTimeline();
   renderFranchises();

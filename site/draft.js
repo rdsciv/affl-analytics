@@ -45,7 +45,7 @@
     const cards = [
       { n: '01 · FORMAT', color: C.gold, pct: 1, label: auction ? '$' : '#',
         title: auction ? 'Auction Draft' : 'Snake Draft',
-        desc: `<strong>${board.length} picks</strong>${auction ? ` · $${fmt(totalSpend)} total spend` : ' · standard serpentine order'}` },
+        desc: `<strong>${board.length} picks</strong>${withPts.length && withPts.length !== board.length ? ` · ${withPts.length} scored` : ''}${auction ? ` · $${fmt(totalSpend)} total spend` : ' · standard serpentine order'}` },
       priciest && { n: '02 · TOP DOLLAR', color: C.fire,
         pct: priciest.bid ? Math.min(1, priciest.bid / 100) : 1,
         label: auction ? '$' + priciest.bid : '1.01',
