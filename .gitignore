@@ -16,3 +16,10 @@ affl.db-shm
 # scraped Spotrac page cache — large, and their content, not ours.
 # regenerate with: python3 fetch_spotrac.py 2018 ... 2025
 data/spotrac/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# MCP state
+.mcp-state

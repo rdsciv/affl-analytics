@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Live Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff2e9a%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EA%3C/text%3E%3C/svg%3E">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+  color: #eef4ff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  background: #ff2e9a;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 28px;
+}
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+select {
+  background: #2a3647;
+  color: #eef4ff;
+  border: 1px solid #3d4f66;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 140px;
+}
+select:hover { border-color: #2f7bff; }
+select:focus { outline: none; border-color: #2f7bff; box-shadow: 0 0 0 3px rgba(47, 123, 255, 0.15); }
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff2d1a;
+  animation: pulse 2s infinite;
+}
+.status.connected .status-dot { background: #93d500; animation: none; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.banner {
+  background: #ffc400;
+  color: #0f1419;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+.banner.show { display: flex; }
+.banner-icon { font-size: 20px; }
+.card {
+  background: rgba(42, 54, 71, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #fff;
+}
+.chart-container {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+}
+.notice {
+  color: #7d8aa0;
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 14px;
+}
+.highlight-info {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(47, 123, 255, 0.1);
+  border: 1px solid rgba(47, 123, 255, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #47a8ff;
+}
+.no-highlight { display: none; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="brand">
+    <div class="brand-mark">A</div>
+    <div>
+      <h1>AFFL Live Dashboard</h1>
+    </div>
+  </div>
+  <div class="controls">
+    <select id="yearSelect">
+      <option value="">Loading...</option>
+    </select>
+    <select id="chartSelect">
+      <option value="standings">Standings</option>
+      <option value="luck">Luck</option>
+      <option value="weekly">Weekly Scoring</option>
+      <option value="lineup">Lineup IQ</option>
+      <option value="draft">Draft PAR</option>
+      <option value="payroll">NFL Payroll</option>
+    </select>
+    <select id="teamSelect">
+      <option value="">All Teams</option>
+    </select>
+  </div>
+  <div class="status" id="wsStatus">
+    <span class="status-dot"></span>
+    <span id="wsText">Connecting...</span>
+  </div>
+</div>
+
+<div class="banner" id="banner">
+  <span class="banner-icon">⚠️</span>
+  <span id="bannerText">Start the AFFL viewer bridge.</span>
+</div>
+
+<div class="card">
+  <h2 id="chartTitle">Standings</h2>
+  <div id="highlightInfo" class="highlight-info no-highlight">
+    Highlighting: <strong id="highlightTeam"></strong>
+  </div>
+  <div class="chart-container">
+    <canvas id="mainChart"></canvas>
+  </div>
+  <div id="chartNotice" class="notice" style="display:none;"></div>
+</div>
+
+<script src="common.js"></script>
+<script src="chart.umd.min.js"></script>
+<script src="live.js"></script>
+</body>
+</html>
