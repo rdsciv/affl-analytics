@@ -19,3 +19,8 @@ nfl.db-shm
 # scraped Spotrac page cache — large, and their content, not ours.
 # regenerate with: python3 fetch_spotrac.py 2018 ... 2025
 data/spotrac/
+
+# lab build output
+site/lab/
+lab/node_modules/
+lab/public/started_vs_nfl.json
