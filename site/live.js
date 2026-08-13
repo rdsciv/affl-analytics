@@ -109,7 +109,17 @@
         }
         break;
       case 'highlight_team':
-        currentTeam = cmd.team || null;
+        // Resolve name/abbrev to team.id
+        if (cmd.team) {
+          const team = season.teams.find(t => 
+            String(t.id) === String(cmd.team) ||
+            t.abbrev === cmd.team ||
+            t.name === cmd.team
+          );
+          currentTeam = team ? String(team.id) : String(cmd.team);
+        } else {
+          currentTeam = null;
+        }
         teamSelect.value = currentTeam || '';
         renderChart();
         break;
@@ -125,7 +135,17 @@
           chartSelect.value = currentChart;
         }
         if (cmd.team !== undefined) {
-          currentTeam = cmd.team || null;
+          // Resolve name/abbrev to team.id
+          if (cmd.team) {
+            const team = season.teams.find(t => 
+              String(t.id) === String(cmd.team) ||
+              t.abbrev === cmd.team ||
+              t.name === cmd.team
+            );
+            currentTeam = team ? String(team.id) : String(cmd.team);
+          } else {
+            currentTeam = null;
+          }
           teamSelect.value = currentTeam || '';
         }
         renderChart();
@@ -163,7 +183,7 @@
     // Update highlight UI
     if (currentTeam) {
       const team = season.teams.find(t => 
-        t.id === currentTeam || 
+        String(t.id) === String(currentTeam) ||
         t.abbrev === currentTeam || 
         t.name === currentTeam
       );
@@ -219,7 +239,7 @@
     const losses = teams.map(t => t.losses);
     
     const colors = teams.map((t) => 
-      currentTeam && (t.id === currentTeam || t.abbrev === currentTeam || t.name === currentTeam)
+      currentTeam && (String(t.id) === String(currentTeam) || t.abbrev === currentTeam || t.name === currentTeam)
         ? AFFL.C.orange 
         : AFFL.C.blue
     );
@@ -265,7 +285,7 @@
     const luck = teams.map(t => t.luck || 0);
     
     const colors = teams.map((t) => {
-      if (currentTeam && (t.id === currentTeam || t.abbrev === currentTeam || t.name === currentTeam)) {
+      if (currentTeam && (String(t.id) === String(currentTeam) || t.abbrev === currentTeam || t.name === currentTeam)) {
         return AFFL.C.orange;
       }
       return (t.luck || 0) >= 0 ? AFFL.C.green : AFFL.C.red;
@@ -318,7 +338,7 @@
     let datasets;
     if (currentTeam) {
       const team = teams.find(t => 
-        t.id === currentTeam || 
+        String(t.id) === String(currentTeam) ||
         t.abbrev === currentTeam || 
         t.name === currentTeam
       );
@@ -378,7 +398,7 @@
     const efficiency = data.map(d => (d.eff || 0) * 100);
     
     const colors = data.map((d) => 
-      currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)
+      currentTeam && (String(d.teamId) === String(currentTeam) || d.team.abbrev === currentTeam || d.team.name === currentTeam)
         ? AFFL.C.orange
         : AFFL.C.blue
     );
@@ -436,7 +456,7 @@
     const par = data.map(d => d.par || 0);
     
     const colors = data.map((d) => {
-      if (currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)) {
+      if (currentTeam && (String(d.teamId) === String(currentTeam) || d.team.abbrev === currentTeam || d.team.name === currentTeam)) {
         return AFFL.C.orange;
       }
       return (d.par || 0) >= 0 ? AFFL.C.green : AFFL.C.red;
@@ -495,7 +515,7 @@
     const totalCap = data.map(d => (d.totalCap || 0) / 1000000);  // Convert to millions
     
     const colors = data.map((d) => 
-      currentTeam && (d.teamId === currentTeam || d.team.abbrev === currentTeam || d.team.name === currentTeam)
+      currentTeam && (String(d.teamId) === String(currentTeam) || d.team.abbrev === currentTeam || d.team.name === currentTeam)
         ? AFFL.C.orange
         : AFFL.C.blue
     );
