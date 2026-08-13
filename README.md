@@ -42,10 +42,27 @@ panels explain what's missing instead of rendering empty.
 
 ## Docs
 
-- **[SPEC.md](SPEC.md)** — verified data availability per season, field inventory,
-  metric formulas, and what is genuinely not obtainable
+- **[STATUS.md](STATUS.md)** — what's built vs planned, the two-database architecture decision, and assembly status
+- **[SPEC.md](SPEC.md)** — verified data availability per season, field inventory, metric formulas, and what is genuinely not obtainable
 - **[ROADMAP.md](ROADMAP.md)** — phased plan and the stack decision
 - **[METRICS.md](METRICS.md)** — metric catalog benchmarked against FantasyGenius
+
+## Architecture
+
+The warehouse is split into **two SQLite files** plus join views:
+- **`affl.db`** — league truth (rosters, matchups, drafts, trades, scoring rules)
+- **`nfl.db`** — NFL truth (weekly stats, contracts, cap hits)
+- Warehouse views created via `ATTACH DATABASE 'nfl.db' AS nfl`
+
+Join key: `dim_player.gsis_id` (nflverse identifier) connects AFFL rosters to NFL data.
+
+This keeps league facts separate from NFL facts, making the boundary explicit and enabling analysis that joins fantasy performance to real NFL stats and salary cap data.
+
+### TanStack Lab
+
+`lab/` contains a proof-of-concept demonstrating the join: a scatter chart and sortable table of **started fantasy points vs NFL EPA** (2018–2025), built with Vite + D3 + TanStack Table. Live at `site/lab/` after build.
+
+This pattern (TanStack Charts + TanStack Table with Vite static build) is the charting path forward. The existing five pages use Chart.js and will migrate as Stats/Leaderboard features are added.
 
 ## Rebuilding the data
 
@@ -70,9 +87,18 @@ Then two processors run:
 Then the warehouse and its exports:
 
 ```bash
-python3 build_db.py           # load everything into affl.db, with integrity checks
+python3 build_db.py           # load everything into affl.db + nfl.db, with integrity checks
 python3 validate_scoring.py   # gate: reproduce ESPN's points from raw NFL stats
 python3 export_site.py        # write SQL-computed metrics into the site bundles
+python3 export_lab.py         # export join data for TanStack lab page
+```
+
+To build the lab page:
+
+```bash
+cd lab
+npm install
+npm run build   # builds to ../site/lab/
 ```
 
 Every season-specific panel on every page reads its year's bundle, so switching the season picker
