@@ -1,49 +1,55 @@
 # AFFL Analytics — roadmap
 
 Ordered so that each phase ships something viewable. See `SPEC.md` for verified
-data availability and formulas.
+data availability and formulas. See `STATUS.md` for what's built vs planned.
 
 ---
 
-## Stack decision
+## Stack decision (FINAL — Aug 2026)
 
-**Recommendation: keep SQLite → static JSON → GitHub Pages. Do not move to
-Supabase/Postgres.**
+**Keep SQLite → static JSON → GitHub Pages. Do not move to Supabase/Postgres.**
 
-You said you've started this five times and never landed a complete deployed
-site. That's the problem worth solving, and the cause is almost never the
-database — it's that a server, a hosted DB and an auth layer are three things
-that can each break a deploy. Right now the site is **already live** at
+The assembly decision: this repo is the product. The site is **already live** at
 `rdsciv.github.io/affl-analytics`, deploys in 27 seconds on `git push`, and has
-no runtime dependencies at all.
+zero runtime dependencies.
 
-Given your actual requirements — public shared link, **no auth**, read-only,
-twelve seasons of data that changes once a week at most — a hosted Postgres buys
-nothing and adds a service to maintain, credentials to rotate, and a cold-start
-failure mode.
+### The Two-Database Architecture
 
-What I'd add instead, when ad-hoc querying starts to matter:
+The warehouse is split into **two SQLite files** plus join views:
+- `affl.db` — league truth (rosters, matchups, drafts, trades, scoring rules)
+- `nfl.db` — NFL truth (weekly stats, contracts, cap hits)
+- Warehouse views created via `ATTACH DATABASE 'nfl.db' AS nfl`
 
-- **DuckDB-WASM** in the browser against a static `affl.duckdb` or Parquet files.
-  Real SQL, arbitrary joins, zero server, still just a static host. This is the
-  thing that would make the site genuinely unusual: a public link where anyone
-  can run their own query against the league's whole history.
+Join key: `dim_player.gsis_id` → nflverse identifier.
 
-Move to Supabase only if a future feature needs **writes** (a submit-your-picks
-game, comments, a poll). That's the trigger, not query complexity.
+Ryan asked for "1 AFFL database, 1 NFL database, joined relationally." This honors that literally.
 
-## Charting
+### Rejected Paths
 
-`site/` currently uses Chart.js. For the next phase I'd evaluate:
+Earlier AFFL attempts (AFFL_Pillars, affl-site, AFFL_ESPN, draftedge-2026, Sourcebook D1) stalled on:
+- Cloudflare D1 / Drizzle
+- Next.js + hosted runtime
+- Supabase / Postgres
 
-- **TanStack Charts** — headless, composes with the table/virtual libraries, good
-  for the dense sortable leaderboards this project keeps needing.
-- **Microsoft flint-chart** — worth a look for the small-multiple and
-  distribution work (score distributions, per-team sparkline grids).
+Those paths added:
+- Services to maintain
+- Credentials to rotate
+- Deploy complexity beyond `git push`
+- Runtime dependencies that can be down
 
-Neither is urgent. Chart.js is carrying the current pages fine; the deciding
-factor will be the Stats/Leaderboard pages where sorting + filtering + charting
-need to share state.
+Given the actual requirements — public shared link, **no auth**, read-only, twelve seasons of data that changes once a week at most — a hosted Postgres buys nothing.
+
+**Move to Supabase only if a future feature needs writes** (submit-your-picks game, comments, a poll). That's the trigger, not query complexity.
+
+### Charting Path Forward
+
+**TanStack Charts** is the chosen path, proven in [dienasty-history](https://github.com/rdsciv/dienasty-history). The lab page (this PR) demonstrates TanStack Table + TanStack Charts with Vite static build, judged against this very AFFL site.
+
+`site/` currently uses Chart.js for the five existing pages. **Do not migrate Chart.js everywhere in this PR.** Chart.js is carrying the current dashboard fine; the migration will happen when Stats/Leaderboard pages need sorting + filtering + charting to share state.
+
+### Future: DuckDB-WASM
+
+When ad-hoc querying starts to matter, add **DuckDB-WASM** in the browser against a static `affl.duckdb` or Parquet files. Real SQL, arbitrary joins, zero server, still just a static host. This would make the site genuinely unusual: a public link where anyone can run their own query against the league's whole history.
 
 ---
 

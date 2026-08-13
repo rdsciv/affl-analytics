@@ -13,7 +13,8 @@ import sqlite3
 import sys
 import os
 
-DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'affl.db')
+DB_AFFL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'affl.db')
+DB_NFL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nfl.db')
 PASS_THRESHOLD = 0.95      # fraction of player-weeks that must match exactly
 
 def rules_for(con, season):
@@ -40,8 +41,10 @@ def score(r, k, mode):
             + r['tp'] * k.get('rush2pt', 0))
 
 def main():
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB_AFFL)
     con.row_factory = sqlite3.Row
+    # Attach NFL database for the join
+    con.execute(f"ATTACH DATABASE '{DB_NFL}' AS nfl")
     seasons = [r[0] for r in con.execute(
         'SELECT season FROM dim_season WHERE has_rosters=1 ORDER BY season')]
     print(f"{'season':>6} {'mode':>11} {'weeks':>9} {'exact':>8} {'<=1pt':>8} {'p99':>6}  verdict")
@@ -56,7 +59,7 @@ def main():
                    n.receptions rc, n.fumbles_lost fl, n.two_pt tp
               FROM fact_roster_week r
               JOIN dim_player p    ON p.player_id = r.player_id
-              JOIN fact_nfl_week n ON n.season = r.season AND n.week = r.week
+              JOIN nfl.fact_nfl_week n ON n.season = r.season AND n.week = r.week
                                   AND n.gsis_id = p.gsis_id
              WHERE r.season = ? AND p.position IN ('QB','RB','WR','TE')
                AND r.points <> 0""", (season,)).fetchall()

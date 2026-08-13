@@ -19,7 +19,8 @@ import os
 import sqlite3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(HERE, 'affl.db')
+DB_AFFL = os.path.join(HERE, 'affl.db')
+DB_NFL = os.path.join(HERE, 'nfl.db')
 YEARS = os.path.join(HERE, 'site', 'years')
 
 def rows(con, sql, args=()):
@@ -119,14 +120,16 @@ def export_year(con, year):
             'cap_teams': len(cap), 'baselines': len(baselines)}
 
 def main():
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB_AFFL)
+    # Attach NFL database for the warehouse views
+    con.execute(f"ATTACH DATABASE '{DB_NFL}' AS nfl")
     years = [r[0] for r in con.execute('SELECT season FROM dim_season ORDER BY season')]
     for y in years:
         info = export_year(con, y)
         if info:
             print(f"  {info['year']}: {info['steals']} steals · {info['power']} power rows "
                   f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines")
-    print('site/years/*.json patched from affl.db')
+    print('site/years/*.json patched from affl.db + nfl.db')
 
 if __name__ == '__main__':
     main()

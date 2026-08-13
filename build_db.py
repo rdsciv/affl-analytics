@@ -17,7 +17,9 @@ from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
-DB = os.path.join(HERE, 'affl.db')
+DB_AFFL = os.path.join(HERE, 'affl.db')
+DB_NFL = os.path.join(HERE, 'nfl.db')
+DB = DB_AFFL  # for backward compatibility
 SITE = os.path.join(HERE, 'site')
 
 SLOT = {0: 'QB', 2: 'RB', 3: 'RB/WR', 4: 'WR', 5: 'WR/TE', 6: 'TE', 7: 'OP',
@@ -37,14 +39,33 @@ def fnum(row, key):
         return 0.0
 
 # --------------------------------------------------------------------- schema
+def init_affl(con):
+    """Initialize AFFL database (league truth)."""
+    con.executescript(open(os.path.join(HERE, 'schema_affl.sql')).read())
+
+def init_nfl(con):
+    """Initialize NFL database (NFL/player truth)."""
+    con.executescript(open(os.path.join(HERE, 'schema_nfl.sql')).read())
+
+def init_warehouse_views(con_affl):
+    """Create cross-database join views after attaching NFL db."""
+    con_affl.execute(f"ATTACH DATABASE '{DB_NFL}' AS nfl")
+    con_affl.executescript(open(os.path.join(HERE, 'schema_warehouse.sql')).read())
+
 def init(con):
-    con.executescript(open(os.path.join(HERE, 'schema.sql')).read())
+    """Legacy function - initialize AFFL database."""
+    init_affl(con)
 
 def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
-              'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
-              'fact_cap_hit', 'player_season', 'dim_player', 'dim_team',
+              'fact_matchup', 'fact_roster_week',
+              'player_season', 'dim_player', 'dim_team',
               'dim_member', 'dim_scoring', 'dim_season'):
+        con.execute(f'DELETE FROM {t}')
+
+def wipe_nfl(con):
+    """Wipe NFL database tables."""
+    for t in ('fact_cap_hit', 'fact_contract', 'fact_nfl_week', 'player_season'):
         con.execute(f'DELETE FROM {t}')
 
 # ------------------------------------------------------------------ load core
@@ -81,7 +102,8 @@ def load_seasons_and_teams(con, site):
               t.get('wins'), t.get('losses'), t.get('ties'), t.get('pf'), t.get('pa'),
               t.get('playoffSeed'), t.get('finalRank')) for t in s['teams']])
 
-def load_players_and_rosters(con):
+def load_players_and_rosters(con_affl, con_nfl):
+    """Load players and rosters into AFFL db; player_season goes to both."""
     players, pseason, rws = {}, [], []
     for year in range(2014, 2026):
         box = load(f'{DATA}/box_{year}.json')
@@ -133,14 +155,23 @@ def load_players_and_rosters(con):
             if g in by_gsis:
                 otc[eid] = by_gsis[g]
 
-    con.executemany("""INSERT OR REPLACE INTO dim_player
+    # dim_player goes to AFFL database
+    con_affl.executemany("""INSERT OR REPLACE INTO dim_player
         (player_id, name, position, gsis_id, otc_id, headshot_url) VALUES (?,?,?,?,?,?)""",
         [(pid, v['name'], v['position'], gsis.get(pid), otc.get(pid), shots.get(pid))
          for pid, v in players.items()])
-    con.executemany('INSERT OR REPLACE INTO player_season(season, player_id, nfl_team) VALUES (?,?,?)',
-                    pseason)
+    
+    # player_season goes to BOTH databases (AFFL needs it for joins, NFL for context)
+    pseason_affl = [(y, pid, nfl) for y, pid, nfl in pseason]
+    pseason_nfl = [(y, pid, gsis.get(pid), nfl) for y, pid, nfl in pseason]
+    
+    con_affl.executemany('INSERT OR REPLACE INTO player_season(season, player_id, nfl_team) VALUES (?,?,?)',
+                    pseason_affl)
+    con_nfl.executemany('INSERT OR REPLACE INTO player_season(season, player_id, gsis_id, nfl_team) VALUES (?,?,?,?)',
+                    pseason_nfl)
+    
     # a player can appear twice in a week if ESPN reports a mid-week move; keep the last
-    con.executemany("""INSERT OR REPLACE INTO fact_roster_week
+    con_affl.executemany("""INSERT OR REPLACE INTO fact_roster_week
         (season, week, team_id, player_id, slot, points, started) VALUES (?,?,?,?,?,?,?)""", rws)
     return len(players), len(rws)
 
@@ -242,6 +273,7 @@ def load_trades(con):
     return n_tr, n_it
 
 def load_nfl_weeks(con):
+    """Load nflverse stats into NFL database."""
     rows = []
     for year in range(2014, 2026):
         p = f'{DATA}/stats_player_week_{year}.csv'
@@ -304,9 +336,10 @@ def load_contracts(con):
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
     return len(rows)
 
-def load_cap_hits(con):
+def load_cap_hits(con_affl, con_nfl):
     """Spotrac cap tables. Resolve each row to an ESPN player_id by name within
-    the same NFL team + season, which is how the AFFL roster join happens."""
+    the same NFL team + season, which is how the AFFL roster join happens.
+    Data goes into NFL database, resolved player_id helps with joins."""
     import glob, re
 
     def norm(n):
@@ -319,13 +352,15 @@ def load_cap_hits(con):
     for path in sorted(glob.glob(f'{DATA}/cap_*.json')):
         season = int(os.path.basename(path).split('_')[1].split('.')[0])
         # espn players active that season, indexed by (nfl_team, normalised name)
-        idx, by_name = {}, defaultdict(list)
-        for pid, name, team in con.execute("""
-                SELECT p.player_id, p.name, ps.nfl_team
+        idx, by_name, gsis_map = {}, defaultdict(list), {}
+        for pid, name, team, gsis in con_affl.execute("""
+                SELECT p.player_id, p.name, ps.nfl_team, p.gsis_id
                   FROM dim_player p JOIN player_season ps
                     ON ps.player_id = p.player_id AND ps.season = ?""", (season,)):
             idx[(team or '', norm(name))] = pid
             by_name[norm(name)].append(pid)
+            if gsis:
+                gsis_map[pid] = gsis
 
         rows = []
         for r in json.load(open(path)):
@@ -335,16 +370,17 @@ def load_cap_hits(con):
                 # fall back to a league-wide unique name (handles mid-season trades)
                 cands = by_name.get(norm(r['player_name']) or '', [])
                 pid = cands[0] if len(cands) == 1 else None
+            gsis_id = gsis_map.get(pid) if pid else None
             if pid is not None:
                 matched += 1
-            rows.append((season, r['nfl_team'], r['player_name'], pid, r.get('position'),
+            rows.append((season, r['nfl_team'], r['player_name'], pid, gsis_id, r.get('position'),
                          r.get('cap_hit'), r.get('base_salary'), r.get('signing_bonus'),
                          r.get('dead_cap'), r.get('cap_pct')))
         total += len(rows)
-        con.executemany("""INSERT OR REPLACE INTO fact_cap_hit
-            (season, nfl_team, player_name, player_id, position, cap_hit,
+        con_nfl.executemany("""INSERT OR REPLACE INTO fact_cap_hit
+            (season, nfl_team, player_name, player_id, gsis_id, position, cap_hit,
              base_salary, signing_bonus, dead_cap, cap_pct)
-            VALUES (?,?,?,?,?,?,?,?,?,?)""", rows)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)""", rows)
     return total, matched
 
 STAT_NAMES = {
@@ -421,10 +457,10 @@ CHECKS = [
     ("draft picks", "SELECT COUNT(*) FROM fact_draft_pick"),
     ("transactions", "SELECT COUNT(*) FROM fact_transaction"),
     ("trades", "SELECT COUNT(*) FROM fact_trade"),
-    ("nfl player-weeks", "SELECT COUNT(*) FROM fact_nfl_week"),
-    ("contracts", "SELECT COUNT(*) FROM fact_contract"),
+    ("nfl player-weeks", "SELECT COUNT(*) FROM nfl.fact_nfl_week"),
+    ("contracts", "SELECT COUNT(*) FROM nfl.fact_contract"),
     ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
-    ("cap hits", "SELECT COUNT(*) FROM fact_cap_hit"),
+    ("cap hits", "SELECT COUNT(*) FROM nfl.fact_cap_hit"),
 ]
 
 INTEGRITY = [
@@ -443,6 +479,12 @@ INTEGRITY = [
 ]
 
 def check(con):
+    # Ensure NFL database is attached for checks
+    try:
+        con.execute(f"ATTACH DATABASE '{DB_NFL}' AS nfl")
+    except sqlite3.OperationalError:
+        pass  # already attached
+    
     print('== row counts ==')
     for label, q in CHECKS:
         print(f'  {label:20} {con.execute(q).fetchone()[0]:>9,}')
@@ -458,33 +500,58 @@ def check(con):
 
 def main():
     if '--check' in sys.argv:
-        con = sqlite3.connect(DB)
+        con = sqlite3.connect(DB_AFFL)
         sys.exit(0 if check(con) else 1)
 
     site = json.load(open(os.path.join(SITE, 'data.json')))
-    fresh = not os.path.exists(DB)
-    con = sqlite3.connect(DB)
-    init(con)
-    wipe(con)
+    fresh_affl = not os.path.exists(DB_AFFL)
+    fresh_nfl = not os.path.exists(DB_NFL)
+    
+    # Initialize both databases
+    con_affl = sqlite3.connect(DB_AFFL)
+    con_nfl = sqlite3.connect(DB_NFL)
+    
+    init_affl(con_affl)
+    init_nfl(con_nfl)
+    wipe(con_affl)
+    wipe_nfl(con_nfl)
 
-    load_seasons_and_teams(con, site)
-    print(f'  scoring rules {load_scoring(con):,}')
-    npl, nrw = load_players_and_rosters(con)
+    # Load AFFL data
+    load_seasons_and_teams(con_affl, site)
+    print(f'  scoring rules {load_scoring(con_affl):,}')
+    npl, nrw = load_players_and_rosters(con_affl, con_nfl)
     print(f'  players {npl:,} · roster-weeks {nrw:,}')
-    print(f'  matchup sides {load_matchups(con):,}')
-    print(f'  draft picks {load_drafts(con):,}')
-    print(f'  transactions {load_transactions(con):,}')
-    tr, it = load_trades(con)
+    print(f'  matchup sides {load_matchups(con_affl):,}')
+    print(f'  draft picks {load_drafts(con_affl):,}')
+    print(f'  transactions {load_transactions(con_affl):,}')
+    tr, it = load_trades(con_affl)
     print(f'  trades {tr:,} ({it:,} items)')
-    print(f'  nfl player-weeks {load_nfl_weeks(con):,}')
-    print(f'  contracts {load_contracts(con):,}')
-    ncap, nmatch = load_cap_hits(con)
+    
+    # Load NFL data
+    print(f'  nfl player-weeks {load_nfl_weeks(con_nfl):,}')
+    print(f'  contracts {load_contracts(con_nfl):,}')
+    ncap, nmatch = load_cap_hits(con_affl, con_nfl)
     print(f'  cap hits {ncap:,} ({nmatch:,} resolved to an AFFL-known player)')
-    con.commit()
-    con.execute('ANALYZE')
-    con.commit()
-    print(f'\naffl.db {"created" if fresh else "rebuilt"} — {os.path.getsize(DB)/1048576:.1f} MB')
-    check(con)
+    
+    con_affl.commit()
+    con_nfl.commit()
+    
+    # Create warehouse views with ATTACH
+    print(f'  creating warehouse join views...')
+    init_warehouse_views(con_affl)
+    con_affl.commit()
+    
+    con_affl.execute('ANALYZE')
+    con_nfl.execute('ANALYZE')
+    con_affl.commit()
+    con_nfl.commit()
+    
+    affl_size = os.path.getsize(DB_AFFL) / 1048576
+    nfl_size = os.path.getsize(DB_NFL) / 1048576
+    print(f'\naffl.db {"created" if fresh_affl else "rebuilt"} — {affl_size:.1f} MB')
+    print(f'nfl.db {"created" if fresh_nfl else "rebuilt"} — {nfl_size:.1f} MB')
+    print(f'Total: {affl_size + nfl_size:.1f} MB')
+    check(con_affl)
 
 if __name__ == '__main__':
     main()
