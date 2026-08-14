@@ -70,8 +70,16 @@ python3 -m http.server 8788 --directory site
    created by this work; safe to remove with
    `git worktree remove ../ccDesktopAFFL.worktrees/executive-summary-league-legacy-is-not-merely-di`.
 
+## Factory (2026-08-13)
+
+See `FACTORY.md`. Work stays on `verify/full-audit`. After any warehouse change run
+`python3 inspect_data.py` and read `preview/SUMMARY.md` — do not wait on the site.
+
+Tickets live in the Notion AFFL Handoff Queue. Ready cards get built. Backlog does not.
+
 ## Next up
 
+- Close identity/phase contracts (AFFL-001 / AFFL-002) against the warehouse that already exists
 - **#8** pbp aggregates + Next Gen Stats → unlocks aDOT / RACR / WOPR and expected TD
 - **#9** receiving-usage and xTD views
 - **#5** the FantasyGenius surface: Rankings, History, Stats, Teams, Wrapped
