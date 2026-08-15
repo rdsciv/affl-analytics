@@ -1,128 +1,93 @@
-import { useEffect, useRef } from 'react';
-import { Chart } from '@tanstack/charts';
+import { useMemo } from 'react'
+import { defineChart, dot } from '@tanstack/charts'
+import { Chart } from '@tanstack/charts/react'
+import { scaleLinear } from '@tanstack/charts/scales/linear'
+import { tooltip } from '@tanstack/charts/tooltip'
+import type { PlayerWeek } from './types'
 
-interface PlayerWeek {
-  season: number;
-  week: number;
-  player_name: string;
-  position: string;
-  team_name: string;
-  fantasy_points: number;
-  nfl_epa: number | null;
-  pass_yards: number | null;
-  pass_tds: number | null;
-  rush_yards: number | null;
-  rush_tds: number | null;
-  receptions: number | null;
-  rec_yards: number | null;
-  rec_tds: number | null;
-  cap_hit_m: number | null;
-}
+const POSITIONS = ['QB', 'RB', 'WR', 'TE'] as const
+const POS_COLORS = ['#dc2626', '#16a34a', '#2563eb', '#ea580c']
 
-interface ScatterChartProps {
-  data: PlayerWeek[];
-}
+export function ScatterChart({ data }: { data: PlayerWeek[] }) {
+  const chartData = useMemo(
+    () => data.filter((d) => d.nfl_epa !== null),
+    [data],
+  )
 
-const posColors: Record<string, string> = {
-  QB: '#dc2626',
-  RB: '#16a34a',
-  WR: '#2563eb',
-  TE: '#ea580c',
-};
-
-export function ScatterChart({ data }: ScatterChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<Chart<PlayerWeek> | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Filter to only rows with EPA data
-    const chartData = data.filter(d => d.nfl_epa !== null);
-
-    if (chartData.length === 0) {
-      containerRef.current.innerHTML = '<p style="text-align: center; color: #a1a1aa; padding: 2rem;">No data to display with current filters</p>';
-      return;
-    }
-
-    // Clear previous chart
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
-
-    // Create new chart
-    const chart = new Chart({
-      container: containerRef.current,
-      data: chartData,
-      primaryAxis: {
-        getValue: (datum) => datum.nfl_epa as number,
-        scaleType: 'linear',
-        label: 'NFL EPA',
-      },
-      secondaryAxes: [{
-        getValue: (datum) => datum.fantasy_points,
-        scaleType: 'linear',
-        label: 'Fantasy Points',
-        min: 0,
-      }],
-      series: [
-        {
-          type: 'scatter',
-          dataKey: 'points',
-          primaryAxisKey: 'primary',
-          secondaryAxisKey: 'secondary',
-          getStyle: (datum) => ({
-            fill: posColors[datum.position] || '#a1a1aa',
-            opacity: 0.6,
+  const definition = useMemo(
+    () =>
+      defineChart({
+        marks: [
+          dot(chartData, {
+            id: 'epa',
+            x: 'nfl_epa',
+            y: 'fantasy_points',
+            color: 'position',
             r: 4,
+            fillOpacity: 0.72,
+            stroke: 'currentColor',
+            strokeOpacity: 0.25,
           }),
+        ],
+        x: {
+          scale: scaleLinear,
+          nice: true,
+          grid: true,
+          axis: { label: 'NFL EPA (pass + rush + rec)' },
         },
-      ],
-      tooltip: {
-        render: (datum) => {
-          if (!datum) return null;
-          return `
-            <div style="background: #27272a; border: 1px solid #3f3f46; padding: 0.5rem; border-radius: 0.375rem; color: #e4e4e7; font-size: 0.875rem;">
-              <strong>${datum.player_name}</strong> (${datum.position})<br/>
-              Fantasy: ${datum.fantasy_points.toFixed(1)} pts<br/>
-              EPA: ${datum.nfl_epa?.toFixed(2)}
-            </div>
-          `;
+        y: {
+          scale: scaleLinear,
+          nice: true,
+          grid: true,
+          axis: { label: 'Started fantasy points' },
         },
-      },
-      theme: {
-        backgroundColor: 'transparent',
-        textColor: '#a1a1aa',
-        gridColor: '#27272a',
-        axisColor: '#52525b',
-      },
-    });
+        color: {
+          domain: [...POSITIONS],
+          range: [...POS_COLORS],
+        },
+        tooltip: {
+          use: tooltip,
+          items: [
+            { field: 'player_name', label: 'Player' },
+            { field: 'position', label: 'Pos' },
+            { field: 'team_name', label: 'AFFL team' },
+            { field: 'season', label: 'Season' },
+            { field: 'week', label: 'Week' },
+            { field: 'fantasy_points', label: 'Started pts' },
+            { field: 'nfl_epa', label: 'EPA' },
+          ],
+        },
+      }),
+    [chartData],
+  )
 
-    chartRef.current = chart;
-
-    return () => {
-      if (chartRef.current) {
-        chartRef.current.destroy();
-      }
-    };
-  }, [data]);
+  if (chartData.length === 0) {
+    return (
+      <p className="empty">
+        No joined player-weeks with EPA under the current filters.
+        Weekly lineups exist 2018–2025 only.
+      </p>
+    )
+  }
 
   return (
     <div>
-      <div ref={containerRef} className="chart-container" />
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-        {Object.entries(posColors).map(([pos, color]) => (
-          <div key={pos} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ 
-              width: '8px', 
-              height: '8px', 
-              borderRadius: '50%', 
-              backgroundColor: color 
-            }} />
-            <span style={{ fontSize: '0.875rem', color: '#d4d4d8' }}>{pos}</span>
+      <div className="chart-shell">
+        <Chart
+          definition={definition}
+          height={460}
+          initialWidth={1100}
+          ariaLabel="Started fantasy points versus NFL EPA. Each dot is a started player-week joined from AFFL rosters to nflverse via gsis_id."
+        />
+      </div>
+      <div className="legend">
+        {POSITIONS.map((pos, i) => (
+          <div key={pos} className="legend-item">
+            <span className="legend-dot" style={{ backgroundColor: POS_COLORS[i] }} />
+            <span>{pos}</span>
           </div>
         ))}
       </div>
     </div>
-  );
+  )
 }

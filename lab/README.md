@@ -35,10 +35,11 @@ The built output goes directly into `site/lab/` where GitHub Pages will serve it
 
 ## Stack
 
-- React 19
-- TanStack Charts ^0.11.2
-- TanStack React Table ^9.1.2
-- TypeScript
-- Vite (static build, no server runtime)
+Same APIs as [dienasty-history](https://github.com/rdsciv/dienasty-history):
 
-This matches the proven pattern from [dienasty-history](https://github.com/rdsciv/dienasty-history). This is the charting path forward. The existing five site pages stay Chart.js; migration is not in this PR's scope.
+- `defineChart` + `dot` from `@tanstack/charts`
+- `<Chart definition={...} />` from `@tanstack/charts/react`
+- `createTableHook` + `table.FlexRender` from `@tanstack/react-table` v9
+- React 19, TypeScript, Vite (static build, no server)
+
+The existing five site pages stay Chart.js; migration is not in this PR's scope.
