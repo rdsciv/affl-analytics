@@ -23,3 +23,5 @@ data/spotrac/
 # lab build output and data
 site/lab/
 lab/node_modules/
+lab/public/started_vs_nfl.json
+lab/tsconfig.tsbuildinfo
