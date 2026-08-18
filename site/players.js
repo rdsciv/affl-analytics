@@ -622,6 +622,10 @@
     const rows = (logYear === "all")
       ? careerRows
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
+    const latestY = playerYears(p.pid)[0];
+    const chartRows = (logYear === "all")
+      ? careerRows.filter((r) => Number(r.y) === Number(latestY))
+      : careerRows.filter((r) => Number(r.y) === Number(logYear));
     let focus = logYear === "all" ? p : ((rows[0] && rows[0].p) || p);
     if (isPre2018(logYear)) {
       focus = Object.assign({}, focus, {
@@ -632,7 +636,7 @@
     const m = meta(p.pid);
     renderHero(focus, m, rows);
     renderOverview(focus);
-    renderChart(focus, rows);
+    renderChart(focus, chartRows);
     renderCareerChart(focus, careerRows);
     if (chart) chart.resize();
     if (careerChart) careerChart.resize();
@@ -2211,6 +2215,11 @@
       if (PP.pos !== "ALL" && p.pos !== PP.pos) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
       return true;
+    }).sort((a, b) => {
+      const tb = Number(b.tot) || 0;
+      const ta = Number(a.tot) || 0;
+      if (tb !== ta) return tb - ta;
+      return String(a.name || "").localeCompare(String(b.name || ""));
     });
   }
 
@@ -2251,10 +2260,10 @@
   $("#pp-more").addEventListener("click", () => { PP.limit += 24; renderGrid(); });
 
 
-  /* Usage that sticks: year-N WOPR vs year-N+1 AFFL (non-PPR) FPpG. */
+  /* Usage that sticks: same-year WOPR vs AFFL (non-PPR) FPpG. */
   const WOPR_MIN_YEAR = 2018;
   const WOPR_POS = { WR: C.orange, TE: C.gold };
-  let woprPair = null;
+  let woprYear = null;
   let woprChart = null;
   let woprWired = false;
 
@@ -2292,10 +2301,10 @@
     return woprNum(row && row.fp) != null;
   }
 
-  function woprNflGames(pid, year, nextRow, nextPlayer) {
-    const fromRow = woprFirstNum(nextRow, ["games", "g", "gp"]);
+  function woprNflGames(pid, year, row, player) {
+    const fromRow = woprFirstNum(row, ["games", "g", "gp"]);
     if (fromRow && fromRow > 0) return fromRow;
-    const fromPl = woprFirstNum(nextPlayer, ["games", "g", "gp"]);
+    const fromPl = woprFirstNum(player, ["games", "g", "gp"]);
     if (fromPl && fromPl > 0) return fromPl;
     if (pid != null && year != null) {
       const rec = nflYearWeeks(pid, year);
@@ -2306,51 +2315,43 @@
     return null;
   }
 
-  function woprNextAfflFppg(nextRow, nextPlayer, year) {
-    const fp = woprNum(nextRow && nextRow.fp);
+  function woprNextAfflFppg(row, player, year) {
+    const fp = woprNum(row && row.fp);
     if (fp == null) return null;
-    const pid = (nextRow && nextRow.pid != null) ? nextRow.pid
-      : (nextPlayer && nextPlayer.pid != null) ? nextPlayer.pid : null;
-    const games = woprNflGames(pid, year, nextRow, nextPlayer);
+    const pid = (row && row.pid != null) ? row.pid
+      : (player && player.pid != null) ? player.pid : null;
+    const games = woprNflGames(pid, year, row, player);
     if (!games || games <= 0) return null;
     return fp / games;
   }
 
-  function woprPersistPairs() {
-    const ys = A.years().filter((y) => y >= WOPR_MIN_YEAR).sort((a, b) => a - b);
-    const pairs = [];
-    for (let i = 0; i < ys.length - 1; i++) {
-      if (ys[i + 1] === ys[i] + 1) pairs.push([ys[i], ys[i + 1]]);
-    }
-    return pairs.reverse();
+  function woprPersistYears() {
+    return A.years().filter((y) => y >= WOPR_MIN_YEAR).sort((a, b) => b - a);
   }
 
-  function woprPersistPoints(ydN, ydN1) {
-    const nextYear = (ydN1 && ydN1.year != null) ? ydN1.year : null;
-    const u0 = woprByPid(ydN && ydN.receivingUsage);
-    const u1 = woprByPid(ydN1 && ydN1.receivingUsage);
-    const p1 = woprByPid(ydN1 && ydN1.players);
+  function woprPersistPoints(yd) {
+    const year = (yd && yd.year != null) ? yd.year : null;
+    const usage = woprByPid(yd && yd.receivingUsage);
+    const players = woprByPid(yd && yd.players);
     const out = [];
-    Object.keys(u0).forEach((k) => {
-      const row = u0[k];
+    Object.keys(usage).forEach((k) => {
+      const row = usage[k];
       const pos = String(row.pos || "").toUpperCase();
       if (pos !== "WR" && pos !== "TE") return;
       const wopr = woprNum(row.wopr);
       if (wopr == null) return;
-      const nxt = u1[k];
-      if (!nxt) return;
       if (!woprYearNSampleOk(row)) return;
-      if (woprNum(row.fp) == null || woprNum(nxt.fp) == null) return;
-      const fppg = woprNextAfflFppg(nxt, p1[k], nextYear);
+      if (woprNum(row.fp) == null) return;
+      const fppg = woprNextAfflFppg(row, players[k], year);
       if (fppg == null) return;
-      const pl = p1[k] || {};
+      const pl = players[k] || {};
       out.push({
         pid: Number(row.pid),
         name: row.name || pl.name || ("#" + row.pid),
         pos: pos,
         wopr: wopr,
         fppg: fppg,
-        fp: nxt.fp,
+        fp: row.fp,
         x: wopr,
         y: fppg,
       });
@@ -2393,15 +2394,15 @@
     return [{ x: xmin, y: a + b * xmin }, { x: xmax, y: a + b * xmax }];
   }
 
-  function renderWoprYearChips(pairs) {
+  function renderWoprYearChips(years) {
     const el = $("#wopr-persist-years");
     if (!el) return;
-    el.innerHTML = pairs.map(([a, b]) =>
-      `<button class="season-chip${a === woprPair ? " on" : ""}" data-y="${a}">${a}→${b}</button>`
+    el.innerHTML = years.map((y) =>
+      `<button class="season-chip${y === woprYear ? " on" : ""}" data-y="${y}">${y}</button>`
     ).join("");
     el.querySelectorAll("button").forEach((btn) => {
       btn.addEventListener("click", () => {
-        woprPair = +btn.dataset.y;
+        woprYear = +btn.dataset.y;
         renderWoprPersist();
       });
     });
@@ -2414,25 +2415,36 @@
     const canvas = $("#wopr-persist-chart");
     const legend = $("#wopr-persist-legend");
     if (!card || !canvas) return;
-    const pairs = woprPersistPairs();
-    if (!pairs.length) {
-      if (sub) sub.textContent = "needs consecutive 2018+ seasons with weekly usage";
-      if (wrap) wrap.innerHTML = A.notice("No consecutive 2018+ seasons to plot.");
+    const years = woprPersistYears();
+    if (!years.length) {
+      if (sub) sub.textContent = "needs 2018+ seasons with receiving usage";
+      if (wrap) wrap.innerHTML = A.notice("No 2018+ seasons to plot.");
       return;
     }
-    if (woprPair == null || !pairs.some((p) => p[0] === woprPair)) {
-      woprPair = pairs[0][0];
+    if (woprYear == null || years.indexOf(woprYear) < 0) {
+      woprYear = null;
+      for (let i = 0; i < years.length; i++) {
+        let probe = null;
+        try { probe = await A.loadYear(years[i]); } catch (e) { probe = null; }
+        if (probe && (probe.receivingUsage || []).length) {
+          woprYear = years[i];
+          break;
+        }
+      }
+      if (woprYear == null) {
+        if (sub) sub.textContent = "needs a season with receiving usage";
+        if (wrap) wrap.innerHTML = A.notice("No receiving usage to plot.");
+        return;
+      }
     }
-    renderWoprYearChips(pairs);
-    const nextY = woprPair + 1;
-    let ydN = null, ydN1 = null;
-    try { ydN = await A.loadYear(woprPair); } catch (e) { ydN = null; }
-    try { ydN1 = await A.loadYear(nextY); } catch (e) { ydN1 = null; }
-    const pts = (ydN && ydN1) ? woprPersistPoints(ydN, ydN1) : [];
+    renderWoprYearChips(years);
+    let yd = null;
+    try { yd = await A.loadYear(woprYear); } catch (e) { yd = null; }
+    const pts = yd ? woprPersistPoints(yd) : [];
     const r2 = woprR2(pts);
     const r2txt = r2 == null ? "—" : r2.toFixed(3);
     if (sub) {
-      sub.textContent = `${woprPair} WOPR vs ${nextY} AFFL Fantasy Points Per Game · WR/TE · non-PPR · R² ${r2txt} · n=${pts.length}`;
+      sub.textContent = `${woprYear} WOPR vs ${woprYear} AFFL Fantasy Points Per Game · WR/TE · non-PPR · R² ${r2txt} · n=${pts.length}`;
     }
     if (legend) {
       legend.innerHTML = Object.keys(WOPR_POS).map((pos) =>
@@ -2442,7 +2454,7 @@
     if (woprChart) { woprChart.destroy(); woprChart = null; }
     if (!pts.length) {
       wrap.classList.add("as-notice");
-      wrap.innerHTML = A.notice(`No WR/TE with year-${woprPair} WOPR and ${nextY} AFFL points.`);
+      wrap.innerHTML = A.notice(`No WR/TE with ${woprYear} WOPR and AFFL points.`);
       return;
     }
     wrap.classList.remove("as-notice");
@@ -2488,7 +2500,7 @@
               label: (c) => {
                 const p = c.raw && c.raw.r;
                 if (!p) return "";
-                return `${p.name} · ${p.pos} · WOPR ${fmt(p.wopr, 3)} · ${nextY} AFFL ${fmt(p.fppg, 1)} Fantasy Points Per Game`;
+                return `${p.name} · ${p.pos} · WOPR ${fmt(p.wopr, 3)} · ${woprYear} AFFL ${fmt(p.fppg, 1)} Fantasy Points Per Game`;
               },
             },
           },
@@ -2497,12 +2509,12 @@
           x: {
             grid: { color: C.grid },
             border: { display: false },
-            title: { display: true, text: woprPair + " WOPR" },
+            title: { display: true, text: woprYear + " WOPR" },
           },
           y: {
             grid: { color: C.grid },
             border: { display: false },
-            title: { display: true, text: nextY + " AFFL Fantasy Points Per Game (non-PPR)" },
+            title: { display: true, text: woprYear + " AFFL Fantasy Points Per Game (non-PPR)" },
           },
         },
         onClick: (_e, els) => {
@@ -2518,7 +2530,7 @@
         },
       },
     });
-    window.__afflWoprPersist = { yearN: woprPair, yearN1: nextY, n: pts.length, r2: r2, points: pts };
+    window.__afflWoprPersist = { year: woprYear, yearN: woprYear, yearN1: woprYear, n: pts.length, r2: r2, points: pts };
   }
 
   async function initWoprPersist() {

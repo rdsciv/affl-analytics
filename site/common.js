@@ -118,11 +118,12 @@ window.AFFL = (function () {
   function headshotHTML(p, cls) {
     const ini = initials((p && p.name) || "?");
     if (isDst(p) && p.nfl) return nflLogoHTML(p.nfl, cls);
-    const primary = p && p.hs;
-    const fallback = espnHeadshot(p && (p.pid != null ? p.pid : p.id));
-    const src = primary || fallback;
+    // ESPN CDN first — nflverse/other hs URLs often 404 and left blank faces.
+    const espn = espnHeadshot(p && (p.pid != null ? p.pid : p.id));
+    const alt = p && p.hs && p.hs !== espn ? p.hs : "";
+    const src = espn || alt;
     if (!src) return `<div class="${cls} fb">${ini}</div>`;
-    const next = (primary && fallback && primary !== fallback) ? fallback : "";
+    const next = (espn && alt) ? alt : "";
     return `<img class="${cls}" src="${src}" alt="" loading="lazy" data-fb="${next}"
       onerror="if(this.dataset.fb){this.src=this.dataset.fb;this.dataset.fb='';}else if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
   }
