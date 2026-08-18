@@ -1,5 +1,7 @@
 /* Stars, Scrubs, & Duds — full NFL career logs + NGS. Blue=started (2018+ weekly and 2014–2017 recovered starters), gray=benched, teal=NFL-only (2018+). Gold=2014–2017 on AFFL roster (weekly lineup not recovered). */
 (async function () {
+  // goTeam: deep-links to Teams live on common; players stays league-wide.
+
   const A = window.AFFL;
   const $ = (s) => document.querySelector(s);
   await A.boot();
