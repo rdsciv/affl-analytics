@@ -450,12 +450,13 @@
     el.innerHTML = bits.join("");
     el.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => {
-        const next = b.dataset.squad || "";
-        if (next) { A.goTeam(next, year, { scope: scope }); return; }
-        squad = "";
+        // Filter scoreboard in place (not navigate). goTeam stays available via A.goTeam.
+        void A.goTeam;
+        squad = b.dataset.squad || "";
         A.rememberSquad(squad);
         const u = new URL(location.href);
-        u.searchParams.delete("squad");
+        if (squad) u.searchParams.set("squad", squad);
+        else u.searchParams.delete("squad");
         history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
         A.stampNav(squad);
         drawSquadFilter();
