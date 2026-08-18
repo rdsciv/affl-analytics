@@ -332,10 +332,58 @@ window.AFFL = (function () {
     return Object.keys(HISTORIC_OWNERS).length;
   }
 
+  function ensureHeaderRail() {
+    const header = document.querySelector(".topbar") || document.querySelector("header");
+    if (!header) return null;
+    let rail = document.getElementById("header-rail");
+    if (rail) return rail;
+    rail = document.createElement("div");
+    rail.id = "header-rail";
+    rail.className = "topbar-row header-rail";
+    /* Insert after first brand row, before nav / meta */
+    const brandRow = header.querySelector(".topbar-row");
+    const nav = header.querySelector(".site-nav");
+    if (brandRow && brandRow.parentNode === header) {
+      brandRow.insertAdjacentElement("afterend", rail);
+    } else if (nav && nav.parentNode) {
+      nav.parentNode.insertBefore(rail, nav);
+    } else {
+      header.appendChild(rail);
+    }
+    /* Force nav onto its own full-width row under the rail */
+    if (nav) {
+      let navRow = nav.closest(".topbar-nav-row");
+      if (!navRow) {
+        if (nav.parentElement && nav.parentElement.classList.contains("topbar-row")
+            && nav.parentElement.querySelector(".brand")) {
+          /* nav shares brand row — pull it out */
+          navRow = document.createElement("div");
+          navRow.className = "topbar-row topbar-nav-row";
+          rail.insertAdjacentElement("afterend", navRow);
+          navRow.appendChild(nav);
+        } else {
+          nav.classList.add("site-nav-bar");
+          if (!nav.parentElement.classList.contains("topbar-nav-row")) {
+            navRow = document.createElement("div");
+            navRow.className = "topbar-row topbar-nav-row";
+            if (nav.parentNode === header) {
+              rail.insertAdjacentElement("afterend", navRow);
+              navRow.appendChild(nav);
+            } else {
+              nav.parentNode.insertBefore(navRow, nav);
+              navRow.appendChild(nav);
+            }
+          }
+        }
+      }
+    }
+    return rail;
+  }
+
   function mountHistoricToggle() {
     if (document.getElementById("historic-toggle")) return;
-    const header = document.querySelector(".topbar") || document.querySelector("header");
-    if (!header) return;
+    const rail = ensureHeaderRail();
+    if (!rail) return;
     const on = showFormer();
     const n = historicCount();
     const label = document.createElement("label");
@@ -345,9 +393,7 @@ window.AFFL = (function () {
     label.innerHTML = "<input type=\"checkbox\"" + (on ? " checked" : "") + ">"
       + "<span>Historic teams</span>"
       + "<span class=\"former-toggle-count\">" + n + "</span>";
-    const nav = header.querySelector(".site-nav");
-    if (nav && nav.parentNode) nav.parentNode.appendChild(label);
-    else header.appendChild(label);
+    rail.appendChild(label);
     label.querySelector("input").addEventListener("change", function (e) {
       setShowFormer(e.target.checked);
     });
@@ -375,8 +421,8 @@ window.AFFL = (function () {
 
   function mountBrandStrip() {
     if (document.getElementById("brand-strip")) return;
-    const home = document.querySelector(".topbar .brand-home, header .brand-home");
-    if (!home || !home.parentNode) return;
+    const rail = ensureHeaderRail();
+    if (!rail) return;
     const active = new URLSearchParams(location.search).get("squad") || "";
     const strip = document.createElement("nav");
     strip.id = "brand-strip";
@@ -391,14 +437,7 @@ window.AFFL = (function () {
         : `<span class="brand-team-fb">${initials(t.name)}</span>`;
       return `<a class="brand-team${on ? " is-active" : ""}" href="${href}" title="${alt}" data-name="${alt}" data-owner="${t.owner}">${inner}</a>`;
     }).join("");
-    /* Own row under the brand identity — never jammed beside the mark. */
-    const row = home.closest(".topbar-row");
-    if (row && row.parentNode) row.insertAdjacentElement("afterend", strip);
-    else {
-      const brand = home.closest(".brand");
-      if (brand && brand.parentNode) brand.insertAdjacentElement("afterend", strip);
-      else home.insertAdjacentElement("afterend", strip);
-    }
+    rail.appendChild(strip);
   }
 
   if (document.readyState === "loading") {

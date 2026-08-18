@@ -221,23 +221,43 @@
         </div>
       </div>`;
     if (career) {
-      $("team-kpis").innerHTML = [
-        kpiCard(rec({ wins: career.w, losses: career.l, ties: career.t }), "career record"),
-        kpiCard(A.fmt(career.pf, 1), "career points for"),
-        kpiCard(String(career.titles), "titles"),
-        kpiCard(String(career.n), "seasons"),
-        kpiCard(String(career.moves || 0), "career ESPN moves"),
-      ].join("");
+      $("team-kpis").innerHTML = "";
+      $("team-kpis").hidden = true;
     } else {
-      const seasonMoves = t && t.id != null ? movesCount(year, t.id) : null;
-      $("team-kpis").innerHTML = [
-        kpiCard(rec(t), "regular-season record"),
-        kpiCard(A.fmt(t && t.pf, 1), "points for"),
-        kpiCard(finish(t), "final finish"),
-        kpiCard(t && t.luck != null ? ((t.luck >= 0 ? "+" : "") + A.fmt(t.luck, 2)) : "—", "luck vs expected"),
-        kpiCard(seasonMoves == null ? "—" : String(seasonMoves), "ESPN moves"),
-      ].join("");
+      $("team-kpis").innerHTML = "";
+      $("team-kpis").hidden = true;
     }
+  }
+
+  function mountTeamToc() {
+    let toc = $("team-toc");
+    if (!toc) {
+      toc = document.createElement("nav");
+      toc.id = "team-toc";
+      toc.className = "team-toc";
+      toc.setAttribute("aria-label", "On this page");
+      const hero = $("team-hero");
+      if (hero && hero.parentNode) hero.insertAdjacentElement("afterend", toc);
+      else return;
+    }
+    const links = [
+      ["scorers-block", "Scorers"],
+      ["games-block", "Games"],
+      ["activity-block", "Activity"],
+      ["ngs-block", "NGS"],
+      ["draft-block", "Draft"],
+      ["trades-block", "Trades"],
+      ["roster-block", "Roster"],
+      ["roto-block", "Roto"],
+      ["lab-block", "Lab"],
+    ].filter(([id]) => {
+      const el = $(id);
+      return el && !el.hidden;
+    });
+    toc.innerHTML = links.map(([id, lab]) =>
+      `<a href="#${id}">${lab}</a>`
+    ).join("");
+    toc.hidden = links.length < 2;
   }
 
   function renderScorers() {
@@ -2419,6 +2439,7 @@
     }
     await renderRotoSeason(tid);
     await renderLab({ one: { y: year, yd: Object.assign({ year: year }, yd), tid: tid, t: t } });
+    mountTeamToc();
     const f = A.squadInfo(squad) || {};
     $("page-sub").textContent = (f.currentName || "") + " · " + year;
   }
@@ -2499,6 +2520,7 @@
     renderRoster(players, year);
     await renderRotoCareer();
     await renderLab({ all: all });
+    mountTeamToc();
     const f = A.squadInfo(squad) || {};
     $("page-sub").textContent = (f.currentName || "") + " · career";
   }
