@@ -133,11 +133,13 @@ body {
 }
 .brand-team:hover::after { opacity: 1; }
 .brand-logo {
-  height: 72px;
-  width: auto;
+  height: 64px;
+  width: 64px;
+  object-fit: contain;
   display: block;
   flex: 0 0 auto;
-  background: #000;
+  background: transparent;
+  border-radius: 8px;
 }
 .brand-mark {
   width: 48px; height: 48px; border-radius: 12px;
