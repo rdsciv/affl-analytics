@@ -72,7 +72,7 @@
         return `<div class="sb-team${win ? ' win' : ''}">
           <div class="sb-team-head">
             ${A.logoHTML(t)}
-            <div class="sb-team-name">${t.name}<span>${A.memberName(t.owner)}</span></div>
+            <div class="sb-team-name"><a class="team-link" href="${A.teamHref(year, s.tid)}">${t.name}</a><span>${A.memberName(t.owner)}</span></div>
             <div class="sb-total${win ? ' w' : ''}">${s.pts.toFixed(1)}</div>
           </div>
           ${rosterHTML(s)}

@@ -290,7 +290,7 @@
     $('#standings-tbl tbody').innerHTML = rows.map((t) => `
       <tr>
         <td><span class="rank-pill ${pillCls(t.finalRank)}">${t.finalRank || '–'}</span></td>
-        <td><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${t.id}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
         <td><strong>${t.wins}-${t.losses}${t.ties ? '-' + t.ties : ''}</strong></td>
         <td>${fmt(t.pf, 1)}</td>
         <td>${fmt(t.pa, 1)}</td>
@@ -786,7 +786,7 @@
     $('#report-tbl tbody').innerHTML = NG.report.map((r, i) => {
       const t = T25[r.teamId];
       return `<tr>
-        <td><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${r.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
         <td>${gradeChip(r.gDraft)}</td>
         <td>${gradeChip(r.gLineup)}</td>
         <td>${gradeChip(r.gWaiver)}</td>
@@ -810,7 +810,7 @@
         : '<span class="fate-even">—</span>';
       return `<tr>
         <td><span class="rank-pill${w.optRank === 1 ? ' gold' : ''}">${w.optRank}</span></td>
-        <td><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}</div></div></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${w.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}</div></div></a></td>
         <td><strong>${w.optW}-${w.optL}</strong></td>
         <td class="own">${w.actW}-${w.actL}</td>
         <td>${fate}</td>

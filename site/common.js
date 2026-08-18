@@ -98,7 +98,16 @@ window.AFFL = (function () {
     return `<div class="notice">${msg}</div>`;
   }
 
+  function teamHref(year, tid) {
+    return `team.html?year=${year}&tid=${tid}`;
+  }
+
+  async function loadJSON(path) {
+    return fetch(path + bust(), { cache: 'no-store' }).then((r) => r.json());
+  }
+
   return { C, boot, loadYear, years, yearInfo, teams, memberName, fmt,
            initials, logoHTML, headshotHTML, yearPicker, chartDefaults, dateStr, notice,
+           teamHref, loadJSON,
            get data() { return DATA; } };
 })();
