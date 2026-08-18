@@ -1,5 +1,7 @@
 /* ============ AFFL Scoreboard — all seasons ============ */
 (async function () {
+  // goTeam: squad deep-links live on Teams; scoreboard filters in place.
+
   const A = window.AFFL;
   const $ = (s) => document.querySelector(s);
   await A.boot();
@@ -450,8 +452,6 @@
     el.innerHTML = bits.join("");
     el.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => {
-        // Filter scoreboard in place (not navigate). goTeam stays available via A.goTeam.
-        void A.goTeam;
         squad = b.dataset.squad || "";
         A.rememberSquad(squad);
         const u = new URL(location.href);
