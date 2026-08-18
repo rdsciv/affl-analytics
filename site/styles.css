@@ -2413,3 +2413,19 @@ img.w1-award-logo,
 }
 .team-toc a:hover { color: var(--ice); border-color: var(--blue); }
 #team-kpis[hidden] { display: none !important; }
+
+
+/* hard-hide profile shells on players landing */
+.pl-detail[hidden],
+#pl-hero[hidden],
+#pl-log-card[hidden],
+#pl-money[hidden],
+#pl-college[hidden],
+#pl-overview[hidden],
+#pl-career[hidden],
+#pl-fg-strip[hidden],
+#pl-custody[hidden],
+#pl-achievements[hidden],
+#pl-fg-charts[hidden] {
+  display: none !important;
+}
