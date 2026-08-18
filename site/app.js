@@ -1279,8 +1279,6 @@
   renderEra();
   renderH2H();
   document.addEventListener("affl:show-former", renderFranchises);
-  try { await renderEloAndMilestones(); } catch (e) { console.warn('elo/milestones', e); }
-
   /* ================= CHI-89 Elo + Milestones (all-time / cum pane) ================= */
   let ELO = null;
   let MS = null;
@@ -1462,4 +1460,5 @@
     renderMsBoard();
     renderMsChase();
   }
+  try { await renderEloAndMilestones(); } catch (e) { console.warn("elo/milestones", e); }
 })();
