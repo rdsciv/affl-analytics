@@ -703,8 +703,9 @@
     hide("#pl-log-card", !profile);
     hide("#pl-money", !profile);
     hide("#pl-back", !profile);
-    hide("#pl-compare", profile);
-    hide("#wopr-persist", profile);
+    // Advanced cards only when a player is open (profile). Landing = clean DB list.
+    hide("#pl-compare", true);
+    hide("#wopr-persist", true);
     hide("#pl-fg-strip", !profile);
     hide("#pl-custody", !profile);
     hide("#pl-achievements", !profile);
@@ -2891,15 +2892,13 @@
     PP.limit = 24;
     A.stampNav(squad);
     logYear = ly == null ? "all" : ly;
-    // Landing chrome first — never leave empty profile shells visible while data loads.
-    if (!pid) {
-      setPageMode("landing");
-      const g = $("#pp-grid");
-      if (g && !g.dataset.ready) g.innerHTML = A.notice("Loading players…");
-      if (chart) { chart.destroy(); chart = null; }
-      if (ngsChart) { ngsChart.destroy(); ngsChart = null; }
-      if (careerChart) { careerChart.destroy(); careerChart = null; }
-    }
+    // Force clean landing state immediately.
+    setPageMode("landing");
+    const g = $("#pp-grid");
+    if (g && !pid) g.innerHTML = A.notice("Loading players…");
+    if (chart) { chart.destroy(); chart = null; }
+    if (ngsChart) { ngsChart.destroy(); ngsChart = null; }
+    if (careerChart) { careerChart.destroy(); careerChart = null; }
     try {
       await careerPlayers();
       YD = await A.loadYear(year);
