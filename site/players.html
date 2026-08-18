@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PlayerProfiler — AFFL</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff7a00%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EP%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<title>Stars, Scrubs, &amp; Duds — AFFL</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
 <div class="frame">
 
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark orange">P</div>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-mark.png" alt="AFFL"></a>
       <div>
-        <h1>Player<span>Profiler</span></h1>
-        <div class="sub">nfl game logs &middot; advanced stats &middot; affl usage</div>
+        <h1>Stars, Scrubs, <span>&amp; Duds</span></h1>
+        <div class="sub">nfl game logs &middot; spotrac &middot; epa &middot; xtd</div>
       </div>
     </div>
     <nav class="site-nav">
@@ -24,47 +25,168 @@
       <a href="players.html" class="on">Players</a>
       <a href="draft.html">Draft</a>
       <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
     </nav>
   </header>
 
-  <div class="picker-row">
-    <div class="picker-label">Season</div>
-    <div class="week-picker" id="year-picker"></div>
-  </div>
-
-  <!-- selected player -->
   <section class="card pl-hero" id="pl-hero"></section>
+  <p class="pl-back" id="pl-back" hidden><a href="players.html">All players</a></p>
+
+  <section class="card" id="pl-overview" hidden></section>
+
+  <div class="picker-row" id="player-year-row" hidden>
+    <div class="picker-label">Player years</div>
+    <div class="week-picker" id="player-year-picker"></div>
+  </div>
 
   <section class="second-grid pl-detail">
     <div class="card">
       <div class="card-head">
-        <div><h2>Weekly Fantasy Production</h2><div class="card-sub">blue = started in an AFFL lineup &middot; gray = benched</div></div>
+        <div><h2>Weekly Fantasy Production</h2><div class="card-sub">blue = started in an AFFL lineup (2018+ weekly and 2014–2017 recovered starters) &middot; gray = benched &middot; teal outline = NFL week not on an AFFL roster (2018+) &middot; gold = on AFFL roster (weekly lineup not recovered, 2014–2017 snapshot) &middot; amber line = ESPN weekly projection</div></div>
       </div>
       <div class="chart-wrap"><canvas id="pl-chart"></canvas></div>
+      <div class="pl-ngs" id="pl-ngs" hidden>
+        <div class="card-sub pl-ngs-sub">NGS strip · week 0 season totals stored but not plotted · dash when below attempt minimums · official chart images not linked (NGS player codes are not in nflverse)</div>
+        <div class="chart-wrap ngs-wrap"><canvas id="pl-ngs-chart"></canvas></div>
+      </div>
+      <div class="pl-career-chart-block" id="pl-career-chart-block">
+        <div class="card-sub">Career weekly production · every NFL week across years · blue / gray / teal / gold same as above</div>
+        <div class="chart-wrap tall"><canvas id="pl-career-chart"></canvas></div>
+      </div>
     </div>
     <div class="card">
       <div class="card-head">
         <div><h2>AFFL Journey</h2><div class="card-sub">how this player moved through the league</div></div>
       </div>
-      <ul class="story-list" id="pl-journey"></ul>
+      <div class="journey" id="pl-journey"></div>
     </div>
   </section>
 
-  <section class="card">
-    <div class="card-head">
-      <div><h2>Game Log</h2><div class="card-sub">fantasy scoring joined to real NFL box-score data via nflverse</div></div>
+  <section class="card" id="pl-college"></section>
+  <section class="card" id="pl-ngs-profile" hidden></section>
+
+  <section class="second-grid pl-career" id="pl-career" hidden>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Seasons</h2><div class="card-sub">one row per NFL/AFFL season in the log · current franchise names · missing stays —</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="pl-season-tbl">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Franchises</h2><div class="card-sub">career rollup by AFFL franchise · current names + logos</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="pl-franchise-tbl">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="pl-log-card">
+    <div class="card-head">
+      <div><h2>Game Log</h2><div class="card-sub" id="pl-log-sub">starter NFL box + EPA + opportunity xTD · gray rows were benched</div></div>
+    </div>
+    <div class="fg-log-filters" id="pl-log-filters"></div>
     <div class="table-scroll">
       <table class="tbl" id="pl-log">
-        <thead><tr><th>Wk</th><th>Opp</th><th>AFFL Team</th><th>Slot</th><th>Fan Pts</th><th>Yds</th><th>TD</th><th>Tgt</th><th>EPA</th></tr></thead>
+        <thead></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
 
-  <!-- database -->
-  <div class="section-break"><h2>The Database <span>every rostered player · 2025</span></h2></div>
-  <section class="card">
+  <section class="card" id="pl-money"></section>
+
+  <section class="card" id="pl-compare">
+    <div class="card-head">
+      <div>
+        <h2>Compare</h2>
+        <div class="card-sub" id="pl-compare-sub">2025 AFFL rates + advanced box · value and position rank · missing stays —</div>
+      </div>
+      <div class="cmp-controls" id="pl-compare-mode">
+        <button class="season-chip on" data-mode="game">Per game</button>
+        <button class="season-chip" data-mode="season">Season</button>
+      </div>
+    </div>
+    <div class="cmp-grid" id="pl-compare-grid"></div>
+  </section>
+
+  <section class="card" id="wopr-persist">
+    <div class="card-head">
+      <div>
+        <h2>Usage that sticks</h2>
+        <div class="card-sub" id="wopr-persist-sub">year-N WOPR vs year-N+1 AFFL FPpG · WR/TE · non-PPR</div>
+      </div>
+      <div class="week-picker wopr-year-chips" id="wopr-persist-years"></div>
+    </div>
+    <div class="wopr-legend" id="wopr-persist-legend"></div>
+    <div class="chart-wrap tall" id="wopr-persist-wrap"><canvas id="wopr-persist-chart"></canvas></div>
+  </section>
+
+  <section class="card" id="pl-fg-strip" hidden>
+    <div class="card-head">
+      <div><h2>Career Strip</h2><div class="card-sub">AFFL seasons · games · starts · start % · pts · PPG · team W-L when matchups exist</div></div>
+    </div>
+    <div class="pp-stats" id="pl-fg-strip-tiles"></div>
+  </section>
+
+  <section class="card" id="pl-custody" hidden>
+    <div class="card-head">
+      <div><h2>Chain of Custody</h2><div class="card-sub">weekly AFFL stints · current franchise names · G / GS / PTS / PPG / W-L while owned</div></div>
+      <div class="cmp-controls" id="pl-custody-mode">
+        <button class="season-chip on" data-mode="table">Table</button>
+        <button class="season-chip" data-mode="timeline">Timeline</button>
+      </div>
+    </div>
+    <div class="table-scroll" id="pl-custody-table-wrap">
+      <table class="tbl" id="pl-custody-tbl">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="journey-rail" id="pl-custody-tl" hidden></div>
+  </section>
+
+  <section class="card" id="pl-achievements" hidden>
+    <div class="card-head">
+      <div><h2>Achievements</h2><div class="card-sub">from the AFFL game log · skip a category when there is no real example</div></div>
+    </div>
+    <ul class="story-list" id="pl-achievements-list"></ul>
+  </section>
+
+  <section class="card" id="pl-fg-charts" hidden>
+    <div class="card-head">
+      <div><h2>Scoring by Owner</h2><div class="card-sub">career average · ownership bands · swarm · range · one color per franchise</div></div>
+    </div>
+    <div class="fg-bands" id="pl-avg-bands"></div>
+    <div class="chart-wrap tall"><canvas id="pl-avg-line"></canvas></div>
+    <div class="second-grid" style="margin-top:16px">
+      <div>
+        <div class="card-sub">Score swarm</div>
+        <div class="chart-wrap xtall"><canvas id="pl-swarm"></canvas></div>
+      </div>
+      <div>
+        <div class="card-sub">Range by owner</div>
+        <div class="chart-wrap xtall"><canvas id="pl-owner-range"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-break" id="pl-db-break"><h2>The Database <span id="db-span">every rostered player</span></h2></div>
+  <section class="card" id="pl-db">
     <div class="card-head">
       <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile above</div></div>
       <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
@@ -74,10 +196,13 @@
     <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
-  <footer class="foot">PlayerProfiler &middot; joined to the AFFL database &middot; data via ESPN Fantasy API + nflverse</footer>
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">Stars, Scrubs, &amp; Duds · ESPN lineups + nflverse EPA/xTD · cap hits from Spotrac</p>
+  </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=2"></script>
-<script src="players.js?v=2"></script>
+<script src="common.js?v=16"></script>
+<script src="players.js?v=30"></script>
 </body>
 </html>

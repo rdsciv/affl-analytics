@@ -1,0 +1,632 @@
+{
+  "3043078": {
+    "college": "Alabama",
+    "draft": "2016: Rd 2, Pk 45 (TEN)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/3043078.png",
+    "name": "Derrick Henry",
+    "news": [
+      {
+        "headline": "Fantasy Football 'Do Draft' list: Derrick Henry, Patrick Mahomes among undervalued players to pick",
+        "published": "2026-08-15T15:37:59.000+00:00"
+      },
+      {
+        "headline": "Fantasy football sleepers, busts and breakouts for 2026",
+        "published": "2026-08-11T20:39:00.000+00:00"
+      },
+      {
+        "headline": "Is Derrick Henry a fantasy RB1 or RB2?",
+        "published": "2026-08-06T15:24:45.000+00:00"
+      },
+      {
+        "headline": "Ravens' Henry, entering 11th year, not thinking about retirement",
+        "published": "2026-07-30T19:07:07.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL running backs for 2026",
+        "published": "2026-07-16T12:46:46.000+00:00"
+      },
+      {
+        "headline": "Don't be surprised if ... Shough is a QB1 option, Achane tops fantasy scorers, Nacua flirts with 2,000 yards",
+        "published": "2026-06-05T10:57:16.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "M&T Bank Stadium",
+      "name": "Philadelphia Eagles at Baltimore Ravens",
+      "shortName": "PHI @ BAL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Henry is expected to get his normal workload this season but will also be more involved in the passing game, Jeremy Fowler of ESPN.com reports."
+  },
+  "3929630": {
+    "college": "Penn State",
+    "draft": "2018: Rd 1, Pk 2 (NYG)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/3929630.png",
+    "name": "Saquon Barkley",
+    "news": [
+      {
+        "headline": "Highest-paid NFL players: Most guaranteed money at every position",
+        "published": "2026-08-15T16:06:28.000+00:00"
+      },
+      {
+        "headline": "Tannenbaum: Saquon Barkley can carry Eagles 'through a lot of question marks'",
+        "published": "2026-08-10T17:04:11.000+00:00"
+      },
+      {
+        "headline": "Eagles' Saquon Barkley, family OK after attempted home burglary",
+        "published": "2026-07-19T14:14:57.000+00:00"
+      },
+      {
+        "headline": "Fantasy football: Dobbins, Montgomery among players to upgrade, downgrade due to O-line",
+        "published": "2026-07-10T13:31:29.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL running backs for 2026",
+        "published": "2026-07-16T12:46:46.000+00:00"
+      },
+      {
+        "headline": "NFC East: Can Cowboys, Giants or Commanders unseat Eagles?",
+        "published": "2026-07-02T17:14:48.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "M&T Bank Stadium",
+      "name": "Philadelphia Eagles at Baltimore Ravens",
+      "shortName": "PHI @ BAL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Barkley isn't in uniform for Saturday's preseason game at Baltimore, Brooks Kubena of The Athletic reports."
+  },
+  "4040715": {
+    "college": "Oklahoma",
+    "draft": "2020: Rd 2, Pk 53 (PHI)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4040715.png",
+    "name": "Jalen Hurts",
+    "news": [
+      {
+        "headline": "2026 NFL training camp awards: Best position battles, more",
+        "published": "2026-08-14T15:57:22.000+00:00"
+      },
+      {
+        "headline": "2026 Philadelphia Eagles training camp: Latest intel, updates",
+        "published": "2026-08-13T19:21:18.000+00:00"
+      },
+      {
+        "headline": "Orlovsky: Criticism of Jalen Hurts at training camp is 'outrageous'",
+        "published": "2026-08-13T12:40:12.000+00:00"
+      },
+      {
+        "headline": "Eagles QB Jalen Hurts' speed in camp drawing rave reviews",
+        "published": "2026-08-11T19:05:55.000+00:00"
+      },
+      {
+        "headline": "Eagles have bought into new offensive system",
+        "published": "2026-08-11T12:08:56.000+00:00"
+      },
+      {
+        "headline": "Tannenbaum: Saquon Barkley can carry Eagles 'through a lot of question marks'",
+        "published": "2026-08-10T17:04:11.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "M&T Bank Stadium",
+      "name": "Philadelphia Eagles at Baltimore Ravens",
+      "shortName": "PHI @ BAL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Hurts has started to establish a good rapport with offseason addition wide receiver Dontavion Wicks at training camp, Geoff Mosher of PhillyVoice reports."
+  },
+  "4244732": {
+    "college": "Ball State",
+    "draft": "",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4244732.png",
+    "name": "Caleb Huntley",
+    "news": [
+      {
+        "headline": "Falcons RB Caleb Huntley suffers season-ending Achilles tear",
+        "published": "2022-12-20T00:00:07.000+00:00"
+      },
+      {
+        "headline": "With Cordarrelle Patterson back, Falcons' run game keeps churning",
+        "published": "2022-11-07T17:57:45.000+00:00"
+      },
+      {
+        "headline": "Falcons turn to committee without Cordarrelle Patterson, with decent results",
+        "published": "2022-10-11T13:14:51.000+00:00"
+      },
+      {
+        "headline": "From junk hauler to ball carrier, Caleb Huntley embraces chance with Falcons",
+        "published": "2022-10-08T10:00:30.000+00:00"
+      },
+      {
+        "headline": "Atlanta Falcons put Cordarrelle Patterson on IR after knee procedure",
+        "published": "2022-10-03T18:26:20.000+00:00"
+      },
+      {
+        "headline": "'Gift' to offensive line pays big dividends for the Atlanta Falcons",
+        "published": "2022-10-03T16:28:00.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-14T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Mercedes-Benz Stadium",
+      "name": "Denver Broncos at Atlanta Falcons",
+      "shortName": "DEN @ ATL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Huntley (Achilles) had a tryout with the Ravens on Tuesday, Aaron Wilson of KPRC 2 Houston reports."
+  },
+  "4262921": {
+    "college": "LSU",
+    "draft": "2020: Rd 1, Pk 22 (MIN)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4262921.png",
+    "name": "Justin Jefferson",
+    "news": [
+      {
+        "headline": "Fantasy Football 'Do Draft' list: Derrick Henry, Patrick Mahomes among undervalued players to pick",
+        "published": "2026-08-15T15:37:59.000+00:00"
+      },
+      {
+        "headline": "2026 Minnesota Vikings training camp: Latest intel, updates",
+        "published": "2026-08-13T22:09:26.000+00:00"
+      },
+      {
+        "headline": "Liz Loza: Justin Jefferson is an 'incredible steal' at his lowest-ever ADP",
+        "published": "2026-08-10T14:30:56.000+00:00"
+      },
+      {
+        "headline": "What McCarthy-Murray QB battle means for Vikings' locker room",
+        "published": "2026-08-04T12:34:37.000+00:00"
+      },
+      {
+        "headline": "What's at stake for Vikings this season? Here are 3 vital concerns",
+        "published": "2026-07-24T10:00:02.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL wide receivers for 2026",
+        "published": "2026-07-16T10:38:03.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T17:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "MetLife Stadium",
+      "name": "Minnesota Vikings at New York Giants",
+      "shortName": "MIN @ NYG",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Jefferson and newly named starting quarterback Kyler Murray have been starting to click at practice, Will Ragatz of Bring Me The Sports reports."
+  },
+  "4361307": {
+    "college": "Colorado State",
+    "draft": "2022: Rd 2, Pk 55 (ARI)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4361307.png",
+    "name": "Trey McBride",
+    "news": [
+      {
+        "headline": "Highest-paid NFL players: Most guaranteed money at every position",
+        "published": "2026-08-15T16:06:28.000+00:00"
+      },
+      {
+        "headline": "2026 Arizona Cardinals training camp: Latest intel, updates",
+        "published": "2026-08-13T15:09:23.000+00:00"
+      },
+      {
+        "headline": "Fantasy football sleepers, busts and breakouts for 2026",
+        "published": "2026-08-11T20:39:00.000+00:00"
+      },
+      {
+        "headline": "Cardinals TE Trey McBride walks back dig at Arizona fanbase",
+        "published": "2026-07-26T13:54:36.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL tight ends for 2026",
+        "published": "2026-07-16T12:42:38.000+00:00"
+      },
+      {
+        "headline": "Why Trey McBride stands alone among fantasy TEs",
+        "published": "2026-07-01T05:04:14.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-14T00:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Allegiant Stadium",
+      "name": "Arizona Cardinals at Las Vegas Raiders",
+      "shortName": "ARI @ LV",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "McBride played one snap in Thursday's 27-14 preseason win over the Raiders."
+  },
+  "4374302": {
+    "college": "USC",
+    "draft": "2021: Rd 4, Pk 112 (DET)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4374302.png",
+    "name": "Amon-Ra St. Brown",
+    "news": [
+      {
+        "headline": "2026 Detroit Lions training camp: Latest intel, updates",
+        "published": "2026-08-13T20:28:09.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL wide receivers for 2026",
+        "published": "2026-07-16T10:38:03.000+00:00"
+      },
+      {
+        "headline": "Amon-Ra St. Brown, longtime girlfriend Brooklyn Adams announce engagement",
+        "published": "2026-07-08T03:03:26.000+00:00"
+      },
+      {
+        "headline": "New Lions OC Drew Petzing leaving strong first impression",
+        "published": "2026-06-03T10:00:01.000+00:00"
+      },
+      {
+        "headline": "Amon-Ra St. Brown, with full offseason, bullish on Lions' 2026",
+        "published": "2026-05-09T10:00:02.000+00:00"
+      },
+      {
+        "headline": "Amon-Ra St. Brown: Lions game in Germany dream come true",
+        "published": "2026-04-01T00:56:05.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-13T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Paycor Stadium",
+      "name": "Detroit Lions at Cincinnati Bengals",
+      "shortName": "DET @ CIN",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "St. Brown is the top option in a wide receiver room that Lions' head coach Dan Campbell described as the \"best it's ever been\" in camp since Campbell's arrival in 2021, Dharya Sharma of Athlon Sports reports."
+  },
+  "4379399": {
+    "college": "Georgia",
+    "draft": "2022: Rd 2, Pk 63 (BUF)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4379399.png",
+    "name": "James Cook III",
+    "news": [
+      {
+        "headline": "Fantasy Football 'Do Draft' list: Derrick Henry, Patrick Mahomes among undervalued players to pick",
+        "published": "2026-08-15T15:37:59.000+00:00"
+      },
+      {
+        "headline": "Fantasy football superlatives: The best in the fantasy game in 30 categories",
+        "published": "2026-07-29T10:46:28.000+00:00"
+      },
+      {
+        "headline": "Fantasy football: Dobbins, Montgomery among players to upgrade, downgrade due to O-line",
+        "published": "2026-07-10T13:31:29.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL running backs for 2026",
+        "published": "2026-07-16T12:46:46.000+00:00"
+      },
+      {
+        "headline": "Jeremy Fowler's takeaways from the top 10 NFL RBs",
+        "published": "2026-07-09T14:22:12.000+00:00"
+      },
+      {
+        "headline": "Fantasy football: Twelve players who will score fewer TDs in 2026",
+        "published": "2026-07-10T19:39:14.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T17:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Highmark Stadium",
+      "name": "Carolina Panthers at Buffalo Bills",
+      "shortName": "CAR @ BUF",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Cook carried the ball five times for 21 yards in Saturday's 29-14 preseason win over the Panthers."
+  },
+  "4429160": {
+    "college": "Texas A&M",
+    "draft": "2023: Rd 3, Pk 84 (MIA)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4429160.png",
+    "name": "De'Von Achane",
+    "news": [
+      {
+        "headline": "2026 Miami Dolphins training camp: Latest intel, updates",
+        "published": "2026-08-13T19:44:00.000+00:00"
+      },
+      {
+        "headline": "Fantasy football sleepers, busts and breakouts for 2026",
+        "published": "2026-08-11T20:39:00.000+00:00"
+      },
+      {
+        "headline": "Jeff Hafley on De'Von Achane workload: He 'better be in good shape'",
+        "published": "2026-08-11T14:27:25.000+00:00"
+      },
+      {
+        "headline": "With De'Von Achane's workload safe, Dolphins sorting out backups' pecking order",
+        "published": "2026-08-09T10:00:14.000+00:00"
+      },
+      {
+        "headline": "Fantasy football superlatives: The best in the fantasy game in 30 categories",
+        "published": "2026-07-29T10:46:28.000+00:00"
+      },
+      {
+        "headline": "You can have 'em: Six big-name players I'll be passing on in drafts",
+        "published": "2026-07-15T10:39:32.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-14T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Northwest Stadium",
+      "name": "Miami Dolphins at Washington Commanders",
+      "shortName": "MIA @ WSH",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Achane rushed seven times for 39 yards and a touchdown and wasn't targeted in the Dolphins' 20-7 preseason loss to the Commanders on Friday."
+  },
+  "4429615": {
+    "college": "Boston College",
+    "draft": "2023: Rd 1, Pk 22 (BAL)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4429615.png",
+    "name": "Zay Flowers",
+    "news": [
+      {
+        "headline": "Fantasy Football 'Do Draft' list: Derrick Henry, Patrick Mahomes among undervalued players to pick",
+        "published": "2026-08-15T15:37:59.000+00:00"
+      },
+      {
+        "headline": "Ravens WR Zay Flowers day-to-day after quad contusion",
+        "published": "2026-08-08T20:12:45.000+00:00"
+      },
+      {
+        "headline": "Ranking 10 most interesting recent NFL contract extensions",
+        "published": "2026-08-07T10:42:54.000+00:00"
+      },
+      {
+        "headline": "Zay Flowers hoping Ravens extend QB Lamar Jackson",
+        "published": "2026-08-05T19:00:10.000+00:00"
+      },
+      {
+        "headline": "Why Greeny expects Lamar Jackson to go on a 'scorched-earth tour' this season",
+        "published": "2026-08-05T13:31:57.000+00:00"
+      },
+      {
+        "headline": "Stephen A. on Zay Flowers' 4-year Ravens extension: 'He deserves it'",
+        "published": "2026-08-05T15:39:30.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "M&T Bank Stadium",
+      "name": "Philadelphia Eagles at Baltimore Ravens",
+      "shortName": "PHI @ BAL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Flowers was rested for Baltimore's 24-7 preseason win over the Eagles on Saturday."
+  },
+  "4429795": {
+    "college": "Alabama",
+    "draft": "2023: Rd 1, Pk 12 (DET)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4429795.png",
+    "name": "Jahmyr Gibbs",
+    "news": [
+      {
+        "headline": "Highest-paid NFL players: Most guaranteed money at every position",
+        "published": "2026-08-15T16:06:28.000+00:00"
+      },
+      {
+        "headline": "2026 Detroit Lions training camp: Latest intel, updates",
+        "published": "2026-08-13T20:28:09.000+00:00"
+      },
+      {
+        "headline": "Why Mike Clay is taking Jahmyr Gibbs over Bijan Robinson",
+        "published": "2026-08-10T15:37:48.000+00:00"
+      },
+      {
+        "headline": "Tracking 2026 NFL hold-ins: Vea sitting after trade request",
+        "published": "2026-08-14T11:05:40.000+00:00"
+      },
+      {
+        "headline": "Lions' Gibbs relieved with deal done, moves focus to field",
+        "published": "2026-08-07T19:21:44.000+00:00"
+      },
+      {
+        "headline": "Ranking 10 most interesting recent NFL contract extensions",
+        "published": "2026-08-07T10:42:54.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-13T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Paycor Stadium",
+      "name": "Detroit Lions at Cincinnati Bengals",
+      "shortName": "DET @ CIN",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Gibbs was held out of Thursday's preseason opener against the Bengals."
+  },
+  "4430737": {
+    "college": "Notre Dame",
+    "draft": "2022: Rd 5, Pk 164 (LAR)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4430737.png",
+    "name": "Kyren Williams",
+    "news": [
+      {
+        "headline": "2026 Los Angeles Rams training camp: Latest intel, updates",
+        "published": "2026-08-14T13:33:08.000+00:00"
+      },
+      {
+        "headline": "Fantasy Football 'Do Not Draft' list: Giants' young trio among players being overvalued",
+        "published": "2026-08-06T15:19:36.000+00:00"
+      },
+      {
+        "headline": "Fantasy football superlatives: The best in the fantasy game in 30 categories",
+        "published": "2026-07-29T10:46:28.000+00:00"
+      },
+      {
+        "headline": "Fantasy football: Dobbins, Montgomery among players to upgrade, downgrade due to O-line",
+        "published": "2026-07-10T13:31:29.000+00:00"
+      },
+      {
+        "headline": "Trust the process: 25 trends to know before your fantasy football draft",
+        "published": "2026-03-26T11:11:10.000+00:00"
+      },
+      {
+        "headline": "Did Rams know Stafford was coming back before MVP speech?",
+        "published": "2026-03-19T05:46:22.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T20:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "GEHA Field at Arrowhead Stadium",
+      "name": "Los Angeles Rams at Kansas City Chiefs",
+      "shortName": "LAR @ KC",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Williams has been consistently finding holes through the defense at training camp, Brock Vierra of Rams Wire reports."
+  },
+  "4430807": {
+    "college": "Texas",
+    "draft": "2023: Rd 1, Pk 8 (ATL)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4430807.png",
+    "name": "Bijan Robinson",
+    "news": [
+      {
+        "headline": "Highest-paid NFL players: Most guaranteed money at every position",
+        "published": "2026-08-15T16:06:28.000+00:00"
+      },
+      {
+        "headline": "Why Mike Clay is taking Jahmyr Gibbs over Bijan Robinson",
+        "published": "2026-08-10T15:37:48.000+00:00"
+      },
+      {
+        "headline": "Tracking 2026 NFL hold-ins: Vea sitting after trade request",
+        "published": "2026-08-14T11:05:40.000+00:00"
+      },
+      {
+        "headline": "Ranking 10 most interesting recent NFL contract extensions",
+        "published": "2026-08-07T10:42:54.000+00:00"
+      },
+      {
+        "headline": "Jahmyr Gibbs' Lions extension: Answering all the key questions",
+        "published": "2026-08-07T01:32:28.000+00:00"
+      },
+      {
+        "headline": "Matthew McConaughey contacts Bijan Robinson following contract extension",
+        "published": "2026-08-05T20:50:21.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-14T23:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Mercedes-Benz Stadium",
+      "name": "Denver Broncos at Atlanta Falcons",
+      "shortName": "DEN @ ATL",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Robinson did not play in the Falcons' 27-7 preseason loss to the Broncos on Friday."
+  },
+  "4430878": {
+    "college": "Ohio State",
+    "draft": "2023: Rd 1, Pk 20 (SEA)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4430878.png",
+    "name": "Jaxon Smith-Njigba",
+    "news": [
+      {
+        "headline": "Highest-paid NFL players: Most guaranteed money at every position",
+        "published": "2026-08-15T16:06:28.000+00:00"
+      },
+      {
+        "headline": "Matt Bowen's favorite fantasy football draft targets of 2026",
+        "published": "2026-08-13T10:46:10.000+00:00"
+      },
+      {
+        "headline": "What to expect from Seahawks on 'Hard Knocks' debut",
+        "published": "2026-08-02T10:00:12.000+00:00"
+      },
+      {
+        "headline": "Fantasy football superlatives: The best in the fantasy game in 30 categories",
+        "published": "2026-07-29T10:46:28.000+00:00"
+      },
+      {
+        "headline": "Myles Garrett, Josh Allen and more earn spots in 'Madden 27' 99 Club",
+        "published": "2026-07-28T16:12:50.000+00:00"
+      },
+      {
+        "headline": "Execs, coaches, scouts rank top NFL wide receivers for 2026",
+        "published": "2026-07-16T10:38:03.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-16T00:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "Lumen Field",
+      "name": "Dallas Cowboys at Seattle Seahawks",
+      "shortName": "DAL @ SEA",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Smith-Njigba is always willing to be coached up in an attempt to be a better player, Anthony Moeglin of Roundtable Sports reports."
+  },
+  "4567048": {
+    "college": "Michigan State",
+    "draft": "2022: Rd 2, Pk 41 (SEA)",
+    "headshotFallback": "https://a.espncdn.com/i/headshots/nfl/players/full/4567048.png",
+    "name": "Kenneth Walker III",
+    "news": [
+      {
+        "headline": "2026 Kansas City Chiefs training camp: Latest intel, updates",
+        "published": "2026-08-13T19:59:31.000+00:00"
+      },
+      {
+        "headline": "Fantasy football sleepers, busts and breakouts for 2026",
+        "published": "2026-08-11T20:39:00.000+00:00"
+      },
+      {
+        "headline": "Why Field Yates is optimistic about Kenneth Walker III in fantasy",
+        "published": "2026-08-10T15:40:17.000+00:00"
+      },
+      {
+        "headline": "Fantasy Football 'Do Not Draft' list: Giants' young trio among players being overvalued",
+        "published": "2026-08-06T15:19:36.000+00:00"
+      },
+      {
+        "headline": "Why Field Yates has Kenneth Walker III as an RB1",
+        "published": "2026-08-03T16:00:59.000+00:00"
+      },
+      {
+        "headline": "Fantasy football superlatives: The best in the fantasy game in 30 categories",
+        "published": "2026-07-29T10:46:28.000+00:00"
+      }
+    ],
+    "nextGame": {
+      "date": "2026-08-15T20:00:00.000+00:00",
+      "displayName": "Previous Game",
+      "location": "GEHA Field at Arrowhead Stadium",
+      "name": "Los Angeles Rams at Kansas City Chiefs",
+      "shortName": "LAR @ KC",
+      "status": "post",
+      "weekText": "Preseason Week 1"
+    },
+    "rotowire": "Walker played one snap on offense during the Chiefs' 20-12 preseason loss to the Chiefs on Saturday."
+  }
+}

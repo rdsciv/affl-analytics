@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Draft Room</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ffc400%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3ED%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 <div class="frame">
 
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark gold">D</div>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-mark.png" alt="AFFL"></a>
       <div>
         <h1>Draft <span>Room</span></h1>
         <div class="sub" id="page-sub">every draft since 2014</div>
@@ -24,10 +25,25 @@
       <a href="players.html">Players</a>
       <a href="draft.html" class="on">Draft</a>
       <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
     </nav>
   </header>
 
   <div class="picker-row">
+    <div class="picker-label">View</div>
+    <div class="week-picker" id="scope-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Squad</div>
+    <div class="week-picker" id="squad-picker"></div>
+  </div>
+  <div class="picker-row" id="year-row">
     <div class="picker-label">Season</div>
     <div class="week-picker" id="year-picker"></div>
   </div>
@@ -48,35 +64,615 @@
       <div class="mini-tables">
         <div>
           <h3 class="g">Steals</h3>
-          <table class="tbl" id="steals-tbl"><tbody></tbody></table>
+          <table class="tbl" id="steals-tbl">
+            <thead><tr>
+              <th class="s" data-k="name">Player</th>
+              <th class="s" data-k="cost">Cost</th>
+              <th class="s" data-k="par">PAR</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
         <div>
           <h3 class="r">Busts</h3>
-          <table class="tbl" id="busts-tbl"><tbody></tbody></table>
+          <table class="tbl" id="busts-tbl">
+            <thead><tr>
+              <th class="s" data-k="name">Player</th>
+              <th class="s" data-k="cost">Cost</th>
+              <th class="s" data-k="par">PAR</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
       <div class="draft-note" id="baseline-note"></div>
     </div>
   </section>
 
+
+
+
+  <section class="card" id="draft-recap" hidden>
+    <div class="card-head">
+      <div>
+        <h2 id="recap-title">Franchise Draft</h2>
+        <div class="card-sub" id="recap-sub">one franchise · one season · PAR · current name</div>
+      </div>
+      <div id="recap-grade"></div>
+    </div>
+    <div id="recap-body">
+      <div class="kpi-row" id="recap-kpis"></div>
+      <div class="recap-steal" id="recap-steal"></div>
+      <div class="lab-section">
+        <h3>Picks</h3>
+        <div class="table-scroll">
+          <table class="tbl" id="recap-picks-tbl">
+            <thead><tr><th class="s" data-k="overall">#</th><th class="s" data-k="name">Player</th><th class="s" data-k="pos">Pos</th><th class="s" data-k="cost">Cost</th><th class="s" data-k="par">PAR</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="second-grid recap-charts">
+        <div>
+          <h3>PAR by round</h3>
+          <div class="card-sub">this franchise vs league-average mean PAR (dotted)</div>
+          <div class="chart-wrap"><canvas id="recap-round-chart"></canvas></div>
+        </div>
+        <div>
+          <h3>PAR by position</h3>
+          <div class="card-sub">this franchise vs league-average mean PAR (dotted)</div>
+          <div class="chart-wrap"><canvas id="recap-pos-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="draft-overview" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Draft Overview</h2>
+        <div class="card-sub" id="ov-sub">all-time PAR · 2014–2025 · points above replacement · current franchise names</div>
+      </div>
+    </div>
+    <div id="ov-empty" class="draft-empty" hidden></div>
+    <div id="ov-body">
+      <div class="kpi-row" id="ov-kpis"></div>
+      <div class="draft-note">AFFL does not use keepers.</div>
+
+      <div class="lab-section">
+        <h3>League total &amp; avg draft value by position</h3>
+        <div class="card-sub">stacked PAR by year · green line = mean PAR per pick that year</div>
+        <div class="chart-wrap xtall"><canvas id="ov-year-chart"></canvas></div>
+      </div>
+
+      <div class="mini-tables lab-bw">
+        <div>
+          <h3 class="g">All-time top 8</h3>
+          <div class="table-scroll">
+            <table class="tbl" id="ov-top-tbl">
+              <thead><tr><th class="s" data-k="name">Player</th><th class="s" data-k="pos">Pos</th><th class="s" data-k="year">Year</th><th class="s" data-k="cost">Cost</th><th class="s" data-k="team">Team</th><th class="s" data-k="par">PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="r">All-time worst 8</h3>
+          <div class="table-scroll">
+            <table class="tbl" id="ov-worst-tbl">
+              <thead><tr><th class="s" data-k="name">Player</th><th class="s" data-k="pos">Pos</th><th class="s" data-k="year">Year</th><th class="s" data-k="cost">Cost</th><th class="s" data-k="team">Team</th><th class="s" data-k="par">PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>All-time franchise draft rankings</h3>
+        <div class="card-sub">ranked by mean PAR per drafted player · also total PAR and pick count</div>
+        <div class="table-scroll">
+          <table class="tbl" id="ov-franchise-tbl">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="s" data-k="name">Team</th>
+                <th class="s" data-k="mean">Mean PAR / pick</th>
+                <th class="s" data-k="total">Total PAR</th>
+                <th class="s" data-k="n">Picks</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Draft value by team by position</h3>
+        <div class="card-sub">total PAR split QB / RB / WR / TE / K / DST</div>
+        <div class="chart-wrap ov-tall"><canvas id="ov-team-pos-chart"></canvas></div>
+        <div class="table-scroll">
+          <table class="tbl" id="ov-team-pos-tbl">
+            <thead>
+              <tr>
+                <th></th><th class="s" data-k="name">Team</th><th class="s" data-k="QB">QB</th><th class="s" data-k="RB">RB</th><th class="s" data-k="WR">WR</th><th class="s" data-k="TE">TE</th><th class="s" data-k="K">K</th><th class="s" data-k="DST">DST</th><th class="s" data-k="total">Total</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Value vs season rank</h3>
+        <div class="card-sub">one point per franchise-season · x = draft PAR · y = final rank (1 at top, same rank History uses)</div>
+        <div class="week-picker" id="ov-scatter-pos"></div>
+        <div class="chart-wrap xtall"><canvas id="ov-scatter"></canvas></div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Most drafted / most value</h3>
+        <div class="mini-tables">
+          <div>
+            <h3>Players</h3>
+            <table class="tbl" id="ov-player-tbl">
+              <thead><tr><th class="s" data-k="name">Player</th><th class="s" data-k="n">Drafted</th><th class="s" data-k="par">Career PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h3>NFL teams</h3>
+            <table class="tbl" id="ov-nfl-tbl">
+              <thead><tr><th class="s" data-k="nfl">NFL</th><th class="s" data-k="n">Picks</th><th class="s" data-k="par">Sum PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Position all-time</h3>
+        <div class="card-sub">by position · avg PAR · avg cost · top / worst · franchise ranking</div>
+        <div class="week-picker" id="ov-pos-tabs"></div>
+        <div class="lab-meta" id="ov-pos-meta"></div>
+        <div class="mini-tables">
+          <div>
+            <h3 class="g">Top 3</h3>
+            <table class="tbl" id="ov-pos-top">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h3 class="r">Worst 3</h3>
+            <table class="tbl" id="ov-pos-worst">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="tbl" id="ov-pos-fr-tbl">
+            <thead>
+              <tr><th></th><th class="s" data-k="name">Team</th><th class="s" data-k="mean">Mean PAR</th><th class="s" data-k="total">Total PAR</th><th class="s" data-k="n">Picks</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="draft-lab">
+    <div class="card-head">
+      <div>
+        <h2>Draft Lab</h2>
+        <div class="card-sub" id="lab-sub">single-season PAR · points above replacement at that position · a cheap QB is not a steal</div>
+      </div>
+    </div>
+    <div id="lab-empty" class="draft-empty" hidden>Pick a season to open the Draft Lab.</div>
+    <div id="lab-body">
+      <div class="kpi-row" id="lab-kpis"></div>
+
+      <div class="mini-tables lab-bw">
+        <div>
+          <h3 class="g">Best overall</h3>
+          <div class="table-scroll">
+            <table class="tbl" id="lab-best-tbl">
+              <thead><tr><th class="s" data-k="name">Player</th><th class="s" data-k="pos">Pos</th><th class="s" data-k="team">Team</th><th class="s" data-k="cost">Cost</th><th class="s" data-k="par">PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="r">Worst overall</h3>
+          <div class="table-scroll">
+            <table class="tbl" id="lab-worst-tbl">
+              <thead><tr><th class="s" data-k="name">Player</th><th class="s" data-k="pos">Pos</th><th class="s" data-k="team">Team</th><th class="s" data-k="cost">Cost</th><th class="s" data-k="par">PAR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>By position</h3>
+        <div class="week-picker" id="lab-pos-tabs"></div>
+        <div class="lab-meta" id="lab-pos-meta"></div>
+        <div class="mini-tables">
+          <div>
+            <h3 class="g">Top 3</h3>
+            <table class="tbl" id="lab-pos-top">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h3 class="r">Worst 3</h3>
+            <table class="tbl" id="lab-pos-worst">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>By round</h3>
+        <div class="week-picker" id="lab-round-tabs"></div>
+        <div class="lab-meta" id="lab-round-meta"></div>
+        <div class="mini-tables">
+          <div>
+            <h3 class="g">Top 3</h3>
+            <table class="tbl" id="lab-round-top">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h3 class="r">Worst 3</h3>
+            <table class="tbl" id="lab-round-worst">
+              <thead><tr>
+                <th class="s" data-k="name">Player</th>
+                <th class="s" data-k="pos">Pos</th>
+                <th class="s" data-k="par">PAR</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="chart-wrap" id="lab-round-chart-wrap"><canvas id="lab-round-chart"></canvas></div>
+        <div class="draft-note">Mean PAR by round — average of each pick's PAR, not a sum.</div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Team grades</h3>
+        <div class="card-sub">letter from this season's total-PAR distribution · A+ top, F bottom</div>
+        <div class="table-scroll">
+          <table class="tbl" id="lab-grades-tbl">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="s" data-k="grade">Grade</th>
+                <th class="s" data-k="name">Team</th>
+                <th class="s" data-k="total">Total PAR</th>
+                <th class="s" data-k="steal">Best steal</th>
+                <th class="s" data-k="reach">Worst reach</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lab-section">
+        <h3>Visual board</h3>
+        <div class="card-sub" id="lab-board-sub">round × slot · PAR chip</div>
+        <div class="lab-board-scroll"><div class="lab-board" id="lab-board"></div></div>
+      </div>
+    </div>
+  </section>
+
   <section class="card">
     <div class="card-head">
-      <div><h2>The Board</h2><div class="card-sub" id="board-sub">every pick in order</div></div>
-      <input id="draft-search" class="team-select" type="search" placeholder="Search picks…" aria-label="Search picks">
+      <div><h2>Points per Dollar by Position</h2>
+        <div class="card-sub">season totals of the players you bought — even if you traded them · not custody</div></div>
     </div>
     <div class="table-scroll">
-      <table class="tbl" id="board-tbl">
-        <thead><tr><th>#</th><th>Player</th><th>Pos</th><th>NFL</th><th>Drafted By</th><th id="cost-th">Cost</th><th>Season Pts</th><th>PAR</th></tr></thead>
+      <table class="tbl" id="pos-ppd-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="spend">$</th>
+            <th class="s" data-k="pts">Pts</th>
+            <th class="s" data-k="ppd">Pts/$</th>
+            <th class="s tip" data-k="parpd" data-tip="Points above replacement per dollar. Subtracts a replacement starter at that position, then divides by auction cost. Raw Pts/$ makes cheap QBs look like steals." title="Points above replacement per dollar. Subtracts a replacement starter at that position, then divides by auction cost. Raw Pts/$ makes cheap QBs look like steals.">PAR/$</th>
+            <th class="s" data-k="ppdQB">QB</th>
+            <th class="s" data-k="ppdRB">RB</th>
+            <th class="s" data-k="ppdWR">WR</th>
+            <th class="s" data-k="ppdTE">TE</th>
+            <th class="s" data-k="ppdK">K</th>
+            <th class="s" data-k="ppdDST">DST</th>
+          </tr>
+        </thead>
         <tbody></tbody>
       </table>
     </div>
-    <button class="pp-more" id="board-more">Show more</button>
   </section>
 
-  <footer class="foot">AFFL Draft Room &middot; auction values and returns via ESPN + nflverse</footer>
+
+
+  <section class="card" id="auction-dna-block" hidden>
+    <div class="card-head">
+      <div><h2>Auction DNA</h2>
+        <div class="card-sub" id="dna-sub">top-6 spend vs the Cates championship curve $58 / $40 / $24 / $13 / $12 / $9</div></div>
+    </div>
+    <div class="chart-wrap xtall" id="dna-chart-wrap"><canvas id="dna-chart"></canvas></div>
+    <div class="draft-empty" id="dna-empty" hidden>Auction DNA is not in this season file yet.</div>
+    <div class="table-scroll">
+      <table class="tbl" id="dna-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="top6Spend">Top 6 $</th>
+            <th class="s" data-k="restSpend">Rest $</th>
+            <th class="s tip" data-k="l1Distance" data-tip="L1 distance from the Cates curve $58/$40/$24/$13/$12/$9. Lower is closer to the championship allocation.">Distance</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="custody-block">
+    <div class="card-head">
+      <div><h2>Where the Points Came From</h2>
+        <div class="card-sub" id="custody-sub">weekly points while on your roster · 2018–2025</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="custody-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s tip" data-k="ptsDrafted" data-tip="Points scored for you by players you still had from the auction.">Drafted</th>
+            <th class="s tip" data-k="ptsTradedIn" data-tip="Points scored for you by players you acquired in a trade.">Traded in</th>
+            <th class="s tip" data-k="ptsWaiver" data-tip="Points scored for you after a waiver claim.">Waiver</th>
+            <th class="s tip" data-k="ptsFa" data-tip="Points scored for you after a free-agent add.">FA</th>
+            <th class="s tip" data-k="draftSpendTraded" data-tip="Auction dollars of players you drafted and later traded away.">$ traded</th>
+            <th class="s tip" data-k="ptsTradedAway" data-tip="Points those traded-away players scored after they left you.">Gave (trade)</th>
+            <th class="s tip" data-k="ptsDroppedAway" data-tip="Points dropped players scored for someone else after you cut them.">Gave (drop)</th>
+            <th class="s tip" data-k="ptsKept" data-tip="All points scored for you this season, every acquisition type.">Kept</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <section class="card" id="w1-block" hidden>
+    <div class="card-head">
+      <div><h2>Week 1 vs Acquired</h2>
+        <div class="card-sub" id="w1-sub">Draft Day % from the week-1 roster · Moneyball % from players acquired after</div></div>
+    </div>
+    <div class="w1-awards-row" id="w1-awards"></div>
+    <div class="draft-empty" id="w1-empty" hidden>Week 1 vs acquired is not in this season file yet.</div>
+    <div class="table-scroll">
+      <table class="tbl" id="w1-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="w1Pts">Week 1 pts</th>
+            <th class="s" data-k="acquiredPts">Acquired pts</th>
+            <th class="s" data-k="w1Share">Draft Day %</th>
+            <th class="s" data-k="acquiredShare">Moneyball %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" id="age-block">
+    <div class="card-head">
+      <div><h2>Draft Age</h2>
+        <div class="card-sub" id="age-sub">ages as of today · updates at midnight</div></div>
+      <label class="age-asof">As of <input type="date" id="age-asof"></label>
+    </div>
+    <div class="kpi-row" id="age-awards"></div>
+    <div class="table-scroll">
+      <table class="tbl" id="age-tbl">
+        <thead>
+          <tr>
+            <th></th><th class="s" data-k="name">Team</th><th class="s" data-k="avg">Avg</th><th class="s" data-k="QB">QB</th><th class="s" data-k="RB">RB</th><th class="s" data-k="WR">WR</th><th class="s" data-k="TE">TE</th><th class="s" data-k="K">K</th><th class="s" data-k="DST">DST</th><th class="s" data-k="young">Youngest</th><th class="s" data-k="old">Oldest</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="age-split">
+      <div>
+        <h3>NFL stacks</h3>
+        <div class="card-sub">same NFL team, same AFFL roster</div>
+        <div id="age-stacks"></div>
+      </div>
+      <div>
+        <h3>College homies</h3>
+        <div class="card-sub">same school, same AFFL roster</div>
+        <div id="age-homies"></div>
+      </div>
+    </div>
+  </section>
+  <section class="card" id="the-board">
+    <div class="card-head">
+      <div><h2>The Board</h2><div class="card-sub" id="board-sub">every pick in order</div></div>
+      <div class="board-tools">
+        <div class="week-picker" id="board-view-toggle" role="tablist" aria-label="Board or table">
+          <button type="button" class="season-chip" data-view="board">BOARD</button>
+          <button type="button" class="season-chip on" data-view="table">TABLE</button>
+        </div>
+        <input id="draft-search" class="team-select" type="search" placeholder="Search picks…" aria-label="Search picks">
+      </div>
+    </div>
+    <div class="week-picker" id="board-pos-chips" aria-label="Filter by position">
+      <button type="button" class="season-chip on" data-pos="ALL">ALL</button>
+      <button type="button" class="season-chip" data-pos="QB">QB</button>
+      <button type="button" class="season-chip" data-pos="RB">RB</button>
+      <button type="button" class="season-chip" data-pos="WR">WR</button>
+      <button type="button" class="season-chip" data-pos="TE">TE</button>
+      <button type="button" class="season-chip" data-pos="K">K</button>
+      <button type="button" class="season-chip" data-pos="DST">DST</button>
+    </div>
+    <div id="board-table-wrap">
+      <div class="table-scroll">
+        <table class="tbl" id="board-tbl">
+          <thead><tr>
+            <th class="s" data-k="year" id="year-th" hidden>Year</th>
+            <th class="s" data-k="overall">#</th>
+            <th class="s" data-k="name">Player</th>
+            <th class="s" data-k="pos">Pos</th>
+            <th class="s" data-k="nfl">NFL</th>
+            <th class="s" data-k="age">Age</th>
+            <th class="s" data-k="miles" id="miles-th">Miles</th>
+            <th class="s" data-k="team">Drafted By</th>
+            <th class="s" data-k="cost" id="cost-th">Cost</th>
+            <th class="s" data-k="pts">Season Pts</th>
+            <th class="s" data-k="par">PAR</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button class="pp-more" id="board-more">Show more</button>
+    </div>
+    <div id="board-grid-wrap" hidden>
+      <div class="card-sub" id="nav-board-sub">franchise × round · color by position</div>
+      <div class="nav-board-scroll"><div class="nav-board" id="nav-board"></div></div>
+    </div>
+  </section>
+
+  <section class="card" id="fg-awards" hidden>
+    <div class="card-head">
+      <div><h2>Draft Awards</h2>
+        <div class="card-sub" id="fg-awards-sub">youngest / oldest / best value / worst reach</div></div>
+    </div>
+    <div class="kpi-row" id="fg-awards-body"></div>
+  </section>
+
+  <section class="card" id="fg-heatmap" hidden>
+    <div class="card-head">
+      <div><h2>Draft Strategy</h2>
+        <div class="card-sub" id="fg-heat-sub">team × position</div></div>
+      <div class="week-picker" id="fg-heat-toggle">
+        <button type="button" class="season-chip on" data-heat="picks">PICKS</button>
+        <button type="button" class="season-chip" data-heat="age">AGE</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl heat-tbl" id="fg-heat-tbl">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="fg-stacks" hidden>
+    <div class="card-head">
+      <div><h2>Draft Stacks</h2>
+        <div class="card-sub" id="fg-stacks-sub">same NFL team · 2+ on one AFFL roster · DOUBLE / TRIPLE</div></div>
+    </div>
+    <div id="fg-stacks-body"></div>
+    <div id="fg-qb-stacks"></div>
+  </section>
+
+  <section class="card" id="fg-college" hidden>
+    <div class="card-head">
+      <div><h2>College Stacks</h2>
+        <div class="card-sub">same school · 2+ on one AFFL roster · skip picks with no college</div></div>
+    </div>
+    <div id="fg-college-body"></div>
+  </section>
+
+  <section class="card" id="fg-homers" hidden>
+    <div class="card-head">
+      <div><h2>Homers</h2>
+        <div class="card-sub" id="fg-homers-sub">franchise → NFL team concentrations · 2+ picks</div></div>
+      <div class="week-picker" id="fg-homer-toggle">
+        <button type="button" class="season-chip on" data-homer="franchise">FRANCHISE</button>
+        <button type="button" class="season-chip" data-homer="nfl">NFL</button>
+      </div>
+    </div>
+    <div id="fg-homers-body"></div>
+  </section>
+
+  <section class="card" id="fg-cuffs" hidden>
+    <div class="card-head">
+      <div><h2>Handcuffs</h2>
+        <div class="card-sub">same franchise · same NFL team · same position</div></div>
+    </div>
+    <div id="fg-cuffs-body"></div>
+  </section>
+
+  <section class="card" id="fg-age-scatter" hidden>
+    <div class="card-head">
+      <div><h2>Age of Team</h2>
+        <div class="card-sub" id="fg-age-sub">player age vs franchise · color by position · birth dates from player_bio</div></div>
+    </div>
+    <div class="chart-wrap xtall"><canvas id="fg-age-chart"></canvas></div>
+  </section>
+
+
+  <section class="card" id="draft-guide">
+    <div class="card-head">
+      <div>
+        <h2>Draft Guide</h2>
+        <div class="card-sub" id="guide-sub">AFFL scout sheet · class grid from this draft board · click a card</div>
+      </div>
+    </div>
+    <div class="guide-tools">
+      <input id="guide-search" class="team-select" type="search" placeholder="Search a drafted player…" aria-label="Search drafted players">
+    </div>
+    <div id="guide-empty" class="draft-empty" hidden></div>
+    <div id="guide-grid" class="guide-grid"></div>
+  </section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Draft Room &middot; auction values and returns via ESPN + nflverse</p>
+  </footer>
+</div>
+
+<div id="guide-modal" class="guide-modal" hidden>
+  <div class="guide-modal-backdrop" data-guide-close></div>
+  <div class="guide-sheet" role="dialog" aria-modal="true" aria-labelledby="guide-name">
+    <button type="button" class="guide-x" data-guide-close aria-label="Close">×</button>
+    <button type="button" class="guide-arrow guide-prev" id="guide-prev" aria-label="Previous">‹</button>
+    <button type="button" class="guide-arrow guide-next" id="guide-next" aria-label="Next">›</button>
+    <div id="guide-card" class="guide-card"></div>
+  </div>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=2"></script>
-<script src="draft.js?v=4"></script>
+<script src="common.js?v=16"></script>
+<script src="draft.js?v=17"></script>
 </body>
 </html>

@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Front Office</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff2d1a%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3ET%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
 <div class="frame">
 
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark red">T</div>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-mark.png" alt="AFFL"></a>
       <div>
         <h1>Front <span>Office</span></h1>
         <div class="sub" id="page-sub">trades &middot; waivers &middot; free agents</div>
@@ -24,15 +25,42 @@
       <a href="players.html">Players</a>
       <a href="draft.html">Draft</a>
       <a href="trades.html" class="on">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
     </nav>
   </header>
 
   <div class="picker-row">
+    <div class="picker-label">View</div>
+    <div class="week-picker" id="scope-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Squad</div>
+    <div class="week-picker" id="squad-picker"></div>
+  </div>
+  <div class="picker-row" id="year-row">
     <div class="picker-label">Season</div>
     <div class="week-picker" id="year-picker"></div>
   </div>
 
   <section class="kpi-row" id="tx-kpis"></section>
+
+  <section class="card" id="trade-grid-block">
+    <div class="card-head">
+      <div>
+        <h2>Trade Grid</h2>
+        <div class="card-sub" id="trade-grid-sub">all-time completed trades between current franchises · 2018+ (ESPN has no trade log before that)</div>
+      </div>
+    </div>
+    <div class="tg-scroll">
+      <table class="tg" id="trade-grid"></table>
+    </div>
+  </section>
 
   <section class="second-grid">
     <div class="card">
@@ -59,17 +87,20 @@
     </div>
     <div class="table-scroll">
       <table class="tbl" id="log-tbl">
-        <thead><tr><th>Wk</th><th>Date</th><th>Manager</th><th>Type</th><th id="bid-th">Bid</th><th>Added</th><th>Dropped</th></tr></thead>
+        <thead><tr><th id="year-th" hidden>Year</th><th>Wk</th><th>Date</th><th>Manager</th><th>Type</th><th id="bid-th">Bid</th><th>Added</th><th>Dropped</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
     <button class="pp-more" id="log-more">Show more</button>
   </section>
 
-  <footer class="foot">AFFL Front Office &middot; transaction history via ESPN Fantasy API</footer>
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Front Office &middot; transaction history via ESPN Fantasy API</p>
+  </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=2"></script>
-<script src="trades.js?v=2"></script>
+<script src="common.js?v=16"></script>
+<script src="trades.js?v=4"></script>
 </body>
 </html>

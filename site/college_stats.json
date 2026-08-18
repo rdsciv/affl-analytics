@@ -1,0 +1,104 @@
+{
+  "4431459": {
+    "college": "Penn State",
+    "line": "153-1839-19",
+    "name": "Tyler Warren",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4431459/stats",
+    "years": [
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4567750": {
+    "college": "Ohio State",
+    "line": "205-2868-24",
+    "name": "Emeka Egbuka",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4567750/stats",
+    "years": [
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4685382": {
+    "college": "North Carolina",
+    "line": "622-3565-36",
+    "name": "Omarion Hampton",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4685382/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4685415": {
+    "college": "Jackson State / Colorado",
+    "line": "171-2169-24",
+    "name": "Travis Hunter",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4685415/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4685472": {
+    "college": "Arizona",
+    "line": "213-3423-26",
+    "name": "Tetairoa McMillan",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4685472/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4689114": {
+    "college": "Ole Miss / USC",
+    "line": "852-1307-11970-81",
+    "name": "Jaxson Dart",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4689114/stats",
+    "years": [
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4701936": {
+    "college": "Houston / Texas",
+    "line": "134-1975-22",
+    "name": "Matthew Golden",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4701936/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4723086": {
+    "college": "Michigan",
+    "line": "117-1466-11",
+    "name": "Colston Loveland",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4723086/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "4890973": {
+    "college": "Boise State",
+    "line": "750-4769-50",
+    "name": "Ashton Jeanty",
+    "source": "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4890973/stats",
+    "years": [
+      2022,
+      2023,
+      2024
+    ]
+  }
+}

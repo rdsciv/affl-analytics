@@ -1,0 +1,4535 @@
+{
+  "m02": {
+    "QB": [
+      {
+        "pid": 2330,
+        "name": "Tom Brady",
+        "pts": 322.5,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4362887,
+        "name": "Justin Fields",
+        "pts": 276.2,
+        "years": [
+          2022,
+          2025
+        ]
+      },
+      {
+        "pid": 3046779,
+        "name": "Jared Goff",
+        "pts": 228.0,
+        "years": [
+          2018,
+          2025
+        ]
+      },
+      {
+        "pid": 3912547,
+        "name": "Sam Darnold",
+        "pts": 154.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 14874,
+        "name": "Andrew Luck",
+        "pts": 153.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3045147,
+        "name": "James Conner",
+        "pts": 410.8,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": 4430807,
+        "name": "Bijan Robinson",
+        "pts": 371.0,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 3916148,
+        "name": "Tony Pollard",
+        "pts": 335.2,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": 4242335,
+        "name": "Jonathan Taylor",
+        "pts": 323.6,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 3116385,
+        "name": "Joe Mixon",
+        "pts": 315.0,
+        "years": [
+          2020,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 284.8,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 2976212,
+        "name": "Stefon Diggs",
+        "pts": 245.9,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 3116165,
+        "name": "Chris Godwin",
+        "pts": 229.7,
+        "years": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "pid": 4241478,
+        "name": "DeVonta Smith",
+        "pts": 215.8,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": 3045138,
+        "name": "Mike Williams",
+        "pts": 128.6,
+        "years": [
+          2018,
+          2022
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 143.9,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 3121023,
+        "name": "Dallas Goedert",
+        "pts": 126.4,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": 4361307,
+        "name": "Trey McBride",
+        "pts": 126.3,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4432665,
+        "name": "Brock Bowers",
+        "pts": 112.2,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3116365,
+        "name": "Mark Andrews",
+        "pts": 90.4,
+        "years": [
+          2023,
+          2023
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 229.0,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": 11122,
+        "name": "Matt Prater",
+        "pts": 153.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 2473037,
+        "name": "Jason Myers",
+        "pts": 132.0,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 4249087,
+        "name": "Matt Gay",
+        "pts": 92.0,
+        "years": [
+          2019,
+          2024
+        ]
+      },
+      {
+        "pid": 3915165,
+        "name": "Rodrigo Blankenship",
+        "pts": 59.0,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16017,
+        "name": "Patriots D/ST",
+        "pts": 209.0,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": -16005,
+        "name": "Browns D/ST",
+        "pts": 113.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": -16015,
+        "name": "Dolphins D/ST",
+        "pts": 95.0,
+        "years": [
+          2018,
+          2023
+        ]
+      },
+      {
+        "pid": -16014,
+        "name": "Rams D/ST",
+        "pts": 87.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": -16009,
+        "name": "Packers D/ST",
+        "pts": 84.0,
+        "years": [
+          2018,
+          2024
+        ]
+      }
+    ]
+  },
+  "m04": {
+    "QB": [
+      {
+        "pid": 8664,
+        "name": "Ryan Fitzpatrick",
+        "pts": 70.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3052587,
+        "name": "Baker Mayfield",
+        "pts": 39.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3039707,
+        "name": "Mitchell Trubisky",
+        "pts": 33.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 12483,
+        "name": "Matthew Stafford",
+        "pts": 31.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 16760,
+        "name": "Jimmy Garoppolo",
+        "pts": 16.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 16913,
+        "name": "James White",
+        "pts": 115.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2979843,
+        "name": "Kenyan Drake",
+        "pts": 70.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3051926,
+        "name": "Gus Edwards",
+        "pts": 51.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3045260,
+        "name": "Corey Clement",
+        "pts": 13.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3051902,
+        "name": "Peyton Barber",
+        "pts": 13.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 16731,
+        "name": "Brandin Cooks",
+        "pts": 103.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 13295,
+        "name": "Emmanuel Sanders",
+        "pts": 64.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2574808,
+        "name": "Robby Anderson",
+        "pts": 45.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 14924,
+        "name": "T.Y. Hilton",
+        "pts": 40.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 15795,
+        "name": "DeAndre Hopkins",
+        "pts": 32.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 13232,
+        "name": "Jimmy Graham",
+        "pts": 62.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2574576,
+        "name": "C.J. Uzomah",
+        "pts": 2.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 13272,
+        "name": "Ed Dickson",
+        "pts": 1.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3051806,
+        "name": "Ricky Seals-Jones",
+        "pts": 1.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 14993,
+        "name": "Greg Zuerlein",
+        "pts": 110.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 17082,
+        "name": "Cody Parkey",
+        "pts": 26.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2971573,
+        "name": "Ka'imi Fairbairn",
+        "pts": 20.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 9354,
+        "name": "Robbie Gould",
+        "pts": 3.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16020,
+        "name": "Jets D/ST",
+        "pts": 26.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16006,
+        "name": "Cowboys D/ST",
+        "pts": 18.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16026,
+        "name": "Seahawks D/ST",
+        "pts": 15.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16022,
+        "name": "Cardinals D/ST",
+        "pts": 4.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16018,
+        "name": "Saints D/ST",
+        "pts": -9.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ]
+  },
+  "m05": {
+    "QB": [
+      {
+        "pid": 3918298,
+        "name": "Josh Allen",
+        "pts": 542.8,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 374.3,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3122840,
+        "name": "Deshaun Watson",
+        "pts": 320.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 4426348,
+        "name": "Jayden Daniels",
+        "pts": 305.7,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 3917315,
+        "name": "Kyler Murray",
+        "pts": 249.8,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 4242335,
+        "name": "Jonathan Taylor",
+        "pts": 388.9,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 3117251,
+        "name": "Christian McCaffrey",
+        "pts": 367.6,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 3043078,
+        "name": "Derrick Henry",
+        "pts": 323.7,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 4241416,
+        "name": "Chuba Hubbard",
+        "pts": 246.7,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 4241457,
+        "name": "Najee Harris",
+        "pts": 221.2,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 3116406,
+        "name": "Tyreek Hill",
+        "pts": 185.3,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4047646,
+        "name": "A.J. Brown",
+        "pts": 184.7,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 13982,
+        "name": "Julio Jones",
+        "pts": 167.3,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 4262921,
+        "name": "Justin Jefferson",
+        "pts": 135.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 2977187,
+        "name": "Cooper Kupp",
+        "pts": 126.4,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 2576925,
+        "name": "Darren Waller",
+        "pts": 113.3,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 3040151,
+        "name": "George Kittle",
+        "pts": 95.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3046439,
+        "name": "Hunter Henry",
+        "pts": 88.2,
+        "years": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "pid": 4431459,
+        "name": "Tyler Warren",
+        "pts": 82.3,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 15835,
+        "name": "Zach Ertz",
+        "pts": 71.6,
+        "years": [
+          2022,
+          2025
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3953687,
+        "name": "Brandon Aubrey",
+        "pts": 284.0,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 3917232,
+        "name": "Tyler Bass",
+        "pts": 114.0,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 14993,
+        "name": "Greg Zuerlein",
+        "pts": 113.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 3150744,
+        "name": "Chase McLaughlin",
+        "pts": 99.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 12731,
+        "name": "Ryan Succop",
+        "pts": 95.0,
+        "years": [
+          2021,
+          2022
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16007,
+        "name": "Broncos D/ST",
+        "pts": 213.0,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 111.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": -16011,
+        "name": "Colts D/ST",
+        "pts": 89.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": -16017,
+        "name": "Patriots D/ST",
+        "pts": 74.0,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": -16028,
+        "name": "Commanders D/ST",
+        "pts": 68.0,
+        "years": [
+          2020,
+          2024
+        ]
+      }
+    ]
+  },
+  "m06": {
+    "QB": [
+      {
+        "pid": 3915511,
+        "name": "Joe Burrow",
+        "pts": 449.3,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 347.0,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 4431452,
+        "name": "Drake Maye",
+        "pts": 320.4,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4040715,
+        "name": "Jalen Hurts",
+        "pts": 274.5,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3917315,
+        "name": "Kyler Murray",
+        "pts": 186.1,
+        "years": [
+          2019,
+          2019
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3043078,
+        "name": "Derrick Henry",
+        "pts": 565.2,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 3042519,
+        "name": "Aaron Jones",
+        "pts": 384.1,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 3128720,
+        "name": "Nick Chubb",
+        "pts": 340.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 2977644,
+        "name": "Todd Gurley II",
+        "pts": 296.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 4427366,
+        "name": "Breece Hall",
+        "pts": 264.8,
+        "years": [
+          2022,
+          2024
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 3915416,
+        "name": "DJ Moore",
+        "pts": 339.0,
+        "years": [
+          2019,
+          2024
+        ]
+      },
+      {
+        "pid": 4239993,
+        "name": "Tee Higgins",
+        "pts": 285.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 4426354,
+        "name": "George Pickens",
+        "pts": 200.7,
+        "years": [
+          2022,
+          2025
+        ]
+      },
+      {
+        "pid": 2976212,
+        "name": "Stefon Diggs",
+        "pts": 182.3,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 15795,
+        "name": "DeAndre Hopkins",
+        "pts": 158.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 3040151,
+        "name": "George Kittle",
+        "pts": 375.8,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": 3046439,
+        "name": "Hunter Henry",
+        "pts": 68.7,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 5083076,
+        "name": "Harold Fannin Jr.",
+        "pts": 56.9,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4361411,
+        "name": "Pat Freiermuth",
+        "pts": 42.7,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 4036131,
+        "name": "Noah Fant",
+        "pts": 42.5,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3051909,
+        "name": "Daniel Carlson",
+        "pts": 153.0,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 143.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 15683,
+        "name": "Justin Tucker",
+        "pts": 104.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 2985659,
+        "name": "Wil Lutz",
+        "pts": 86.0,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": 16339,
+        "name": "Brandon McManus",
+        "pts": 77.0,
+        "years": [
+          2018,
+          2024
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16023,
+        "name": "Steelers D/ST",
+        "pts": 137.0,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": -16002,
+        "name": "Bills D/ST",
+        "pts": 111.0,
+        "years": [
+          2018,
+          2023
+        ]
+      },
+      {
+        "pid": -16014,
+        "name": "Rams D/ST",
+        "pts": 95.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": -16010,
+        "name": "Titans D/ST",
+        "pts": 78.0,
+        "years": [
+          2021,
+          2023
+        ]
+      },
+      {
+        "pid": -16033,
+        "name": "Ravens D/ST",
+        "pts": 59.0,
+        "years": [
+          2022,
+          2024
+        ]
+      }
+    ]
+  },
+  "m07": {
+    "QB": [
+      {
+        "pid": 3918298,
+        "name": "Josh Allen",
+        "pts": 378.8,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 3917315,
+        "name": "Kyler Murray",
+        "pts": 374.9,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 4362887,
+        "name": "Justin Fields",
+        "pts": 221.5,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 2580,
+        "name": "Drew Brees",
+        "pts": 172.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 169.7,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3043078,
+        "name": "Derrick Henry",
+        "pts": 183.6,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 4035538,
+        "name": "David Montgomery",
+        "pts": 169.3,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 4242335,
+        "name": "Jonathan Taylor",
+        "pts": 166.2,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 4045163,
+        "name": "Miles Sanders",
+        "pts": 161.9,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 4052042,
+        "name": "James Robinson",
+        "pts": 142.9,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 15795,
+        "name": "DeAndre Hopkins",
+        "pts": 271.1,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 2976499,
+        "name": "Amari Cooper",
+        "pts": 222.7,
+        "years": [
+          2018,
+          2022
+        ]
+      },
+      {
+        "pid": 4372016,
+        "name": "Jaylen Waddle",
+        "pts": 178.9,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 16460,
+        "name": "Adam Thielen",
+        "pts": 174.3,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 4426515,
+        "name": "Puka Nacua",
+        "pts": 156.4,
+        "years": [
+          2023,
+          2023
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 256.6,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 3116365,
+        "name": "Mark Andrews",
+        "pts": 185.6,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 3117256,
+        "name": "Dalton Schultz",
+        "pts": 75.0,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 4361307,
+        "name": "Trey McBride",
+        "pts": 52.1,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 2573401,
+        "name": "Tyler Higbee",
+        "pts": 47.2,
+        "years": [
+          2019,
+          2022
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 4249087,
+        "name": "Matt Gay",
+        "pts": 150.0,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4360234,
+        "name": "Evan McPherson",
+        "pts": 117.0,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 9354,
+        "name": "Robbie Gould",
+        "pts": 79.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 15965,
+        "name": "Dustin Hopkins",
+        "pts": 71.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 66.0,
+        "years": [
+          2019,
+          2019
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16003,
+        "name": "Bears D/ST",
+        "pts": 198.0,
+        "years": [
+          2018,
+          2021
+        ]
+      },
+      {
+        "pid": -16006,
+        "name": "Cowboys D/ST",
+        "pts": 121.0,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": -16033,
+        "name": "Ravens D/ST",
+        "pts": 107.0,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 67.0,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": -16021,
+        "name": "Eagles D/ST",
+        "pts": 50.0,
+        "years": [
+          2021,
+          2023
+        ]
+      }
+    ]
+  },
+  "m08": {
+    "QB": [
+      {
+        "pid": 4040715,
+        "name": "Jalen Hurts",
+        "pts": 684.6,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 3918298,
+        "name": "Josh Allen",
+        "pts": 676.7,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 12483,
+        "name": "Matthew Stafford",
+        "pts": 321.5,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 11237,
+        "name": "Matt Ryan",
+        "pts": 315.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 4361741,
+        "name": "Brock Purdy",
+        "pts": 253.1,
+        "years": [
+          2023,
+          2023
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 4430737,
+        "name": "Kyren Williams",
+        "pts": 402.9,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 3051392,
+        "name": "Ezekiel Elliott",
+        "pts": 398.6,
+        "years": [
+          2018,
+          2020
+        ]
+      },
+      {
+        "pid": 3117251,
+        "name": "Christian McCaffrey",
+        "pts": 325.9,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 2576414,
+        "name": "Raheem Mostert",
+        "pts": 238.1,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 4039359,
+        "name": "Darrell Henderson Jr.",
+        "pts": 208.3,
+        "years": [
+          2020,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 16737,
+        "name": "Mike Evans",
+        "pts": 321.4,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 3052876,
+        "name": "Will Fuller V",
+        "pts": 234.1,
+        "years": [
+          2018,
+          2020
+        ]
+      },
+      {
+        "pid": 4426515,
+        "name": "Puka Nacua",
+        "pts": 211.1,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4262921,
+        "name": "Justin Jefferson",
+        "pts": 202.4,
+        "years": [
+          2021,
+          2023
+        ]
+      },
+      {
+        "pid": 4047646,
+        "name": "A.J. Brown",
+        "pts": 202.1,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 2576925,
+        "name": "Darren Waller",
+        "pts": 139.8,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 98.4,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4385690,
+        "name": "Dalton Kincaid",
+        "pts": 59.9,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3123076,
+        "name": "David Njoku",
+        "pts": 55.7,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 4360248,
+        "name": "Kyle Pitts Sr.",
+        "pts": 48.5,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3050478,
+        "name": "Jake Elliott",
+        "pts": 190.0,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 12460,
+        "name": "Graham Gano",
+        "pts": 138.0,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": 3915165,
+        "name": "Rodrigo Blankenship",
+        "pts": 99.0,
+        "years": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "pid": 11122,
+        "name": "Matt Prater",
+        "pts": 87.0,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 80.0,
+        "years": [
+          2024,
+          2024
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16030,
+        "name": "Jaguars D/ST",
+        "pts": 128.0,
+        "years": [
+          2018,
+          2025
+        ]
+      },
+      {
+        "pid": -16014,
+        "name": "Rams D/ST",
+        "pts": 110.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": -16003,
+        "name": "Bears D/ST",
+        "pts": 69.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 60.0,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": -16027,
+        "name": "Buccaneers D/ST",
+        "pts": 40.0,
+        "years": [
+          2024,
+          2024
+        ]
+      }
+    ]
+  },
+  "m09": {
+    "QB": [],
+    "RB": [],
+    "WR": [],
+    "TE": [],
+    "K": [],
+    "DST": []
+  },
+  "m10": {
+    "QB": [
+      {
+        "pid": 5536,
+        "name": "Ben Roethlisberger",
+        "pts": 228.4,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 227.7,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 8439,
+        "name": "Aaron Rodgers",
+        "pts": 213.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2969939,
+        "name": "Jameis Winston",
+        "pts": 107.5,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 2330,
+        "name": "Tom Brady",
+        "pts": 69.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3116593,
+        "name": "Dalvin Cook",
+        "pts": 293.8,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3929630,
+        "name": "Saquon Barkley",
+        "pts": 264.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3115364,
+        "name": "Leonard Fournette",
+        "pts": 183.4,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 4047365,
+        "name": "Josh Jacobs",
+        "pts": 171.6,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 2979477,
+        "name": "Tevin Coleman",
+        "pts": 154.2,
+        "years": [
+          2018,
+          2019
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 15818,
+        "name": "Keenan Allen",
+        "pts": 249.4,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 3116406,
+        "name": "Tyreek Hill",
+        "pts": 241.9,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 15880,
+        "name": "Robert Woods",
+        "pts": 155.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 16733,
+        "name": "Odell Beckham Jr.",
+        "pts": 148.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3121422,
+        "name": "Terry McLaurin",
+        "pts": 131.3,
+        "years": [
+          2019,
+          2020
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 10475,
+        "name": "Greg Olsen",
+        "pts": 111.1,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 16732,
+        "name": "Eric Ebron",
+        "pts": 60.3,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3924365,
+        "name": "Hayden Hurst",
+        "pts": 47.5,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 15853,
+        "name": "Vance McDonald",
+        "pts": 21.3,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 15773,
+        "name": "Darren Fells",
+        "pts": 8.5,
+        "years": [
+          2019,
+          2019
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3049899,
+        "name": "Younghoe Koo",
+        "pts": 129.0,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 9704,
+        "name": "Stephen Gostkowski",
+        "pts": 125.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 88.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 2985659,
+        "name": "Wil Lutz",
+        "pts": 66.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 12731,
+        "name": "Ryan Succop",
+        "pts": 25.0,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16016,
+        "name": "Vikings D/ST",
+        "pts": 94.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 76.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": -16029,
+        "name": "Panthers D/ST",
+        "pts": 62.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": -16021,
+        "name": "Eagles D/ST",
+        "pts": 40.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": -16001,
+        "name": "Falcons D/ST",
+        "pts": 39.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ]
+  },
+  "m11": {
+    "QB": [
+      {
+        "pid": 14881,
+        "name": "Russell Wilson",
+        "pts": 304.3,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 3122840,
+        "name": "Deshaun Watson",
+        "pts": 259.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 4038941,
+        "name": "Justin Herbert",
+        "pts": 251.5,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 2577417,
+        "name": "Dak Prescott",
+        "pts": 183.8,
+        "years": [
+          2018,
+          2022
+        ]
+      },
+      {
+        "pid": 2330,
+        "name": "Tom Brady",
+        "pts": 171.3,
+        "years": [
+          2020,
+          2022
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 4047365,
+        "name": "Josh Jacobs",
+        "pts": 424.6,
+        "years": [
+          2020,
+          2024
+        ]
+      },
+      {
+        "pid": 3068267,
+        "name": "Austin Ekeler",
+        "pts": 284.7,
+        "years": [
+          2018,
+          2022
+        ]
+      },
+      {
+        "pid": 3919596,
+        "name": "Chris Carson",
+        "pts": 282.2,
+        "years": [
+          2019,
+          2021
+        ]
+      },
+      {
+        "pid": 2576434,
+        "name": "Melvin Gordon",
+        "pts": 225.5,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 4697815,
+        "name": "Rachaad White",
+        "pts": 173.4,
+        "years": [
+          2023,
+          2023
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 3128429,
+        "name": "Courtland Sutton",
+        "pts": 203.8,
+        "years": [
+          2022,
+          2025
+        ]
+      },
+      {
+        "pid": 4372016,
+        "name": "Jaylen Waddle",
+        "pts": 182.5,
+        "years": [
+          2021,
+          2023
+        ]
+      },
+      {
+        "pid": 3120348,
+        "name": "JuJu Smith-Schuster",
+        "pts": 172.1,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 2577327,
+        "name": "Tyler Lockett",
+        "pts": 166.4,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 4241389,
+        "name": "CeeDee Lamb",
+        "pts": 149.3,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 347.4,
+        "years": [
+          2018,
+          2025
+        ]
+      },
+      {
+        "pid": 4360248,
+        "name": "Kyle Pitts",
+        "pts": 113.3,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 3116365,
+        "name": "Mark Andrews",
+        "pts": 112.1,
+        "years": [
+          2019,
+          2024
+        ]
+      },
+      {
+        "pid": 3051876,
+        "name": "Evan Engram",
+        "pts": 76.0,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": 3054212,
+        "name": "Jonnu Smith",
+        "pts": 61.0,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 4362081,
+        "name": "Cameron Dicker",
+        "pts": 206.0,
+        "years": [
+          2022,
+          2025
+        ]
+      },
+      {
+        "pid": 3049899,
+        "name": "Younghoe Koo",
+        "pts": 95.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 9354,
+        "name": "Robbie Gould",
+        "pts": 93.0,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 3124679,
+        "name": "Jason Sanders",
+        "pts": 90.0,
+        "years": [
+          2020,
+          2024
+        ]
+      },
+      {
+        "pid": 3975763,
+        "name": "Greg Joseph",
+        "pts": 85.0,
+        "years": [
+          2021,
+          2023
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 128.0,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": -16002,
+        "name": "Bills D/ST",
+        "pts": 127.0,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": -16006,
+        "name": "Cowboys D/ST",
+        "pts": 123.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": -16009,
+        "name": "Packers D/ST",
+        "pts": 58.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": -16019,
+        "name": "Giants D/ST",
+        "pts": 44.0,
+        "years": [
+          2022,
+          2025
+        ]
+      }
+    ]
+  },
+  "m12": {
+    "QB": [
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 415.7,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 14881,
+        "name": "Russell Wilson",
+        "pts": 211.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2580,
+        "name": "Drew Brees",
+        "pts": 111.9,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 13994,
+        "name": "Cam Newton",
+        "pts": 79.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 2573079,
+        "name": "Carson Wentz",
+        "pts": 78.3,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3117251,
+        "name": "Christian McCaffrey",
+        "pts": 222.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3116385,
+        "name": "Joe Mixon",
+        "pts": 152.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 16777,
+        "name": "Carlos Hyde",
+        "pts": 108.6,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 2576434,
+        "name": "Melvin Gordon III",
+        "pts": 94.8,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 15825,
+        "name": "Le'Veon Bell",
+        "pts": 90.5,
+        "years": [
+          2019,
+          2020
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 2976316,
+        "name": "Michael Thomas",
+        "pts": 221.9,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 3116406,
+        "name": "Tyreek Hill",
+        "pts": 212.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3045144,
+        "name": "Tyler Boyd",
+        "pts": 130.1,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 13982,
+        "name": "Julio Jones",
+        "pts": 95.1,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3128429,
+        "name": "Courtland Sutton",
+        "pts": 79.5,
+        "years": [
+          2019,
+          2019
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 3040151,
+        "name": "George Kittle",
+        "pts": 163.7,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 15835,
+        "name": "Zach Ertz",
+        "pts": 157.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 2573401,
+        "name": "Tyler Higbee",
+        "pts": 36.6,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3120303,
+        "name": "Ross Dwelley",
+        "pts": 13.4,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": 3043275,
+        "name": "Austin Hooper",
+        "pts": 13.0,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 16486,
+        "name": "Brett Maher",
+        "pts": 68.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 2985659,
+        "name": "Wil Lutz",
+        "pts": 52.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3124084,
+        "name": "Joey Slye",
+        "pts": 31.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 2971573,
+        "name": "Ka'imi Fairbairn",
+        "pts": 28.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 3043234,
+        "name": "Zane Gonzalez",
+        "pts": 25.0,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16014,
+        "name": "Rams D/ST",
+        "pts": 104.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": -16018,
+        "name": "Saints D/ST",
+        "pts": 60.0,
+        "years": [
+          2018,
+          2020
+        ]
+      },
+      {
+        "pid": -16009,
+        "name": "Packers D/ST",
+        "pts": 51.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": -16011,
+        "name": "Colts D/ST",
+        "pts": 29.0,
+        "years": [
+          2019,
+          2019
+        ]
+      },
+      {
+        "pid": -16024,
+        "name": "Chargers D/ST",
+        "pts": 24.0,
+        "years": [
+          2019,
+          2019
+        ]
+      }
+    ]
+  },
+  "m13": {
+    "QB": [
+      {
+        "pid": 2577417,
+        "name": "Dak Prescott",
+        "pts": 335.7,
+        "years": [
+          2019,
+          2021
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 302.1,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 294.0,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 13994,
+        "name": "Cam Newton",
+        "pts": 271.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 3918298,
+        "name": "Josh Allen",
+        "pts": 200.9,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 4379399,
+        "name": "James Cook",
+        "pts": 299.5,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 3045147,
+        "name": "James Conner",
+        "pts": 239.0,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 4045163,
+        "name": "Miles Sanders",
+        "pts": 193.4,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3116385,
+        "name": "Joe Mixon",
+        "pts": 191.3,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 4239996,
+        "name": "Travis Etienne Jr.",
+        "pts": 185.1,
+        "years": [
+          2022,
+          2025
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 4374302,
+        "name": "Amon-Ra St. Brown",
+        "pts": 378.2,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 16737,
+        "name": "Mike Evans",
+        "pts": 328.5,
+        "years": [
+          2018,
+          2021
+        ]
+      },
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 220.0,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 3932905,
+        "name": "Diontae Johnson",
+        "pts": 189.0,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": 4241389,
+        "name": "CeeDee Lamb",
+        "pts": 183.4,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 4361307,
+        "name": "Trey McBride",
+        "pts": 169.5,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3116365,
+        "name": "Mark Andrews",
+        "pts": 169.1,
+        "years": [
+          2019,
+          2024
+        ]
+      },
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 161.4,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 16732,
+        "name": "Eric Ebron",
+        "pts": 104.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 12537,
+        "name": "Jared Cook",
+        "pts": 77.9,
+        "years": [
+          2019,
+          2020
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 15683,
+        "name": "Justin Tucker",
+        "pts": 151.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 10636,
+        "name": "Mason Crosby",
+        "pts": 111.0,
+        "years": [
+          2018,
+          2021
+        ]
+      },
+      {
+        "pid": 2473037,
+        "name": "Jason Myers",
+        "pts": 94.0,
+        "years": [
+          2018,
+          2020
+        ]
+      },
+      {
+        "pid": 3821683,
+        "name": "Austin Seibert",
+        "pts": 70.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 2971573,
+        "name": "Ka'imi Fairbairn",
+        "pts": 64.0,
+        "years": [
+          2018,
+          2018
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16018,
+        "name": "Saints D/ST",
+        "pts": 154.0,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": -16017,
+        "name": "Patriots D/ST",
+        "pts": 113.0,
+        "years": [
+          2018,
+          2023
+        ]
+      },
+      {
+        "pid": -16027,
+        "name": "Buccaneers D/ST",
+        "pts": 112.0,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": -16016,
+        "name": "Vikings D/ST",
+        "pts": 108.0,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": -16002,
+        "name": "Bills D/ST",
+        "pts": 107.0,
+        "years": [
+          2018,
+          2025
+        ]
+      }
+    ]
+  },
+  "m14": {
+    "QB": [
+      {
+        "pid": 4040715,
+        "name": "Jalen Hurts",
+        "pts": 284.6,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4360310,
+        "name": "Trevor Lawrence",
+        "pts": 219.9,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 218.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 12483,
+        "name": "Matthew Stafford",
+        "pts": 156.1,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 151.5,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3929630,
+        "name": "Saquon Barkley",
+        "pts": 482.8,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 4379399,
+        "name": "James Cook III",
+        "pts": 267.7,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3068267,
+        "name": "Austin Ekeler",
+        "pts": 235.7,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4697815,
+        "name": "Rachaad White",
+        "pts": 205.8,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 4360294,
+        "name": "Antonio Gibson",
+        "pts": 133.7,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 3126486,
+        "name": "Deebo Samuel Sr.",
+        "pts": 529.3,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 2977187,
+        "name": "Cooper Kupp",
+        "pts": 249.2,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4262921,
+        "name": "Justin Jefferson",
+        "pts": 183.0,
+        "years": [
+          2022,
+          2025
+        ]
+      },
+      {
+        "pid": 15818,
+        "name": "Keenan Allen",
+        "pts": 170.9,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 4047646,
+        "name": "A.J. Brown",
+        "pts": 142.3,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 4036133,
+        "name": "T.J. Hockenson",
+        "pts": 127.8,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 4430027,
+        "name": "Sam LaPorta",
+        "pts": 116.2,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3121023,
+        "name": "Dallas Goedert",
+        "pts": 95.5,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 2468609,
+        "name": "Taysom Hill",
+        "pts": 59.4,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4385690,
+        "name": "Dalton Kincaid",
+        "pts": 42.1,
+        "years": [
+          2024,
+          2024
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 15683,
+        "name": "Justin Tucker",
+        "pts": 146.0,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 4362081,
+        "name": "Cameron Dicker",
+        "pts": 119.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4249087,
+        "name": "Matt Gay",
+        "pts": 90.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 16486,
+        "name": "Brett Maher",
+        "pts": 82.0,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 2985659,
+        "name": "Wil Lutz",
+        "pts": 80.0,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16023,
+        "name": "Steelers D/ST",
+        "pts": 129.0,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": -16027,
+        "name": "Buccaneers D/ST",
+        "pts": 68.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": -16034,
+        "name": "Texans D/ST",
+        "pts": 36.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": -16009,
+        "name": "Packers D/ST",
+        "pts": 33.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 32.0,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ]
+  },
+  "m15": {
+    "QB": [
+      {
+        "pid": 3122840,
+        "name": "Deshaun Watson",
+        "pts": 373.3,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 339.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 4038941,
+        "name": "Justin Herbert",
+        "pts": 338.8,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 3917315,
+        "name": "Kyler Murray",
+        "pts": 292.2,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 4431611,
+        "name": "Caleb Williams",
+        "pts": 225.8,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3059915,
+        "name": "Kareem Hunt",
+        "pts": 360.0,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": 3042519,
+        "name": "Aaron Jones",
+        "pts": 295.7,
+        "years": [
+          2018,
+          2021
+        ]
+      },
+      {
+        "pid": 4567048,
+        "name": "Kenneth Walker III",
+        "pts": 280.8,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 4429795,
+        "name": "Jahmyr Gibbs",
+        "pts": 272.6,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3043078,
+        "name": "Derrick Henry",
+        "pts": 244.9,
+        "years": [
+          2020,
+          2020
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 4241389,
+        "name": "CeeDee Lamb",
+        "pts": 234.1,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 13934,
+        "name": "Antonio Brown",
+        "pts": 222.1,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 184.1,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3925357,
+        "name": "Calvin Ridley",
+        "pts": 170.5,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 4047650,
+        "name": "DK Metcalf",
+        "pts": 165.8,
+        "years": [
+          2019,
+          2025
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 3040151,
+        "name": "George Kittle",
+        "pts": 125.6,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3116164,
+        "name": "Mike Gesicki",
+        "pts": 104.4,
+        "years": [
+          2020,
+          2024
+        ]
+      },
+      {
+        "pid": 3043275,
+        "name": "Austin Hooper",
+        "pts": 99.3,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 3116365,
+        "name": "Mark Andrews",
+        "pts": 97.5,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 12537,
+        "name": "Jared Cook",
+        "pts": 91.5,
+        "years": [
+          2018,
+          2021
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 2985659,
+        "name": "Wil Lutz",
+        "pts": 167.0,
+        "years": [
+          2018,
+          2025
+        ]
+      },
+      {
+        "pid": 3051909,
+        "name": "Daniel Carlson",
+        "pts": 151.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 4360234,
+        "name": "Evan McPherson",
+        "pts": 77.0,
+        "years": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "pid": 4333,
+        "name": "Matt Bryant",
+        "pts": 59.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": 2473037,
+        "name": "Jason Myers",
+        "pts": 58.0,
+        "years": [
+          2018,
+          2025
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16023,
+        "name": "Steelers D/ST",
+        "pts": 172.0,
+        "years": [
+          2019,
+          2021
+        ]
+      },
+      {
+        "pid": -16020,
+        "name": "Jets D/ST",
+        "pts": 119.0,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": -16005,
+        "name": "Browns D/ST",
+        "pts": 116.0,
+        "years": [
+          2018,
+          2023
+        ]
+      },
+      {
+        "pid": -16006,
+        "name": "Cowboys D/ST",
+        "pts": 98.0,
+        "years": [
+          2021,
+          2025
+        ]
+      },
+      {
+        "pid": -16024,
+        "name": "Chargers D/ST",
+        "pts": 96.0,
+        "years": [
+          2018,
+          2025
+        ]
+      }
+    ]
+  },
+  "m16": {
+    "QB": [],
+    "RB": [],
+    "WR": [],
+    "TE": [],
+    "K": [],
+    "DST": []
+  },
+  "m17": {
+    "QB": [
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 365.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 4038941,
+        "name": "Justin Herbert",
+        "pts": 327.7,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 8439,
+        "name": "Aaron Rodgers",
+        "pts": 243.5,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": 2330,
+        "name": "Tom Brady",
+        "pts": 243.4,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 14881,
+        "name": "Russell Wilson",
+        "pts": 211.3,
+        "years": [
+          2020,
+          2025
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3051392,
+        "name": "Ezekiel Elliott",
+        "pts": 589.4,
+        "years": [
+          2019,
+          2022
+        ]
+      },
+      {
+        "pid": 3117251,
+        "name": "Christian McCaffrey",
+        "pts": 324.3,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 4429160,
+        "name": "De'Von Achane",
+        "pts": 242.3,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4259545,
+        "name": "D'Andre Swift",
+        "pts": 231.5,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 3043078,
+        "name": "Derrick Henry",
+        "pts": 217.4,
+        "years": [
+          2018,
+          2021
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 4362628,
+        "name": "Ja'Marr Chase",
+        "pts": 424.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 3116406,
+        "name": "Tyreek Hill",
+        "pts": 225.9,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 2976212,
+        "name": "Stefon Diggs",
+        "pts": 207.9,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 2974858,
+        "name": "Kenny Golladay",
+        "pts": 180.0,
+        "years": [
+          2019,
+          2021
+        ]
+      },
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 172.4,
+        "years": [
+          2018,
+          2021
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 15835,
+        "name": "Zach Ertz",
+        "pts": 179.2,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 15847,
+        "name": "Travis Kelce",
+        "pts": 100.8,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 4036133,
+        "name": "T.J. Hockenson",
+        "pts": 67.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 3051876,
+        "name": "Evan Engram",
+        "pts": 57.6,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3117256,
+        "name": "Dalton Schultz",
+        "pts": 56.1,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 2971573,
+        "name": "Ka'imi Fairbairn",
+        "pts": 259.0,
+        "years": [
+          2019,
+          2025
+        ]
+      },
+      {
+        "pid": 15683,
+        "name": "Justin Tucker",
+        "pts": 146.0,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 2998120,
+        "name": "Josh Lambo",
+        "pts": 98.0,
+        "years": [
+          2019,
+          2020
+        ]
+      },
+      {
+        "pid": 3049899,
+        "name": "Younghoe Koo",
+        "pts": 94.0,
+        "years": [
+          2020,
+          2023
+        ]
+      },
+      {
+        "pid": 10621,
+        "name": "Nick Folk",
+        "pts": 49.0,
+        "years": [
+          2023,
+          2023
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16027,
+        "name": "Buccaneers D/ST",
+        "pts": 165.0,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": -16033,
+        "name": "Ravens D/ST",
+        "pts": 140.0,
+        "years": [
+          2018,
+          2019
+        ]
+      },
+      {
+        "pid": -16011,
+        "name": "Colts D/ST",
+        "pts": 73.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": -16016,
+        "name": "Vikings D/ST",
+        "pts": 63.0,
+        "years": [
+          2021,
+          2023
+        ]
+      },
+      {
+        "pid": -16034,
+        "name": "Texans D/ST",
+        "pts": 58.0,
+        "years": [
+          2019,
+          2024
+        ]
+      }
+    ]
+  },
+  "m18": {
+    "QB": [
+      {
+        "pid": 5536,
+        "name": "Ben Roethlisberger",
+        "pts": 277.0,
+        "years": [
+          2018,
+          2018
+        ]
+      },
+      {
+        "pid": 14880,
+        "name": "Kirk Cousins",
+        "pts": 275.5,
+        "years": [
+          2019,
+          2021
+        ]
+      },
+      {
+        "pid": 8439,
+        "name": "Aaron Rodgers",
+        "pts": 269.8,
+        "years": [
+          2020,
+          2025
+        ]
+      },
+      {
+        "pid": 3046779,
+        "name": "Jared Goff",
+        "pts": 238.6,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 199.0,
+        "years": [
+          2022,
+          2022
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3128720,
+        "name": "Nick Chubb",
+        "pts": 302.7,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": 3054850,
+        "name": "Alvin Kamara",
+        "pts": 263.4,
+        "years": [
+          2018,
+          2024
+        ]
+      },
+      {
+        "pid": 4047365,
+        "name": "Josh Jacobs",
+        "pts": 259.3,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3042519,
+        "name": "Aaron Jones",
+        "pts": 232.0,
+        "years": [
+          2020,
+          2024
+        ]
+      },
+      {
+        "pid": 4430807,
+        "name": "Bijan Robinson",
+        "pts": 217.1,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 3116406,
+        "name": "Tyreek Hill",
+        "pts": 296.5,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 4047650,
+        "name": "DK Metcalf",
+        "pts": 272.0,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 271.9,
+        "years": [
+          2018,
+          2025
+        ]
+      },
+      {
+        "pid": 4262921,
+        "name": "Justin Jefferson",
+        "pts": 258.5,
+        "years": [
+          2020,
+          2022
+        ]
+      },
+      {
+        "pid": 4362628,
+        "name": "Ja'Marr Chase",
+        "pts": 204.8,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 2576925,
+        "name": "Darren Waller",
+        "pts": 153.9,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": 13229,
+        "name": "Rob Gronkowski",
+        "pts": 117.5,
+        "years": [
+          2018,
+          2021
+        ]
+      },
+      {
+        "pid": 3046439,
+        "name": "Hunter Henry",
+        "pts": 70.6,
+        "years": [
+          2019,
+          2023
+        ]
+      },
+      {
+        "pid": 3040151,
+        "name": "George Kittle",
+        "pts": 65.5,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4360248,
+        "name": "Kyle Pitts",
+        "pts": 63.2,
+        "years": [
+          2022,
+          2024
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 15683,
+        "name": "Justin Tucker",
+        "pts": 344.0,
+        "years": [
+          2018,
+          2020
+        ]
+      },
+      {
+        "pid": 3917232,
+        "name": "Tyler Bass",
+        "pts": 165.0,
+        "years": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "pid": 4689936,
+        "name": "Jake Bates",
+        "pts": 97.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4686361,
+        "name": "Cam Little",
+        "pts": 85.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 85.0,
+        "years": [
+          2021,
+          2021
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16026,
+        "name": "Seahawks D/ST",
+        "pts": 167.0,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": -16021,
+        "name": "Eagles D/ST",
+        "pts": 114.0,
+        "years": [
+          2018,
+          2022
+        ]
+      },
+      {
+        "pid": -16012,
+        "name": "Chiefs D/ST",
+        "pts": 111.0,
+        "years": [
+          2018,
+          2023
+        ]
+      },
+      {
+        "pid": -16033,
+        "name": "Ravens D/ST",
+        "pts": 104.0,
+        "years": [
+          2020,
+          2020
+        ]
+      },
+      {
+        "pid": -16034,
+        "name": "Texans D/ST",
+        "pts": 96.0,
+        "years": [
+          2018,
+          2024
+        ]
+      }
+    ]
+  },
+  "m19": {
+    "QB": [
+      {
+        "pid": 3915511,
+        "name": "Joe Burrow",
+        "pts": 339.1,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 280.1,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 3916387,
+        "name": "Lamar Jackson",
+        "pts": 221.2,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": 3917792,
+        "name": "Daniel Jones",
+        "pts": 174.1,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4432577,
+        "name": "C.J. Stroud",
+        "pts": 153.9,
+        "years": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 3054850,
+        "name": "Alvin Kamara",
+        "pts": 214.5,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": 3116593,
+        "name": "Dalvin Cook",
+        "pts": 186.3,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 4362238,
+        "name": "Chase Brown",
+        "pts": 167.5,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 3059915,
+        "name": "Kareem Hunt",
+        "pts": 166.8,
+        "years": [
+          2021,
+          2023
+        ]
+      },
+      {
+        "pid": 2980453,
+        "name": "Jamaal Williams",
+        "pts": 163.4,
+        "years": [
+          2022,
+          2023
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 16737,
+        "name": "Mike Evans",
+        "pts": 297.6,
+        "years": [
+          2022,
+          2024
+        ]
+      },
+      {
+        "pid": 4258173,
+        "name": "Nico Collins",
+        "pts": 288.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 4374302,
+        "name": "Amon-Ra St. Brown",
+        "pts": 193.1,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 16800,
+        "name": "Davante Adams",
+        "pts": 191.1,
+        "years": [
+          2021,
+          2024
+        ]
+      },
+      {
+        "pid": 16460,
+        "name": "Adam Thielen",
+        "pts": 146.8,
+        "years": [
+          2021,
+          2023
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 2468609,
+        "name": "Taysom Hill",
+        "pts": 110.5,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 3930086,
+        "name": "Dawson Knox",
+        "pts": 82.5,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": 3121023,
+        "name": "Dallas Goedert",
+        "pts": 72.6,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4430027,
+        "name": "Sam LaPorta",
+        "pts": 51.7,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4361411,
+        "name": "Pat Freiermuth",
+        "pts": 45.4,
+        "years": [
+          2023,
+          2024
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 17372,
+        "name": "Chris Boswell",
+        "pts": 227.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 3055899,
+        "name": "Harrison Butker",
+        "pts": 144.0,
+        "years": [
+          2023,
+          2023
+        ]
+      },
+      {
+        "pid": 10621,
+        "name": "Nick Folk",
+        "pts": 120.0,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": 2473037,
+        "name": "Jason Myers",
+        "pts": 90.0,
+        "years": [
+          2022,
+          2022
+        ]
+      },
+      {
+        "pid": 4372066,
+        "name": "Jake Moody",
+        "pts": 67.0,
+        "years": [
+          2023,
+          2024
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16002,
+        "name": "Bills D/ST",
+        "pts": 96.0,
+        "years": [
+          2023,
+          2025
+        ]
+      },
+      {
+        "pid": -16025,
+        "name": "49ers D/ST",
+        "pts": 88.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": -16014,
+        "name": "Rams D/ST",
+        "pts": 67.0,
+        "years": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "pid": -16012,
+        "name": "Chiefs D/ST",
+        "pts": 47.0,
+        "years": [
+          2021,
+          2021
+        ]
+      },
+      {
+        "pid": -16033,
+        "name": "Ravens D/ST",
+        "pts": 42.0,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ]
+  },
+  "m21": {
+    "QB": [
+      {
+        "pid": 3918298,
+        "name": "Josh Allen",
+        "pts": 379.1,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 3139477,
+        "name": "Patrick Mahomes",
+        "pts": 271.6,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4689114,
+        "name": "Jaxson Dart",
+        "pts": 73.5,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4241479,
+        "name": "Tua Tagovailoa",
+        "pts": 28.5,
+        "years": [
+          2024,
+          2024
+        ]
+      }
+    ],
+    "RB": [
+      {
+        "pid": 4259545,
+        "name": "D'Andre Swift",
+        "pts": 340.9,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 4362238,
+        "name": "Chase Brown",
+        "pts": 188.6,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4241474,
+        "name": "Brian Robinson Jr.",
+        "pts": 138.2,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4038815,
+        "name": "Rico Dowdle",
+        "pts": 74.6,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4575131,
+        "name": "Jacory Croskey-Merritt",
+        "pts": 47.8,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "WR": [
+      {
+        "pid": 4241389,
+        "name": "CeeDee Lamb",
+        "pts": 287.9,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 4430878,
+        "name": "Jaxon Smith-Njigba",
+        "pts": 232.5,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 4429615,
+        "name": "Zay Flowers",
+        "pts": 109.7,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 2977187,
+        "name": "Cooper Kupp",
+        "pts": 108.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 2976212,
+        "name": "Stefon Diggs",
+        "pts": 92.8,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "TE": [
+      {
+        "pid": 4432665,
+        "name": "Brock Bowers",
+        "pts": 139.7,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4572680,
+        "name": "Tucker Kraft",
+        "pts": 85.2,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3117256,
+        "name": "Dalton Schultz",
+        "pts": 47.7,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3054212,
+        "name": "Jonnu Smith",
+        "pts": 4.5,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 3929645,
+        "name": "Juwan Johnson",
+        "pts": 3.8,
+        "years": [
+          2025,
+          2025
+        ]
+      }
+    ],
+    "K": [
+      {
+        "pid": 3953687,
+        "name": "Brandon Aubrey",
+        "pts": 180.6,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": 3150744,
+        "name": "Chase McLaughlin",
+        "pts": 56.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4567104,
+        "name": "Will Reichard",
+        "pts": 33.0,
+        "years": [
+          2024,
+          2025
+        ]
+      },
+      {
+        "pid": 3917232,
+        "name": "Tyler Bass",
+        "pts": 23.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": 4259619,
+        "name": "Blake Grupe",
+        "pts": 14.0,
+        "years": [
+          2024,
+          2024
+        ]
+      }
+    ],
+    "DST": [
+      {
+        "pid": -16016,
+        "name": "Vikings D/ST",
+        "pts": 48.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": -16008,
+        "name": "Lions D/ST",
+        "pts": 43.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": -16015,
+        "name": "Dolphins D/ST",
+        "pts": 39.0,
+        "years": [
+          2025,
+          2025
+        ]
+      },
+      {
+        "pid": -16004,
+        "name": "Bengals D/ST",
+        "pts": 35.0,
+        "years": [
+          2024,
+          2024
+        ]
+      },
+      {
+        "pid": -16003,
+        "name": "Bears D/ST",
+        "pts": 27.0,
+        "years": [
+          2024,
+          2025
+        ]
+      }
+    ]
+  }
+}

@@ -4,66 +4,148 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Analytics</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%23ff2e9a%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EA%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
 <div class="frame">
 
   <!-- ============ HEADER ============ -->
   <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">A</div>
-      <div>
-        <h1>AFFL <span>Analytics</span></h1>
-        <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
+    <div class="topbar-row">
+      <div class="brand">
+        <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-mark.png" alt="AFFL"></a>
+        <div>
+          <h1>AFFL <span>Analytics</span></h1>
+          <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="index.html" class="on">Dashboard</a>
+        <a href="scoreboard.html">Scoreboard</a>
+        <a href="players.html">Players</a>
+        <a href="draft.html">Draft</a>
+        <a href="trades.html">Trades</a>
+        <a href="roto.html">Roto</a>
+        <a href="teams.html">Teams</a>
+        <a href="history.html">History</a>
+        <a href="awards.html">Awards</a>
+        <a href="dictionary.html">Dictionary</a>
+        <a href="wrapped.html">Wrapped</a>
+      </nav>
+    </div>
+    <div class="topbar-row topbar-meta">
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hs-value" id="hs-total">15,723</div>
+          <div class="hs-label">reg-season points</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-value accent" id="hs-games">84</div>
+          <div class="hs-label">reg-season games</div>
+        </div>
+      </div>
+      <div class="season-block">
+        <p class="provenance">ESPN Fantasy API &middot; verified warehouse &middot; 2014–2025</p>
+        <div class="season-picker" id="season-picker">
+          <button class="season-chip on" data-y="">Cumulative</button>
+          <button class="season-chip" data-y="2014">2014</button>
+          <button class="season-chip" data-y="2015">2015</button>
+          <button class="season-chip" data-y="2016">2016</button>
+          <button class="season-chip" data-y="2017">2017</button>
+          <button class="season-chip" data-y="2018">2018</button>
+          <button class="season-chip" data-y="2019">2019</button>
+          <button class="season-chip" data-y="2020">2020</button>
+          <button class="season-chip" data-y="2021">2021</button>
+          <button class="season-chip" data-y="2022">2022</button>
+          <button class="season-chip" data-y="2023">2023</button>
+          <button class="season-chip" data-y="2024">2024</button>
+          <button class="season-chip" data-y="2025">2025</button>
+        </div>
       </div>
     </div>
-    <nav class="site-nav">
-      <a href="index.html" class="on">Dashboard</a>
-      <a href="scoreboard.html">Scoreboard</a>
-      <a href="players.html">Players</a>
-      <a href="draft.html">Draft</a>
-      <a href="trades.html">Trades</a>
-    </nav>
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hs-value" id="hs-total">–</div>
-        <div class="hs-label">reg-season points</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hs-value accent" id="hs-games">–</div>
-        <div class="hs-label">reg-season games</div>
-      </div>
-    </div>
-    <div class="season-picker" id="season-picker"></div>
   </header>
 
-  <!-- ============ KPI DONUT ROW ============ -->
-  <section class="kpi-row" id="kpi-row"></section>
+  <!-- ============ KPI ROW (static league tiles; JS replaces with season donuts) ============ -->
+  <section class="kpi-row" id="kpi-row">
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">12</div>
+      <div class="kpi-desc">seasons</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">12</div>
+      <div class="kpi-desc">owners</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">927</div>
+      <div class="kpi-desc">matchups</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">2014–25</div>
+      <div class="kpi-desc">range</div>
+    </div>
+  </section>
 
-  <!-- ============ MAIN GRID ============ -->
+  <div id="season-pane" hidden>
+  <!-- ============ STANDINGS + SEASON STORY ============ -->
   <section class="main-grid">
-    <div class="card chart-card">
+    <div class="card">
       <div class="card-head">
-        <div>
-          <h2>Weekly Scoring</h2>
-          <div class="card-sub">league high / average / low &middot; regular season</div>
-        </div>
-        <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+        <div><h2>Final Standings</h2><div class="card-sub" id="standings-sub">ESPN W-L-T · warehouse Power</div></div>
       </div>
-      <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
+      <div class="table-scroll">
+        <table class="tbl" id="standings-tbl">
+          <thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th><th>All-Play</th><th>PWR</th><th>Luck</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
     <aside class="card side-card">
-      <div class="card-head"><h2>Season Story</h2></div>
-      <div class="champ-spot" id="champ-spot"></div>
+      <div class="card-head">
+        <div>
+          <h2>Season Story</h2>
+          <div class="card-sub" id="story-sub">warehouse notables · both scores</div>
+        </div>
+      </div>
+      <div class="champ-spot" id="champ-spot">
+        <img class="avatar" src="logos/4fd947dd128a.jpg" alt="">
+        <div>
+          <div class="tag">League Champion</div>
+          <div class="nm">San Diego Shadowcöcks</div>
+          <div class="rec">John Newton · 11-3 · 1,543.02 PF</div>
+        </div>
+      </div>
       <ul class="story-list" id="story-list"></ul>
-      <div class="side-total"><span>league total</span><strong id="side-total">–</strong></div>
+      <div class="side-total"><span>league total</span><strong id="side-total">15,723 pts</strong></div>
     </aside>
   </section>
 
-  <!-- ============ SECOND ROW ============ -->
+  <!-- ============ TROPHIES ============ -->
+  <section class="card" id="trophy-card">
+    <div class="card-head">
+      <div>
+        <h2>Trophies</h2>
+        <div class="card-sub" id="trophy-sub">Cup · Board · Roto · current franchise names</div>
+      </div>
+    </div>
+    <div class="trophy-grid" id="trophy-grid"></div>
+  </section>
+
+  <!-- ============ WEEKLY SCORING ============ -->
+  <section class="card chart-card">
+    <div class="card-head">
+      <div>
+        <h2>Weekly Scoring</h2>
+        <div class="card-sub">league high / average / low &middot; regular season</div>
+      </div>
+      <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+    </div>
+    <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
+  </section>
+
+  <!-- ============ RACE / PPW ============ -->
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
@@ -79,38 +161,57 @@
     </div>
   </section>
 
-  <!-- ============ STANDINGS + LUCK ============ -->
-  <section class="second-grid">
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Final Standings</h2><div class="card-sub" id="standings-sub">including playoffs</div></div>
-      </div>
-      <div class="table-scroll">
-        <table class="tbl" id="standings-tbl">
-          <thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th><th>Avg</th><th>All-Play</th></tr></thead>
-          <tbody></tbody>
-        </table>
+  <!-- ============ LUCK ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Luck Index</h2><div class="card-sub">lucky wins minus unlucky losses · weighted luck in the tooltip</div></div>
+    </div>
+    <div class="chart-wrap xtall"><canvas id="luck-chart"></canvas></div>
+  </section>
+
+  <section class="card" id="luck-card">
+    <div class="card-head">
+      <div>
+        <h2>Schedule vs Roster Luck</h2>
+        <div class="card-sub" id="luck-card-sub">actual · all-play · median · expected wins · schedule luck · TD−xTD</div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Luck Index</h2><div class="card-sub">actual wins minus schedule-adjusted expected wins</div></div>
-      </div>
-      <div class="chart-wrap fill"><canvas id="luck-chart"></canvas></div>
+    <div class="table-scroll">
+      <table class="tbl" id="luck-card-tbl">
+        <thead>
+          <tr>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="actualW">W-L</th>
+            <th class="s" data-k="allPlayW">All-Play</th>
+            <th class="s" data-k="medianW">Median</th>
+            <th class="s" data-k="expectedWins">Exp W</th>
+            <th class="s" data-k="scheduleLuckWins">Sched luck</th>
+            <th class="s" data-k="tdRes">TD−xTD</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
   <!-- ============ NEXT GEN LAB ============ -->
   <div class="section-break"><h2>Next Gen Lab <span id="lab-year">joined to nflverse</span></h2></div>
 
-  <section class="second-grid">
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Lineup IQ</h2><div class="card-sub">points started vs perfect lineups &middot; wasted on the bench</div></div>
-      </div>
-      <div class="chart-wrap xtall" data-canvas="lineup-chart"><canvas id="lineup-chart"></canvas></div>
+  <section class="card maxpot-card" id="max-potential">
+    <div class="maxpot-head">
+      <h2>Maximum Potential</h2>
+      <p>Highest ideal lineup points scored</p>
     </div>
-    <div class="card">
+    <div id="maxpot-award"></div>
+    <div class="maxpot-label">All teams · actual vs ideal points</div>
+    <div id="maxpot-bars"></div>
+    <div class="maxpot-legend">
+      <span><i class="dot actual"></i> Actual points scored</span>
+      <span><i class="dot left"></i> Points left on table</span>
+    </div>
+  </section>
+
+  <section class="card">
       <div class="card-head">
         <div><h2>Draft War Room</h2><div class="card-sub">auction ROI as points <em>above replacement</em> per dollar &middot; positionally fair</div></div>
       </div>
@@ -125,7 +226,6 @@
         </div>
       </div>
       <div class="draft-note" id="draft-note"></div>
-    </div>
   </section>
 
   <section class="second-grid">
@@ -165,18 +265,27 @@
 
   <section class="card">
     <div class="card-head">
-      <div><h2>Elite Company</h2><div class="card-sub">top started scorers with real NFL advanced context &middot; EPA, WOPR, target share</div></div>
+      <div><h2>Elite Company</h2><div class="card-sub" id="opp-sub">opportunity board · tgt share, WOPR, aDOT, xFP, FP−xFP</div></div>
     </div>
     <div class="table-scroll">
       <table class="tbl" id="spotlight-tbl">
-        <thead><tr><th>Player</th><th>Pos</th><th>Started By</th><th>Fantasy Pts</th><th>PPG</th><th>NFL EPA</th><th>WOPR</th><th>Tgt Share</th></tr></thead>
+        <thead><tr>
+          <th class="s" data-k="name">Player</th>
+          <th class="s" data-k="pos">Pos</th>
+          <th class="s" data-k="tgtShare">Tgt Share</th>
+          <th class="s" data-k="wopr">WOPR</th>
+          <th class="s" data-k="adot">aDOT</th>
+          <th class="s" data-k="xfp">xFP</th>
+          <th class="s" data-k="fp">FP</th>
+          <th class="s" data-k="resid">FP−xFP</th>
+        </tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
 
-  <!-- ============ PLAYER PROFILER ============ -->
-  <div class="section-break"><h2>Player Profiler <span id="profiler-year">every rostered player</span></h2></div>
+  <!-- ============ STARS, SCRUBS, & DUDS ============ -->
+  <div class="section-break"><h2>Stars, Scrubs, &amp; Duds <span id="profiler-year">every rostered player</span></h2></div>
 
   <section class="card">
     <div class="card-head">
@@ -223,19 +332,64 @@
     </div>
   </section>
 
+  </div>
+
+  <div id="cum-pane">
   <!-- ============ ALL-TIME ============ -->
   <div class="section-break"><h2>All-Time <span>2014 – 2025</span></h2></div>
 
   <section class="timeline" id="timeline"></section>
 
+  <!-- CHI-89: Leagology-style manager milestones + Elo (verified matchups) -->
+  <section class="card" id="elo-card">
+    <div class="card-head">
+      <div>
+        <h2>League Rating</h2>
+        <div class="card-sub" id="elo-sub">Elo · 1500 average · every verified game · playoff boost · blowout weight</div>
+      </div>
+      <div class="elo-filters" id="elo-filters" role="tablist" aria-label="Elo filter">
+        <button type="button" class="chip on" data-elo-filter="active">Active</button>
+        <button type="button" class="chip" data-elo-filter="all">Everyone</button>
+      </div>
+    </div>
+    <div class="chart-wrap tall"><canvas id="elo-chart"></canvas></div>
+    <div class="table-scroll">
+      <table class="tbl" id="elo-tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Manager</th><th class="s">Rating</th><th class="s">Peak</th><th class="s">Low</th><th class="s">Games</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="draft-note" id="elo-note"></p>
+  </section>
+
+  <section class="card" id="milestones-card">
+    <div class="card-head">
+      <div>
+        <h2>Milestones</h2>
+        <div class="card-sub" id="ms-sub">Fewest career games to each bar · paced from first AFFL game · not a running total</div>
+      </div>
+    </div>
+    <div class="ms-board-tabs" id="ms-board-tabs" role="tablist" aria-label="Milestone boards"></div>
+    <div class="ms-board" id="ms-board"></div>
+    <div class="ms-chase-wrap">
+      <h3 class="ms-chase-title">The chase · next win bar</h3>
+      <ul class="story-list" id="ms-chase"></ul>
+    </div>
+    <p class="draft-note" id="ms-note"></p>
+  </section>
+
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
-        <div><h2>Franchise Records</h2><div class="card-sub">every owner, every season</div></div>
+        <div><h2>Franchise Records</h2><div class="card-sub">current name · career · full book on History</div></div>
       </div>
       <div class="table-scroll">
         <table class="tbl" id="franchise-tbl">
-          <thead><tr><th>Owner</th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>🏆</th><th>PF</th></tr></thead>
+          <thead><tr><th></th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>Titles</th><th>PF</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -250,15 +404,21 @@
 
   <section class="card h2h-card">
     <div class="card-head">
-      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins, row owner vs column owner &middot; active members</div></div>
+      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins · current franchise names</div></div>
     </div>
     <div class="table-scroll"><table class="tbl h2h" id="h2h-tbl"></table></div>
   </section>
 
-  <footer class="foot">AFFL Analytics &middot; data via ESPN Fantasy API &middot; seasons 2014–2025</footer>
+  </div>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Analytics &middot; data via ESPN Fantasy API &middot; seasons 2014–2025</p>
+  </footer>
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="app.js?v=9"></script>
+<script src="common.js?v=16"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

@@ -3,11 +3,13 @@
 -- the site's JSON bundles become build artifacts exported from these tables.
 --
 -- Conventions
---   * season          = fantasy year (2014..2025)
+--   * season          = fantasy year (2014..2026)
 --   * team_id         = ESPN team id, only unique WITHIN a season
---   * member_id       = anonymised owner alias (m01..m21); stable across seasons
+--   * member_id       = ESPN slot alias (m01..m22); not the person
+--   * owner_id        = the person (dim_owner). career math joins through this
 --   * player_id       = ESPN player id (negative for D/ST: -16000 - proTeamId)
 --   * points are fantasy points; "started" excludes BN/IR slots
+--   * phase           = regular | championship | consolation | playoff_unspecified
 -- ============================================================================
 
 PRAGMA journal_mode = WAL;
@@ -32,10 +34,20 @@ CREATE TABLE IF NOT EXISTS dim_season (
   yardage_mode    TEXT NOT NULL DEFAULT 'FRACTIONAL'
 );
 
-CREATE TABLE IF NOT EXISTS dim_member (
-  member_id       TEXT PRIMARY KEY,       -- m01..m21 (never a real ESPN SWID)
+-- Person grain. ESPN member_id splits (Kafka m07/m01) and leaves orphans
+-- (Sliger m03, Dunn m20). Career math joins dim_team.member_id -> dim_member
+-- -> dim_owner. member_id is kept; it is not destroyed.
+CREATE TABLE IF NOT EXISTS dim_owner (
+  owner_id        TEXT PRIMARY KEY,
   display_name    TEXT NOT NULL,
   is_active       INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS dim_member (
+  member_id       TEXT PRIMARY KEY,       -- m01..m22 (never a real ESPN SWID)
+  display_name    TEXT NOT NULL,
+  is_active       INTEGER NOT NULL DEFAULT 0,
+  owner_id        TEXT                    -- person; see dim_owner
 );
 
 -- a franchise-season: the same owner's team in one particular year
@@ -137,7 +149,7 @@ CREATE TABLE IF NOT EXISTS fact_transaction (
 );
 CREATE INDEX IF NOT EXISTS ix_tx ON fact_transaction(season, team_id, direction);
 
--- trades are reconstructed from roster movement, not the transaction feed
+-- trades: TRADE_ACCEPT items when present; else reconstructed from roster deltas
 CREATE TABLE IF NOT EXISTS fact_trade (
   trade_id        INTEGER PRIMARY KEY AUTOINCREMENT,
   season          INTEGER NOT NULL,
@@ -227,19 +239,29 @@ SELECT m.season, m.week, m.team_id, t.member_id, t.name AS team_name,
 FROM fact_matchup m
 JOIN dim_team t ON t.season = m.season AND t.team_id = m.team_id;
 
--- all-play / power ranking: how you'd do against the whole league every week
+-- all-play / power ranking: how you'd do against the whole league every week.
+-- Ranks use the raw numerator/denominator (power_ratio), not the rounded display.
+-- CHI-26 / AFFL-005.
 DROP VIEW IF EXISTS v_power;
 CREATE VIEW v_power AS
-SELECT season, team_id,
-       SUM(beat_this_week)                                    AS allplay_w,
-       SUM(field_size - beat_this_week)                       AS allplay_l,
-       ROUND(1.0 * SUM(beat_this_week) /
-             NULLIF(SUM(field_size), 0), 4)                   AS power_pct
-FROM v_team_week
-WHERE is_playoff = 0
-GROUP BY season, team_id;
+SELECT season, team_id, allplay_w, allplay_l, power_ratio, power_pct,
+       RANK() OVER (PARTITION BY season
+                    ORDER BY power_ratio DESC, allplay_w DESC, allplay_l ASC) AS power_rank
+FROM (
+  SELECT season, team_id,
+         SUM(beat_this_week)                                    AS allplay_w,
+         SUM(field_size - beat_this_week)                       AS allplay_l,
+         1.0 * SUM(beat_this_week) /
+               NULLIF(SUM(field_size), 0)                       AS power_ratio,
+         ROUND(1.0 * SUM(beat_this_week) /
+               NULLIF(SUM(field_size), 0), 4)                   AS power_pct
+  FROM v_team_week
+  WHERE is_playoff = 0
+  GROUP BY season, team_id
+);
 
--- FantasyGenius luck: won while in the bottom half / lost while in the top half
+-- Luck Index (FantasyGenius discrete). Distinct from League Legacy weighted luck
+-- in v_luck_weighted (actual wins minus all-play expected wins).
 DROP VIEW IF EXISTS v_luck;
 CREATE VIEW v_luck AS
 SELECT season, team_id,
@@ -250,6 +272,82 @@ SELECT season, team_id,
 FROM v_team_week
 WHERE is_playoff = 0
 GROUP BY season, team_id;
+
+-- CHI-25 / AFFL-006. Normalized scoring + notable matchups from fact_matchup.
+-- Regular season only. One game = is_home=1 so we do not double-count sides.
+DROP VIEW IF EXISTS v_score_week;
+CREATE VIEW v_score_week AS
+SELECT season, week,
+       COUNT(*) AS n,
+       MIN(points) AS min_pts,
+       AVG(points) AS avg_pts,
+       MAX(points) AS max_pts
+FROM fact_matchup
+WHERE is_playoff = 0
+GROUP BY season, week;
+
+DROP VIEW IF EXISTS v_score_normalized;
+CREATE VIEW v_score_normalized AS
+SELECT m.season, m.week, m.team_id, m.opponent_id, m.points, m.result,
+       w.avg_pts AS week_avg, w.min_pts AS week_min, w.max_pts AS week_max,
+       m.points - w.avg_pts AS vs_avg,
+       1.0 * m.points / NULLIF(w.avg_pts, 0) AS pct_of_week
+FROM fact_matchup m
+JOIN v_score_week w ON w.season = m.season AND w.week = m.week
+WHERE m.is_playoff = 0;
+
+DROP VIEW IF EXISTS v_score_distribution;
+CREATE VIEW v_score_distribution AS
+SELECT season,
+       CAST(points / 10 AS INTEGER) * 10 AS bucket,
+       COUNT(*) AS n
+FROM fact_matchup
+WHERE is_playoff = 0
+GROUP BY season, CAST(points / 10 AS INTEGER) * 10;
+
+DROP VIEW IF EXISTS v_game;
+CREATE VIEW v_game AS
+SELECT season, week, team_id AS home_id, opponent_id AS away_id,
+       points AS home_pts, opponent_points AS away_pts,
+       CASE WHEN points >= opponent_points THEN team_id ELSE opponent_id END AS winner_id,
+       CASE WHEN points >= opponent_points THEN opponent_id ELSE team_id END AS loser_id,
+       CASE WHEN points >= opponent_points THEN points ELSE opponent_points END AS winner_pts,
+       CASE WHEN points >= opponent_points THEN opponent_points ELSE points END AS loser_pts,
+       points + opponent_points AS combined,
+       ABS(points - opponent_points) AS margin,
+       is_playoff
+FROM fact_matchup
+WHERE is_home = 1;
+
+DROP VIEW IF EXISTS v_notable_matchup;
+CREATE VIEW v_notable_matchup AS
+WITH g AS (
+  SELECT * FROM v_game WHERE is_playoff = 0
+)
+SELECT season, 'min_win' AS kind, week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE (season, winner_pts) IN (SELECT season, MIN(winner_pts) FROM g GROUP BY season)
+UNION ALL
+SELECT season, 'max_loss', week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE (season, loser_pts) IN (SELECT season, MAX(loser_pts) FROM g GROUP BY season)
+UNION ALL
+SELECT season, 'slugfest', week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE (season, combined) IN (SELECT season, MAX(combined) FROM g GROUP BY season)
+UNION ALL
+SELECT season, 'pillow_fight', week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE (season, combined) IN (SELECT season, MIN(combined) FROM g GROUP BY season)
+UNION ALL
+SELECT season, 'blowout', week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE (season, margin) IN (SELECT season, MAX(margin) FROM g GROUP BY season)
+UNION ALL
+SELECT season, 'nail_biter', week, winner_id, loser_id,
+       winner_pts, loser_pts, combined, margin
+FROM g WHERE margin > 0
+  AND (season, margin) IN (SELECT season, MIN(margin) FROM g WHERE margin > 0 GROUP BY season);
 
 -- a player's fantasy season from the AFFL's point of view
 DROP VIEW IF EXISTS v_player_season;
@@ -491,7 +589,8 @@ WHERE dv.bid > 0 AND dv.par IS NOT NULL
 
 DROP VIEW IF EXISTS v_manager_market;
 CREATE VIEW v_manager_market AS
-SELECT t.member_id, m.display_name,
+SELECT COALESCE(o.owner_id, t.member_id)         AS owner_id,
+       COALESCE(o.display_name, m.display_name)  AS display_name,
        COUNT(*)                                  AS picks,
        ROUND(SUM(e.bid))                         AS spent,
        ROUND(SUM(e.edge), 1)                     AS total_edge,
@@ -500,4 +599,396 @@ SELECT t.member_id, m.display_name,
 FROM v_pick_edge e
 JOIN dim_team   t ON t.season = e.season AND t.team_id = e.team_id
 JOIN dim_member m ON m.member_id = t.member_id
-GROUP BY t.member_id;
+LEFT JOIN dim_owner o ON o.owner_id = m.owner_id
+GROUP BY COALESCE(o.owner_id, t.member_id);
+
+
+-- ===========================================================================
+-- Identity / phase / GM / xTD / projections  (CONTRACTS.md)
+-- ===========================================================================
+
+DROP VIEW IF EXISTS v_team;
+CREATE VIEW v_team AS
+SELECT t.season, t.team_id, t.member_id, m.owner_id,
+       t.name, t.abbrev, t.logo, t.wins, t.losses, t.ties,
+       t.points_for, t.points_against, t.playoff_seed, t.final_rank,
+       o.display_name AS owner_name
+FROM dim_team t
+LEFT JOIN dim_member m ON m.member_id = t.member_id
+LEFT JOIN dim_owner  o ON o.owner_id = m.owner_id;
+
+-- regular = is_playoff 0. championship = winners bracket. consolation =
+-- either consolation ladder. Pre-2018 ESPN stored no tier, so those playoff
+-- sides are playoff_unspecified and stay out of official W/L.
+DROP VIEW IF EXISTS v_matchup;
+CREATE VIEW v_matchup AS
+SELECT m.*,
+       CASE
+         WHEN m.is_playoff = 0 THEN 'regular'
+         WHEN m.tier = 'WINNERS_BRACKET' THEN 'championship'
+         WHEN m.tier IN ('LOSERS_CONSOLATION_LADDER', 'WINNERS_CONSOLATION_LADDER')
+           THEN 'consolation'
+         ELSE 'playoff_unspecified'
+       END AS phase
+FROM fact_matchup m;
+
+DROP VIEW IF EXISTS v_official_record;
+CREATE VIEW v_official_record AS
+SELECT m.season, m.team_id, t.member_id, t.owner_id, t.owner_name, t.name AS team_name,
+       SUM(CASE WHEN m.result = 'W' THEN 1 ELSE 0 END) AS wins,
+       SUM(CASE WHEN m.result = 'L' THEN 1 ELSE 0 END) AS losses,
+       SUM(CASE WHEN m.result = 'T' THEN 1 ELSE 0 END) AS ties,
+       ROUND(SUM(m.points), 1) AS points_for,
+       ROUND(SUM(m.opponent_points), 1) AS points_against
+FROM v_matchup m
+JOIN v_team t ON t.season = m.season AND t.team_id = m.team_id
+WHERE m.phase IN ('regular', 'championship')
+GROUP BY m.season, m.team_id;
+
+-- Regular-season standings from weekly sides. ESPN dim_team W-L-T is the
+-- published record; PF/PA here is the 1-decimal box grain (CHI-24). Compare,
+-- do not overwrite. CHI-26 / AFFL-005.
+DROP VIEW IF EXISTS v_standings_regular;
+CREATE VIEW v_standings_regular AS
+SELECT m.season, m.team_id, t.member_id, t.owner_id, t.owner_name, t.name AS team_name,
+       SUM(CASE WHEN m.result = 'W' THEN 1 ELSE 0 END) AS wins,
+       SUM(CASE WHEN m.result = 'L' THEN 1 ELSE 0 END) AS losses,
+       SUM(CASE WHEN m.result = 'T' THEN 1 ELSE 0 END) AS ties,
+       SUM(m.points) AS points_for,
+       SUM(m.opponent_points) AS points_against,
+       COUNT(*) AS games
+FROM v_matchup m
+JOIN v_team t ON t.season = m.season AND t.team_id = m.team_id
+WHERE m.phase = 'regular'
+GROUP BY m.season, m.team_id;
+
+-- League Legacy weighted luck: actual regular-season wins minus all-play
+-- expected wins. Not Luck Index (v_luck). CHI-26 / AFFL-005.
+DROP VIEW IF EXISTS v_luck_weighted;
+CREATE VIEW v_luck_weighted AS
+SELECT s.season, s.team_id,
+       s.wins AS reg_wins,
+       s.games AS reg_games,
+       p.allplay_w, p.allplay_l,
+       ROUND(p.power_ratio * s.games, 2) AS exp_wins,
+       ROUND(s.wins - p.power_ratio * s.games, 2) AS weighted_luck
+FROM v_standings_regular s
+JOIN v_power p ON p.season = s.season AND p.team_id = s.team_id;
+
+-- Weekly custody PAR, 2018-2025 only (needs fact_roster_week).
+-- par = weekly points - replacement(pos, season) / weeks_in_season.
+-- replacement is the Nth-best season total at the position (v_replacement_level).
+CREATE TABLE IF NOT EXISTS fact_player_week_par (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  team_id         INTEGER NOT NULL,
+  points          REAL NOT NULL,
+  par             REAL,
+  started         INTEGER NOT NULL,
+  acquisition     TEXT NOT NULL,          -- Drafted | Traded in | Waiver | FA
+  position        TEXT,
+  PRIMARY KEY (season, week, team_id, player_id)
+);
+CREATE INDEX IF NOT EXISTS ix_pwpar_team ON fact_player_week_par(season, team_id);
+CREATE INDEX IF NOT EXISTS ix_pwpar_acq  ON fact_player_week_par(season, acquisition);
+
+DROP VIEW IF EXISTS v_custody_par;
+CREATE VIEW v_custody_par AS
+SELECT r.season, r.team_id, t.owner_id, t.owner_name, t.name AS team_name,
+       ROUND(SUM(r.par), 1) AS par_total,
+       ROUND(SUM(CASE WHEN r.acquisition = 'Drafted'    THEN r.par ELSE 0 END), 1) AS par_drafted,
+       ROUND(SUM(CASE WHEN r.acquisition = 'Traded in'  THEN r.par ELSE 0 END), 1) AS par_traded_in,
+       ROUND(SUM(CASE WHEN r.acquisition = 'Waiver'     THEN r.par ELSE 0 END), 1) AS par_waiver,
+       ROUND(SUM(CASE WHEN r.acquisition = 'FA'         THEN r.par ELSE 0 END), 1) AS par_fa
+FROM fact_player_week_par r
+JOIN v_team t ON t.season = r.season AND t.team_id = r.team_id
+GROUP BY r.season, r.team_id;
+
+-- 2014-2017: no weekly lineups. Season draft PAR from draft + season totals.
+-- Labeled reconstructed. Not weekly custody PAR.
+CREATE TABLE IF NOT EXISTS fact_player_season_par_reconstructed (
+  season          INTEGER NOT NULL,
+  team_id         INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  position        TEXT,
+  points          REAL,
+  par             REAL,
+  acquisition     TEXT NOT NULL DEFAULT 'Drafted',
+  PRIMARY KEY (season, team_id, player_id)
+);
+
+DROP VIEW IF EXISTS v_custody_par_reconstructed;
+CREATE VIEW v_custody_par_reconstructed AS
+SELECT r.season, r.team_id, t.owner_id, t.owner_name, t.name AS team_name,
+       ROUND(SUM(r.par), 1) AS par_total,
+       ROUND(SUM(CASE WHEN r.acquisition = 'Drafted' THEN r.par ELSE 0 END), 1) AS par_drafted,
+       'reconstructed' AS grain
+FROM fact_player_season_par_reconstructed r
+JOIN v_team t ON t.season = r.season AND t.team_id = r.team_id
+GROUP BY r.season, r.team_id;
+
+-- Opportunity xTD from nflverse pbp. Empty until compute_xtd.py lands rows.
+CREATE TABLE IF NOT EXISTS fact_xtd_player_week (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  gsis_id         TEXT NOT NULL,
+  player_id       INTEGER,                -- ESPN id when resolved
+  team_id         INTEGER,                -- AFFL roster owner that week, else NULL
+  rush_td         REAL NOT NULL DEFAULT 0,
+  rec_td          REAL NOT NULL DEFAULT 0,
+  actual_td       REAL NOT NULL DEFAULT 0,
+  rush_xtd        REAL NOT NULL DEFAULT 0,
+  rec_xtd         REAL NOT NULL DEFAULT 0,
+  xtd             REAL NOT NULL DEFAULT 0,
+  residual        REAL NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, week, gsis_id)
+);
+CREATE INDEX IF NOT EXISTS ix_xtd_team ON fact_xtd_player_week(season, team_id);
+
+DROP VIEW IF EXISTS v_xtd_player_season;
+CREATE VIEW v_xtd_player_season AS
+SELECT season, player_id, gsis_id,
+       ROUND(SUM(actual_td), 2) AS actual_td,
+       ROUND(SUM(xtd), 2)       AS xtd,
+       ROUND(SUM(residual), 2)  AS residual
+FROM fact_xtd_player_week
+GROUP BY season, gsis_id;
+
+DROP VIEW IF EXISTS v_xtd_portfolio;
+CREATE VIEW v_xtd_portfolio AS
+SELECT x.season, x.team_id, t.owner_id, t.owner_name, t.name AS team_name,
+       ROUND(SUM(x.actual_td), 2) AS actual_td,
+       ROUND(SUM(x.xtd), 2)       AS xtd,
+       ROUND(SUM(x.residual), 2)  AS residual
+FROM fact_xtd_player_week x
+JOIN v_team t ON t.season = x.season AND t.team_id = x.team_id
+WHERE x.team_id IS NOT NULL
+GROUP BY x.season, x.team_id;
+
+-- Weekly projections. source='espn' from raw mMatchup stats (statSourceId=1).
+-- source='fantasypros' reserved; no historical dump is on disk.
+CREATE TABLE IF NOT EXISTS fact_projection_week (
+  source          TEXT NOT NULL,
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  pass_yds REAL, pass_td REAL, interceptions REAL,
+  rush_yds REAL, rush_td REAL,
+  rec_yds  REAL, rec_td  REAL, receptions REAL,
+  fumbles_lost REAL,
+  affl_points     REAL,
+  PRIMARY KEY (source, season, week, player_id)
+);
+
+
+-- ===========================================================================
+-- Rotisserie standings. Started-player NFL stats, 2018+ only.
+-- Rank 1 = best. Roto pts = nTeams - rank + 1. Consolation excluded.
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS fact_roto_team_season (
+  season INTEGER NOT NULL,
+  phase TEXT NOT NULL,                 -- regular | championship | combined
+  team_id INTEGER NOT NULL,
+  games INTEGER NOT NULL,
+  py REAL NOT NULL DEFAULT 0,
+  ptd REAL NOT NULL DEFAULT 0,
+  cmp REAL NOT NULL DEFAULT 0,
+  att REAL NOT NULL DEFAULT 0,
+  ry REAL NOT NULL DEFAULT 0,
+  rtd REAL NOT NULL DEFAULT 0,
+  car REAL NOT NULL DEFAULT 0,
+  rec REAL NOT NULL DEFAULT 0,
+  recy REAL NOT NULL DEFAULT 0,
+  retd REAL NOT NULL DEFAULT 0,
+  comp_pct REAL NOT NULL DEFAULT 0,
+  ypc REAL NOT NULL DEFAULT 0,
+  ypr REAL NOT NULL DEFAULT 0,
+  py_rank INTEGER, py_pts INTEGER,
+  ptd_rank INTEGER, ptd_pts INTEGER,
+  comp_pct_rank INTEGER, comp_pct_pts INTEGER,
+  ry_rank INTEGER, ry_pts INTEGER,
+  rtd_rank INTEGER, rtd_pts INTEGER,
+  ypc_rank INTEGER, ypc_pts INTEGER,
+  recy_rank INTEGER, recy_pts INTEGER,
+  retd_rank INTEGER, retd_pts INTEGER,
+  rec_rank INTEGER, rec_pts INTEGER,
+  ypr_rank INTEGER, ypr_pts INTEGER,
+  total_pts INTEGER NOT NULL,
+  total_rank INTEGER NOT NULL,
+  PRIMARY KEY (season, phase, team_id)
+);
+
+CREATE TABLE IF NOT EXISTS fact_roto_team_week (
+  season INTEGER NOT NULL,
+  phase TEXT NOT NULL,                 -- regular | championship | combined
+  week INTEGER NOT NULL,
+  team_id INTEGER NOT NULL,
+  py REAL NOT NULL DEFAULT 0,
+  ptd REAL NOT NULL DEFAULT 0,
+  cmp REAL NOT NULL DEFAULT 0,
+  att REAL NOT NULL DEFAULT 0,
+  ry REAL NOT NULL DEFAULT 0,
+  rtd REAL NOT NULL DEFAULT 0,
+  car REAL NOT NULL DEFAULT 0,
+  rec REAL NOT NULL DEFAULT 0,
+  recy REAL NOT NULL DEFAULT 0,
+  retd REAL NOT NULL DEFAULT 0,
+  comp_pct REAL NOT NULL DEFAULT 0,
+  ypc REAL NOT NULL DEFAULT 0,
+  ypr REAL NOT NULL DEFAULT 0,
+  PRIMARY KEY (season, phase, week, team_id)
+);
+
+-- CHI-27 / AFFL-007. Started-player NFL stat lines.
+-- DST has no gsis. Missing skill weeks stay missing (no zero fill).
+DROP VIEW IF EXISTS v_starter_nfl_week;
+CREATE VIEW v_starter_nfl_week AS
+SELECT r.season, r.week, r.team_id, r.player_id, p.name, p.position, p.gsis_id,
+       r.slot, r.points AS affl_points,
+       n.pass_yards, n.pass_tds, n.completions, n.attempts,
+       n.rush_yards, n.rush_tds, n.carries,
+       n.rec_yards, n.rec_tds, n.receptions, n.targets,
+       n.epa,
+       CASE WHEN n.gsis_id IS NOT NULL THEN 1 ELSE 0 END AS has_nfl
+FROM fact_roster_week r
+JOIN dim_player p ON p.player_id = r.player_id
+LEFT JOIN fact_nfl_week n
+  ON n.season = r.season AND n.week = r.week AND n.gsis_id = p.gsis_id
+WHERE r.started = 1;
+
+DROP VIEW IF EXISTS v_roto_standings;
+
+CREATE VIEW v_roto_standings AS
+SELECT r.season, r.phase, r.team_id, t.owner_id, t.owner_name, t.name AS team_name,
+       r.games, r.py, r.ptd, r.cmp, r.att, r.comp_pct, r.ry, r.rtd, r.car, r.ypc,
+       r.recy, r.retd, r.rec, r.ypr,
+       r.py_rank, r.py_pts, r.ptd_rank, r.ptd_pts,
+       r.comp_pct_rank, r.comp_pct_pts, r.ry_rank, r.ry_pts,
+       r.rtd_rank, r.rtd_pts, r.ypc_rank, r.ypc_pts,
+       r.recy_rank, r.recy_pts, r.retd_rank, r.retd_pts,
+       r.rec_rank, r.rec_pts, r.ypr_rank, r.ypr_pts,
+       r.total_pts, r.total_rank
+  FROM fact_roto_team_season r
+  JOIN v_team t ON t.season = r.season AND t.team_id = r.team_id;
+
+
+-- ===========================================================================
+-- Import provenance. CHI-24 / AFFL-004.
+-- Checksum + adapter version + diagnostics. Not wiped on rebuild.
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS meta_import_run (
+  run_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  adapter         TEXT NOT NULL,
+  adapter_version TEXT NOT NULL,
+  dataset         TEXT NOT NULL,          -- matchup | roster | ...
+  season          INTEGER,
+  started_at      TEXT NOT NULL,          -- UTC ISO
+  finished_at     TEXT,
+  status          TEXT NOT NULL,          -- ok | fail
+  row_count       INTEGER,
+  diagnostics     TEXT                    -- JSON; no secrets
+);
+CREATE INDEX IF NOT EXISTS ix_import_run_ds ON meta_import_run(dataset, season);
+
+CREATE TABLE IF NOT EXISTS meta_import_source (
+  source_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  run_id          INTEGER NOT NULL REFERENCES meta_import_run(run_id),
+  path            TEXT NOT NULL,          -- repo-relative, e.g. data/box_2025.json
+  sha256          TEXT NOT NULL,
+  bytes           INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_import_source_run ON meta_import_source(run_id);
+
+
+-- ===========================================================================
+-- Sidecar NFL context. CHI-72 Phase B. Loaded from cached JSON/CSV, not ESPN
+-- at query time. Join on ESPN player_id / gsis_id already on dim_player.
+-- Missing id stays NULL (honest empty). Do not invent 2014-17 benches.
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS fact_ngs (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,          -- 0 = season aggregate
+  season_type     TEXT NOT NULL DEFAULT 'REG',
+  gsis_id         TEXT NOT NULL,
+  player_id       INTEGER,                   -- ESPN id when dim_player has it
+  kind            TEXT NOT NULL,             -- passing | rushing | receiving
+  attempts REAL, completions REAL, cmp_pct REAL,
+  pass_yards REAL, pass_td REAL, interceptions REAL,
+  passer_rating REAL, cpoe REAL, time_to_throw REAL, aggressiveness REAL,
+  intended_air_yards REAL,
+  rush_attempts REAL, rush_yards REAL, rush_td REAL,
+  efficiency REAL, stacked_box_pct REAL, ryoe REAL, ryoe_per_att REAL,
+  targets REAL, receptions REAL, rec_yards REAL, rec_td REAL,
+  avg_cushion REAL, avg_separation REAL, yac_above_expectation REAL,
+  intended_air_yards_share REAL,
+  PRIMARY KEY (season, week, season_type, gsis_id, kind)
+);
+CREATE INDEX IF NOT EXISTS ix_ngs_gsis ON fact_ngs(gsis_id);
+CREATE INDEX IF NOT EXISTS ix_ngs_player ON fact_ngs(player_id);
+CREATE INDEX IF NOT EXISTS ix_ngs_season ON fact_ngs(season, kind);
+
+CREATE TABLE IF NOT EXISTS dim_player_bio (
+  player_id       INTEGER PRIMARY KEY,       -- ESPN
+  gsis_id         TEXT,
+  birth           TEXT,
+  college         TEXT,
+  college_logo    TEXT,
+  draft_year      INTEGER,
+  draft_round     INTEGER,
+  draft_pick      INTEGER,
+  draft_team      TEXT,
+  breakout_age    REAL,
+  dominator       REAL,
+  early_declare   INTEGER,
+  class_year      INTEGER,
+  age_by_year     TEXT,                      -- JSON {season: age}
+  nfl_by_year     TEXT                       -- JSON {season: nfl team}
+);
+CREATE INDEX IF NOT EXISTS ix_bio_gsis ON dim_player_bio(gsis_id);
+
+CREATE TABLE IF NOT EXISTS fact_injury (
+  player_id       INTEGER PRIMARY KEY,       -- ESPN athleteId; current snapshot
+  gsis_id         TEXT,
+  name            TEXT,
+  status          TEXT,
+  comment         TEXT,
+  team            TEXT,
+  date            TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_injury_gsis ON fact_injury(gsis_id);
+
+CREATE TABLE IF NOT EXISTS fact_depthchart (
+  player_id       INTEGER PRIMARY KEY,       -- ESPN athleteId; current snapshot
+  gsis_id         TEXT,
+  name            TEXT,
+  team            TEXT,
+  pos             TEXT,
+  rank            INTEGER,
+  depth           TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_depth_gsis ON fact_depthchart(gsis_id);
+
+-- 9 rookies in the cache. Do not invent more.
+CREATE TABLE IF NOT EXISTS fact_college (
+  player_id       INTEGER PRIMARY KEY,
+  gsis_id         TEXT,
+  name            TEXT,
+  college         TEXT,
+  years           TEXT,                      -- JSON list of season ints
+  line            TEXT,
+  source          TEXT
+);
+
+-- Thin news/overview cache (15 players). Not a complete league feed.
+CREATE TABLE IF NOT EXISTS fact_player_overview (
+  player_id       INTEGER PRIMARY KEY,
+  gsis_id         TEXT,
+  name            TEXT,
+  college         TEXT,
+  draft           TEXT,
+  headshot_fallback TEXT,
+  next_game       TEXT,                      -- JSON
+  news            TEXT,                      -- JSON array
+  rotowire        TEXT
+);

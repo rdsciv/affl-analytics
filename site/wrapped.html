@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Wrapped</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="styles.css?v=30">
+</head>
+<body>
+<div class="frame">
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-mark.png" alt="AFFL"></a>
+      <div>
+        <h1>AFFL <span>Wrapped</span></h1>
+        <div class="sub" id="page-sub">that season only · PAR adds · trade grades · current franchise names</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html" class="on">Wrapped</a>
+    </nav>
+  </header>
+
+  <div class="picker-row" id="year-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+
+  <p class="wrap-lede" id="wrap-lede">Season recap from numbers this site already computes. Career totals stay off a year chip. Adds ranked by PAR, not raw starter points. A card is omitted when the file does not have the number.</p>
+
+  <section class="wrap-grid" id="wrap-cards"></section>
+
+  <section class="second-grid" id="wrap-tables">
+    <div class="card wrap-panel" id="wrap-power-card" hidden>
+      <div class="card-head">
+        <div>
+          <h2>Power</h2>
+          <div class="card-sub">raw all-play · v_power</div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl wrap-tbl" id="wrap-power-tbl">
+          <thead><tr><th></th><th>Team</th><th>All-play</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card wrap-panel" id="wrap-luck-card" hidden>
+      <div class="card-head">
+        <div>
+          <h2>Luck Index</h2>
+          <div class="card-sub">lucky wins − unlucky losses · v_luck</div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl wrap-tbl" id="wrap-luck-tbl">
+          <thead><tr><th></th><th>Team</th><th>Net</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card wrap-panel" id="wrap-notes-card" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Notables</h2>
+        <div class="card-sub">regular-season superlatives already in years JSON</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl wrap-tbl" id="wrap-notes-tbl">
+        <thead><tr><th>Kind</th><th>Week</th><th>Winner</th><th>W</th><th>L</th><th>Loser</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <section class="card wrap-panel" id="wrap-trades-card" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Trade Grades</h2>
+        <div class="card-sub">starter points the receiving team got after the trade week · 2018+ only · published PAR baseline</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl wrap-tbl" id="wrap-trades-tbl">
+        <thead><tr><th>Wk</th><th>Deal</th><th>Net pts</th><th>Net PAR</th><th>Grade</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Wrapped · that season only · current franchise names</p>
+  </footer>
+</div>
+<script src="common.js?v=16"></script>
+<script src="wrapped.js?v=2"></script>
+</body>
+</html>
