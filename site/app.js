@@ -1316,7 +1316,7 @@
         <td><span class="rank-pill${i === 0 ? ' gold' : ''}">${i + 1}</span></td>
         <td><div class="team-cell">${avatarHTML(team, 'mini')}<div>
           <div>${team.name}</div>
-          <div class="card-sub" style="margin:0">${r.name}${r.active ? '' : ' · inactive'}</div>
+          <div class="card-sub" style="margin:0">${r.name}</div>
         </div></div></td>
         <td class="s"><strong>${fmt(r.rating, 0)}</strong></td>
         <td class="s" title="${peakAt}">${fmt(r.peak, 0)}</td>

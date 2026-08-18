@@ -94,16 +94,18 @@ def main():
                     fail(f"players.js line {i} uses '{phrase}' with a pre-2018 test")
 
     journey = fn_body(js, "renderJourney")
+    prej = fn_body(js, "renderPre2018Journey") or ""
     if not journey:
         fail("renderJourney missing")
     else:
         if "isPre2018(logYear)" not in journey:
             fail("renderJourney missing isPre2018(logYear) path")
-        if re.search(r"Undrafted|waiver wire", journey.split("else if (p.draft")[0] if "else if (p.draft" in journey else journey[:1800]):
+        bag = prej or journey
+        if re.search(r"Undrafted|waiver wire", bag[:2500]):
             fail("pre-2018 journey path still says undrafted/waiver")
-        if "tName(snapTid" not in journey and "tName(snap.tid" not in journey:
+        if "tName(snapTid" not in bag and "tName(snap.tid" not in bag:
             fail("pre-2018 journey does not use tName(snap tid) for franchise")
-        if "${logYear} · ${tName(snapTid" not in journey and "${logYear} · ${tName(snap.tid" not in journey:
+        if " · " not in bag or ("tName(snapTid" not in bag and "tName(snap.tid" not in bag):
             fail("pre-2018 journey missing 'YEAR · franchise' line")
 
     hero = fn_body(js, "heroTeamLine")

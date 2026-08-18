@@ -35,10 +35,13 @@ def main():
     bio = json.loads((SITE / "player_bio.json").read_text())
 
     # --- cache ---
-    if "draft.js?v=17" not in html:
-        fail("draft.html did not bump draft.js cache to v=17")
-    if "styles.css?v=16" not in html and "styles.css?v=15" not in html:
-        fail("draft.html missing styles.css cache bust")
+    import re
+    dj = re.search(r"draft\.js\?v=(\d+)", html)
+    sc = re.search(r"styles\.css\?v=(\d+)", html)
+    if not dj or int(dj.group(1)) < 17:
+        fail("draft.html draft.js pin need v>=17")
+    if not sc or int(sc.group(1)) < 15:
+        fail("draft.html styles.css pin need v>=15")
 
     # --- BOARD / TABLE toggle ---
     if 'data-view="board"' not in html or 'data-view="table"' not in html:
@@ -72,7 +75,8 @@ def main():
     if 'data-k="overall"' not in html or 'data-k="name"' not in html:
         fail("board table headers are not click-sortable")
     if html.count('class="s"') < 20:
-        fail(f"too few sortable headers: {html.count('class=\"s\"')}")
+        n_s = html.count('class="s"')
+        fail(f"too few sortable headers: {n_s}")
 
     # --- links ---
     if "A.playerLink" not in js:

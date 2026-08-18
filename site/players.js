@@ -2876,6 +2876,7 @@
     cur = null;
     PP.limit = 24;
     A.stampNav(squad);
+    void A.goTeam;
     await careerPlayers();
     logYear = ly == null ? "all" : ly;
     YD = await A.loadYear(year);

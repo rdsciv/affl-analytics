@@ -59,8 +59,10 @@ def main():
         fail("hero missing pos rank tile")
     if '"best week"' not in players:
         fail("hero missing best week tile")
-    if "players.js?v=19" not in html:
-        fail("players.html did not bump players.js cache")
+    import re
+    pj = re.search(r"players\.js\?v=(\d+)", html)
+    if not pj or int(pj.group(1)) < 19:
+        fail("players.html players.js pin need v>=19")
 
     idx = json.loads((SITE / "player_index.json").read_text())
     nfl = json.loads((SITE / "nfl_weeks.json").read_text())

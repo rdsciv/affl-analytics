@@ -69,7 +69,7 @@ def main():
         fail("players.js coerces missing proj to 0")
     if re.search(r"weekProj\([^)]*\)\s*\?\?\s*0", js):
         fail("players.js nullish-coalesces missing proj to 0")
-    if "<th>Proj</th>" not in js:
+    if "<th>Proj</th>" not in js and 'mark("proj", "Proj")' not in js:
         fail("players.js log missing Proj header")
     if 'pj != null ? fmt(pj, 1) : "—"' not in js and "pj != null ? fmt(pj, 1) : '—'" not in js:
         fail("players.js log does not keep missing proj as em dash")

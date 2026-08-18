@@ -65,10 +65,13 @@ def main():
         fail("teams.js never mentions lab-block")
     if "function renderLab" not in js:
         fail("teams.js missing renderLab")
-    if "teams.js?v=6" not in html:
-        fail("teams.html does not cache-bust teams.js?v=6")
-    if "styles.css?v=14" not in html:
-        fail("teams.html does not cache-bust styles.css?v=14")
+    import re
+    tj = re.search(r"teams\.js\?v=(\d+)", html)
+    sc = re.search(r"styles\.css\?v=(\d+)", html)
+    if not tj or int(tj.group(1)) < 6:
+        fail("teams.html teams.js pin need v>=6")
+    if not sc or int(sc.group(1)) < 14:
+        fail("teams.html styles.css pin need v>=14")
     if "chart.umd.min.js" not in html:
         fail("teams.html missing Chart.js")
 

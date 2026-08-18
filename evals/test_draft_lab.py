@@ -42,10 +42,13 @@ def main():
         fail("draft.js does not read parByOverall / PAR")
     if "renderLab();" not in js:
         fail("pick() never calls renderLab")
-    if "draft.js?v=17" not in html:
-        fail("draft.html did not bump draft.js cache to v=17")
-    if "styles.css?v=16" not in html:
-        fail("draft.html did not bump styles.css cache to v=16")
+    import re
+    dj = re.search(r"draft\.js\?v=(\d+)", html)
+    sc = re.search(r"styles\.css\?v=(\d+)", html)
+    if not dj or int(dj.group(1)) < 17:
+        fail("draft.html draft.js pin need v>=17")
+    if not sc or int(sc.group(1)) < 16:
+        fail("draft.html styles.css pin need v>=16")
     if "lab-board-cell" not in css:
         fail("styles.css missing visual-board rules")
     if "Mean PAR by round" not in js:

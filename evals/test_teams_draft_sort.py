@@ -9,5 +9,7 @@ assert "draftSortKey" in js
 assert "mark(\"cost\")" in js or "data-k=\"cost\"" in js
 assert "mark(\"pts\")" in js or "data-k=\"pts\"" in js
 assert "team-draft-tbl" in js
-assert "teams.js?v=6" in html
+import re
+m = re.search(r"teams\.js\?v=(\d+)", html)
+assert m and int(m.group(1)) >= 6, html[:200]
 print("ok")

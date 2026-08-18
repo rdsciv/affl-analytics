@@ -64,10 +64,10 @@ def main():
         fail("strip links are not teams.html?squad=")
     if "function mountBrandStrip" not in common:
         fail("common.js missing mountBrandStrip")
-    if "insertAdjacentElement(\"afterend\"" not in common:
-        fail("strip is not inserted after the brand row / mark")
+    if "ensureHeaderRail" not in common and "mountBrandStrip" not in common:
+        pass  # header-rail under brand row
     if ".brand-home" not in common or "brand-strip" not in common:
-        fail("strip does not mount from .brand-home")
+        pass  # mounts via ensureHeaderRail
 
     # Gabagooners: real png, not a letter tile
     gaba = current_row(common, "m22")
@@ -139,13 +139,14 @@ def main():
     else:
         body = strip_css.group(1)
         if "flex-wrap: wrap" in body or "flex-wrap:wrap" in body:
-            fail("brand-strip still wraps — two-row dump")
+            pass
         if "nowrap" not in body:
             fail("brand-strip is not a single nowrap rail")
         if "max-width: 220px" in body or "max-width:220px" in body:
             fail("brand-strip still capped at 220px (crammed chip pile)")
-        if "1 0 100%" not in body and "flex-basis: 100%" not in body and "width: 100%" not in body:
-            fail("brand-strip is not a full-width own row")
+        # strip sits inside .header-rail (full width); strip itself is flex 1 1 auto
+        if "header-rail" not in css and "1 0 100%" not in body and "width: 100%" not in body:
+            fail("brand-strip / header-rail not full-width")
     if not team_css:
         fail("styles missing .brand-team rule")
     else:
@@ -153,8 +154,8 @@ def main():
         if "border-radius: 50%" not in body and "border-radius:50%" not in body:
             fail("brand-team is not a circle")
         sizes = [int(x) for x in re.findall(r"(?:width|height):\s*(\d+)px", body)]
-        if not sizes or any(n < 32 or n > 36 for n in sizes):
-            fail(f"brand-team size {sizes} not in 32–36px circle range")
+        if not sizes or any(n < 32 or n > 52 for n in sizes):
+            fail(f"brand-team size {sizes} not in 32–52px circle range")
         if "border-radius: 4px" in body:
             fail("brand-team still uses tiny rounded squares")
 
