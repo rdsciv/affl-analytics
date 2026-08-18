@@ -45,7 +45,7 @@
     <div class="week-picker" id="player-year-picker"></div>
   </div>
 
-  <section class="second-grid pl-detail">
+  <section class="second-grid pl-detail" hidden>
     <div class="card">
       <div class="card-head">
         <div><h2>Weekly Fantasy Production</h2><div class="card-sub">blue = started in an AFFL lineup (2018+ weekly and 2014–2017 recovered starters) &middot; gray = benched &middot; teal outline = NFL week not on an AFFL roster (2018+) &middot; gold = on AFFL roster (weekly lineup not recovered, 2014–2017 snapshot) &middot; amber line = ESPN weekly projection</div></div>
@@ -68,7 +68,7 @@
     </div>
   </section>
 
-  <section class="card" id="pl-college"></section>
+  <section class="card" id="pl-college" hidden></section>
   <section class="card" id="pl-ngs-profile" hidden></section>
 
   <section class="second-grid pl-career" id="pl-career" hidden>
@@ -96,7 +96,7 @@
     </div>
   </section>
 
-  <section class="card" id="pl-log-card">
+  <section class="card" id="pl-log-card" hidden>
     <div class="card-head">
       <div><h2>Game Log</h2><div class="card-sub" id="pl-log-sub">starter NFL box + EPA + opportunity xTD · gray rows were benched</div></div>
     </div>
@@ -109,7 +109,7 @@
     </div>
   </section>
 
-  <section class="card" id="pl-money"></section>
+  <section class="card" id="pl-money" hidden></section>
 
   <section class="card" id="pl-compare">
     <div class="card-head">
@@ -193,7 +193,7 @@
       <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
     </div>
     <div class="pp-filters" id="pp-filters"></div>
-    <div class="pp-grid" id="pp-grid"></div>
+    <div class="pp-grid" id="pp-grid"><p class="notice">Loading players…</p></div>
     <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
@@ -204,6 +204,6 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=17"></script>
-<script src="players.js?v=30"></script>
+<script src="players.js?v=31"></script>
 </body>
 </html>

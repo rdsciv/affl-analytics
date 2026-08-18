@@ -2876,20 +2876,34 @@
     cur = null;
     PP.limit = 24;
     A.stampNav(squad);
-    void A.goTeam;
-    await careerPlayers();
     logYear = ly == null ? "all" : ly;
-    YD = await A.loadYear(year);
-    T = A.teams(year);
-    if (pid) {
-      await loadPlayer(pid, false);
-    } else {
+    // Landing chrome first — never leave empty profile shells visible while data loads.
+    if (!pid) {
       setPageMode("landing");
+      const g = $("#pp-grid");
+      if (g && !g.dataset.ready) g.innerHTML = A.notice("Loading players…");
       if (chart) { chart.destroy(); chart = null; }
       if (ngsChart) { ngsChart.destroy(); ngsChart = null; }
       if (careerChart) { careerChart.destroy(); careerChart = null; }
     }
-    renderGrid();
+    try {
+      await careerPlayers();
+      YD = await A.loadYear(year);
+      T = A.teams(year);
+      if (pid) {
+        await loadPlayer(pid, false);
+      } else {
+        setPageMode("landing");
+      }
+      renderGrid();
+      const g2 = $("#pp-grid");
+      if (g2) g2.dataset.ready = "1";
+    } catch (e) {
+      console.error("players pick failed", e);
+      const g = $("#pp-grid");
+      if (g) g.innerHTML = A.notice("Could not load player database. Check the console / network tab.");
+      setPageMode("landing");
+    }
   }
 
   const qs = new URLSearchParams(location.search);
