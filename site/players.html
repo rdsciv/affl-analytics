@@ -35,10 +35,37 @@
     </nav>
   </header>
 
+  <!-- Landing surfaces first (compare + usage + database) -->
+  <section class="card" id="pl-compare">
+    <div class="card-head">
+      <div>
+        <h2>Compare</h2>
+        <div class="card-sub" id="pl-compare-sub">2025 AFFL rates + advanced box · value and position rank · missing stays —</div>
+      </div>
+      <div class="cmp-controls" id="pl-compare-mode">
+        <button class="season-chip on" data-mode="game">Per game</button>
+        <button class="season-chip" data-mode="season">Season</button>
+      </div>
+    </div>
+    <div class="cmp-grid" id="pl-compare-grid"></div>
+  </section>
+
+  <section class="card" id="wopr-persist">
+    <div class="card-head">
+      <div>
+        <h2>Usage that sticks</h2>
+        <div class="card-sub" id="wopr-persist-sub">same-year WOPR vs AFFL FPpG · WR/TE · non-PPR</div>
+      </div>
+      <div class="week-picker wopr-year-chips" id="wopr-persist-years"></div>
+    </div>
+    <div class="wopr-legend" id="wopr-persist-legend"></div>
+    <div class="chart-wrap tall" id="wopr-persist-wrap"><canvas id="wopr-persist-chart"></canvas></div>
+  </section>
+
   <div class="section-break" id="pl-db-break"><h2>The Database <span id="db-span">every rostered player</span></h2></div>
   <section class="card" id="pl-db">
     <div class="card-head">
-      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile above</div></div>
+      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile</div></div>
       <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
     </div>
     <div class="pp-filters" id="pp-filters"></div>
@@ -46,8 +73,8 @@
     <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
-
-  <section class="card pl-hero" id="pl-hero"></section>
+  <!-- Profile-only (hidden on landing) -->
+  <section class="card pl-hero" id="pl-hero" hidden></section>
   <p class="pl-back" id="pl-back" hidden><a href="players.html">All players</a></p>
 
   <section class="card" id="pl-overview" hidden></section>
@@ -123,32 +150,6 @@
 
   <section class="card" id="pl-money" hidden></section>
 
-  <section class="card" id="pl-compare">
-    <div class="card-head">
-      <div>
-        <h2>Compare</h2>
-        <div class="card-sub" id="pl-compare-sub">2025 AFFL rates + advanced box · value and position rank · missing stays —</div>
-      </div>
-      <div class="cmp-controls" id="pl-compare-mode">
-        <button class="season-chip on" data-mode="game">Per game</button>
-        <button class="season-chip" data-mode="season">Season</button>
-      </div>
-    </div>
-    <div class="cmp-grid" id="pl-compare-grid"></div>
-  </section>
-
-  <section class="card" id="wopr-persist">
-    <div class="card-head">
-      <div>
-        <h2>Usage that sticks</h2>
-        <div class="card-sub" id="wopr-persist-sub">same-year WOPR vs AFFL FPpG · WR/TE · non-PPR</div>
-      </div>
-      <div class="week-picker wopr-year-chips" id="wopr-persist-years"></div>
-    </div>
-    <div class="wopr-legend" id="wopr-persist-legend"></div>
-    <div class="chart-wrap tall" id="wopr-persist-wrap"><canvas id="wopr-persist-chart"></canvas></div>
-  </section>
-
   <section class="card" id="pl-fg-strip" hidden>
     <div class="card-head">
       <div><h2>Career Strip</h2><div class="card-sub">AFFL seasons · games · starts · start % · pts · PPG · team W-L when matchups exist</div></div>
@@ -198,7 +199,6 @@
     </div>
   </section>
 
-
   <footer class="foot">
     <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
     <p class="foot-caption">Stars, Scrubs, &amp; Duds · ESPN lineups + nflverse EPA/xTD · cap hits from Spotrac</p>
@@ -206,6 +206,6 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=18"></script>
-<script src="players.js?v=33"></script>
+<script src="players.js?v=34"></script>
 </body>
 </html>
