@@ -2340,6 +2340,26 @@ img.w1-award-logo,
   letter-spacing: .06em;
   color: var(--mut);
 }
+
+/* Force small circular avatars in milestones (was expanding to natural logo size) */
+.ms-who img,
+.ms-who .mini {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--line);
+  flex: 0 0 32px;
+}
+.ms-who .mini {
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #dff0ff;
+  background: linear-gradient(135deg, #1a2c4a, var(--steel));
+}
+
 .ms-chase-wrap { margin-top: 18px; }
 .ms-chase-title {
   margin: 0 0 8px;
