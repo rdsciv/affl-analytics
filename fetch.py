@@ -10,11 +10,17 @@ Availability discovered empirically:
   lineups       2018-2025   (ESPN does not retain rosters before 2018)
   transactions  2018-2025
 
-Credentials come from .env — see .env.example.
+ESPN credentials come from .env — see .env.example. Public nflverse pulls
+(pbp / ngs / weekly stats) do not need .env.
+
+Savant (https://nflsavant.com/) is a Cloudflare UI over the same nflverse PBP.
+Historical Savant CSVs (`https://nflsavant.com/pbp_data.php?year=YYYY`) are
+not fetched here; we use the nflverse release files and record the URL used.
 """
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor
@@ -22,10 +28,25 @@ from concurrent.futures import ThreadPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
 
+# Savant's advertised PBP window. AFFL itself starts 2014.
+PBP_FIRST_YEAR = 2013
+PBP_LAST_YEAR = 2025
+NGS_FIRST_YEAR = 2016
+NFLVERSE_UA = 'affl-analytics/1.0 (+https://github.com/rdsciv/affl-analytics)'
+NFLVERSE_SLEEP = 0.75
+
+# Documented sources. Savant PHP is listed only as the UI's historical path.
+PBP_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz'
+PBP_NFLVERSE_CSV = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv'
+PBP_SAVANT = 'https://nflsavant.com/pbp_data.php?year={year}'
+NGS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_{year}_{kind}.csv'
+STATS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/stats_player/{kind}_{year}.csv'
+ROSTER_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_{year}.csv'
+
 def env(path):
     out = {}
     if not os.path.exists(path):
-        sys.exit('error: .env not found. Copy .env.example to .env and fill it in.')
+        return None
     for line in open(path):
         line = line.strip()
         if line and not line.startswith('#') and '=' in line:
@@ -33,11 +54,27 @@ def env(path):
             out[k.strip()] = v.strip()
     return out
 
-CFG = env(os.path.join(HERE, '.env'))
-LEAGUE = CFG.get('ESPN_LEAGUE_ID', '51418')
-SEASON = int(CFG.get('ESPN_SEASON', '2025'))
-COOKIE = f"SWID={CFG['ESPN_SWID']}; espn_s2={CFG['ESPN_S2']}"
+def espn_cfg():
+    cfg = env(os.path.join(HERE, '.env'))
+    if not cfg:
+        sys.exit('error: .env not found. Copy .env.example to .env and fill it in.')
+    missing = [k for k in ('ESPN_SWID', 'ESPN_S2') if not cfg.get(k)]
+    if missing:
+        sys.exit('error: .env is missing ' + ', '.join(missing))
+    return cfg
+
+CFG = None
+LEAGUE = '51418'
+SEASON = PBP_LAST_YEAR
+COOKIE = ''
 BASE = 'https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl'
+
+def bind_espn():
+    global CFG, LEAGUE, SEASON, COOKIE
+    CFG = espn_cfg()
+    LEAGUE = CFG.get('ESPN_LEAGUE_ID', '51418')
+    SEASON = int(CFG.get('ESPN_SEASON', str(PBP_LAST_YEAR)))
+    COOKIE = f"SWID={CFG['ESPN_SWID']}; espn_s2={CFG['ESPN_S2']}"
 
 FIRST_YEAR = 2014
 ROSTER_FIRST_YEAR = 2018   # ESPN retains weekly lineups from here on
@@ -195,26 +232,126 @@ def fetch_tx_year(year):
     return year, len(uniq), trades
 
 # ---------------------------------------------------------------- nflverse
-def fetch_nflverse(year):
-    got = []
-    for kind, rel in (('stats_player_week', 'stats_player'), ('roster', 'rosters')):
-        u = f'https://github.com/nflverse/nflverse-data/releases/download/{rel}/{kind}_{year}.csv'
-        dest = f'{DATA}/{kind}_{year}.csv'
+def _force():
+    return '--force' in sys.argv
+
+
+def write_manifest(entries):
+    path = os.path.join(DATA, 'nflverse_manifest.json')
+    prev = {}
+    if os.path.exists(path):
         try:
-            req = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=180) as r, open(dest, 'wb') as f:
-                f.write(r.read())
-            got.append(f'{kind}={os.path.getsize(dest)//1024}KB')
-        except Exception as e:
-            got.append(f'{kind}=FAIL({type(e).__name__})')
+            prev = json.load(open(path))
+        except json.JSONDecodeError:
+            prev = {}
+    files = prev.get('files') or {}
+    for e in entries:
+        files[e['dest']] = e
+    out = {
+        'note': 'Savant UI is Cloudflare-protected; files come from nflverse releases.',
+        'savant_pbp_template': PBP_SAVANT,
+        'savant_still_needs_browser': [
+            'combine RAS (0-10) — not in nflverse',
+            'explore query-builder leaderboards — derived views, not a bulk feed',
+            'compare page snapshots — UI only',
+        ],
+        'files': files,
+    }
+    json.dump(out, open(path, 'w'), indent=2, sort_keys=True)
+
+
+def download_cached(url, dest, min_bytes=64, timeout=180):
+    """Skip a local cache hit unless --force. Returns (ok, detail)."""
+    if os.path.exists(dest) and os.path.getsize(dest) >= min_bytes and not _force():
+        return True, f'cached {os.path.getsize(dest)//1024}KB'
+    tmp = dest + '.part'
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': NFLVERSE_UA})
+        with urllib.request.urlopen(req, timeout=timeout) as r, open(tmp, 'wb') as f:
+            while True:
+                chunk = r.read(1024 * 256)
+                if not chunk:
+                    break
+                f.write(chunk)
+        os.replace(tmp, dest)
+        return True, f'{os.path.getsize(dest)//1024}KB'
+    except Exception as e:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        return False, f'FAIL({type(e).__name__}: {e})'
+
+
+def fetch_nflverse(year):
+    got, manifest = [], []
+    for kind, rel, name in (
+            ('stats_player_week', 'stats_player', 'stats_player_week'),
+            ('roster', 'rosters', 'roster')):
+        u = f'https://github.com/nflverse/nflverse-data/releases/download/{rel}/{name}_{year}.csv'
+        dest = f'{DATA}/{name}_{year}.csv'
+        ok, detail = download_cached(u, dest, min_bytes=1024)
+        got.append(f'{name}={detail}')
+        manifest.append({'year': year, 'kind': name, 'url': u, 'dest': dest,
+                         'ok': ok, 'via': 'nflverse'})
+        time.sleep(NFLVERSE_SLEEP)
+    write_manifest(manifest)
     return year, ', '.join(got)
+
+
+def fetch_pbp_year(year):
+    """Prefer nflverse csv.gz (~18MB). Savant PHP is documented, not used."""
+    dest_gz = f'{DATA}/play_by_play_{year}.csv.gz'
+    dest_csv = f'{DATA}/play_by_play_{year}.csv'
+    url_gz = PBP_NFLVERSE.format(year=year)
+    ok, detail = download_cached(url_gz, dest_gz, min_bytes=100_000, timeout=300)
+    used = url_gz
+    dest = dest_gz
+    if not ok:
+        url_csv = PBP_NFLVERSE_CSV.format(year=year)
+        ok, detail = download_cached(url_csv, dest_csv, min_bytes=100_000, timeout=300)
+        used, dest = url_csv, dest_csv
+    write_manifest([{
+        'year': year, 'kind': 'pbp', 'url': used, 'dest': dest,
+        'ok': ok, 'via': 'nflverse',
+        'savant_equivalent': PBP_SAVANT.format(year=year),
+    }])
+    time.sleep(NFLVERSE_SLEEP)
+    return year, ('ok' if ok else 'FAIL'), used, detail
+
+
+def fetch_ngs_year(year):
+    got, manifest = [], []
+    for kind in ('passing', 'rushing', 'receiving'):
+        u = NGS_NFLVERSE.format(year=year, kind=kind)
+        dest = f'{DATA}/ngs_{year}_{kind}.csv'
+        ok, detail = download_cached(u, dest, min_bytes=200)
+        got.append(f'{kind}={detail}')
+        manifest.append({'year': year, 'kind': f'ngs_{kind}', 'url': u,
+                         'dest': dest, 'ok': ok, 'via': 'nflverse'})
+        time.sleep(NFLVERSE_SLEEP)
+    write_manifest(manifest)
+    return year, ', '.join(got)
+
 
 # ---------------------------------------------------------------- main
 def main():
     os.makedirs(DATA, exist_ok=True)
-    years = list(range(FIRST_YEAR, SEASON + 1))
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    only = args[0] if args else 'all'
+    year_filter = int(args[1]) if len(args) > 1 and args[1].isdigit() else None
+
+    needs_espn = only in ('all', 'league', 'draft', 'box', 'tx')
+    if needs_espn:
+        bind_espn()
+    season_end = SEASON if CFG else PBP_LAST_YEAR
+    years = list(range(FIRST_YEAR, season_end + 1))
     roster_years = [y for y in years if y >= ROSTER_FIRST_YEAR]
-    only = sys.argv[1] if len(sys.argv) > 1 else 'all'
+    pbp_years = list(range(PBP_FIRST_YEAR, PBP_LAST_YEAR + 1))
+    ngs_years = list(range(NGS_FIRST_YEAR, PBP_LAST_YEAR + 1))
+    if year_filter is not None:
+        years = [year_filter] if year_filter in years else [year_filter]
+        roster_years = [y for y in years if y >= ROSTER_FIRST_YEAR]
+        pbp_years = [year_filter]
+        ngs_years = [year_filter] if year_filter >= NGS_FIRST_YEAR else []
 
     if only in ('all', 'league'):
         print('== league core ==')
@@ -243,10 +380,25 @@ def main():
     if only in ('all', 'nflverse'):
         # every season, not just those with ESPN lineups: pre-2018 fantasy points
         # are computed from these stats (see v_player_season_calc)
-        print('== nflverse ==')
-        with ThreadPoolExecutor(max_workers=3) as ex:
-            for y, msg in ex.map(fetch_nflverse, years):
-                print(f'  {y}: {msg}')
+        print('== nflverse weekly stats + rosters ==')
+        nfl_years = years if only == 'nflverse' or year_filter else list(range(FIRST_YEAR, PBP_LAST_YEAR + 1))
+        for y in nfl_years:
+            y, msg = fetch_nflverse(y)
+            print(f'  {y}: {msg}')
+
+    if only in ('all', 'pbp', 'savant'):
+        print('== nflverse play-by-play (Savant range 2013–2025) ==')
+        print('   source: nflverse pbp release (csv.gz); Savant PHP is Cloudflare-blocked')
+        for y in pbp_years:
+            y, status, url, detail = fetch_pbp_year(y)
+            print(f'  {y}: {status} {detail}')
+            print(f'       {url}')
+
+    if only in ('all', 'ngs', 'savant'):
+        print('== nflverse nextgen_stats (2016+) ==')
+        for y in ngs_years:
+            y, msg = fetch_ngs_year(y)
+            print(f'  {y}: {msg}')
 
     print('done')
 

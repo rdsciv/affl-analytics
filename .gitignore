@@ -4,6 +4,8 @@
 # raw API dumps + nflverse CSVs (regenerate with ./fetch.sh)
 data/*.json
 data/*.csv
+data/*.csv.gz
+data/*.part
 !data/logo_map.json
 
 .DS_Store

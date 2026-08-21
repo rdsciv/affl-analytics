@@ -80,7 +80,7 @@ Tickets live in the Notion AFFL Handoff Queue. Ready cards get built. Backlog do
 ## Next up
 
 - Close identity/phase contracts (AFFL-001 / AFFL-002) against the warehouse that already exists
-- **#8** pbp aggregates + Next Gen Stats → unlocks aDOT / RACR / WOPR and expected TD
+- **#8** pbp aggregates + Next Gen Stats — landed as `fact_pbp_agg` / `fact_ngs` + Skill Radar (CHI-113). Combine RAS and Savant Explore still need a live scrape.
 - **#9** receiving-usage and xTD views
 - **#5** the FantasyGenius surface: Rankings, History, Stats, Teams, Wrapped
 - **#11** pre-2018 lineup solver (experimental, must be validated before publishing)

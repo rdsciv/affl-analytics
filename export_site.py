@@ -13,6 +13,8 @@ Owns:
   luckFG       FantasyGenius-style lucky wins / unlucky losses (v_luck)
   nflCap       NFL salary-cap total carried by each AFFL roster (v_team_nfl_cap)
   baselines    the replacement level used, so the UI can explain the number
+  skillRadar   started-player NFL pass/rush/rec efficiency + EPA (non-PPR)
+  player PBP   CPOE / aDOT / success / xTD / TD luck patched onto players[]
 """
 import json
 import os
@@ -25,6 +27,107 @@ YEARS = os.path.join(HERE, 'site', 'years')
 def rows(con, sql, args=()):
     con.row_factory = sqlite3.Row
     return [dict(r) for r in con.execute(sql, args).fetchall()]
+
+def _rank(values, higher_is_better=True):
+    """Competition rank (1 = best). Ties share a rank; next rank skips."""
+    indexed = list(enumerate(values))
+    indexed.sort(key=lambda iv: (iv[1] is None, -(iv[1] or 0) if higher_is_better else (iv[1] or 0)))
+    ranks = [None] * len(values)
+    i = 0
+    while i < len(indexed):
+        val = indexed[i][1]
+        j = i
+        while j < len(indexed) and indexed[j][1] == val:
+            j += 1
+        for k in range(i, j):
+            ranks[indexed[k][0]] = None if val is None else i + 1
+        i = j
+    return ranks
+
+def _round(v, nd=1):
+    return None if v is None else round(float(v), nd)
+
+def skill_radar_payload(con, year):
+    raw = rows(con, """
+        SELECT team_id, pass_yards, pass_tds, completions, attempts,
+               rush_yards, rush_tds, carries, rec_yards, rec_tds, receptions,
+               box_epa, pbp_epa, cpoe_sum, cpoe_n, success_n, success_d,
+               xtd, pbp_td
+          FROM v_skill_radar WHERE season = ?""", (year,))
+    if not raw:
+        return None
+    teams = []
+    for r in raw:
+        att = r['attempts'] or 0
+        carries = r['carries'] or 0
+        rec = r['receptions'] or 0
+        cpoe_n = r['cpoe_n'] or 0
+        suc_d = r['success_d'] or 0
+        teams.append({
+            'teamId': r['team_id'],
+            'passYds': _round(r['pass_yards'], 0),
+            'passTd': _round(r['pass_tds'], 0),
+            'compPct': _round(100.0 * (r['completions'] or 0) / att, 1) if att else None,
+            'rushYds': _round(r['rush_yards'], 0),
+            'rushTd': _round(r['rush_tds'], 0),
+            'ypc': _round((r['rush_yards'] or 0) / carries, 2) if carries else None,
+            'recYds': _round(r['rec_yards'], 0),
+            'recTd': _round(r['rec_tds'], 0),
+            'rec': _round(r['receptions'], 0),
+            'ypr': _round((r['rec_yards'] or 0) / rec, 2) if rec else None,
+            'epa': _round(r['pbp_epa'] or r['box_epa'], 1),
+            'cpoe': _round((r['cpoe_sum'] or 0) / cpoe_n, 1) if cpoe_n else None,
+            'success': _round((r['success_n'] or 0) / suc_d, 3) if suc_d else None,
+            'xtd': _round(r['xtd'], 1),
+            'tdLuck': _round((r['pbp_td'] or 0) - (r['xtd'] or 0), 1),
+        })
+    # league ranks — higher is better for every axis we publish
+    axes = ('passYds', 'passTd', 'compPct', 'rushYds', 'rushTd', 'ypc',
+            'recYds', 'recTd', 'rec', 'ypr', 'epa', 'cpoe', 'success')
+    rank_keys = {
+        'passYds': 'passYdsRk', 'passTd': 'passTdRk', 'compPct': 'compPctRk',
+        'rushYds': 'rushYdsRk', 'rushTd': 'rushTdRk', 'ypc': 'ypcRk',
+        'recYds': 'recYdsRk', 'recTd': 'recTdRk', 'rec': 'recRk',
+        'ypr': 'yprRk', 'epa': 'epaRk', 'cpoe': 'cpoeRk', 'success': 'successRk',
+    }
+    for axis in axes:
+        rks = _rank([t[axis] for t in teams])
+        for t, rk in zip(teams, rks):
+            t[rank_keys[axis]] = rk
+    teams.sort(key=lambda t: (t['epaRk'] or 99, -(t['epa'] or 0)))
+    return {
+        'scoring': 'NON_PPR',
+        'recIsVolume': True,
+        'note': 'Receptions are a counting stat. AFFL awards 0 points per reception.',
+        'teams': teams,
+    }
+
+def patch_player_pbp(con, bundle, year):
+    """Attach Savant-class season rolls to rostered players via gsis_id."""
+    gsis_rows = rows(con, """
+        SELECT p.player_id AS pid, v.cpoe, v.adot, v.success_rate, v.xtd,
+               v.td_luck, v.epa, v.targets, v.receptions
+          FROM v_player_pbp_season v
+          JOIN dim_player p ON p.gsis_id = v.gsis_id
+         WHERE v.season = ?""", (year,))
+    by_pid = {r['pid']: r for r in gsis_rows}
+    n = 0
+    for p in bundle.get('players') or []:
+        row = by_pid.get(p.get('pid'))
+        if not row:
+            p.setdefault('cpoe', None)
+            p.setdefault('adot', None)
+            p.setdefault('success', None)
+            p.setdefault('xtd', None)
+            p.setdefault('tdLuck', None)
+            continue
+        p['cpoe'] = _round(row['cpoe'], 1)
+        p['adot'] = _round(row['adot'], 1)
+        p['success'] = _round(row['success_rate'], 3)
+        p['xtd'] = _round(row['xtd'], 1)
+        p['tdLuck'] = _round(row['td_luck'], 1)
+        n += 1
+    return n
 
 def export_year(con, year):
     path = os.path.join(YEARS, f'{year}.json')
@@ -123,9 +226,15 @@ def export_year(con, year):
     bundle['power'] = power
     bundle['luckFG'] = luck
     bundle['nflCap'] = {'byTeam': cap, 'final': capFinal, 'topPlayers': capTop}
+    radar = skill_radar_payload(con, year)
+    if radar:
+        bundle['skillRadar'] = radar
+    n_pbp = patch_player_pbp(con, bundle, year)
     json.dump(bundle, open(path, 'w'))
     return {'year': year, 'steals': len(steals), 'power': len(power),
-            'cap_teams': len(cap), 'baselines': len(baselines)}
+            'cap_teams': len(cap), 'baselines': len(baselines),
+            'radar': len((radar or {}).get('teams') or []),
+            'pbp_players': n_pbp}
 
 def main():
     con = sqlite3.connect(DB)
@@ -134,7 +243,8 @@ def main():
         info = export_year(con, y)
         if info:
             print(f"  {info['year']}: {info['steals']} steals · {info['power']} power rows "
-                  f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines")
+                  f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines"
+                  f" · {info['radar']} skill-radar · {info['pbp_players']} pbp players")
     print('site/years/*.json patched from affl.db')
 
 if __name__ == '__main__':

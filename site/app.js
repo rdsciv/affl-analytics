@@ -578,6 +578,39 @@
     });
   }
 
+  function rk(n) {
+    return n == null ? '' : ` <span class="rk">#${n}</span>`;
+  }
+
+  function renderSkillRadar() {
+    const sr = NG.skillRadar;
+    if (!sr || !sr.teams || !sr.teams.length) {
+      $('#radar-tbl tbody').innerHTML =
+        `<tr><td colspan="12">${noLineups('Skill Radar needs weekly lineups (2018+) and nflverse PBP.')}</td></tr>`;
+      return;
+    }
+    const cell = (v, digits, rank, cls) => {
+      if (v == null) return `<td>—</td>`;
+      const shown = typeof v === 'number' ? fmt(v, digits) : v;
+      return `<td class="${cls || ''}">${shown}${rk(rank)}</td>`;
+    };
+    $('#radar-tbl tbody').innerHTML = sr.teams.map((t) => `
+      <tr>
+        <td><div class="team-cell">${avatarHTML(T25[t.teamId] || { name: '?' }, 'mini')}<div>${tName25(t.teamId)}</div></div></td>
+        ${cell(t.passYds, 0, t.passYdsRk)}
+        ${cell(t.passTd, 0, t.passTdRk)}
+        ${cell(t.compPct, 1, t.compPctRk)}
+        ${cell(t.rushYds, 0, t.rushYdsRk)}
+        ${cell(t.ypc, 2, t.ypcRk)}
+        ${cell(t.recYds, 0, t.recYdsRk)}
+        ${cell(t.rec, 0, t.recRk)}
+        ${cell(t.ypr, 2, t.yprRk)}
+        ${cell(t.epa, 1, t.epaRk, t.epa >= 0 ? 'pos' : 'neg')}
+        ${cell(t.cpoe, 1, t.cpoeRk, t.cpoe >= 0 ? 'pos' : 'neg')}
+        ${cell(t.tdLuck, 1, null, t.tdLuck >= 0 ? 'pos' : 'neg')}
+      </tr>`).join('');
+  }
+
   function renderSpotlight() {
     if (!NG.spotlight.length) {
       $('#spotlight-tbl tbody').innerHTML =
@@ -680,6 +713,10 @@
         ${stat(p.epa != null ? (p.epa >= 0 ? '+' : '') + fmt(p.epa, 1) : '—', 'nfl epa')}
         ${stat(p.wopr != null ? p.wopr.toFixed(2) : '—', 'wopr')}
         ${stat(p.tsh != null ? (p.tsh * 100).toFixed(1) + '%' : '—', 'target share')}
+        ${stat(p.cpoe != null ? (p.cpoe >= 0 ? '+' : '') + fmt(p.cpoe, 1) : '—', 'cpoe')}
+        ${stat(p.adot != null ? fmt(p.adot, 1) : '—', 'adot')}
+        ${stat(p.xtd != null ? fmt(p.xtd, 1) : '—', 'xtd')}
+        ${stat(p.tdLuck != null ? (p.tdLuck >= 0 ? '+' : '') + fmt(p.tdLuck, 1) : '—', 'td luck')}
         ${stat(`${p.boom}<span style="font-size:12px;color:var(--mut)">/</span>${p.bust}`, 'boom / bust wks')}
       </div>
       <div class="pp-spark"><canvas id="pp-spark-canvas"></canvas></div>
@@ -863,6 +900,7 @@
     renderDraft();
     renderDNA();
     renderEPA();
+    renderSkillRadar();
     renderSpotlight();
     renderCap();
     initProfiler();

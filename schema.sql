@@ -203,6 +203,50 @@ CREATE TABLE IF NOT EXISTS fact_cap_hit (
 );
 CREATE INDEX IF NOT EXISTS ix_cap_player ON fact_cap_hit(player_id);
 
+-- Play-by-play rolled to player-week. Raw nflverse PBP is ~20MB gzip / ~100MB
+-- CSV per season; we do not keep play grain or ship it to the public site.
+-- Join to AFFL via dim_player.gsis_id. Receptions here are volume, not PPR.
+CREATE TABLE IF NOT EXISTS fact_pbp_agg (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  gsis_id         TEXT NOT NULL,
+  dropbacks       REAL, pass_attempts REAL, completions REAL,
+  pass_epa        REAL, cpoe REAL, cpoe_n REAL,
+  pass_air_yards  REAL, pass_success REAL, pass_success_n REAL,
+  pass_td         REAL, pass_xtd REAL, rz_pass REAL, gl_pass REAL,
+  rush_att        REAL, rush_epa REAL, rush_success REAL, rush_success_n REAL,
+  rush_td         REAL, rush_xtd REAL, rz_rush REAL, gl_rush REAL,
+  targets         REAL, receptions REAL, rec_epa REAL,
+  rec_air_yards   REAL, rec_success REAL, rec_success_n REAL,
+  rec_td          REAL, rec_xtd REAL, rz_tgt REAL, gl_tgt REAL,
+  xyac            REAL, xyac_n REAL,
+  PRIMARY KEY (season, week, gsis_id)
+);
+CREATE INDEX IF NOT EXISTS ix_pbp_gsis ON fact_pbp_agg(gsis_id);
+
+-- Next Gen Stats weekly (2016+). Small files; stored as-is at player-week grain.
+CREATE TABLE IF NOT EXISTS fact_ngs (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  gsis_id         TEXT NOT NULL,
+  stat_type       TEXT NOT NULL,          -- passing | rushing | receiving
+  avg_cushion     REAL,
+  avg_separation  REAL,
+  avg_intended_air_yards REAL,
+  catch_percentage REAL,
+  avg_yac         REAL,
+  avg_expected_yac REAL,
+  avg_yac_above_expectation REAL,
+  avg_time_to_throw REAL,
+  aggressiveness  REAL,
+  expected_completion_percentage REAL,
+  completion_percentage_above_expectation REAL,
+  efficiency      REAL,
+  rush_yards_over_expected REAL,
+  PRIMARY KEY (season, week, gsis_id, stat_type)
+);
+CREATE INDEX IF NOT EXISTS ix_ngs_gsis ON fact_ngs(gsis_id);
+
 -- ============================================================================
 -- Views: the metric layer.  Everything the site renders should come from here.
 -- ============================================================================
@@ -501,3 +545,75 @@ FROM v_pick_edge e
 JOIN dim_team   t ON t.season = e.season AND t.team_id = e.team_id
 JOIN dim_member m ON m.member_id = t.member_id
 GROUP BY t.member_id;
+
+-- Started-player NFL box + PBP, regular season only. Receptions are volume
+-- (AFFL scoring is non-PPR; rec points stay 0 in dim_scoring).
+DROP VIEW IF EXISTS v_skill_radar;
+CREATE VIEW v_skill_radar AS
+SELECT r.season, r.team_id,
+       SUM(COALESCE(n.pass_yards, 0))   AS pass_yards,
+       SUM(COALESCE(n.pass_tds, 0))     AS pass_tds,
+       SUM(COALESCE(n.completions, 0))  AS completions,
+       SUM(COALESCE(n.attempts, 0))     AS attempts,
+       SUM(COALESCE(n.rush_yards, 0))   AS rush_yards,
+       SUM(COALESCE(n.rush_tds, 0))     AS rush_tds,
+       SUM(COALESCE(n.carries, 0))      AS carries,
+       SUM(COALESCE(n.rec_yards, 0))    AS rec_yards,
+       SUM(COALESCE(n.rec_tds, 0))      AS rec_tds,
+       SUM(COALESCE(n.receptions, 0))   AS receptions,
+       SUM(COALESCE(n.epa, 0))          AS box_epa,
+       SUM(COALESCE(p.pass_epa, 0) + COALESCE(p.rush_epa, 0)
+           + COALESCE(p.rec_epa, 0))    AS pbp_epa,
+       SUM(COALESCE(p.cpoe, 0) * COALESCE(p.cpoe_n, 0)) AS cpoe_sum,
+       SUM(COALESCE(p.cpoe_n, 0))       AS cpoe_n,
+       SUM(COALESCE(p.pass_success, 0) + COALESCE(p.rush_success, 0)
+           + COALESCE(p.rec_success, 0)) AS success_n,
+       SUM(COALESCE(p.pass_success_n, 0) + COALESCE(p.rush_success_n, 0)
+           + COALESCE(p.rec_success_n, 0)) AS success_d,
+       SUM(COALESCE(p.pass_xtd, 0) + COALESCE(p.rush_xtd, 0)
+           + COALESCE(p.rec_xtd, 0))    AS xtd,
+       SUM(COALESCE(p.pass_td, 0) + COALESCE(p.rush_td, 0)
+           + COALESCE(p.rec_td, 0))     AS pbp_td
+  FROM fact_roster_week r
+  JOIN dim_player pl ON pl.player_id = r.player_id
+  JOIN dim_season s  ON s.season = r.season
+  LEFT JOIN fact_nfl_week n
+    ON n.season = r.season AND n.week = r.week AND n.gsis_id = pl.gsis_id
+  LEFT JOIN fact_pbp_agg p
+    ON p.season = r.season AND p.week = r.week AND p.gsis_id = pl.gsis_id
+ WHERE r.started = 1 AND r.week <= s.reg_weeks
+   AND pl.position IN ('QB', 'RB', 'WR', 'TE')
+ GROUP BY r.season, r.team_id;
+
+DROP VIEW IF EXISTS v_player_pbp_season;
+CREATE VIEW v_player_pbp_season AS
+SELECT season, gsis_id,
+       SUM(dropbacks) AS dropbacks,
+       SUM(pass_attempts) AS pass_attempts,
+       SUM(completions) AS completions,
+       SUM(pass_epa) AS pass_epa,
+       SUM(cpoe * cpoe_n) / NULLIF(SUM(cpoe_n), 0) AS cpoe,
+       SUM(pass_air_yards) AS pass_air_yards,
+       SUM(pass_td) AS pass_td,
+       SUM(pass_xtd) AS pass_xtd,
+       SUM(rush_att) AS rush_att,
+       SUM(rush_epa) AS rush_epa,
+       SUM(rush_td) AS rush_td,
+       SUM(rush_xtd) AS rush_xtd,
+       SUM(targets) AS targets,
+       SUM(receptions) AS receptions,
+       SUM(rec_epa) AS rec_epa,
+       SUM(rec_air_yards) AS rec_air_yards,
+       SUM(rec_air_yards) / NULLIF(SUM(targets), 0) AS adot,
+       SUM(rec_td) AS rec_td,
+       SUM(rec_xtd) AS rec_xtd,
+       SUM(pass_success + rush_success + rec_success)
+         / NULLIF(SUM(pass_success_n + rush_success_n + rec_success_n), 0)
+         AS success_rate,
+       SUM(pass_xtd + rush_xtd + rec_xtd) AS xtd,
+       SUM(pass_td + rush_td + rec_td) AS actual_td,
+       SUM(pass_td + rush_td + rec_td)
+         - SUM(pass_xtd + rush_xtd + rec_xtd) AS td_luck,
+       SUM(pass_epa + rush_epa + rec_epa) AS epa
+  FROM fact_pbp_agg
+ GROUP BY season, gsis_id;

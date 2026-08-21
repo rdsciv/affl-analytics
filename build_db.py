@@ -15,6 +15,8 @@ import sqlite3
 import sys
 from collections import defaultdict
 
+from pbp_agg import aggregate_pbp, pbp_path
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
 DB = os.path.join(HERE, 'affl.db')
@@ -42,7 +44,8 @@ def init(con):
 
 def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
-              'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
+              'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_pbp_agg',
+              'fact_ngs', 'fact_contract',
               'fact_cap_hit', 'fact_player_season_points', 'player_season',
               'dim_player', 'dim_team',
               'dim_member', 'dim_scoring', 'dim_season'):
@@ -82,10 +85,32 @@ def load_seasons_and_teams(con, site):
               t.get('wins'), t.get('losses'), t.get('ties'), t.get('pf'), t.get('pa'),
               t.get('playoffSeed'), t.get('finalRank')) for t in s['teams']])
 
+def box_from_year_bundle(bundle):
+    """Rebuild the compact box shape from a committed site/years bundle.
+
+    Needed when data/box_*.json is not in the tree (gitignored) but the
+    season JSON already has weekly lineups.
+    """
+    players = {}
+    for pid_s, v in (bundle.get('pmeta') or {}).items():
+        if isinstance(v, (list, tuple)) and v:
+            players[str(pid_s)] = [v[0], v[1] if len(v) > 1 else '?',
+                                   v[2] if len(v) > 2 else '']
+    for p in bundle.get('players') or []:
+        pid = str(p.get('pid'))
+        if pid and pid not in players:
+            players[pid] = [p.get('name'), p.get('pos'), p.get('nfl') or '']
+    return {'year': bundle.get('year'), 'weeks': bundle.get('weeks') or {},
+            'players': players}
+
+
 def load_players_and_rosters(con):
     players, pseason, rws = {}, [], []
     for year in range(2014, 2026):
         box = load(f'{DATA}/box_{year}.json')
+        if not box:
+            bundle = load(os.path.join(SITE, 'years', f'{year}.json'))
+            box = box_from_year_bundle(bundle) if bundle else None
         if not box:
             continue
         for pid_s, v in box.get('players', {}).items():
@@ -276,6 +301,84 @@ def load_nfl_weeks(con):
          air_yards, target_share, wopr, epa,
          interceptions, fumbles_lost, two_pt, sacks_suffered, air_yards_share, racr, pacr)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
+    return len(rows)
+
+def load_pbp_agg(con):
+    """Stream cached nflverse PBP into player-week facts. 2013 is fetched for
+    Savant's advertised range; AFFL joins start 2014."""
+    rows = []
+    for year in range(2013, 2026):
+        path = pbp_path(DATA, year)
+        if not path:
+            continue
+        for r in aggregate_pbp(path):
+            rows.append((
+                r['season'], r['week'], r['gsis_id'],
+                r['dropbacks'], r['pass_attempts'], r['completions'],
+                r['pass_epa'], r['cpoe'], r['cpoe_n'],
+                r['pass_air_yards'], r['pass_success'], r['pass_success_n'],
+                r['pass_td'], r['pass_xtd'], r['rz_pass'], r['gl_pass'],
+                r['rush_att'], r['rush_epa'], r['rush_success'], r['rush_success_n'],
+                r['rush_td'], r['rush_xtd'], r['rz_rush'], r['gl_rush'],
+                r['targets'], r['receptions'], r['rec_epa'],
+                r['rec_air_yards'], r['rec_success'], r['rec_success_n'],
+                r['rec_td'], r['rec_xtd'], r['rz_tgt'], r['gl_tgt'],
+                r['xyac'], r['xyac_n'],
+            ))
+    con.executemany("""INSERT OR REPLACE INTO fact_pbp_agg
+        (season, week, gsis_id, dropbacks, pass_attempts, completions,
+         pass_epa, cpoe, cpoe_n, pass_air_yards, pass_success, pass_success_n,
+         pass_td, pass_xtd, rz_pass, gl_pass,
+         rush_att, rush_epa, rush_success, rush_success_n,
+         rush_td, rush_xtd, rz_rush, gl_rush,
+         targets, receptions, rec_epa, rec_air_yards, rec_success, rec_success_n,
+         rec_td, rec_xtd, rz_tgt, gl_tgt, xyac, xyac_n)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        rows)
+    return len(rows)
+
+def load_ngs(con):
+    rows = []
+    kinds = ('passing', 'rushing', 'receiving')
+    for year in range(2016, 2026):
+        for kind in kinds:
+            path = f'{DATA}/ngs_{year}_{kind}.csv'
+            if not os.path.exists(path):
+                continue
+            for r in csv.DictReader(open(path)):
+                if (r.get('season_type') or 'REG') not in ('REG', ''):
+                    continue
+                gsis = r.get('player_gsis_id') or r.get('player_id') or ''
+                if not gsis:
+                    continue
+                try:
+                    wk = int(float(r['week']))
+                except (KeyError, TypeError, ValueError):
+                    continue
+                vals = {c: (fnum(r, c) if r.get(c) not in (None, '', 'NA') else None)
+                        for c in (
+                            'avg_cushion', 'avg_separation', 'avg_intended_air_yards',
+                            'catch_percentage', 'avg_yac', 'avg_expected_yac',
+                            'avg_yac_above_expectation', 'avg_time_to_throw',
+                            'aggressiveness', 'expected_completion_percentage',
+                            'completion_percentage_above_expectation',
+                            'efficiency', 'rush_yards_over_expected')}
+                rows.append((year, wk, gsis, kind,
+                             vals['avg_cushion'], vals['avg_separation'],
+                             vals['avg_intended_air_yards'], vals['catch_percentage'],
+                             vals['avg_yac'], vals['avg_expected_yac'],
+                             vals['avg_yac_above_expectation'],
+                             vals['avg_time_to_throw'], vals['aggressiveness'],
+                             vals['expected_completion_percentage'],
+                             vals['completion_percentage_above_expectation'],
+                             vals['efficiency'], vals['rush_yards_over_expected']))
+    con.executemany("""INSERT OR REPLACE INTO fact_ngs
+        (season, week, gsis_id, stat_type, avg_cushion, avg_separation,
+         avg_intended_air_yards, catch_percentage, avg_yac, avg_expected_yac,
+         avg_yac_above_expectation, avg_time_to_throw, aggressiveness,
+         expected_completion_percentage, completion_percentage_above_expectation,
+         efficiency, rush_yards_over_expected)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
     return len(rows)
 
 def load_contracts(con):
@@ -476,6 +579,8 @@ CHECKS = [
     ("transactions", "SELECT COUNT(*) FROM fact_transaction"),
     ("trades", "SELECT COUNT(*) FROM fact_trade"),
     ("nfl player-weeks", "SELECT COUNT(*) FROM fact_nfl_week"),
+    ("pbp player-weeks", "SELECT COUNT(*) FROM fact_pbp_agg"),
+    ("ngs player-weeks", "SELECT COUNT(*) FROM fact_ngs"),
     ("contracts", "SELECT COUNT(*) FROM fact_contract"),
     ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
     ("player-seasons", "SELECT COUNT(*) FROM fact_player_season_points"),
@@ -532,6 +637,8 @@ def main():
     tr, it = load_trades(con)
     print(f'  trades {tr:,} ({it:,} items)')
     print(f'  nfl player-weeks {load_nfl_weeks(con):,}')
+    print(f'  pbp player-weeks {load_pbp_agg(con):,}')
+    print(f'  ngs player-weeks {load_ngs(con):,}')
     print(f'  contracts {load_contracts(con):,}')
     na, nc = load_player_season_points(con)
     print(f'  player-seasons {na + nc:,} ({nc:,} computed from NFL stats)')

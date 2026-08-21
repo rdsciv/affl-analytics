@@ -173,6 +173,55 @@ def main():
         write_csv(os.path.join(OUT, f"luck_{season}.csv"), luck_cols, luck)
         parts += ["", f"## {season} luck", "", md_table(luck_cols, luck, limit=16)]
 
+    try:
+        radar_cols, radar = q(
+            con,
+            """
+            SELECT team_id, ROUND(pass_yards,0), ROUND(pass_tds,0),
+                   ROUND(rush_yards,0), ROUND(rec_yards,0), ROUND(receptions,0),
+                   ROUND(pbp_epa,1), ROUND(xtd,1)
+              FROM v_skill_radar WHERE season = ? ORDER BY pbp_epa DESC
+            """,
+            (season,),
+        )
+    except Exception:
+        radar_cols, radar = [], []
+    if radar:
+        write_csv(os.path.join(OUT, f"skill_radar_{season}.csv"), radar_cols, radar)
+        parts += ["", f"## {season} skill radar (started skill players, non-PPR)",
+                  "", md_table(radar_cols, radar, limit=16)]
+
+    pbp_n = 0
+    try:
+        pbp_n = con.execute("SELECT COUNT(*) FROM fact_pbp_agg").fetchone()[0]
+        ngs_n = con.execute("SELECT COUNT(*) FROM fact_ngs").fetchone()[0]
+    except Exception:
+        ngs_n = 0
+    parts += [
+        "",
+        "## Savant / nflverse PBP",
+        "",
+        f"fact_pbp_agg rows: **{pbp_n:,}**. fact_ngs rows: **{ngs_n:,}**.",
+        "",
+        "Landed from nflverse release files (not a live Savant scrape):",
+        "",
+        "- play-by-play 2013–2025 → `fact_pbp_agg` (EPA, CPOE, air yards, success, xTD)",
+        "- nextgen_stats 2016+ → `fact_ngs` (separation, cushion, CPOE, RYoe)",
+        "- Skill Radar on the site uses started AFFL skill players; receptions are volume, not PPR",
+        "",
+        "Still needs a browser scrape of nflsavant.com (Cloudflare) if we want the UI pages themselves:",
+        "",
+        "- Combine RAS (0–10)",
+        "- Explore query-builder leaderboards",
+        "- Compare-page snapshots",
+        "",
+        "Source URL template (per year): "
+        "`https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`",
+        "",
+        "Savant historical equivalent (not fetched): "
+        "`https://nflsavant.com/pbp_data.php?year={year}`",
+    ]
+
     parts += [
         "",
         "## How to refresh",

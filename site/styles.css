@@ -174,6 +174,7 @@ body {
 .rank-pill.slv { background: linear-gradient(135deg, #e8f3ff, #93a7c0); color: #101828; }
 .rank-pill.brz { background: linear-gradient(135deg, #e08b4e, #9a5426); color: #200f02; }
 .pos { color: var(--green); } .neg { color: var(--red); }
+.rk { color: var(--mut); font-size: 10px; font-weight: 700; margin-left: 2px; }
 
 /* h2h */
 .tbl.h2h th, .tbl.h2h td { text-align: center; padding: 7px 6px; }

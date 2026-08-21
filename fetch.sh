@@ -5,6 +5,9 @@
 # Usage:  ./fetch.sh            full refresh (all years)
 #         ./fetch.sh box        just lineups
 #         ./fetch.sh tx         just transactions
+#         ./fetch.sh nflverse   weekly stats + rosters (no ESPN cookie)
+#         ./fetch.sh pbp        nflverse play-by-play 2013–2025 (no ESPN cookie)
+#         ./fetch.sh ngs        nextgen_stats 2016+ (no ESPN cookie)
 #         ./fetch.sh process    skip fetching, just rebuild site JSON
 set -e
 cd "$(dirname "$0")"

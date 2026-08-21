@@ -46,6 +46,11 @@
           ${stat(p.epa != null ? (p.epa >= 0 ? '+' : '') + fmt(p.epa, 1) : '—', 'nfl epa')}
           ${stat(p.wopr != null ? p.wopr.toFixed(2) : '—', 'wopr')}
           ${stat(p.tsh != null ? (p.tsh * 100).toFixed(1) + '%' : '—', 'target share')}
+          ${stat(p.cpoe != null ? (p.cpoe >= 0 ? '+' : '') + fmt(p.cpoe, 1) : '—', 'cpoe')}
+          ${stat(p.adot != null ? fmt(p.adot, 1) : '—', 'adot')}
+          ${stat(p.success != null ? Math.round(p.success * 100) + '%' : '—', 'success')}
+          ${stat(p.xtd != null ? fmt(p.xtd, 1) : '—', 'xtd')}
+          ${stat(p.tdLuck != null ? (p.tdLuck >= 0 ? '+' : '') + fmt(p.tdLuck, 1) : '—', 'td luck')}
           ${stat(`${p.boom}/${p.bust}`, 'boom/bust wks')}
         </div>
       </div>`;
