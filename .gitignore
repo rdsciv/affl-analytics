@@ -9,6 +9,8 @@ data/*.part
 !data/logo_map.json
 
 .DS_Store
+__pycache__/
+*.pyc
 
 # built warehouse (rebuild with: python3 build_db.py)
 affl.db
