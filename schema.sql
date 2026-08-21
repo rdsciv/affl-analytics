@@ -247,6 +247,36 @@ CREATE TABLE IF NOT EXISTS fact_ngs (
 );
 CREATE INDEX IF NOT EXISTS ix_ngs_gsis ON fact_ngs(gsis_id);
 
+-- AFFL-scored expected fantasy points. FP / XFP / FPOE are NEVER imported
+-- from Savant /fantasy (that page's std/half/ppr columns are a comparison UI).
+-- rec points are 0. Yardage mode comes from dim_season.
+CREATE TABLE IF NOT EXISTS fact_player_xfp (
+  season          INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  games           INTEGER,
+  fp              REAL,          -- AFFL recomputed from fact_nfl_week
+  xfp             REAL,          -- same engine, xTD + air/xYAC rec yards
+  fpoe            REAL,          -- fp - xfp
+  fp_g            REAL,
+  xfp_g           REAL,
+  st_games        INTEGER,       -- AFFL starts (2018+)
+  st_fp           REAL,
+  st_xfp          REAL,
+  st_fpoe         REAL,
+  wopr            REAL,
+  target_share    REAL,
+  air_yards_share REAL,
+  rz_opp          REAL,
+  gl_opp          REAL,
+  xtd             REAL,
+  td_luck         REAL,
+  targets         REAL,
+  carries         REAL,
+  opp             REAL,
+  PRIMARY KEY (season, player_id)
+);
+CREATE INDEX IF NOT EXISTS ix_xfp_fpoe ON fact_player_xfp(season, fpoe);
+
 -- ============================================================================
 -- Views: the metric layer.  Everything the site renders should come from here.
 -- ============================================================================

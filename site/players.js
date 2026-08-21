@@ -19,6 +19,7 @@
       $('#pl-hero').innerHTML = A.notice(`No player data stored for ${year}. ESPN retains weekly lineups from 2018 on.`);
       $('#pl-log tbody').innerHTML = '';
       $('#pl-journey').innerHTML = '';
+      if ($('#pl-xfp')) $('#pl-xfp').innerHTML = '';
       if (chart) { chart.destroy(); chart = null; }
       return;
     }
@@ -51,9 +52,29 @@
           ${stat(p.success != null ? Math.round(p.success * 100) + '%' : '—', 'success')}
           ${stat(p.xtd != null ? fmt(p.xtd, 1) : '—', 'xtd')}
           ${stat(p.tdLuck != null ? (p.tdLuck >= 0 ? '+' : '') + fmt(p.tdLuck, 1) : '—', 'td luck')}
+          ${stat(p.fpoe != null ? (p.fpoe >= 0 ? '+' : '') + fmt(p.fpoe, 1) : '—', 'fpoe')}
           ${stat(`${p.boom}/${p.bust}`, 'boom/bust wks')}
         </div>
       </div>`;
+
+    const signed = (v, d) => v == null ? '—' : ((v >= 0 ? '+' : '') + fmt(v, d));
+    const pct = (v) => v == null ? '—' : (v * 100).toFixed(1) + '%';
+    $('#pl-xfp').innerHTML = [
+      stat(p.fp != null ? fmt(p.fp, 1) : '—', 'affl fp'),
+      stat(p.xfp != null ? fmt(p.xfp, 1) : '—', 'affl xfp'),
+      stat(signed(p.fpoe, 1), 'fpoe'),
+      stat(p.fpG != null ? fmt(p.fpG, 1) : '—', 'fp/g'),
+      stat(p.xfpG != null ? fmt(p.xfpG, 1) : '—', 'xfp/g'),
+      stat(p.stFpoe != null ? signed(p.stFpoe, 1) : '—', 'started fpoe'),
+      stat(p.opp != null ? fmt(p.opp, 0) : '—', 'opp'),
+      stat(p.wopr != null ? p.wopr.toFixed(2) : '—', 'wopr'),
+      stat(pct(p.tsh), 'tgt%'),
+      stat(pct(p.ayShare), 'ay%'),
+      stat(p.rzOpp != null ? fmt(p.rzOpp, 0) : '—', 'rz opp'),
+      stat(p.glOpp != null ? fmt(p.glOpp, 0) : '—', 'gl opp'),
+      stat(p.xtd != null ? fmt(p.xtd, 1) : '—', 'xtd'),
+      stat(signed(p.tdLuck, 1), 'td luck'),
+    ].join('');
 
     const items = [];
     if (p.draft) {

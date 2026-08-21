@@ -188,6 +188,27 @@
 
   <section class="card">
     <div class="card-head">
+      <div>
+        <h2>AFFL FPOE</h2>
+        <div class="card-sub">fantasy points over expected under AFFL scoring (non-PPR) &middot; started skill players &middot; Savant /fantasy std is a comparison UI, not the source</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="fpoe-tbl">
+        <thead>
+          <tr>
+            <th>Player</th><th>Pos</th><th>Starts</th>
+            <th>FP</th><th>XFP</th><th>FPOE</th>
+            <th>WOPR</th><th>Tgt%</th><th>AY%</th><th>RZ</th><th>xTD</th><th>TD luck</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
       <div><h2>Elite Company</h2><div class="card-sub">top started scorers with real NFL advanced context &middot; EPA, WOPR, target share</div></div>
     </div>
     <div class="table-scroll">
@@ -282,6 +303,6 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

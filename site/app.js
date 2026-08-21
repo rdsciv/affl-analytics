@@ -611,6 +611,32 @@
       </tr>`).join('');
   }
 
+  function renderFPOE() {
+    const rows = ((NG.afflFantasy || {}).started || []).slice(0, 12);
+    if (!rows.length) {
+      $('#fpoe-tbl tbody').innerHTML =
+        `<tr><td colspan="12">${noLineups('AFFL FPOE needs weekly lineups (2018+) and nflverse PBP.')}</td></tr>`;
+      return;
+    }
+    const pct = (v) => v == null ? '—' : (v * 100).toFixed(1) + '%';
+    const signed = (v) => v == null ? '—' : ((v >= 0 ? '+' : '') + fmt(v, 1));
+    $('#fpoe-tbl tbody').innerHTML = rows.map((p) => `
+      <tr>
+        <td><strong>${p.name}</strong></td>
+        <td><span class="badge pos-${p.pos}">${p.pos}</span></td>
+        <td>${p.starts ?? '—'}</td>
+        <td>${p.fp != null ? fmt(p.fp, 1) : '—'}</td>
+        <td>${p.xfp != null ? fmt(p.xfp, 1) : '—'}</td>
+        <td class="${p.fpoe >= 0 ? 'pos' : 'neg'}">${signed(p.fpoe)}</td>
+        <td>${p.wopr != null ? p.wopr.toFixed(2) : '—'}</td>
+        <td>${pct(p.tsh)}</td>
+        <td>${pct(p.ayShare)}</td>
+        <td>${p.rzOpp != null ? fmt(p.rzOpp, 0) : '—'}</td>
+        <td>${p.xtd != null ? fmt(p.xtd, 1) : '—'}</td>
+        <td class="${p.tdLuck >= 0 ? 'pos' : 'neg'}">${signed(p.tdLuck)}</td>
+      </tr>`).join('');
+  }
+
   function renderSpotlight() {
     if (!NG.spotlight.length) {
       $('#spotlight-tbl tbody').innerHTML =
@@ -717,6 +743,7 @@
         ${stat(p.adot != null ? fmt(p.adot, 1) : '—', 'adot')}
         ${stat(p.xtd != null ? fmt(p.xtd, 1) : '—', 'xtd')}
         ${stat(p.tdLuck != null ? (p.tdLuck >= 0 ? '+' : '') + fmt(p.tdLuck, 1) : '—', 'td luck')}
+        ${stat(p.fpoe != null ? (p.fpoe >= 0 ? '+' : '') + fmt(p.fpoe, 1) : '—', 'fpoe')}
         ${stat(`${p.boom}<span style="font-size:12px;color:var(--mut)">/</span>${p.bust}`, 'boom / bust wks')}
       </div>
       <div class="pp-spark"><canvas id="pp-spark-canvas"></canvas></div>
@@ -901,6 +928,7 @@
     renderDNA();
     renderEPA();
     renderSkillRadar();
+    renderFPOE();
     renderSpotlight();
     renderCap();
     initProfiler();

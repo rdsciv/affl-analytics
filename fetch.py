@@ -14,8 +14,11 @@ ESPN credentials come from .env — see .env.example. Public nflverse pulls
 (pbp / ngs / weekly stats) do not need .env.
 
 Savant (https://nflsavant.com/) is a Cloudflare UI over the same nflverse PBP.
-Historical Savant CSVs (`https://nflsavant.com/pbp_data.php?year=YYYY`) are
-not fetched here; we use the nflverse release files and record the URL used.
+`/pbp_data.php?year=YYYY` 301s to the homepage — it is not a file. Live PBP
+CSVs sit on R2 (`PBP_SAVANT_R2`, ~112–115 MB, 372 nflfastR cols, 2013–2025)
+at the same grain as the nflverse release files we already cache. We do not
+download the R2 copies. `/fantasy` is a comparison UI (std / half / ppr);
+AFFL XFP is computed here from dim_scoring, never imported from Savant FP.
 """
 import json
 import os
@@ -35,10 +38,13 @@ NGS_FIRST_YEAR = 2016
 NFLVERSE_UA = 'affl-analytics/1.0 (+https://github.com/rdsciv/affl-analytics)'
 NFLVERSE_SLEEP = 0.75
 
-# Documented sources. Savant PHP is listed only as the UI's historical path.
+# Documented sources. Fetch uses nflverse gzip (~18MB). R2 is the live Savant
+# public file; do not commit those 110MB CSVs.
 PBP_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz'
 PBP_NFLVERSE_CSV = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv'
-PBP_SAVANT = 'https://nflsavant.com/pbp_data.php?year={year}'
+PBP_SAVANT_R2 = 'https://pub-e9a6e73e336047fba26374ae44334139.r2.dev/pbp-{year}.csv'
+PBP_SAVANT_PHP = 'https://nflsavant.com/pbp_data.php?year={year}'  # 301 homepage
+PBP_SAVANT = PBP_SAVANT_PHP  # kept so older callers still resolve
 NGS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_{kind}.csv.gz'
 
 def env(path):
@@ -247,7 +253,11 @@ def write_manifest(entries):
         files[e['dest']] = e
     out = {
         'note': 'Savant UI is Cloudflare-protected; files come from nflverse releases.',
-        'savant_pbp_template': PBP_SAVANT,
+        'savant_pbp_r2': PBP_SAVANT_R2,
+        'savant_pbp_php': PBP_SAVANT_PHP,
+        'savant_pbp_php_status': '301 to homepage — not a file',
+        'savant_fantasy': 'https://nflsavant.com/fantasy is a comparison UI (std/half/ppr). AFFL XFP uses dim_scoring.',
+        'savant_pbp_template': PBP_SAVANT_R2,
         'savant_still_needs_browser': [
             'combine RAS (0-10) — not in nflverse',
             'explore query-builder leaderboards — derived views, not a bulk feed',
@@ -310,7 +320,8 @@ def fetch_pbp_year(year):
     write_manifest([{
         'year': year, 'kind': 'pbp', 'url': used, 'dest': dest,
         'ok': ok, 'via': 'nflverse',
-        'savant_equivalent': PBP_SAVANT.format(year=year),
+        'savant_r2': PBP_SAVANT_R2.format(year=year),
+        'savant_php': PBP_SAVANT_PHP.format(year=year),
     }])
     time.sleep(NFLVERSE_SLEEP)
     return year, ('ok' if ok else 'FAIL'), used, detail

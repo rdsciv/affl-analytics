@@ -15,10 +15,13 @@ Owns:
   baselines    the replacement level used, so the UI can explain the number
   skillRadar   started-player NFL pass/rush/rec efficiency + EPA (non-PPR)
   player PBP   CPOE / aDOT / success / xTD / TD luck patched onto players[]
+  afflFantasy  AFFL-scored FP / XFP / FPOE + opportunity shares (not Savant)
 """
 import json
 import os
 import sqlite3
+
+from affl_xfp import SAVANT_FANTASY_NOTE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(HERE, 'affl.db')
@@ -98,36 +101,101 @@ def skill_radar_payload(con, year):
     return {
         'scoring': 'NON_PPR',
         'recIsVolume': True,
-        'note': 'Receptions are a counting stat. AFFL awards 0 points per reception.',
+        'note': 'Receptions are a counting stat. AFFL awards 0 points per reception. '
+                + SAVANT_FANTASY_NOTE,
         'teams': teams,
     }
 
 def patch_player_pbp(con, bundle, year):
-    """Attach Savant-class season rolls to rostered players via gsis_id."""
+    """Attach PBP rolls and AFFL XFP / FPOE to rostered players via gsis_id."""
     gsis_rows = rows(con, """
         SELECT p.player_id AS pid, v.cpoe, v.adot, v.success_rate, v.xtd,
                v.td_luck, v.epa, v.targets, v.receptions
           FROM v_player_pbp_season v
           JOIN dim_player p ON p.gsis_id = v.gsis_id
          WHERE v.season = ?""", (year,))
+    xfp_rows = rows(con, """
+        SELECT player_id AS pid, games, fp, xfp, fpoe, fp_g, xfp_g,
+               st_games, st_fp, st_xfp, st_fpoe, wopr, target_share,
+               air_yards_share, rz_opp, gl_opp, xtd, td_luck, targets,
+               carries, opp
+          FROM fact_player_xfp WHERE season = ?""", (year,))
     by_pid = {r['pid']: r for r in gsis_rows}
+    by_xfp = {r['pid']: r for r in xfp_rows}
     n = 0
     for p in bundle.get('players') or []:
         row = by_pid.get(p.get('pid'))
-        if not row:
+        xf = by_xfp.get(p.get('pid'))
+        if not row and not xf:
             p.setdefault('cpoe', None)
             p.setdefault('adot', None)
             p.setdefault('success', None)
             p.setdefault('xtd', None)
             p.setdefault('tdLuck', None)
             continue
-        p['cpoe'] = _round(row['cpoe'], 1)
-        p['adot'] = _round(row['adot'], 1)
-        p['success'] = _round(row['success_rate'], 3)
-        p['xtd'] = _round(row['xtd'], 1)
-        p['tdLuck'] = _round(row['td_luck'], 1)
+        if row:
+            p['cpoe'] = _round(row['cpoe'], 1)
+            p['adot'] = _round(row['adot'], 1)
+            p['success'] = _round(row['success_rate'], 3)
+            p['xtd'] = _round(row['xtd'], 1)
+            p['tdLuck'] = _round(row['td_luck'], 1)
+        if xf:
+            p['fp'] = _round(xf['fp'], 1)
+            p['xfp'] = _round(xf['xfp'], 1)
+            p['fpoe'] = _round(xf['fpoe'], 1)
+            p['fpG'] = _round(xf['fp_g'], 2)
+            p['xfpG'] = _round(xf['xfp_g'], 2)
+            p['stFp'] = _round(xf['st_fp'], 1)
+            p['stXfp'] = _round(xf['st_xfp'], 1)
+            p['stFpoe'] = _round(xf['st_fpoe'], 1)
+            p['ayShare'] = _round(xf['air_yards_share'], 3)
+            p['rzOpp'] = _round(xf['rz_opp'], 0)
+            p['glOpp'] = _round(xf['gl_opp'], 0)
+            p['opp'] = _round(xf['opp'], 0)
+            if xf['wopr'] is not None:
+                p['wopr'] = _round(xf['wopr'], 2)
+            if xf['target_share'] is not None:
+                p['tsh'] = _round(xf['target_share'], 3)
+            if xf['xtd'] is not None:
+                p['xtd'] = _round(xf['xtd'], 1)
+            if xf['td_luck'] is not None:
+                p['tdLuck'] = _round(xf['td_luck'], 1)
         n += 1
     return n
+
+
+def affl_fantasy_payload(con, year):
+    started = rows(con, """
+        SELECT x.player_id AS pid, p.name, p.position AS pos,
+               x.st_games AS starts, x.st_fp AS fp, x.st_xfp AS xfp,
+               x.st_fpoe AS fpoe, x.wopr, x.target_share AS tsh,
+               x.air_yards_share AS ayShare, x.rz_opp AS rzOpp,
+               x.xtd, x.td_luck AS tdLuck
+          FROM fact_player_xfp x
+          JOIN dim_player p ON p.player_id = x.player_id
+         WHERE x.season = ? AND x.st_games > 0
+           AND p.position IN ('QB', 'RB', 'WR', 'TE')
+         ORDER BY x.st_fpoe DESC""", (year,))
+    if not started:
+        return None
+    return {
+        'scoring': 'NON_PPR',
+        'recIsVolume': True,
+        'source': 'AFFL dim_scoring',
+        'note': SAVANT_FANTASY_NOTE,
+        'started': [{
+            'pid': r['pid'], 'name': r['name'], 'pos': r['pos'],
+            'starts': r['starts'],
+            'fp': _round(r['fp'], 1), 'xfp': _round(r['xfp'], 1),
+            'fpoe': _round(r['fpoe'], 1),
+            'wopr': _round(r['wopr'], 2),
+            'tsh': _round(r['tsh'], 3),
+            'ayShare': _round(r['ayShare'], 3),
+            'rzOpp': _round(r['rzOpp'], 0),
+            'xtd': _round(r['xtd'], 1),
+            'tdLuck': _round(r['tdLuck'], 1),
+        } for r in started],
+    }
 
 def export_year(con, year):
     path = os.path.join(YEARS, f'{year}.json')
@@ -234,11 +302,15 @@ def export_year(con, year):
     if radar:
         bundle['skillRadar'] = radar
     n_pbp = patch_player_pbp(con, bundle, year)
+    fantasy = affl_fantasy_payload(con, year)
+    if fantasy:
+        bundle['afflFantasy'] = fantasy
     json.dump(bundle, open(path, 'w'))
     return {'year': year, 'steals': len(steals), 'power': len(power),
             'cap_teams': len(cap), 'baselines': len(baselines),
             'radar': len((radar or {}).get('teams') or []),
-            'pbp_players': n_pbp}
+            'pbp_players': n_pbp,
+            'xfp': len((fantasy or {}).get('started') or [])}
 
 def main():
     con = sqlite3.connect(DB)
@@ -248,7 +320,8 @@ def main():
         if info:
             print(f"  {info['year']}: {info['steals']} steals · {info['power']} power rows "
                   f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines"
-                  f" · {info['radar']} skill-radar · {info['pbp_players']} pbp players")
+                  f" · {info['radar']} skill-radar · {info['pbp_players']} pbp players"
+                  f" · {info['xfp']} xfp starters")
     print('site/years/*.json patched from affl.db')
 
 if __name__ == '__main__':

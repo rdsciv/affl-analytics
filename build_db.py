@@ -16,6 +16,7 @@ import sqlite3
 import sys
 from collections import defaultdict
 
+from affl_xfp import AFFL_SKILL_RULES, week_xfp
 from pbp_agg import aggregate_pbp, pbp_path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -47,7 +48,8 @@ def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
               'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_pbp_agg',
               'fact_ngs', 'fact_contract',
-              'fact_cap_hit', 'fact_player_season_points', 'player_season',
+              'fact_cap_hit', 'fact_player_season_points', 'fact_player_xfp',
+              'player_season',
               'dim_player', 'dim_team',
               'dim_member', 'dim_scoring', 'dim_season'):
         con.execute(f'DELETE FROM {t}')
@@ -514,7 +516,22 @@ def load_scoring(con):
     # vs 6.6% fractional; 2019: the reverse).
     con.execute("UPDATE dim_season SET yardage_mode = 'BUCKET'     WHERE season <= 2018")
     con.execute("UPDATE dim_season SET yardage_mode = 'FRACTIONAL' WHERE season >= 2019")
-    return len(rows) + filled
+
+    # Seed verified AFFL skill rules when ESPN settings dumps are missing, and
+    # always force rec = 0 (this league is non-PPR).
+    have = {(s, sid) for s, sid in con.execute('SELECT season, stat_id FROM dim_scoring')}
+    seasons = [r[0] for r in con.execute('SELECT season FROM dim_season ORDER BY season')]
+    seeded = 0
+    for season in seasons:
+        for sid, (name, pts) in AFFL_SKILL_RULES.items():
+            if sid == 53 or (season, sid) not in have:
+                con.execute("""INSERT OR REPLACE INTO dim_scoring
+                    (season, stat_id, stat_name, points) VALUES (?,?,?,?)""",
+                    (season, sid, name, pts))
+                seeded += 1
+    if seeded:
+        print(f'    seeded {seeded} AFFL skill rules (rec forced to 0)')
+    return len(rows) + filled + seeded
 
 def load_player_season_points(con):
     """Season fantasy totals per player: ESPN's own where lineups exist, computed
@@ -569,6 +586,136 @@ def load_player_season_points(con):
         (season, player_id, total_points, is_computed) VALUES (?,?,?,?)""", rows)
     return sum(1 for r in rows if not r[3]), sum(1 for r in rows if r[3])
 
+def load_player_xfp(con):
+    """AFFL FP / XFP / FPOE + opportunity shares for skill players.
+
+    FP is recomputed from fact_nfl_week under dim_scoring (not Savant /fantasy).
+    XFP swaps TDs for pbp xTD and receiving yards for air + xYAC.
+    """
+    modes = dict(con.execute('SELECT season, yardage_mode FROM dim_season'))
+    rules_by = defaultdict(dict)
+    for season, sid, pts in con.execute('SELECT season, stat_id, points FROM dim_scoring'):
+        rules_by[season][sid] = pts
+    for season in modes:
+        rules_by[season][53] = 0.0
+        for sid, (_n, pts) in AFFL_SKILL_RULES.items():
+            rules_by[season].setdefault(sid, pts)
+
+    gsis_to_pid = {}
+    for pid, g, pos in con.execute(
+            "SELECT player_id, gsis_id, position FROM dim_player WHERE gsis_id IS NOT NULL"):
+        if pos in ('QB', 'RB', 'WR', 'TE'):
+            gsis_to_pid[g] = pid
+
+    started = set(con.execute(
+        "SELECT season, week, player_id FROM fact_roster_week WHERE started = 1"))
+
+    pbp = {}
+    for r in con.execute("""
+            SELECT season, week, gsis_id, pass_xtd, rush_xtd, rec_xtd,
+                   rec_air_yards, xyac, xyac_n,
+                   rz_pass, rz_rush, rz_tgt, gl_pass, gl_rush, gl_tgt,
+                   targets, rush_att, pass_attempts, dropbacks
+              FROM fact_pbp_agg"""):
+        pbp[(r[0], r[1], r[2])] = {
+            'pass_xtd': r[3], 'rush_xtd': r[4], 'rec_xtd': r[5],
+            'rec_air_yards': r[6], 'xyac': r[7], 'xyac_n': r[8],
+            'rz_pass': r[9], 'rz_rush': r[10], 'rz_tgt': r[11],
+            'gl_pass': r[12], 'gl_rush': r[13], 'gl_tgt': r[14],
+            'targets': r[15], 'rush_att': r[16], 'pass_attempts': r[17],
+            'dropbacks': r[18],
+        }
+
+    ngs_ryoe = {}
+    for s, w, g, ryoe in con.execute("""
+            SELECT season, week, gsis_id, rush_yards_over_expected
+              FROM fact_ngs
+             WHERE stat_type = 'rushing' AND week > 0
+               AND rush_yards_over_expected IS NOT NULL"""):
+        ngs_ryoe[(s, w, g)] = {'rush_yards_over_expected': ryoe}
+
+    acc = {}
+    def bucket(season, pid):
+        return acc.setdefault((season, pid), {
+            'games': 0, 'fp': 0.0, 'xfp': 0.0,
+            'st_games': 0, 'st_fp': 0.0, 'st_xfp': 0.0,
+            'wopr_s': 0.0, 'wopr_n': 0, 'tsh_s': 0.0, 'tsh_n': 0,
+            'ay_s': 0.0, 'ay_n': 0, 'rz': 0.0, 'gl': 0.0,
+            'xtd': 0.0, 'td': 0.0, 'tgt': 0.0, 'car': 0.0, 'opp': 0.0,
+        })
+
+    for row in con.execute("""
+            SELECT season, week, gsis_id, pass_yards, pass_tds, interceptions,
+                   rush_yards, rush_tds, carries, rec_yards, rec_tds, receptions,
+                   targets, fumbles_lost, two_pt, wopr, target_share, air_yards_share
+              FROM fact_nfl_week"""):
+        season, week, gsis = row[0], row[1], row[2]
+        pid = gsis_to_pid.get(gsis)
+        if pid is None:
+            continue
+        box = {
+            'pass_yards': row[3], 'pass_tds': row[4], 'interceptions': row[5],
+            'rush_yards': row[6], 'rush_tds': row[7], 'rec_yards': row[9],
+            'rec_tds': row[10], 'receptions': row[11],
+            'fumbles_lost': row[13], 'two_pt': row[14],
+        }
+        pb = pbp.get((season, week, gsis))
+        fp, xfp, _ = week_xfp(box, pb, rules_by[season],
+                              modes.get(season, 'FRACTIONAL'),
+                              ngs_ryoe.get((season, week, gsis)))
+        a = bucket(season, pid)
+        a['games'] += 1
+        a['fp'] += fp
+        a['xfp'] += xfp
+        if (season, week, pid) in started:
+            a['st_games'] += 1
+            a['st_fp'] += fp
+            a['st_xfp'] += xfp
+        if row[15]:
+            a['wopr_s'] += row[15]; a['wopr_n'] += 1
+        if row[16]:
+            a['tsh_s'] += row[16]; a['tsh_n'] += 1
+        if row[17]:
+            a['ay_s'] += row[17]; a['ay_n'] += 1
+        carries = row[8] or 0
+        targets = row[12] or 0
+        attempts = (pb or {}).get('pass_attempts') or 0
+        a['tgt'] += targets
+        a['car'] += carries
+        a['opp'] += targets + carries + attempts
+        if pb:
+            a['rz'] += (pb.get('rz_pass') or 0) + (pb.get('rz_rush') or 0) + (pb.get('rz_tgt') or 0)
+            a['gl'] += (pb.get('gl_pass') or 0) + (pb.get('gl_rush') or 0) + (pb.get('gl_tgt') or 0)
+            a['xtd'] += ((pb.get('pass_xtd') or 0) + (pb.get('rush_xtd') or 0)
+                         + (pb.get('rec_xtd') or 0))
+        a['td'] += (row[4] or 0) + (row[7] or 0) + (row[10] or 0)
+
+    rows = []
+    for (season, pid), a in acc.items():
+        g = a['games'] or 1
+        sg = a['st_games']
+        rows.append((
+            season, pid, a['games'],
+            round(a['fp'], 1), round(a['xfp'], 1), round(a['fp'] - a['xfp'], 1),
+            round(a['fp'] / g, 2), round(a['xfp'] / g, 2),
+            sg,
+            round(a['st_fp'], 1) if sg else None,
+            round(a['st_xfp'], 1) if sg else None,
+            round(a['st_fp'] - a['st_xfp'], 1) if sg else None,
+            round(a['wopr_s'] / a['wopr_n'], 3) if a['wopr_n'] else None,
+            round(a['tsh_s'] / a['tsh_n'], 3) if a['tsh_n'] else None,
+            round(a['ay_s'] / a['ay_n'], 3) if a['ay_n'] else None,
+            a['rz'], a['gl'], round(a['xtd'], 2),
+            round(a['td'] - a['xtd'], 2),
+            a['tgt'], a['car'], a['opp'],
+        ))
+    con.executemany("""INSERT OR REPLACE INTO fact_player_xfp
+        (season, player_id, games, fp, xfp, fpoe, fp_g, xfp_g,
+         st_games, st_fp, st_xfp, st_fpoe, wopr, target_share, air_yards_share,
+         rz_opp, gl_opp, xtd, td_luck, targets, carries, opp)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
+    return len(rows), sum(1 for r in rows if r[8])
+
 # ---------------------------------------------------------------- verification
 CHECKS = [
     ("seasons", "SELECT COUNT(*) FROM dim_season"),
@@ -587,6 +734,7 @@ CHECKS = [
     ("contracts", "SELECT COUNT(*) FROM fact_contract"),
     ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
     ("player-seasons", "SELECT COUNT(*) FROM fact_player_season_points"),
+    ("player xfp", "SELECT COUNT(*) FROM fact_player_xfp"),
     ("cap hits", "SELECT COUNT(*) FROM fact_cap_hit"),
 ]
 
@@ -645,6 +793,8 @@ def main():
     print(f'  contracts {load_contracts(con):,}')
     na, nc = load_player_season_points(con)
     print(f'  player-seasons {na + nc:,} ({nc:,} computed from NFL stats)')
+    nx, nxs = load_player_xfp(con)
+    print(f'  player xfp {nx:,} ({nxs:,} with an AFFL start)')
     ncap, nmatch = load_cap_hits(con)
     print(f'  cap hits {ncap:,} ({nmatch:,} resolved to an AFFL-known player)')
     con.commit()

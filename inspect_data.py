@@ -191,23 +191,49 @@ def main():
         parts += ["", f"## {season} skill radar (started skill players, non-PPR)",
                   "", md_table(radar_cols, radar, limit=16)]
 
-    pbp_n = 0
+    pbp_n = ngs_n = xfp_n = 0
     try:
         pbp_n = con.execute("SELECT COUNT(*) FROM fact_pbp_agg").fetchone()[0]
         ngs_n = con.execute("SELECT COUNT(*) FROM fact_ngs").fetchone()[0]
+        xfp_n = con.execute("SELECT COUNT(*) FROM fact_player_xfp").fetchone()[0]
     except Exception:
-        ngs_n = 0
+        pass
+    try:
+        xfp_cols, xfp = q(
+            con,
+            """
+            SELECT p.name, p.position, x.st_games, ROUND(x.st_fp,1),
+                   ROUND(x.st_xfp,1), ROUND(x.st_fpoe,1), ROUND(x.xtd,1)
+              FROM fact_player_xfp x
+              JOIN dim_player p ON p.player_id = x.player_id
+             WHERE x.season = ? AND x.st_games > 0
+             ORDER BY x.st_fpoe DESC
+            """,
+            (season,),
+        )
+    except Exception:
+        xfp_cols, xfp = [], []
+    if xfp:
+        write_csv(os.path.join(OUT, f"xfp_{season}.csv"), xfp_cols, xfp)
+        parts += ["", f"## {season} AFFL XFP / FPOE (started skill players, non-PPR)",
+                  "", md_table(xfp_cols, xfp, limit=16)]
     parts += [
         "",
         "## Savant / nflverse PBP",
         "",
-        f"fact_pbp_agg rows: **{pbp_n:,}**. fact_ngs rows: **{ngs_n:,}**.",
+        f"fact_pbp_agg rows: **{pbp_n:,}**. fact_ngs rows: **{ngs_n:,}**. "
+        f"fact_player_xfp rows: **{xfp_n:,}**.",
         "",
         "Landed from nflverse release files (not a live Savant scrape):",
         "",
         "- play-by-play 2013–2025 → `fact_pbp_agg` (EPA, CPOE, air yards, success, xTD)",
         "- nextgen_stats 2016+ → `fact_ngs` (separation, cushion, CPOE, RYoe)",
-        "- Skill Radar on the site uses started AFFL skill players; receptions are volume, not PPR",
+        "- AFFL FP / XFP / FPOE from `dim_scoring` + box + PBP. Receptions are volume, not PPR",
+        "- Skill Radar on the site uses started AFFL skill players",
+        "",
+        "Savant `/fantasy` std is a **comparison UI**, not the AFFL scoring source. "
+        "Do not import its FP / XFP / PPR / half-PPR columns. AFFL: rec = 0, "
+        "yardage bucketed through 2018, 50-yard FG = 3.",
         "",
         "Still needs a browser scrape of nflsavant.com (Cloudflare) if we want the UI pages themselves:",
         "",
@@ -215,11 +241,11 @@ def main():
         "- Explore query-builder leaderboards",
         "- Compare-page snapshots",
         "",
-        "Source URL template (per year): "
-        "`https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`",
+        "PBP sources (same grain; we fetch nflverse gzip, do not commit giant CSVs):",
         "",
-        "Savant historical equivalent (not fetched): "
-        "`https://nflsavant.com/pbp_data.php?year={year}`",
+        "- nflverse: `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`",
+        "- Savant R2 (alternate, ~112–115 MB): `https://pub-e9a6e73e336047fba26374ae44334139.r2.dev/pbp-{year}.csv`",
+        "- `https://nflsavant.com/pbp_data.php?year={year}` 301s to the homepage — not a file",
     ]
 
     parts += [
