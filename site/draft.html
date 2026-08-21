@@ -34,6 +34,35 @@
 
   <section class="kpi-row" id="draft-kpis"></section>
 
+  <section class="card holdout-card">
+    <div class="card-head">
+      <div>
+        <h2 id="holdout-title">Ticket holdouts lose</h2>
+        <div class="card-sub" id="holdout-sub">auction player-seasons · PAR from v_draft_value</div>
+      </div>
+      <div class="holdout-controls">
+        <div class="pp-filters" id="holdout-scope"></div>
+        <div class="pp-filters" id="holdout-stack"></div>
+      </div>
+    </div>
+    <div class="claim-line" id="holdout-claim"></div>
+    <div class="second-grid holdout-grid">
+      <div>
+        <div class="viz-label">Marimekko · width = share of draft spend</div>
+        <div class="chart-wrap xtall mekko-wrap" id="mekko"></div>
+      </div>
+      <div>
+        <div class="viz-label">Connected scatter · early vs late mean PAR</div>
+        <div class="chart-wrap xtall"><canvas id="holdout-scatter"></canvas></div>
+      </div>
+    </div>
+    <details class="holdout-continuous">
+      <summary>Continuous view · mean PAR vs overall pick, within each cost bucket</summary>
+      <div class="chart-wrap tall"><canvas id="holdout-continuous"></canvas></div>
+    </details>
+    <div class="draft-note" id="holdout-note"></div>
+  </section>
+
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
@@ -76,7 +105,7 @@
   <footer class="foot">AFFL Draft Room &middot; auction values and returns via ESPN + nflverse</footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=2"></script>
-<script src="draft.js?v=3"></script>
+<script src="common.js?v=3"></script>
+<script src="draft.js?v=4"></script>
 </body>
 </html>
