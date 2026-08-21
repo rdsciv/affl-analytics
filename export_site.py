@@ -219,13 +219,17 @@ def export_year(con, year):
     # If the season's points had to be computed from NFL stats (pre-2018, where
     # ESPN kept no lineups), say so rather than passing it off as ESPN's own.
     computed_season = bool(dv) and all(d['computed'] for d in dv)
-    bundle['draftValue'] = {'steals': steals, 'busts': busts, 'teamEff': eff,
-                            'auction': auction, 'baselines': baselines,
-                            'parByOverall': par_by_overall,
-                            'computed': computed_season}
-    bundle['power'] = power
-    bundle['luckFG'] = luck
-    bundle['nflCap'] = {'byTeam': cap, 'final': capFinal, 'topPlayers': capTop}
+    if dv or steals or eff:
+        bundle['draftValue'] = {'steals': steals, 'busts': busts, 'teamEff': eff,
+                                'auction': auction, 'baselines': baselines,
+                                'parByOverall': par_by_overall,
+                                'computed': computed_season}
+    if power:
+        bundle['power'] = power
+    if luck:
+        bundle['luckFG'] = luck
+    if cap or capFinal or capTop:
+        bundle['nflCap'] = {'byTeam': cap, 'final': capFinal, 'topPlayers': capTop}
     radar = skill_radar_payload(con, year)
     if radar:
         bundle['skillRadar'] = radar

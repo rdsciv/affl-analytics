@@ -39,9 +39,7 @@ NFLVERSE_SLEEP = 0.75
 PBP_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz'
 PBP_NFLVERSE_CSV = 'https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv'
 PBP_SAVANT = 'https://nflsavant.com/pbp_data.php?year={year}'
-NGS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_{year}_{kind}.csv'
-STATS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/stats_player/{kind}_{year}.csv'
-ROSTER_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_{year}.csv'
+NGS_NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_{kind}.csv.gz'
 
 def env(path):
     out = {}
@@ -318,18 +316,20 @@ def fetch_pbp_year(year):
     return year, ('ok' if ok else 'FAIL'), used, detail
 
 
-def fetch_ngs_year(year):
+def fetch_ngs():
+    """One file per stat type covers 2016–present (week 0 = season summary)."""
     got, manifest = [], []
     for kind in ('passing', 'rushing', 'receiving'):
-        u = NGS_NFLVERSE.format(year=year, kind=kind)
-        dest = f'{DATA}/ngs_{year}_{kind}.csv'
-        ok, detail = download_cached(u, dest, min_bytes=200)
+        u = NGS_NFLVERSE.format(kind=kind)
+        dest = f'{DATA}/ngs_{kind}.csv.gz'
+        ok, detail = download_cached(u, dest, min_bytes=1000)
         got.append(f'{kind}={detail}')
-        manifest.append({'year': year, 'kind': f'ngs_{kind}', 'url': u,
-                         'dest': dest, 'ok': ok, 'via': 'nflverse'})
+        manifest.append({'kind': f'ngs_{kind}', 'url': u,
+                         'dest': dest, 'ok': ok, 'via': 'nflverse',
+                         'years': '2016-present'})
         time.sleep(NFLVERSE_SLEEP)
     write_manifest(manifest)
-    return year, ', '.join(got)
+    return ', '.join(got)
 
 
 # ---------------------------------------------------------------- main
@@ -346,12 +346,10 @@ def main():
     years = list(range(FIRST_YEAR, season_end + 1))
     roster_years = [y for y in years if y >= ROSTER_FIRST_YEAR]
     pbp_years = list(range(PBP_FIRST_YEAR, PBP_LAST_YEAR + 1))
-    ngs_years = list(range(NGS_FIRST_YEAR, PBP_LAST_YEAR + 1))
     if year_filter is not None:
         years = [year_filter] if year_filter in years else [year_filter]
         roster_years = [y for y in years if y >= ROSTER_FIRST_YEAR]
         pbp_years = [year_filter]
-        ngs_years = [year_filter] if year_filter >= NGS_FIRST_YEAR else []
 
     if only in ('all', 'league'):
         print('== league core ==')
@@ -395,10 +393,8 @@ def main():
             print(f'       {url}')
 
     if only in ('all', 'ngs', 'savant'):
-        print('== nflverse nextgen_stats (2016+) ==')
-        for y in ngs_years:
-            y, msg = fetch_ngs_year(y)
-            print(f'  {y}: {msg}')
+        print('== nflverse nextgen_stats (2016–present, one file per type) ==')
+        print(f'  {fetch_ngs()}')
 
     print('done')
 

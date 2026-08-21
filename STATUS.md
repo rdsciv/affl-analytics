@@ -25,6 +25,8 @@ FantasyGenius benchmark.
 | transactions | 15,815 |
 | trades | 181 |
 | NFL player-weeks | 208,168 |
+| PBP player-weeks (`fact_pbp_agg`, 2013–2025) | 67,328 |
+| NGS player-weeks (`fact_ngs`, 2016+) | 25,619 |
 | contracts / cap hits | 31,893 / 30,611 |
 | scoring rules / player-seasons | 254 / 7,251 |
 

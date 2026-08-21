@@ -9,6 +9,7 @@ truth for metrics. Idempotent: safe to re-run, rebuilds from scratch.
     python3 build_db.py --check    # run verification queries only
 """
 import csv
+import gzip
 import json
 import os
 import sqlite3
@@ -339,21 +340,23 @@ def load_pbp_agg(con):
 
 def load_ngs(con):
     rows = []
-    kinds = ('passing', 'rushing', 'receiving')
-    for year in range(2016, 2026):
-        for kind in kinds:
-            path = f'{DATA}/ngs_{year}_{kind}.csv'
-            if not os.path.exists(path):
-                continue
-            for r in csv.DictReader(open(path)):
+    for kind in ('passing', 'rushing', 'receiving'):
+        path = f'{DATA}/ngs_{kind}.csv.gz'
+        if not os.path.exists(path):
+            continue
+        with gzip.open(path, 'rt', encoding='utf-8', newline='') as fh:
+            for r in csv.DictReader(fh):
                 if (r.get('season_type') or 'REG') not in ('REG', ''):
                     continue
                 gsis = r.get('player_gsis_id') or r.get('player_id') or ''
                 if not gsis:
                     continue
                 try:
+                    year = int(float(r['season']))
                     wk = int(float(r['week']))
                 except (KeyError, TypeError, ValueError):
+                    continue
+                if year < 2016:
                     continue
                 vals = {c: (fnum(r, c) if r.get(c) not in (None, '', 'NA') else None)
                         for c in (

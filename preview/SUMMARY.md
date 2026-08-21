@@ -154,6 +154,35 @@ This is the data. Not the website.
 | 2025 | 13 | 1 | 1 | 0 |
 | 2025 | 14 | 1 | 1 | 0 |
 
+
+## Savant / nflverse PBP (CHI-113)
+
+Verified this rebuild (ESPN dumps are gitignored and were not present here;
+draft/matchup counts above are from the previous complete warehouse):
+
+| table | rows |
+| --- | --- |
+| fact_pbp_agg | 67,328 |
+| fact_ngs | 25,619 |
+
+PBP coverage by season (player-weeks): 2013–2025 all present (4,992–5,415 per year).
+Source per year: `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`
+Savant PHP equivalent (not fetched, Cloudflare): `https://nflsavant.com/pbp_data.php?year={year}`
+
+Landed:
+
+- play-by-play → `fact_pbp_agg` (EPA, CPOE, air yards, success, RZ/GL, xTD)
+- nextgen_stats → `fact_ngs` (`ngs_{passing,rushing,receiving}.csv.gz`, 2016–present)
+- Skill Radar on 2018–2025 year bundles (started skill players; receptions are volume, not PPR)
+
+Still needs a live scrape of nflsavant.com UI pages:
+
+- Combine RAS (0–10)
+- Explore query-builder leaderboards
+- Compare-page snapshots
+
+See `preview/skill_radar_2025.csv` for 2025 team totals.
+
 ## How to refresh
 
 ```
