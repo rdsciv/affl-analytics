@@ -164,24 +164,57 @@ draft/matchup counts above are from the previous complete warehouse):
 | --- | --- |
 | fact_pbp_agg | 67,328 |
 | fact_ngs | 25,619 |
+| fact_player_xfp | 6,768 |
+| dim_scoring (seeded AFFL skill; rec = 0) | 144 |
 
 PBP coverage by season (player-weeks): 2013–2025 all present (4,992–5,415 per year).
-Source per year: `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`
-Savant PHP equivalent (not fetched, Cloudflare): `https://nflsavant.com/pbp_data.php?year={year}`
+
+PBP sources (same grain; we fetch nflverse gzip and do not commit giant CSVs):
+
+- nflverse: `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{year}.csv.gz`
+- Savant R2 (alternate, ~112–115 MB, 372 nflfastR cols): `https://pub-e9a6e73e336047fba26374ae44334139.r2.dev/pbp-{year}.csv`
+- `https://nflsavant.com/pbp_data.php?year={year}` 301s to the homepage — not a file
 
 Landed:
 
 - play-by-play → `fact_pbp_agg` (EPA, CPOE, air yards, success, RZ/GL, xTD)
 - nextgen_stats → `fact_ngs` (`ngs_{passing,rushing,receiving}.csv.gz`, 2016–present)
-- Skill Radar on 2018–2025 year bundles (started skill players; receptions are volume, not PPR)
+- AFFL FP / XFP / FPOE + WOPR / TGT% / AY% / RZ / GL / xTD / TD luck from `fact_pbp_agg` + `dim_scoring` + `fact_nfl_week`
+- Skill Radar and player/NFL tiles (started skill players; receptions are volume, not PPR)
+- 2025 year bundle: `afflFantasy.scoring = NON_PPR`, 201 started skill players with XFP / FPOE
+
+Savant `/fantasy` std is a **comparison UI**, not the AFFL scoring source.
+Do not import its FP / XFP / PPR / half-PPR columns. AFFL: rec = 0,
+yardage bucketed through 2018 (fractional from 2019), 50-yard FG = 3.
+
+## 2025 AFFL XFP / FPOE (started skill players, non-PPR)
+
+| name | pos | starts | fp | xfp | fpoe | xtd | td_luck |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Jonathan Taylor | RB | 15 | 302.3 | 244.8 | +57.5 | 15.5 | 4.5 |
+| Jahmyr Gibbs | RB | 16 | 272.6 | 227.5 | +45.1 | 11.7 | 6.3 |
+| James Cook | RB | 16 | 267.7 | 225.2 | +42.5 | 12.2 | 1.8 |
+| Josh Allen | QB | 15 | 340.1 | 301.6 | +38.5 | 31.7 | 7.3 |
+| Derrick Henry | RB | 16 | 251.9 | 214.4 | +37.5 | 15.9 | 0.1 |
+| Jalen Hurts | QB | 16 | 301.1 | 268.3 | +32.8 | 25.4 | 7.5 |
+| Bijan Robinson | RB | 16 | 287.5 | 259.7 | +27.8 | 11.2 | -0.1 |
+| Tucker Kraft | TE | 8 | 85.2 | 60.2 | +25.0 | 2.6 | 3.4 |
+| Jaylen Warren | RB | 14 | 162.4 | 140.0 | +22.4 | 10.9 | -2.9 |
+| TreVeyon Henderson | RB | 10 | 132.9 | 111.4 | +21.5 | 8.2 | 1.8 |
+| De'Von Achane | RB | 16 | 255.8 | 234.6 | +21.2 | 8.2 | 3.8 |
+| Trevor Lawrence | QB | 6 | 135.6 | 117.1 | +18.4 | 33.0 | 5.0 |
+| Drake Maye | QB | 15 | 320.4 | 302.6 | +17.8 | 32.0 | 3.0 |
+| Brock Purdy | QB | 3 | 70.4 | 53.0 | +17.4 | 19.7 | 3.3 |
+| Matthew Stafford | QB | 7 | 142.1 | 125.3 | +16.8 | 37.1 | 8.9 |
+| Rico Dowdle | RB | 12 | 160.0 | 144.9 | +15.1 | 7.3 | -0.3 |
+
+See `preview/xfp_2025.csv` (201 started skill players) and `preview/skill_radar_2025.csv`.
 
 Still needs a live scrape of nflsavant.com UI pages:
 
 - Combine RAS (0–10)
 - Explore query-builder leaderboards
 - Compare-page snapshots
-
-See `preview/skill_radar_2025.csv` for 2025 team totals.
 
 ## How to refresh
 
