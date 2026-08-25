@@ -15,7 +15,9 @@ Owns:
   baselines    the replacement level used, so the UI can explain the number
   skillRadar   started-player NFL pass/rush/rec efficiency + EPA (non-PPR)
   player PBP   CPOE / aDOT / success / xTD / TD luck patched onto players[]
-  afflFantasy  AFFL-scored FP / XFP / FPOE + opportunity shares (not Savant)
+  afflFantasy      AFFL-scored FP / XFP / FPOE + opportunity shares (not Savant)
+  playerSeasonXfp  season grain: fact_player_xfp fp/xfp/fpoe (season+player_id)
+  playerWeekNfl    week grain: pbp volume/TDs + nfl_week yards (season+week+gsis_id)
 """
 import json
 import os
@@ -26,6 +28,8 @@ from affl_xfp import SAVANT_FANTASY_NOTE
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(HERE, 'affl.db')
 YEARS = os.path.join(HERE, 'site', 'years')
+CHART_FIRST_YEAR = 2013
+CHART_LAST_YEAR = 2025
 
 def rows(con, sql, args=()):
     con.row_factory = sqlite3.Row
@@ -164,6 +168,95 @@ def patch_player_pbp(con, bundle, year):
     return n
 
 
+def player_season_xfp_payload(con, year):
+    """Season grain only. CHI-114 binds fp / xfp / fpoe on season+player_id.
+
+    Do not put weekly yards or TDs on this object.
+    """
+    raw = rows(con, """
+        SELECT season, player_id, fp, xfp, fpoe
+          FROM fact_player_xfp
+         WHERE season = ?
+         ORDER BY player_id""", (year,))
+    if not raw:
+        return None
+    return {
+        'grain': 'season+player_id',
+        'scoring': 'NON_PPR',
+        'recIsVolume': True,
+        'source': 'fact_player_xfp',
+        'note': SAVANT_FANTASY_NOTE,
+        'rows': [{
+            'season': r['season'],
+            'player_id': r['player_id'],
+            'fp': _round(r['fp'], 1),
+            'xfp': _round(r['xfp'], 1),
+            'fpoe': _round(r['fpoe'], 1),
+        } for r in raw],
+    }
+
+
+def player_week_nfl_payload(con, year):
+    """Week grain only. CHI-114 binds pbp volume/TDs and nfl_week yards.
+
+    Keys are season+week+gsis_id. player_id is a dim_player join, not a key.
+    XFP / FPOE / air yards stay off this object. Receptions are volume.
+    """
+    raw = rows(con, """
+        SELECT a.season, a.week, a.gsis_id, p.player_id,
+               a.targets, a.receptions, a.rush_td, a.pass_td, a.rec_td,
+               n.pass_yards, n.rush_yards
+          FROM fact_pbp_agg a
+          LEFT JOIN dim_player p ON p.gsis_id = a.gsis_id
+          LEFT JOIN fact_nfl_week n
+            ON n.season = a.season AND n.week = a.week AND n.gsis_id = a.gsis_id
+         WHERE a.season = ?
+         ORDER BY a.week, a.gsis_id""", (year,))
+    if not raw:
+        return None
+    return {
+        'grain': 'season+week+gsis_id',
+        'scoring': 'NON_PPR',
+        'recIsVolume': True,
+        'source': 'fact_pbp_agg + fact_nfl_week via dim_player',
+        'note': SAVANT_FANTASY_NOTE,
+        'rows': [{
+            'season': r['season'],
+            'week': r['week'],
+            'gsis_id': r['gsis_id'],
+            'player_id': r['player_id'],
+            'targets': _round(r['targets'], 0),
+            'receptions': _round(r['receptions'], 0),
+            'rush_td': _round(r['rush_td'], 0),
+            'pass_td': _round(r['pass_td'], 0),
+            'rec_td': _round(r['rec_td'], 0),
+            'pass_yards': _round(r['pass_yards'], 1),
+            'rush_yards': _round(r['rush_yards'], 1),
+        } for r in raw],
+    }
+
+
+def ensure_year_bundle(year):
+    """Create an NFL-only stub so 2013 (and any missing play year) can ship."""
+    path = os.path.join(YEARS, f'{year}.json')
+    if os.path.exists(path):
+        return path
+    os.makedirs(YEARS, exist_ok=True)
+    stub = {
+        'year': year,
+        'nflOnly': True,
+        'hasRosters': False,
+        'hasTx': False,
+        'players': [],
+        'weeks': {},
+        'note': 'NFL play year. AFFL league history starts 2014. '
+                'playerWeekNfl is the weekly bind; playerSeasonXfp is empty '
+                'when fact_nfl_week has no rows.',
+    }
+    json.dump(stub, open(path, 'w'))
+    return path
+
+
 def affl_fantasy_payload(con, year):
     started = rows(con, """
         SELECT x.player_id AS pid, p.name, p.position AS pos,
@@ -200,7 +293,10 @@ def affl_fantasy_payload(con, year):
 def export_year(con, year):
     path = os.path.join(YEARS, f'{year}.json')
     if not os.path.exists(path):
-        return None
+        if CHART_FIRST_YEAR <= year <= CHART_LAST_YEAR:
+            path = ensure_year_bundle(year)
+        else:
+            return None
     bundle = json.load(open(path))
 
     baselines = rows(con, """
@@ -305,23 +401,36 @@ def export_year(con, year):
     fantasy = affl_fantasy_payload(con, year)
     if fantasy:
         bundle['afflFantasy'] = fantasy
+    season_xfp = player_season_xfp_payload(con, year)
+    if season_xfp:
+        bundle['playerSeasonXfp'] = season_xfp
+    else:
+        bundle.pop('playerSeasonXfp', None)
+    week_nfl = player_week_nfl_payload(con, year)
+    if week_nfl:
+        bundle['playerWeekNfl'] = week_nfl
+    else:
+        bundle.pop('playerWeekNfl', None)
     json.dump(bundle, open(path, 'w'))
     return {'year': year, 'steals': len(steals), 'power': len(power),
             'cap_teams': len(cap), 'baselines': len(baselines),
             'radar': len((radar or {}).get('teams') or []),
             'pbp_players': n_pbp,
-            'xfp': len((fantasy or {}).get('started') or [])}
+            'xfp': len((fantasy or {}).get('started') or []),
+            'season_xfp': len((season_xfp or {}).get('rows') or []),
+            'week_nfl': len((week_nfl or {}).get('rows') or [])}
 
 def main():
     con = sqlite3.connect(DB)
-    years = [r[0] for r in con.execute('SELECT season FROM dim_season ORDER BY season')]
+    years = list(range(CHART_FIRST_YEAR, CHART_LAST_YEAR + 1))
     for y in years:
         info = export_year(con, y)
         if info:
             print(f"  {info['year']}: {info['steals']} steals · {info['power']} power rows "
                   f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines"
                   f" · {info['radar']} skill-radar · {info['pbp_players']} pbp players"
-                  f" · {info['xfp']} xfp starters")
+                  f" · {info['xfp']} xfp starters"
+                  f" · {info['season_xfp']} season-xfp · {info['week_nfl']} week-nfl")
     print('site/years/*.json patched from affl.db')
 
 if __name__ == '__main__':

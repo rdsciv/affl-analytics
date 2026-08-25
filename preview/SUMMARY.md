@@ -210,6 +210,32 @@ yardage bucketed through 2018 (fractional from 2019), 50-yard FG = 3.
 
 See `preview/xfp_2025.csv` (201 started skill players) and `preview/skill_radar_2025.csv`.
 
+## CHI-114 chart bind (Ork, no local tree)
+
+Year bundles on `verify/full-audit` now carry two **separate** objects. Ork binds
+these without `~/Projects/ccDesktopAFFL`. See `preview/CHI-114-BIND.md`.
+
+| file | season grain `playerSeasonXfp` | week grain `playerWeekNfl` |
+| --- | --- | --- |
+| `site/years/2013.json` | — (no `fact_nfl_week`) | 4,992 |
+| `site/years/2014.json` | 449 | 5,100 |
+| `site/years/2015.json` | 485 | 5,072 |
+| `site/years/2016.json` | 513 | 5,045 |
+| `site/years/2017.json` | 524 | 5,084 |
+| `site/years/2018.json` | 575 | 5,039 |
+| `site/years/2019.json` | 575 | 5,010 |
+| `site/years/2020.json` | 612 | 5,169 |
+| `site/years/2021.json` | 633 | 5,415 |
+| `site/years/2022.json` | 611 | 5,374 |
+| `site/years/2023.json` | 582 | 5,372 |
+| `site/years/2024.json` | 592 | 5,306 |
+| `site/years/2025.json` | 617 | 5,350 |
+
+- `playerSeasonXfp.grain = season+player_id` — `fp`, `xfp`, `fpoe` only
+- `playerWeekNfl.grain = season+week+gsis_id` — `targets`, `receptions`, `rush_td`, `pass_td`, `rec_td`, `pass_yards`, `rush_yards`
+- Both tagged `NON_PPR`. Receptions are volume. No PPR fields. Savant `/fantasy` is not the source.
+- 2016–17 are present. Do not drop them.
+
 Still needs a live scrape of nflsavant.com UI pages:
 
 - Combine RAS (0–10)

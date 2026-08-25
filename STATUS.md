@@ -83,6 +83,7 @@ Tickets live in the Notion AFFL Handoff Queue. Ready cards get built. Backlog do
 
 - Close identity/phase contracts (AFFL-001 / AFFL-002) against the warehouse that already exists
 - **#8 / CHI-113** pbp + NGS + Skill Radar + AFFL XFP/FPOE (`fact_player_xfp`). Savant `/fantasy` std is a comparison UI, not the scoring source. Combine RAS / Explore still need a live scrape.
+- **CHI-114** year-bundle bind is on `verify/full-audit`: `playerSeasonXfp` + `playerWeekNfl` for 2013–2025 (2016–17 included). Ork binds `site/years/{year}.json` — see `preview/CHI-114-BIND.md`. Do not mark Done.
 - **#9** receiving-usage and xTD views
 - **#5** the FantasyGenius surface: Rankings, History, Stats, Teams, Wrapped
 - **#11** pre-2018 lineup solver (experimental, must be validated before publishing)
