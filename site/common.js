@@ -26,6 +26,22 @@ window.AFFL = (function () {
     11289: { name: "Ray Rice", pos: "RB", nfl: "BAL" },
     15358: { name: "Jarrett Boykin", pos: "WR", nfl: "BUF" },
     4685720: { name: "Bryce Young", pos: "QB", nfl: "CAR" },
+    14885: { name: "Doug Martin", pos: "RB" },
+    11307: { name: "Jamaal Charles", pos: "RB" },
+    16040: { name: "C.J. Anderson", pos: "RB" },
+    14221: { name: "Doug Baldwin", pos: "WR" },
+    9705: { name: "Brandon Marshall", pos: "WR" },
+    11270: { name: "Jordy Nelson", pos: "WR" },
+    4259308: { name: "Raheem Blackshear", pos: "RB" },
+    4430871: { name: "Sean Tucker", pos: "RB" },
+    3149687: { name: "Chris Brooks", pos: "RB" },
+    4361417: { name: "Zack Kuntz", pos: "TE" },
+    4362619: { name: "Chris Rodriguez Jr.", pos: "RB" },
+    4373632: { name: "Jaren Hall", pos: "QB" },
+    10452: { name: "Adrian Peterson", pos: "RB" },
+    13229: { name: "Rob Gronkowski", pos: "TE" },
+    14876: { name: "Ryan Tannehill", pos: "QB" },
+    4571557: { name: "Spencer Shrader", pos: "K" },
   };
   function hydratePlayer(p) {
     if (!p) return p;
@@ -671,7 +687,7 @@ window.AFFL = (function () {
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,
            fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
-           playerHref, playerLink, unresolvedPlayerName, displayPlayerName,
+           playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
            loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, scopePicker, scopeFromURL, showYearRow,
            chartDefaults, dateStr, notice,
            get data() { return DATA; } };
