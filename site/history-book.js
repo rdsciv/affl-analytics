@@ -1,5 +1,5 @@
 /* AFFL History Book — archive, records, franchises. Stats come from
-   history.json (derived from data.json). Missing 2014–17 benches/tx stay missing. */
+   history.json + split parts (MCP payload limit). Missing 2014–17 benches/tx stay missing. */
 (function () {
   const FIRST = 2014;
   const LAST = 2025;
@@ -18,15 +18,17 @@
     ['scoreboard.html', 'Scoreboard'],
   ];
 
-  function bust(url) { return url + (url.includes('?') ? '&' : '?') + 'v=hist1'; }
+  function bust(url) { return url + (url.includes('?') ? '&' : '?') + 'v=hist2'; }
 
   async function boot() {
     if (H && DATA) return { H, DATA };
-    const [h, d] = await Promise.all([
+    const [h, extraF, extraL, d] = await Promise.all([
       fetch(bust('history.json'), { cache: 'no-store' }).then((r) => r.json()),
+      fetch(bust('history-franchises.json'), { cache: 'no-store' }).then((r) => r.json()),
+      fetch(bust('history-ledger.json'), { cache: 'no-store' }).then((r) => r.json()),
       fetch(bust('data.json'), { cache: 'no-store' }).then((r) => r.json()),
     ]);
-    H = h;
+    H = Object.assign({}, h, extraF, extraL);
     DATA = d;
     return { H, DATA };
   }
