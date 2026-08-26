@@ -1,4 +1,4 @@
-/* CHI-119/120 History: Season dropdown + The Race. Runs the last full History book with year/Race patched in. */
+/* CHI-119/120 History: Season dropdown + The Race. All-Play on All is career 2014-2025. */
 (async function () {
   async function loadCore() {
     const urls = [
