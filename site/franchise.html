@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Franchise · AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+  <div id="franchise-body">
+    <div class="picker-row">
+      <div class="picker-label">Year</div>
+      <div class="week-picker" id="year-chips"></div>
+    </div>
+    <section class="card" id="fran-hero"></section>
+    <section class="second-grid">
+      <div class="card">
+        <div class="card-head"><h2>Season log</h2><div class="card-sub">every year this franchise played</div></div>
+        <div class="table-scroll">
+          <table class="tbl" id="fran-seasons">
+            <thead>
+              <tr>
+                <th data-sort="year" data-type="num">Year</th>
+                <th>Season name</th>
+                <th data-sort="rank" data-type="num">Finish</th>
+                <th data-sort="wins" data-type="num">W-L</th>
+                <th data-sort="pf" data-type="num">PF</th>
+                <th>PA</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Trophy math</h2><div class="card-sub">combined = championships + seconds + thirds + point titles − sackos</div></div>
+        <ul class="story-list" id="fran-honors"></ul>
+      </div>
+    </section>
+  </div>
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('franchise');</script>
+</body>
+</html>

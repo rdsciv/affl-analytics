@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Season · AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+  <div id="year-body">
+    <div class="picker-row">
+      <div class="picker-label">Year</div>
+      <div class="week-picker" id="year-chips"></div>
+    </div>
+    <section class="honor-grid" id="year-honors"></section>
+    <nav class="quick-links" id="year-links"></nav>
+    <div id="year-note"></div>
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Final Standings</h2>
+          <div class="card-sub">Current franchise names · sortable · click a team for its career page</div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="standings-tbl">
+          <thead>
+            <tr>
+              <th data-sort="rank" data-type="num">#</th>
+              <th data-sort="name" data-type="str">Team</th>
+              <th data-sort="wins" data-type="num">W-L</th>
+              <th data-sort="pf" data-type="num">PF</th>
+              <th>PA</th>
+              <th>Avg</th>
+              <th>All-Play</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('year');</script>
+</body>
+</html>

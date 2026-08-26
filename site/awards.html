@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awards · AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+  <div class="picker-row">
+    <div class="picker-label">Year</div>
+    <div class="week-picker" id="year-chips"></div>
+  </div>
+
+  <div class="section-break"><h2>Trophy case</h2></div>
+  <section class="trophy-row" id="trophy-case"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Season honors</h2><div class="card-sub">champion · runner-up · third · sacko · regular-season point title · current names</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="awards-tbl">
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Champion</th>
+            <th>Runner-up</th>
+            <th>Third</th>
+            <th>Sacko</th>
+            <th>Point title</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('awards');</script>
+</body>
+</html>

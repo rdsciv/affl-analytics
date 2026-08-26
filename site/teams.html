@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teams · AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+  <div class="picker-row">
+    <div class="picker-label">Year</div>
+    <div class="week-picker" id="year-chips"></div>
+  </div>
+  <div id="teams-grid" class="stack"></div>
+  <section class="card">
+    <div class="card-head">
+      <div><h2>New franchises</h2><div class="card-sub">no 2014–2025 history — nothing invented</div></div>
+    </div>
+    <div class="team-dir" id="new-franchises"></div>
+  </section>
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('teams');</script>
+</body>
+</html>

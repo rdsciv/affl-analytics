@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Records · AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+  <div class="picker-row">
+    <div class="picker-label">Year</div>
+    <div class="week-picker" id="year-chips"></div>
+  </div>
+
+  <div class="section-break"><h2>Champions timeline</h2></div>
+  <section class="timeline" id="timeline"></section>
+
+  <div class="section-break"><h2>Trophy case</h2></div>
+  <section class="trophy-row" id="trophy-case"></section>
+
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Franchise Records</h2><div class="card-sub">every owner, every season they played</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="franchise-tbl">
+          <thead>
+            <tr>
+              <th data-sort="name" data-type="str">Owner</th>
+              <th data-sort="name" data-type="str">Team</th>
+              <th data-sort="years" data-type="num">Yrs</th>
+              <th>W-L</th>
+              <th data-sort="winpct" data-type="num">Win%</th>
+              <th data-sort="titles" data-type="num">🏆</th>
+              <th data-sort="pf" data-type="num">PF</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Combined titles</h2><div class="card-sub">championships + seconds + thirds + point titles − sackos</div></div>
+      </div>
+      <div class="table-scroll">
+        <table class="tbl" id="combined-tbl">
+          <thead>
+            <tr>
+              <th data-sort="name" data-type="str">Franchise</th>
+              <th data-sort="c" data-type="num">C</th>
+              <th data-sort="s" data-type="num">2nd</th>
+              <th data-sort="t" data-type="num">3rd</th>
+              <th data-sort="pt" data-type="num">PT</th>
+              <th data-sort="sk" data-type="num">Sacko</th>
+              <th data-sort="combined" data-type="num">Combined</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Finishes heatmap</h2><div class="card-sub">final rank by season · blank years are years that franchise did not play</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl heat" id="heatmap-tbl"></table>
+    </div>
+  </section>
+
+  <section class="card h2h-card">
+    <div class="card-head">
+      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins, row vs column · current franchises</div></div>
+    </div>
+    <div class="table-scroll"><table class="tbl h2h" id="h2h-tbl"></table></div>
+  </section>
+
+  <div class="section-break"><h2>Single-season records</h2></div>
+  <section class="second-grid">
+    <div class="card">
+      <div class="card-head"><h2>Highest PF</h2><div class="card-sub">regular-season points-for</div></div>
+      <div class="table-scroll">
+        <table class="tbl" id="ss-pf">
+          <thead><tr><th>Year</th><th>Team</th><th>W-L</th><th>PF</th><th>Avg</th><th>#</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Most wins</h2><div class="card-sub">regular-season win totals</div></div>
+      <div class="table-scroll">
+        <table class="tbl" id="ss-wins">
+          <thead><tr><th>Year</th><th>Team</th><th>W-L</th><th>PF</th><th>Avg</th><th>#</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Lowest PF</h2><div class="card-sub">regular-season points-for</div></div>
+      <div class="table-scroll">
+        <table class="tbl" id="ss-low">
+          <thead><tr><th>Year</th><th>Team</th><th>W-L</th><th>PF</th><th>Avg</th><th>#</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Most losses</h2><div class="card-sub">regular-season loss totals</div></div>
+      <div class="table-scroll">
+        <table class="tbl" id="ss-loss">
+          <thead><tr><th>Year</th><th>Team</th><th>W-L</th><th>PF</th><th>Avg</th><th>#</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('records');</script>
+</body>
+</html>
