@@ -35,7 +35,10 @@
   }
 
   const qs = new URLSearchParams(location.search);
-  let scope = A.scopeFromURL();
+  function teamScopeFromURL() {
+    return new URLSearchParams(location.search).get("scope") === "season" ? "season" : "cum";
+  }
+  let scope = teamScopeFromURL();
   let squad = A.squadFromURL();
   let year = +qs.get("year") || A.years()[0];
   year = A.clampYear(year, squad);
@@ -2418,7 +2421,7 @@
     showTeam(true);
     $("years-block").hidden = true;
     const sl = sliceYear(yd, tid);
-    renderHero(t, null);
+    renderHero(t, careerRollup(squad));
     renderScorers();
     renderNgs();
     renderGames(sl.mine, tid, T);
