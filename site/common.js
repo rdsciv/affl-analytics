@@ -80,6 +80,7 @@ window.AFFL = (function () {
     m02: "logos/cucks.png",
     m14: "logos/pollywogs.png",
     m22: "logos/gabagooners.png",
+    m10: "logos/wake-snakes.png",
   };
 
   function franchiseLogo(id) {
