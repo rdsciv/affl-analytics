@@ -39,11 +39,18 @@ window.AFFL = (function () {
     }
     return p;
   }
+  function hydrateTree(o) {
+    if (!o || typeof o !== "object") return;
+    if (o.pid != null && "name" in o) hydratePlayer(o);
+    if (Array.isArray(o)) { o.forEach(hydrateTree); return; }
+    Object.keys(o).forEach((k) => hydrateTree(o[k]));
+  }
   async function loadYear(year) {
     if (yearCache.has(year)) return yearCache.get(year);
     const d = await fetch(`years/${year}.json` + bust(), { cache: 'no-store' }).then((r) => r.json());
     const board = d && d.draft && d.draft.board;
     if (Array.isArray(board)) board.forEach(hydratePlayer);
+    hydrateTree(d);
     yearCache.set(year, d);
     return d;
   }
