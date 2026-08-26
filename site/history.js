@@ -1,4 +1,4 @@
-/* CHI-119 History: Season dropdown + The Race. Runs the last full History book with year/Race patched in. */
+/* CHI-119/120 History: Season dropdown + The Race. Runs the last full History book with year/Race patched in. */
 (async function () {
   async function loadCore() {
     const urls = [
@@ -24,7 +24,7 @@
   const newYearInit = "  function latestFinished() {\n    const ys = (A.years() || []).filter((y) => y >= 2014 && y <= 2025).sort((a, b) => b - a);\n    return ys[0] || 2025;\n  }\n  function parseSeasonParam(raw) {\n    if (raw == null || raw === \"\" || String(raw).toLowerCase() === \"all\") return null;\n    const y = +raw;\n    if (!y || y < 2014 || y > 2025) return null;\n    if ((A.years() || []).indexOf(y) < 0) return null;\n    return y;\n  }\n  const qsYear = new URLSearchParams(location.search).get(\"year\");\n  let pickedYear = parseSeasonParam(qsYear);\n  let seasonYear = pickedYear == null ? latestFinished() : pickedYear;";
 
   const oldSub = "    if (sub) sub.textContent = seasonYear + \" · ESPN Moves · current franchise names\";";
-  const newSub = "    if (sub) {\n      sub.textContent = (pickedYear == null ? seasonYear + \" · latest finished · \" : seasonYear + \" · \")\n        + \"ESPN Moves · current franchise names\";\n    }";
+  const newSub = "    if (sub) {\n      sub.textContent = pickedYear == null\n        ? \"All · career All-Play 2014–2025 · current franchise names\"\n        : seasonYear + \" · ESPN Moves · current franchise names\";\n    }";
 
   const oldPicker = "  function stampSeasonYear(y) {\n    const u = new URL(location.href);\n    u.searchParams.set(\"year\", y);\n    history.replaceState(null, \"\", u.pathname.split(\"/\").pop() + u.search + u.hash);\n  }\n\n  if ($(\"year-picker\")) {\n    A.yearPicker($(\"year-picker\"), seasonYear, (y) => {\n      seasonYear = y;\n      stampSeasonYear(y);\n      renderSeasonStandings();\n      renderTxnAndWeeks();\n      renderWaiverReport();\n      renderTxLog();\n      renderWaiverValue();\n      renderCustodyPar();\n      renderAgeScatter();\n    });\n  }";
 
@@ -33,15 +33,20 @@
   const oldCalls = "  renderSeasonStandings();\n  renderTxnAndWeeks();\n  renderWaiverReport();\n  renderTxLog();\n  renderWaiverValue();\n  renderCustodyPar();\n  renderAgeScatter();\n  renderTable();";
   const newCalls = "  renderSeasonStandings();\n  renderTxnAndWeeks();\n  renderWaiverReport();\n  renderTxLog();\n  renderWaiverValue();\n  renderCustodyPar();\n  renderAgeScatter();\n  renderRace();\n  renderTable();";
 
+  const oldStandRows = "    const rows = seasonStandRows(seasonYear).slice().sort((a, b) => {";
+  const newStandRows = "    function careerStandRows() {\n      const by = {};\n      Object.keys(DATA.seasons || {}).forEach((ys) => {\n        const year = +ys;\n        if (year < 2014 || year > 2025) return;\n        ((DATA.seasons[ys] || {}).teams || []).forEach((t) => {\n          const oid = canon(t.owner);\n          if (!oid) return;\n          if (!by[oid]) {\n            by[oid] = { owner: oid, name: \"\", logo: \"\", tid: t.id, rank: null, wins: 0, losses: 0, ties: 0, pf: 0, pa: 0, allW: 0, allL: 0, moves: 0 };\n          }\n          const r = by[oid];\n          r.name = A.franchiseName(oid) || (typeof NAME !== \"undefined\" && NAME[oid]) || t.name || r.name;\n          r.logo = A.franchiseLogo(oid) || t.logo || r.logo;\n          r.wins += t.wins || 0;\n          r.losses += t.losses || 0;\n          r.ties += t.ties || 0;\n          r.pf += t.pf || 0;\n          r.pa += t.pa || 0;\n          r.allW += t.allplayW || 0;\n          r.allL += t.allplayL || 0;\n          const mv = movesCount(year, t.id);\n          if (mv != null) r.moves += mv;\n        });\n      });\n      return Object.values(by).sort((a, b) => (b.allW - a.allW) || (a.allL - b.allL)).map((r, i) => { r.rank = i + 1; return r; });\n    }\n    const rows = (pickedYear == null ? careerStandRows() : seasonStandRows(seasonYear)).slice().sort((a, b) => {";
+
   if (src.indexOf(oldYearInit) < 0) throw new Error("history core missing year init");
   if (src.indexOf(oldSub) < 0) throw new Error("history core missing season sub");
   if (src.indexOf(oldPicker) < 0) throw new Error("history core missing year picker");
   if (src.indexOf(oldCalls) < 0) throw new Error("history core missing render calls");
+  if (src.indexOf(oldStandRows) < 0) throw new Error("history core missing standings rows");
 
   let s = src;
   s = s.replace(oldYearInit, newYearInit);
   s = s.replace(oldSub, newSub);
   s = s.replace(oldPicker, newPicker);
   s = s.replace(oldCalls, newCalls);
+  s = s.replace(oldStandRows, newStandRows);
   (0, eval)(s);
 })();
