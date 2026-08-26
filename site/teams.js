@@ -594,7 +594,7 @@
         const key = wk + ":" + dow;
         const det = (g.details && g.details[key]) || [];
         const title = det.length
-          ? `${wk} · ${dow}\n` + det.map((m) => `${m.op} ${m.name}`).join("\n")
+          ? `${wk} · ${dow}\n` + det.map((m) => `${m.op} ${A.displayPlayerName(m.name)}`).join("\n")
           : (n ? `${wk} · ${dow}: ${n} move${n === 1 ? "" : "s"}` : "");
         return `<td class="act-cell${n ? " on" : ""}" style="${shade(n)}" title="${esc(title)}">${n || ""}</td>`;
       }).join("");
