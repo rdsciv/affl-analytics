@@ -992,3 +992,55 @@ CREATE TABLE IF NOT EXISTS fact_player_overview (
   news            TEXT,                      -- JSON array
   rotowire        TEXT
 );
+
+-- ── Savant-class NFL metrics (CHI-113 / CHI-114) ─────────────────────────
+-- Merged from verify/full-audit. Play grain is never stored or shipped;
+-- these are player-week and player-season rollups joined via gsis_id.
+
+-- Play-by-play rolled to player-week. Raw nflverse PBP is ~20MB gzip / ~100MB
+-- CSV per season; we do not keep play grain or ship it to the public site.
+-- Join to AFFL via dim_player.gsis_id. Receptions here are volume, not PPR.
+CREATE TABLE IF NOT EXISTS fact_pbp_agg (
+  season          INTEGER NOT NULL,
+  week            INTEGER NOT NULL,
+  gsis_id         TEXT NOT NULL,
+  dropbacks       REAL, pass_attempts REAL, completions REAL,
+  pass_epa        REAL, cpoe REAL, cpoe_n REAL,
+  pass_air_yards  REAL, pass_success REAL, pass_success_n REAL,
+  pass_td         REAL, pass_xtd REAL, rz_pass REAL, gl_pass REAL,
+  rush_att        REAL, rush_epa REAL, rush_success REAL, rush_success_n REAL,
+  rush_td         REAL, rush_xtd REAL, rz_rush REAL, gl_rush REAL,
+  targets         REAL, receptions REAL, rec_epa REAL,
+  rec_air_yards   REAL, rec_success REAL, rec_success_n REAL,
+  rec_td          REAL, rec_xtd REAL, rz_tgt REAL, gl_tgt REAL,
+  xyac            REAL, xyac_n REAL,
+  PRIMARY KEY (season, week, gsis_id)
+);
+CREATE INDEX IF NOT EXISTS ix_pbp_gsis ON fact_pbp_agg(gsis_id);
+
+-- AFFL-scored expected fantasy points. Non-PPR: receptions are volume only.
+CREATE TABLE IF NOT EXISTS fact_player_xfp (
+  season          INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  games           INTEGER,
+  fp              REAL,          -- AFFL recomputed from fact_nfl_week
+  xfp             REAL,          -- same engine, xTD + air/xYAC rec yards
+  fpoe            REAL,          -- fp - xfp
+  fp_g            REAL,
+  xfp_g           REAL,
+  st_games        INTEGER,       -- AFFL starts (2018+)
+  st_fp           REAL,
+  st_xfp          REAL,
+  st_fpoe         REAL,
+  wopr            REAL,
+  target_share    REAL,
+  air_yards_share REAL,
+  rz_opp          REAL,
+  gl_opp          REAL,
+  xtd             REAL,
+  td_luck         REAL,
+  targets         REAL,
+  carries         REAL,
+  opp             REAL,
+  PRIMARY KEY (season, player_id)
+);
