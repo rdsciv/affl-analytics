@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Savant</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="logo.css?v=2">
+<style>
+  .sv-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .sv-field { display: flex; flex-direction: column; gap: 5px; }
+  .sv-field label {
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--mut); font-weight: 600;
+  }
+  .sv-plot { position: relative; height: 520px; }
+  .sv-plot canvas { width: 100% !important; height: 100% !important; }
+  .sv-note { color: var(--mut); font-size: 12px; margin: 10px 0 0; }
+  .sv-legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 0; }
+  .sv-key { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mut); }
+  .sv-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .sv-count { color: var(--mut); font-size: 12px; }
+  .sv-tbl-wrap { overflow-x: auto; }
+  .sv-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sv-tbl th {
+    text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line);
+    color: var(--mut); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  .sv-tbl th:first-child, .sv-tbl td:first-child { text-align: left; }
+  .sv-tbl th.on { color: var(--blue2); }
+  .sv-tbl td {
+    padding: 7px 10px; border-bottom: 1px solid #131a28; text-align: right;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .sv-tbl tbody tr:hover { background: #131826aa; }
+  .sv-pos { font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--mut); }
+  .sv-fr { color: var(--blue2); font-size: 11px; }
+  .sv-empty { padding: 28px; text-align: center; color: var(--mut); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <div>
+        <h1>AFFL <span>Savant</span></h1>
+        <div class="sub">Every NFL skill player, 2014–2025. Hover any dot to see who it is.</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="savant.html" class="on">Savant</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
+    </nav>
+  </header>
+
+  <div class="picker-row" id="year-row">
+    <div class="week-picker" id="season-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="week-picker" id="pos-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="week-picker" id="view-picker"></div>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Opportunity vs Production</h2>
+        <div class="card-sub" id="plot-sub">AFFL scoring · non-PPR · receptions score zero</div>
+      </div>
+      <div class="sv-count" id="plot-count"></div>
+    </div>
+
+    <div class="sv-controls">
+      <div class="sv-field">
+        <label for="x-metric">X axis</label>
+        <select id="x-metric" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="y-metric">Y axis</label>
+        <select id="y-metric" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="franchise">AFFL franchise</label>
+        <select id="franchise" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="min-opp">Minimum opportunity</label>
+        <select id="min-opp" class="team-select"></select>
+      </div>
+    </div>
+
+    <div class="sv-plot"><canvas id="sv-scatter"></canvas></div>
+
+    <div class="sv-legend" id="sv-legend"></div>
+    <p class="sv-note" id="sv-note"></p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>The table</h2>
+        <div class="card-sub">Click a column to sort. Same filters as the chart.</div>
+      </div>
+    </div>
+    <div class="sv-tbl-wrap">
+      <table class="sv-tbl" id="sv-tbl">
+        <thead><tr id="sv-head"></tr></thead>
+        <tbody id="sv-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    AFFL Savant · NFL data from nflverse · AFFL context keyed on franchise, not team id.
+  </footer>
+</div>
+
+<script src="chart.umd.min.js?v=1"></script>
+<script src="common.js?v=18"></script>
+<script src="savant.js?v=1"></script>
+</body>
+</html>

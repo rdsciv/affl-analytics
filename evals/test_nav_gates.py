@@ -18,10 +18,10 @@ fails = []
 
 NAV_PAGES = [
     "index.html", "scoreboard.html", "players.html", "draft.html",
-    "trades.html", "roto.html", "teams.html", "history.html", "awards.html",
+    "savant.html", "trades.html", "roto.html", "teams.html", "history.html", "awards.html",
     "dictionary.html", "wrapped.html",
 ]
-NAV_ORDER = ["Dashboard", "Scoreboard", "Players", "Draft", "Trades", "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
+NAV_ORDER = ["Dashboard", "Scoreboard", "Players", "Savant", "Draft", "Trades", "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
 # Pages that must NOT appear in primary nav until their grain is verified.
 BANNED_NAV = ("genius", "projections", "lab", "auction-lab")
 
@@ -30,6 +30,7 @@ NAV_GRAIN = {
     "Dashboard": "matchup+standings",
     "Scoreboard": "matchup",
     "Players": "roster_week",
+    "Savant": "nfl_week",
     "Draft": "draft_pick",
     "Trades": "transaction",
     "Roto": "roster_week+nfl_week",

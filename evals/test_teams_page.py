@@ -24,7 +24,7 @@ NAV_PAGES = [
     "teams.html",
     "history.html",
 ]
-NAV_ORDER = ['Dashboard', 'Scoreboard', 'Players', 'Draft', 'Trades', 'Roto', 'Teams', 'History', 'Awards', 'Dictionary', 'Wrapped']
+NAV_ORDER = ['Dashboard', 'Scoreboard', 'Players', 'Savant', 'Draft', 'Trades', 'Roto', 'Teams', 'History', 'Awards', 'Dictionary', 'Wrapped']
 fails = []
 counts = {}
 
