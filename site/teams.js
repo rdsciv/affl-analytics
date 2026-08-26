@@ -2857,10 +2857,18 @@
       render();
     });
     A.stampNav(squad);
-    A.showYearRow(scope === "season");
+    const season = scope === "season";
+    A.showYearRow(season);
+    const yearRow = $("year-row");
+    if (yearRow) yearRow.style.display = season ? "" : "none";
     const ylist = squad ? A.squadYears(squad) : A.years();
     if (squad) year = A.clampYear(year, squad);
-    A.yearPicker($("year-picker"), year, (y) => { year = y; render(); }, null, ylist);
+    if (season) {
+      A.yearPicker($("year-picker"), year, (y) => { year = y; render(); }, null, ylist);
+    } else {
+      const yp = $("year-picker");
+      if (yp) yp.innerHTML = "";
+    }
 
     if (!squad) {
       renderGrid();
