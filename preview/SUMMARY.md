@@ -1,6 +1,6 @@
 # AFFL warehouse preview
 
-Generated 2026-08-14 01:54 UTC from `affl.db`. Season focus: **2025**.
+Generated 2026-08-16 14:34 CT from `affl.db`. Season focus: **2025**.
 This is the data. Not the website.
 
 ## Table counts
@@ -8,6 +8,7 @@ This is the data. Not the website.
 | table | rows |
 | --- | --- |
 | dim_member | 21 |
+| dim_owner | 18 |
 | dim_player | 4854 |
 | dim_scoring | 254 |
 | dim_season | 12 |
@@ -17,11 +18,19 @@ This is the data. Not the website.
 | fact_draft_pick | 2124 |
 | fact_matchup | 2220 |
 | fact_nfl_week | 208168 |
+| fact_player_season_par_reconstructed | 569 |
 | fact_player_season_points | 7251 |
+| fact_player_week_par | 24762 |
+| fact_projection_week | 3391 |
 | fact_roster_week | 24762 |
+| fact_roto_team_season | 240 |
+| fact_roto_team_week | 2776 |
 | fact_trade | 181 |
 | fact_trade_item | 586 |
 | fact_transaction | 15815 |
+| fact_xtd_player_week | 60662 |
+| meta_import_run | 3 |
+| meta_import_source | 6 |
 | player_season | 2546 |
 
 ## Coverage by season
@@ -154,10 +163,165 @@ This is the data. Not the website.
 | 2025 | 13 | 1 | 1 | 0 |
 | 2025 | 14 | 1 | 1 | 0 |
 
+## Owners (after merges)
+
+| owner_id | display_name | is_active | member_ids | team_seasons |
+| --- | --- | --- | --- | --- |
+| m13 | Alex Clausen | 1 | m13 | 11 |
+| m06 | Alex Renney | 1 | m06 | 11 |
+| m02 | Austin Williams | 1 | m02 | 12 |
+| m11 | Chris Zweifel | 1 | m11 | 12 |
+| m16 | david allardyce | 0 | m16 | 1 |
+| m12 | Garrett Jones | 0 | m12 | 7 |
+| m04 | Jake Hibbard | 0 | m04 | 4 |
+| m01 | Jason Kafka | 0 | m07,m01 | 8 |
+| m05 | John Newton | 1 | m05 | 7 |
+| m08 | Kevin Sliger | 1 | m08,m03 | 12 |
+| m15 | Levi Sanchez | 1 | m15 | 12 |
+| m21 | Patrick O'Neill | 1 | m21 | 2 |
+| m18 | Ryan Childress | 1 | m18 | 12 |
+| m09 | Scott Ace | 0 | m09 | 1 |
+| m14 | Steven Breitmayer | 1 | m14 | 5 |
+| m10 | Tanner Dunn | 0 | m10,m20 | 4 |
+| m19 | Tyler Sanchez | 1 | m19 | 5 |
+| m17 | Zack Blotz | 1 | m17 | 12 |
+
+## Matchup sides by phase
+
+| season | phase | sides |
+| --- | --- | --- |
+| 2014 | playoff_unspecified | 20 |
+| 2014 | regular | 130 |
+| 2015 | playoff_unspecified | 20 |
+| 2015 | regular | 130 |
+| 2016 | playoff_unspecified | 20 |
+| 2016 | regular | 130 |
+| 2017 | playoff_unspecified | 34 |
+| 2017 | regular | 156 |
+| 2018 | championship | 10 |
+| 2018 | consolation | 24 |
+| 2018 | regular | 156 |
+| 2019 | championship | 10 |
+| 2019 | consolation | 24 |
+| 2019 | regular | 156 |
+| 2020 | championship | 10 |
+| 2020 | consolation | 24 |
+| 2020 | regular | 156 |
+| 2021 | championship | 10 |
+| 2021 | consolation | 24 |
+| 2021 | regular | 168 |
+| 2022 | championship | 10 |
+| 2022 | consolation | 24 |
+| 2022 | regular | 168 |
+| 2023 | championship | 10 |
+| 2023 | consolation | 24 |
+| 2023 | regular | 168 |
+| 2024 | championship | 10 |
+| 2024 | consolation | 24 |
+| 2024 | regular | 168 |
+| 2025 | championship | 10 |
+| 2025 | consolation | 24 |
+| 2025 | regular | 168 |
+
+## 2025 Custody PAR by team
+
+| team_name | owner_name | par_total | par_drafted | par_traded_in | par_waived | par_unknown |
+| --- | --- | --- | --- | --- | --- | --- |
+| San Diego Shadowcöcks | John Newton | 715.40 | 616.30 | 72.20 | 51.50 | -24.70 |
+| Patagonia Pipers | Patrick O'Neill | 656.20 | 515.60 | 58.50 | 82.10 | 0.00 |
+| Grand Teeton Feelers | Ryan Childress | 607.60 | 195.80 | 287.20 | -27.00 | 151.60 |
+| Honolulu Horndogs | Alex Clausen | 584.90 | 348.90 | 229.30 | 5.90 | 0.90 |
+| Westeros Warlords | Levi Sanchez | 546.10 | 377.00 | 45.30 | 141.10 | -17.40 |
+| Goleta Gringos | Kevin Sliger | 480.30 | 391.10 | -1.70 | 113.90 | -23.10 |
+| DC Mighty Cucks | Austin Williams | 432.40 | 35.90 | 144.20 | 253.80 | -1.50 |
+| Fairview Fat Cats | Alex Renney | 420.10 | 224.70 | 121.70 | 73.70 | 0.00 |
+| Tijuana Sanchitos | Zack Blotz | 342.90 | -3.30 | 282.40 | 93.70 | -29.80 |
+| Poulsbo Pollywogs | Steven Breitmayer | 327.20 | 196.80 | 7.70 | 122.70 | 0.00 |
+| Squaw Valley Skinners | Chris Zweifel | 261.90 | 216.60 | -18.40 | 17.00 | 46.60 |
+| Pasco Pounders | Tyler Sanchez | 123.70 | -56.00 | 0.00 | 179.70 | 0.00 |
+
+## 2025 xTD portfolio
+
+| team_name | owner_name | actual_td | xtd | residual |
+| --- | --- | --- | --- | --- |
+| Westeros Warlords | Levi Sanchez | 85.00 | 76.19 | 8.81 |
+| Grand Teeton Feelers | Ryan Childress | 91.00 | 83.91 | 7.09 |
+| Tijuana Sanchitos | Zack Blotz | 76.00 | 71.06 | 4.94 |
+| Goleta Gringos | Kevin Sliger | 81.00 | 76.56 | 4.44 |
+| DC Mighty Cucks | Austin Williams | 63.00 | 62.86 | 0.14 |
+| Patagonia Pipers | Patrick O'Neill | 81.00 | 81.02 | -0.02 |
+| Honolulu Horndogs | Alex Clausen | 84.00 | 84.78 | -0.78 |
+| Squaw Valley Skinners | Chris Zweifel | 77.00 | 78.21 | -1.21 |
+| Pasco Pounders | Tyler Sanchez | 62.00 | 65.28 | -3.28 |
+| San Diego Shadowcöcks | John Newton | 80.00 | 84.15 | -4.15 |
+| Fairview Fat Cats | Alex Renney | 82.00 | 87.21 | -5.21 |
+| Poulsbo Pollywogs | Steven Breitmayer | 65.00 | 72.80 | -7.80 |
+
+## Projection coverage
+
+| source | season | rows | weeks | players |
+| --- | --- | --- | --- | --- |
+| espn | 2025 | 3391 | 17 | 326 |
+
+## 2025 regular roto standings
+
+Starter NFL production, 10-cat rotisserie. Rank 1 = best. Pts = nTeams − rank + 1. 2018+ only.
+
+| rank | team_name | owner_name | games | py | ptd | cmp_pct | ry | rtd | ypc | recy | retd | rec | ypr | total_pts |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | San Diego Shadowcöcks | John Newton | 14 | 3843.00 | 32.00 | 67.80 | 3201.00 | 37.00 | 4.11 | 3702.00 | 24.00 | 336.00 | 11.02 | 89 |
+| 2 | Patagonia Pipers | Patrick O'Neill | 14 | 3640.00 | 22.00 | 63.20 | 2676.00 | 19.00 | 4.78 | 4225.00 | 25.00 | 351.00 | 12.04 | 88 |
+| 3 | Fairview Fat Cats | Alex Renney | 14 | 3482.00 | 25.00 | 70.30 | 2565.00 | 17.00 | 4.56 | 3678.00 | 25.00 | 298.00 | 12.34 | 85 |
+| 4 | Grand Teeton Feelers | Ryan Childress | 14 | 3452.00 | 25.00 | 68.70 | 2845.00 | 19.00 | 4.52 | 3329.00 | 33.00 | 338.00 | 9.85 | 81 |
+| 5 | Goleta Gringos | Kevin Sliger | 14 | 3312.00 | 23.00 | 67.30 | 2350.00 | 33.00 | 4.37 | 3914.00 | 20.00 | 351.00 | 11.15 | 75 |
+| 6 | Honolulu Horndogs | Alex Clausen | 14 | 2944.00 | 19.00 | 61.70 | 2511.00 | 18.00 | 4.39 | 4025.00 | 30.00 | 348.00 | 11.57 | 64 |
+| 7 | Poulsbo Pollywogs | Steven Breitmayer | 14 | 3312.00 | 32.00 | 67.20 | 2284.00 | 19.00 | 4.57 | 3230.00 | 14.00 | 269.00 | 12.01 | 59 |
+| 8 | Westeros Warlords | Levi Sanchez | 14 | 3161.00 | 22.00 | 60.30 | 2966.00 | 28.00 | 5.12 | 2858.00 | 22.00 | 270.00 | 10.59 | 56 |
+| 9 | Tijuana Sanchitos | Zack Blotz | 14 | 2898.00 | 21.00 | 64.20 | 2402.00 | 14.00 | 5.01 | 3636.00 | 27.00 | 336.00 | 10.82 | 55 |
+| 10 | DC Mighty Cucks | Austin Williams | 14 | 3190.00 | 21.00 | 64.80 | 2232.00 | 15.00 | 3.80 | 3674.00 | 21.00 | 322.00 | 11.41 | 46 |
+| 11 | Pasco Pounders | Tyler Sanchez | 14 | 3078.00 | 22.00 | 65.50 | 1720.00 | 8.00 | 4.44 | 3599.00 | 23.00 | 316.00 | 11.39 | 46 |
+| 12 | Squaw Valley Skinners | Chris Zweifel | 14 | 2837.00 | 19.00 | 64.80 | 2338.00 | 20.00 | 4.17 | 2885.00 | 23.00 | 296.00 | 9.75 | 36 |
+
+## 2025 matchup import
+
+Versioned adapter + checksum. See `preview/MATCHUP_IMPORT.md`.
+
+| week | sides | teams | games | playoff_sides |
+| --- | --- | --- | --- | --- |
+| 1 | 12 | 12 | 6 | 0 |
+| 2 | 12 | 12 | 6 | 0 |
+| 3 | 12 | 12 | 6 | 0 |
+| 4 | 12 | 12 | 6 | 0 |
+| 5 | 12 | 12 | 6 | 0 |
+| 6 | 12 | 12 | 6 | 0 |
+| 7 | 12 | 12 | 6 | 0 |
+| 8 | 12 | 12 | 6 | 0 |
+| 9 | 12 | 12 | 6 | 0 |
+| 10 | 12 | 12 | 6 | 0 |
+| 11 | 12 | 12 | 6 | 0 |
+| 12 | 12 | 12 | 6 | 0 |
+| 13 | 12 | 12 | 6 | 0 |
+| 14 | 12 | 12 | 6 | 0 |
+| 15 | 10 | 10 | 5 | 10 |
+| 16 | 12 | 12 | 6 | 12 |
+| 17 | 12 | 12 | 6 | 12 |
+
+| run_id | adapter | adapter_version | season | status | row_count | finished_at | path | sha256 | bytes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 3 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:34:09+00:00 | data/box_2025.json | 8cb77c0bdbb4fa004d1d501244b03fe5b4170af08cac56733840ac533b2984a0 | 99907 |
+| 3 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:34:09+00:00 | data/league_2025.json | c4510757cf5e4d216056869614d06a871cffb7dd3fc7850324f12fe19c203411 | 969299 |
+| 2 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:34:09+00:00 | data/box_2025.json | 8cb77c0bdbb4fa004d1d501244b03fe5b4170af08cac56733840ac533b2984a0 | 99907 |
+| 2 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:34:09+00:00 | data/league_2025.json | c4510757cf5e4d216056869614d06a871cffb7dd3fc7850324f12fe19c203411 | 969299 |
+| 1 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:33:58+00:00 | data/box_2025.json | 8cb77c0bdbb4fa004d1d501244b03fe5b4170af08cac56733840ac533b2984a0 | 99907 |
+| 1 | espn_box | v1 | 2025 | ok | 202 | 2026-08-16T19:33:58+00:00 | data/league_2025.json | c4510757cf5e4d216056869614d06a871cffb7dd3fc7850324f12fe19c203411 | 969299 |
+
 ## How to refresh
 
 ```
-python3 build_db.py --check
+python3 build_db.py
+python3 compute_xtd.py          # optional; downloads nflverse pbp csv.gz
+python3 compute_roto.py         # 10-cat roto from starter NFL stats
+python3 fetch_projections.py    # ESPN raw + any FantasyPros files you drop in
 python3 inspect_data.py --season 2025
 ```
 

@@ -242,10 +242,12 @@ def main():
 
     if only in ('all', 'nflverse'):
         # every season, not just those with ESPN lineups: pre-2018 fantasy points
-        # are computed from these stats (see v_player_season_calc)
+        # are computed from these stats (see v_player_season_calc).
+        # 2026 NFL rosters land even when ESPN_SEASON is still 2025.
         print('== nflverse ==')
+        nfl_years = list(range(FIRST_YEAR, max(SEASON, 2026) + 1))
         with ThreadPoolExecutor(max_workers=3) as ex:
-            for y, msg in ex.map(fetch_nflverse, years):
+            for y, msg in ex.map(fetch_nflverse, nfl_years):
                 print(f'  {y}: {msg}')
 
     print('done')

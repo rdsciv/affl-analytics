@@ -8,6 +8,7 @@ initial page load small — the front end lazy-loads only the season being viewe
 Data availability (see fetch.py): drafts 2014+, lineups & transactions 2018+.
 """
 import json
+import sys
 import csv
 import os
 import re
@@ -125,6 +126,174 @@ def slot_counts_from_settings(league):
         if not m[k]:
             m[k] = v
     return m
+
+
+def missing_team(tid):
+    """FA / unset. ESPN uses 0 and -1 as drop-to-wire sentinels, not clubs."""
+    return tid in (None, 0, -1, '')
+
+
+def resolve_accept_items(accept, by_id):
+    """Join TRADE_ACCEPT.rel → TRADE_PROPOSAL and fill one-sided from/to.
+
+    ESPN often stores the players on the proposal and emits ACCEPT as a bare
+    status event. One-sided rows (only from or only to) are completed from the
+    proposal item with the same pid, or from the other party in the same deal.
+    DROP-to-FA is not a trade leg.
+    """
+    if by_id is None:
+        by_id = {}
+    items = [dict(i) for i in (accept.get('items') or [])]
+    rel = accept.get('rel')
+    proposal = by_id.get(rel) if rel else None
+    if proposal:
+        prop_items = [dict(i) for i in (proposal.get('items') or [])]
+        if not items:
+            items = prop_items
+        else:
+            by_pid = {i.get('pid'): i for i in prop_items if i.get('pid') is not None}
+            for i in items:
+                p = by_pid.get(i.get('pid'))
+                if not p:
+                    continue
+                if missing_team(i.get('from')) and not missing_team(p.get('from')):
+                    i['from'] = p['from']
+                if missing_team(i.get('to')) and not missing_team(p.get('to')):
+                    i['to'] = p['to']
+            have = {i.get('pid') for i in items}
+            for p in prop_items:
+                if p.get('pid') not in have:
+                    items.append(p)
+
+    parties = []
+    seen = set()
+    for i in items:
+        for side in (i.get('from'), i.get('to')):
+            if not missing_team(side) and side not in seen:
+                seen.add(side)
+                parties.append(side)
+
+    out = []
+    for i in items:
+        if i.get('pid') is None:
+            continue
+        if (i.get('act') or '').upper() == 'DROP':
+            continue
+        frm, to = i.get('from'), i.get('to')
+        if missing_team(frm) or missing_team(to):
+            if len(parties) == 2:
+                a, b = parties[0], parties[1]
+                if not missing_team(frm) and missing_team(to):
+                    to = b if frm == a else a if frm == b else None
+                elif not missing_team(to) and missing_team(frm):
+                    frm = b if to == a else a if to == b else None
+        if missing_team(frm) or missing_team(to) or frm == to:
+            continue
+        i['from'] = frm
+        i['to'] = to
+        out.append(i)
+    return out
+
+
+def collect_accept_trades(tx_list, pmeta=None):
+    """ACCEPT trades after proposal join + one-sided fill. No reconstruction."""
+    pmeta = pmeta or {}
+    by_id = {t['id']: t for t in tx_list if t.get('id')}
+    seen_itemsets = set()
+    trades = []
+    accept_moves = set()
+    for t in tx_list:
+        if t.get('type') != 'TRADE_ACCEPT':
+            continue
+        items = resolve_accept_items(t, by_id)
+        if not items:
+            continue
+        key = frozenset((i['pid'], i['from'], i['to']) for i in items)
+        if key in seen_itemsets:
+            continue
+        seen_itemsets.add(key)
+        sides = defaultdict(list)
+        for i in items:
+            m = pmeta.get(i['pid'], {})
+            sides[i['to']].append({'pid': i['pid'], 'from': i['from'],
+                                   'name': m.get('name', f"Player {i['pid']}"),
+                                   'pos': m.get('pos', '?')})
+            accept_moves.add((i['pid'], i['from'], i['to'], t.get('wk')))
+        trades.append({'wk': t.get('wk'), 'date': t.get('date'),
+                       'sides': [{'tid': tid, 'got': got} for tid, got in sides.items()]})
+    return trades, accept_moves, by_id
+
+
+def build_season_trades(year, tx_list, pmeta, draft_picks, roster_rows, moves):
+    """ACCEPT join first; 2018+ roster-delta reconstruction for empty accepts.
+
+    2014–17 have no ESPN tx log — do not invent trades from draft-only ownership.
+    """
+    trades, accept_moves, _by_id = collect_accept_trades(tx_list, pmeta)
+    if year < 2018:
+        return trades, accept_moves
+
+    owner_by_week = defaultdict(dict)
+    for p in draft_picks:
+        pid = p.get('pid')
+        if pid is not None:
+            owner_by_week[pid][0] = p['tid']
+    for wk, tid, pid, slot, pts, started in roster_rows:
+        owner_by_week[pid][wk] = tid
+
+    wire_events = set()
+    for m in moves:
+        dest = m['tid']
+        for a in m.get('add') or []:
+            add_team = a.get('to') if a.get('to') is not None else dest
+            wire_events.add((a['pid'], m['wk'], add_team))
+
+    transitions = []
+    for pid, byw in owner_by_week.items():
+        wks = sorted(byw)
+        for a_wk, b_wk in zip(wks, wks[1:]):
+            if byw[a_wk] == byw[b_wk]:
+                continue
+            dest = byw[b_wk]
+            if (pid, b_wk, dest) in wire_events:
+                continue
+            if any((pid, byw[a_wk], dest, w) in accept_moves
+                   for w in (b_wk - 1, b_wk, b_wk + 1)):
+                continue
+            transitions.append({'pid': pid, 'from': byw[a_wk], 'to': dest, 'wk': b_wk})
+
+    feed_dates = []
+    for t in tx_list:
+        pids = {i['pid'] for i in (t.get('items') or []) if i.get('pid')}
+        if pids and t.get('date'):
+            feed_dates.append((pids, t.get('wk'), t['date']))
+
+    def trade_date(pids, wk):
+        best = None
+        for fp, fwk, fdate in feed_dates:
+            if not (pids & fp):
+                continue
+            gap = abs((fwk or 0) - wk)
+            if gap <= 2 and (best is None or gap < best[0]):
+                best = (gap, fdate)
+        return best[1] if best else None
+
+    by_week_pair = defaultdict(list)
+    for tr in transitions:
+        by_week_pair[(tr['wk'], frozenset((tr['from'], tr['to'])))].append(tr)
+
+    for (wk, pair), items in sorted(by_week_pair.items(), key=lambda x: x[0][0]):
+        sides = defaultdict(list)
+        for i in items:
+            m = pmeta.get(i['pid'], {})
+            sides[i['to']].append({'pid': i['pid'], 'from': i['from'],
+                                   'name': m.get('name', f"Player {i['pid']}"),
+                                   'pos': m.get('pos', '?')})
+        pids = {i['pid'] for i in items}
+        trades.append({'wk': wk, 'date': trade_date(pids, wk),
+                       'sides': [{'tid': tid, 'got': got} for tid, got in sides.items()]})
+    return trades, accept_moves
+
 
 # ------------------------------------------------------------------ per year
 def process_year(year, league, season_teams):
@@ -306,7 +475,6 @@ def process_year(year, league, season_teams):
     # ESPN records traded players on the TRADE_PROPOSAL and emits TRADE_ACCEPT as
     # a bare status event carrying relatedTransactionId, so accepts must be joined
     # back to their proposal to recover who actually moved.
-    by_id = {t['id']: t for t in txd.get('tx', [])}
 
     def named(items):
         out = []
@@ -347,70 +515,16 @@ def process_year(year, league, season_teams):
                               'bid': t['bid'] or 0, 'date': t['date'],
                               'add': adds, 'drop': drops})
 
-    # ---- trades, derived from actual roster movement ----
-    # The transaction feed cannot be trusted for trade attribution: `teamId` is
-    # the team that EXECUTED the record, and this league's commissioner pushes
-    # trades through on other managers' behalf, so his team was being credited
-    # for trades he merely rubber-stamped. Worse, most TRADE_ACCEPT events carry
-    # no items and point at a superseded counter-offer, so any team-anchored
-    # guess inherits the same bias.
-    #
-    # Weekly rosters are ground truth: if a player is on team A one week and
-    # team B the next, and no waiver/free-agent claim explains it, he was traded.
-    # Requiring movement in BOTH directions between the same pair identifies a
-    # genuine swap. The feed is then used only to date the trade.
-    owner_by_week = defaultdict(dict)
-    for wk, tid, pid, slot, pts, started in rows:
-        owner_by_week[pid][wk] = tid
-
-    wire_events = set()
-    for m in moves:
-        for a in m['add']:
-            wire_events.add((a['pid'], m['wk']))
-            wire_events.add((a['pid'], m['wk'] + 1))
-
-    transitions = []
-    for pid, byw in owner_by_week.items():
-        wks = sorted(byw)
-        for a_wk, b_wk in zip(wks, wks[1:]):
-            if byw[a_wk] != byw[b_wk] and (pid, b_wk) not in wire_events:
-                transitions.append({'pid': pid, 'from': byw[a_wk], 'to': byw[b_wk], 'wk': b_wk})
-
-    # index feed items so a detected swap can be given a real timestamp
-    feed_dates = []
-    for t in txd.get('tx', []):
-        pids = {i['pid'] for i in (t.get('items') or []) if i.get('pid')}
-        if pids and t.get('date'):
-            feed_dates.append((pids, t['wk'], t['date']))
-
-    def trade_date(pids, wk):
-        best = None
-        for fp, fwk, fdate in feed_dates:
-            if not (pids & fp):
-                continue
-            gap = abs((fwk or 0) - wk)
-            if gap <= 2 and (best is None or gap < best[0]):
-                best = (gap, fdate)
-        return best[1] if best else None
-
-    by_week_pair = defaultdict(list)
-    for tr in transitions:
-        by_week_pair[(tr['wk'], frozenset((tr['from'], tr['to'])))].append(tr)
-
-    trades = []
-    for (wk, pair), items in sorted(by_week_pair.items(), key=lambda x: x[0][0]):
-        directions = {(i['from'], i['to']) for i in items}
-        if len(directions) < 2:
-            continue          # one-way move — a drop/add, not a swap
-        sides = defaultdict(list)
-        for i in items:
-            m = pmeta.get(i['pid'], {})
-            sides[i['to']].append({'pid': i['pid'],
-                                   'name': m.get('name', f"Player {i['pid']}"),
-                                   'pos': m.get('pos', '?')})
-        pids = {i['pid'] for i in items}
-        trades.append({'wk': wk, 'date': trade_date(pids, wk),
-                       'sides': [{'tid': tid, 'got': got} for tid, got in sides.items()]})
+    # ---- trades: ACCEPT joined to proposal; 2018+ roster-delta reconstruction ----
+    # Executing-team on the feed is the commissioner, not a party. Item from/to
+    # is usable once empty ACCEPTs are joined back to TRADE_PROPOSAL via rel.
+    # One-sided ESPN rows are filled from the proposal or the paired item — not
+    # dropped on a truthy from/to check. 2014–17 have no tx log; do not invent.
+    # Draft board is week-0 ownership so post-draft pre-W1 swaps are trades.
+    # Waiver/FA adds suppress only the add week, and only if dest == add team.
+    # One-way roster jumps stay Traded in — no reverse player required.
+    trades, accept_moves = build_season_trades(
+        year, txd.get('tx', []), pmeta, draft.get('picks', []), rows, moves)
 
     for tr in trades:
         for s in tr['sides']:
@@ -677,7 +791,77 @@ def process_year(year, league, season_teams):
         'kb': round(os.path.getsize(path) / 1024, 1),
     }
 
+def patch_year_trades(year, site_bundle=None):
+    """Rewrite only trades-related keys. Leaves export_site metrics intact."""
+    path = os.path.join(YEARS_DIR, f'{year}.json')
+    if not os.path.exists(path):
+        return None
+    bundle = json.load(open(path))
+    txd = load(f'{DATA}/tx_{year}.json') or {'tx': []}
+    draft = load(f'{DATA}/draft_{year}.json') or {'picks': []}
+    pmeta = {}
+    for k, v in (bundle.get('pmeta') or {}).items():
+        try:
+            pid = int(k)
+        except (TypeError, ValueError):
+            continue
+        pmeta[pid] = {'name': v[0] if v else f'Player {pid}',
+                      'pos': v[1] if v and len(v) > 1 else '?'}
+    rows = []
+    for wk_s, games in (bundle.get('weeks') or {}).items():
+        wk = int(wk_s)
+        for g in games:
+            for side in ('home', 'away'):
+                s = g[side]
+                for pid, slot, pts in s.get('roster') or []:
+                    rows.append((wk, s['tid'], pid, slot, pts,
+                                 slot not in STARTER_SLOTS_EXCLUDE))
+    trades, _ = build_season_trades(
+        year, txd.get('tx', []), pmeta, draft.get('picks', []),
+        rows, bundle.get('moves') or [])
+    bundle['trades'] = trades
+    bundle['hasTx'] = bool(bundle.get('moves') or trades)
+    biggest = max(trades, key=lambda t: sum(len(s['got']) for s in t['sides'])) if trades else None
+    bundle['biggestSwap'] = ({'wk': biggest['wk'],
+                              'n': sum(len(s['got']) for s in biggest['sides']),
+                              'teams': [s['tid'] for s in biggest['sides']]} if biggest else None)
+    moved = Counter()
+    for tr in trades:
+        for s in tr['sides']:
+            for g in s['got']:
+                moved[(g['pid'], g['name'], g['pos'])] += 1
+    bundle['mostTraded'] = [{'name': k[1], 'pos': k[2], 'n': n}
+                            for k, n in moved.most_common(5) if n > 1]
+    tx_by = bundle.get('txByTeam') or {}
+    for rec in tx_by.values():
+        if isinstance(rec, dict):
+            rec['trades'] = 0
+    for tr in trades:
+        for s in tr['sides']:
+            rec = tx_by.setdefault(str(s['tid']),
+                                   {'waiver': 0, 'fa': 0, 'drop': 0, 'trades': 0, 'spent': 0})
+            rec['trades'] = rec.get('trades', 0) + 1
+    bundle['txByTeam'] = tx_by
+    json.dump(bundle, open(path, 'w'))
+    return {'year': year, 'trades': len(trades),
+            'kb': round(os.path.getsize(path) / 1024, 1)}
+
+
 def main():
+    trades_only = '--trades-only' in sys.argv
+    if trades_only:
+        years = []
+        for a in sys.argv[1:]:
+            if a.isdigit():
+                years.append(int(a))
+        if not years:
+            years = list(range(2014, 2026))
+        for year in years:
+            info = patch_year_trades(year)
+            if info:
+                print(f"  {year}: {info['trades']:>2} trades  {info['kb']:>6}KB  [trades-only]")
+        return
+
     site = json.load(open(os.path.join(SITE, 'data.json')))
     years = sorted(int(y) for y in site['seasons'])
     manifest = []

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CHI-51 / weekly bars: #pl-chart paints any year chip; #pl-career-chart exists."""
+"""CHI-51 / CHI-95 weekly bars: #pl-chart is latest year on All; #pl-career-chart is career."""
 import re
 import sys
 import urllib.error
@@ -57,6 +57,27 @@ def main():
     if "barStyle" not in career_fn:
         fail("career chart does not reuse started/benched/nfl colors")
 
+    # CHI-95: All-years top chart is latest season, not careerRows
+    if re.search(r"renderChart\s*\(\s*focus\s*,\s*rows\s*\)", load_fn):
+        fail("loadPlayer still does renderChart(focus, rows); All would paint careerRows")
+    if re.search(r"renderChart\s*\(\s*focus\s*,\s*careerRows\s*\)", load_fn):
+        fail("loadPlayer passes careerRows to renderChart")
+    if "chartRows" not in load_fn:
+        fail("loadPlayer missing chartRows for the top weekly chart")
+    if not re.search(r"playerYears\s*\([^)]*\)\s*\[\s*0\s*\]", load_fn):
+        fail("All-years top chart is not filtered to playerYears(...)[0]")
+    if "renderChart(focus, chartRows)" not in load_fn and not re.search(
+        r"renderChart\s*\(\s*focus\s*,\s*chartRows\s*\)", load_fn
+    ):
+        fail("renderChart is not called with chartRows")
+    if "renderCareerChart(focus, careerRows)" not in load_fn and not re.search(
+        r"renderCareerChart\s*\(\s*focus\s*,\s*careerRows\s*\)", load_fn
+    ):
+        fail("renderCareerChart must still get careerRows")
+    # rows itself may still be careerRows on All (journey/log); that is required
+    if "logYear === \"all\"" not in load_fn and "logYear === 'all'" not in load_fn:
+        fail("loadPlayer no longer branches on All")
+
     # FG extras must still be present
     for i in ("pl-fg-strip", "pl-custody", "pl-achievements", "pl-avg-line"):
         if f'id="{i}"' not in html:
@@ -65,7 +86,7 @@ def main():
     bust = re.search(r"players\.js\?v=(\d+)", html)
     if not bust:
         fail("players.html missing players.js cache")
-    elif int(bust.group(1)) < 26:
+    elif int(bust.group(1)) < 31:
         fail(f"players.js cache still v={bust.group(1)}")
 
     try:
@@ -87,7 +108,7 @@ def main():
             print(" -", f)
         return 1
     print("PASS")
-    print("both canvases present; renderChart not latest-year-only; career chart exists")
+    print("both canvases present; All-years top chart is latest year; career chart exists")
     return 0
 
 

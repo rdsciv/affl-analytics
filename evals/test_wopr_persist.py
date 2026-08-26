@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Players landing: year-N WOPR vs year-N+1 AFFL Fantasy Points Per Game.
+"""Players landing: same-year WOPR vs AFFL Fantasy Points Per Game.
 
 Gates:
 - card exists on the list/landing (not only the open player card)
-- uses wopr and next-year AFFL points / NFL games, not PPR, not AFFL starts
+- chips are single seasons (no →); both axes from the same year file
+- uses wopr and same-year AFFL points / NFL games, not PPR, not AFFL starts
 - Tre Tucker 2025 cannot appear as FPpG >= 40
-- max FPpG in the 2024→2025 pair is in a sane per-game range
+- max FPpG in the 2025 same-year pool is in a sane per-game range
 - JS divides by games and drops the point when games are missing
 - no Tittsburgh
-- Jefferson 4262921 or Adams 16800 appear in the 2024→2025 pool
+- Jefferson 4262921 or Adams 16800 appear in the 2025 pool
   if those pids are in the year JSON
 """
 import json
@@ -67,19 +68,19 @@ def nfl_games(nfl, pid, year):
     return n if n > 0 else None
 
 
-def next_affl_fppg(next_row, next_player, year, nfl):
-    fp = num(next_row.get("fp") if next_row else None)
+def same_year_fppg(row, player, year, nfl):
+    fp = num(row.get("fp") if row else None)
     if fp is None:
         return None
-    games = first_num(next_row, ("games", "g", "gp"))
+    games = first_num(row, ("games", "g", "gp"))
     if not (games and games > 0):
-        games = first_num(next_player, ("games", "g", "gp"))
+        games = first_num(player, ("games", "g", "gp"))
     if not (games and games > 0):
         pid = None
-        if next_row and next_row.get("pid") is not None:
-            pid = int(next_row["pid"])
-        elif next_player and next_player.get("pid") is not None:
-            pid = int(next_player["pid"])
+        if row and row.get("pid") is not None:
+            pid = int(row["pid"])
+        elif player and player.get("pid") is not None:
+            pid = int(player["pid"])
         games = nfl_games(nfl, pid, year) if pid is not None else None
     if not (games and games > 0):
         return None
@@ -94,36 +95,32 @@ def by_pid(rows):
     return out
 
 
-def persist_points(yd_n, yd_n1, nfl):
-    u0 = by_pid(yd_n.get("receivingUsage"))
-    u1 = by_pid(yd_n1.get("receivingUsage"))
-    p1 = by_pid(yd_n1.get("players"))
-    next_year = yd_n1.get("year")
+def persist_points(yd, nfl):
+    usage = by_pid(yd.get("receivingUsage"))
+    players = by_pid(yd.get("players"))
+    year = yd.get("year")
     out = []
-    for pid, row in u0.items():
+    for pid, row in usage.items():
         pos = str(row.get("pos") or "").upper()
         if pos not in ("WR", "TE"):
             continue
         wopr = num(row.get("wopr"))
         if wopr is None:
             continue
-        nxt = u1.get(pid)
-        if not nxt:
-            continue
         if not year_n_sample_ok(row):
             continue
-        if num(row.get("fp")) is None or num(nxt.get("fp")) is None:
+        if num(row.get("fp")) is None:
             continue
-        fppg = next_affl_fppg(nxt, p1.get(pid), next_year, nfl)
+        fppg = same_year_fppg(row, players.get(pid), year, nfl)
         if fppg is None:
             continue
         out.append({
             "pid": pid,
-            "name": row.get("name") or nxt.get("name"),
+            "name": row.get("name") or (players.get(pid) or {}).get("name"),
             "pos": pos,
             "wopr": wopr,
             "fppg": fppg,
-            "fp": num(nxt.get("fp")),
+            "fp": num(row.get("fp")),
         })
     return out
 
@@ -145,13 +142,23 @@ def r_squared(pts):
     return r * r
 
 
+def persist_slice(js):
+    start = js.find("Usage that sticks")
+    end = js.find("Flock-style compare")
+    if start < 0:
+        return js
+    if end < 0:
+        end = len(js)
+    return js[start:end]
+
+
 def main():
     html = (SITE / "players.html").read_text()
     js = (SITE / "players.js").read_text()
     css = (SITE / "styles.css").read_text()
-    y24 = json.loads((SITE / "years/2024.json").read_text())
     y25 = json.loads((SITE / "years/2025.json").read_text())
     nfl = json.loads((SITE / "nfl_weeks.json").read_text())
+    persist = persist_slice(js)
 
     if "Usage that sticks" not in html:
         fail("players.html missing Usage that sticks card")
@@ -165,6 +172,10 @@ def main():
         fail("player search/grid was removed")
     if html.find('id="wopr-persist"') > html.find('id="pp-grid"'):
         fail("persist card is not on the list/landing (it sits after the grid)")
+    if "year-N+1" in html or "year-N WOPR vs year-N+1" in html:
+        fail("players.html subtitle still says year-N vs year-N+1")
+    if "→" in html:
+        fail("players.html still has → year pairing")
 
     if "function woprPersistPoints" not in js:
         fail("players.js missing woprPersistPoints")
@@ -175,14 +186,14 @@ def main():
     if "function woprR2" not in js:
         fail("players.js missing woprR2 (R² must be computed in JS from plotted points)")
     if "row.wopr" not in js and "woprNum(row.wopr)" not in js:
-        fail("players.js does not read year-N wopr")
+        fail("players.js does not read wopr")
     persist_fn = js.split("function woprPersistPoints", 1)[-1].split("function woprR2", 1)[0]
-    fppg_fn = js.split("function woprNextAfflFppg", 1)[-1].split("function woprPersistPairs", 1)[0]
+    fppg_fn = js.split("function woprNextAfflFppg", 1)[-1].split("function woprPersistYears", 1)[0]
+    if "function woprPersistYears" not in js:
+        fppg_fn = js.split("function woprNextAfflFppg", 1)[-1].split("function woprPersistPoints", 1)[0]
     games_fn = js.split("function woprNflGames", 1)[-1].split("function woprNextAfflFppg", 1)[0]
     if "wopr" not in persist_fn:
         fail("woprPersistPoints does not use wopr")
-    if "nxt.fp" not in persist_fn and "nextRow.fp" not in fppg_fn and "nextRow && nextRow.fp" not in fppg_fn:
-        fail("persist scatter does not use next-year AFFL fp")
     if "ppr" in persist_fn.lower() or "ppr" in fppg_fn.lower():
         fail("persist scatter mentions PPR")
     if "pwopr" in js.lower() or "koalaty" in js.lower() or "pff" in persist_fn.lower():
@@ -204,10 +215,39 @@ def main():
     if "Fantasy Points Per Game" not in js:
         fail("axis/copy does not spell out Fantasy Points Per Game")
 
+    if "→" in persist:
+        fail("persist chips/copy still contain →")
+    if "year-N+1" in persist or "year-N + 1" in persist:
+        fail("persist functions still describe year-N+1 pairing")
+    if re.search(r"function woprPersistPoints\s*\(\s*ydN\s*,\s*ydN1", js):
+        fail("woprPersistPoints still takes two year files")
+    if "ydN1" in persist_fn or "nxt.fp" in persist_fn:
+        fail("woprPersistPoints still reads a next-year row")
+    if re.search(r"woprYear\s*\+\s*1|woprPair\s*\+\s*1", persist):
+        fail("persist render still pairs selected year with year+1")
+    if "function woprPersistPairs" in js:
+        fail("woprPersistPairs consecutive-year pairing is still present")
+    if 'data-y="${y}">${y}</button>' not in persist and "data-y=" not in persist:
+        fail("year chips missing data-y single-season markup")
+    if "same-year" not in persist.lower() and "same year" not in persist.lower():
+        fail("persist comment/block does not say same-year")
+    if "__afflWoprPersist" not in persist:
+        fail("window.__afflWoprPersist not set")
+    else:
+        expose = persist.split("window.__afflWoprPersist", 1)[-1].split(";", 1)[0]
+        if "year:" not in expose and "year :" not in expose:
+            fail("__afflWoprPersist does not expose year")
+        if "n:" not in expose and "n :" not in expose:
+            fail("__afflWoprPersist does not expose n")
+        if "r2" not in expose:
+            fail("__afflWoprPersist does not expose r2")
+        if "points" not in expose:
+            fail("__afflWoprPersist does not expose points")
+
     bust = re.search(r"players\.js\?v=(\d+)", html)
     if not bust:
         fail("players.html did not cache-bust players.js")
-    elif int(bust.group(1)) < 26:
+    elif int(bust.group(1)) < 31:
         fail(f"players.js cache still v={bust.group(1)}")
     css_bust = re.search(r"styles\.css\?v=(\d+)", html)
     if not css_bust:
@@ -217,18 +257,17 @@ def main():
     if "#wopr-persist" not in css:
         fail("styles.css missing #wopr-persist rules")
 
-    u24 = {int(r["pid"]): r for r in (y24.get("receivingUsage") or []) if r.get("pid") is not None}
     u25 = {int(r["pid"]): r for r in (y25.get("receivingUsage") or []) if r.get("pid") is not None}
-    present = [pid for pid in KNOWN if pid in u24 and pid in u25]
-    pts = persist_points(y24, y25, nfl)
+    present = [pid for pid in KNOWN if pid in u25]
+    pts = persist_points(y25, nfl)
     r2 = r_squared(pts)
-    print(f"2024→2025 n={len(pts)} R²={None if r2 is None else round(r2, 6)}")
+    print(f"2025 n={len(pts)} R²={None if r2 is None else round(r2, 6)}")
     if present:
         pool_ids = {p["pid"] for p in pts}
         hit = [pid for pid in present if pid in pool_ids]
         names = {JEFFERSON: "Jefferson", ADAMS: "Adams"}
         if not hit:
-            fail("2024→2025 pool missing known WR "
+            fail("2025 pool missing known WR "
                  + ", ".join(f"{names[p]} {p}" for p in present)
                  + " even though year JSON has them")
         else:
@@ -237,7 +276,7 @@ def main():
                     print(f"  {p['name']} pid={p['pid']} wopr={p['wopr']} "
                           f"fppg={p['fppg']:.2f}")
     else:
-        print("known WRs not in both year JSONs; pool membership skipped")
+        print("known WRs not in 2025 year JSON; pool membership skipped")
 
     tucker_usage = u25.get(TUCKER)
     tucker_pt = next((p for p in pts if p["pid"] == TUCKER), None)
@@ -247,7 +286,7 @@ def main():
         print(f"Tre Tucker 2025 fp={fp} nfl_games={games} "
               f"fppg={None if fp is None or not games else round(fp / games, 4)}")
         if tucker_pt is None:
-            fail("Tre Tucker missing from 2024→2025 persist pool")
+            fail("Tre Tucker missing from 2025 persist pool")
         else:
             if tucker_pt["fppg"] >= 40:
                 fail(f"Tre Tucker FPpG is {tucker_pt['fppg']:.2f} (>= 40); season total plotted as per-game")
@@ -260,7 +299,7 @@ def main():
 
     if pts:
         mx = max(p["fppg"] for p in pts)
-        print(f"2024→2025 max FPpG={mx:.2f}")
+        print(f"2025 max FPpG={mx:.2f}")
         if mx >= 30:
             fail(f"max FPpG {mx:.2f} is not a sane per-game range")
         for p in pts:
@@ -281,6 +320,8 @@ def main():
             fail(f"players.html HTTP {code}")
         elif "Usage that sticks" not in body:
             fail("8765 players.html missing Usage that sticks")
+        elif "year-N+1" in body:
+            fail("8765 players.html still serves year-N+1 subtitle")
         else:
             print("players.html HTTP 200")
     except (urllib.error.URLError, TimeoutError, OSError) as e:

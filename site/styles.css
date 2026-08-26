@@ -2369,6 +2369,38 @@ img.w1-award-logo,
   letter-spacing: .06em;
   color: var(--mut);
 }
+
+/* CHI-111 — Chase next-win logos + global mini/avatar cap (white PNGs must not blow layout) */
+img.mini {
+  width: 28px;
+  height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  object-fit: contain;
+  background: transparent;
+  flex: 0 0 28px;
+}
+img.avatar {
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: contain;
+}
+.story-ico { overflow: hidden; }
+#ms-chase .story-ico img,
+#ms-chase .story-ico .mini,
+.story-ico img,
+.story-ico .mini {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px;
+  max-height: 28px;
+  object-fit: contain;
+  background: transparent;
+  display: block;
+  border-radius: 7px;
+}
+.second-grid .chart-wrap.xtall { height: 440px; }
+
 #elo-card .table-scroll { margin-top: 12px; }
 #elo-note, #ms-note { margin-top: 10px; }
 

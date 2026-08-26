@@ -123,10 +123,11 @@
     const rows = Object.entries(YD.txByTeam || {}).map(([tid, v]) => ({ tid: +tid, ...v }))
       .sort((a, b) => (b.waiver + b.fa + b.trades) - (a.waiver + a.fa + a.trades));
     if (chart) chart.destroy();
+    const names = rows.map((r) => tName(r.tid));
     chart = new Chart($('#activity-chart'), {
       type: 'bar',
       data: {
-        labels: rows.map((r) => short(r.tid)),
+        labels: names,
         datasets: [
           { label: 'Waiver claims', data: rows.map((r) => r.waiver), backgroundColor: '#2f7bffcc', stack: 'a', maxBarThickness: 15 },
           { label: 'Free agents', data: rows.map((r) => r.fa), backgroundColor: '#93d500cc', stack: 'a', maxBarThickness: 15 },
@@ -136,9 +137,12 @@
       options: {
         indexAxis: 'y',
         maintainAspectRatio: false,
+        layout: { padding: { left: 4, right: 8, top: 4, bottom: 4 } },
         plugins: {
           legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: { callbacks: { afterBody: (items) => {
+          tooltip: { callbacks: {
+            title: (items) => names[items[0].dataIndex],
+            afterBody: (items) => {
             const r = rows[items[0].dataIndex];
             const parts = [`${r.waiver + r.fa} wire moves`, `${r.drop} drops`, `${r.trades} trades`];
             if (YD.usesFaab) parts.push(`$${r.spent} spent`);
@@ -147,7 +151,13 @@
         },
         scales: {
           x: { stacked: true, grid: { color: C.grid }, border: { display: false } },
-          y: { stacked: true, grid: { display: false }, border: { display: false } },
+          y: {
+            stacked: true,
+            grid: { display: false },
+            border: { display: false },
+            ticks: { display: true, autoSkip: false, color: C.ink, font: { size: 11, weight: '600' } },
+            afterFit(scale) { scale.width = Math.max(scale.width, 128); },
+          },
         },
       },
     });
