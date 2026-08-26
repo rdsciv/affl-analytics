@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL History</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="stylesheet" href="history-book.css">
+<link rel="stylesheet" href="logo.css">
+</head>
+<body>
+<div class="frame">
+  <div id="site-chrome"></div>
+
+  <div class="picker-row">
+    <div class="picker-label">Jump</div>
+    <div class="week-picker" id="year-chips"></div>
+  </div>
+
+  <section class="lede card">
+    <h2>The Archive</h2>
+    <p class="card-sub">AFFL history book for ESPN league 51418. Non-PPR. Twelve finished seasons, 2014–2025. Names on every card are the current franchise names. Pounders and Pollywogs are historic. Chupacabras is current. Gabagooners is new and has no 2014–2025 history. There is no 2026 season here until the draft.</p>
+  </section>
+
+  <section class="year-wall" id="year-wall"></section>
+
+  <div class="section-break"><h2>Open the ledger</h2></div>
+  <nav class="quick-links">
+    <a class="page-link" href="records.html">Franchise records · combined titles · heatmap · H2H</a>
+    <a class="page-link" href="archive-awards.html">Trophy case</a>
+    <a class="page-link" href="archive-teams.html">Franchise pages</a>
+  </nav>
+
+  <footer class="foot" id="site-foot"></footer>
+</div>
+<script src="common.js"></script>
+<script src="history-book.js"></script>
+<script>AFFLHistory.start('archive');</script>
+</body>
+</html>

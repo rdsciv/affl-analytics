@@ -10,7 +10,7 @@
   let DATA = null;
 
   const NAV = [
-    ['history.html', 'Archive'],
+    ['archive.html', 'Archive'],
     ['records.html', 'Records'],
     ['teams.html', 'Teams'],
     ['awards.html', 'Awards'],
@@ -95,7 +95,7 @@
     if (!host) return;
     host.innerHTML = `
       <header class="topbar">
-        <a class="brand brand-link" href="history.html">
+        <a class="brand brand-link" href="archive.html">
           <div class="brand-mark" aria-hidden="true"></div>
           <div>
             <h1>AFFL <span>${accent}</span></h1>
@@ -499,7 +499,7 @@
     await boot();
     if (window.AFFL && AFFL.boot) await AFFL.boot();
     if (page === 'archive') {
-      chrome({ page: 'history.html', title: 'AFFL History', accent: 'History', sub: 'The archive · 2014–2025 · current franchise names' });
+      chrome({ page: 'archive.html', title: 'AFFL History', accent: 'History', sub: 'The archive · 2014–2025 · current franchise names' });
       yearChips($('#year-chips'), null, (y) => { location.href = `year.html?y=${y}`; });
       renderYearWall();
     } else if (page === 'year') renderYearPage();

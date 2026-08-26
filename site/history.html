@@ -4,37 +4,531 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL History</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
-<link rel="stylesheet" href="history-book.css">
-<link rel="stylesheet" href="logo.css">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
 <div class="frame">
-  <div id="site-chrome"></div>
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <div>
+        <h1>AFFL <span>History</span></h1>
+        <div class="sub" id="page-sub">franchise careers · 2014–2025</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html" class="on">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
+    </nav>
+  </header>
 
-  <div class="picker-row">
-    <div class="picker-label">Jump</div>
-    <div class="week-picker" id="year-chips"></div>
+  <div class="picker-row" id="year-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
   </div>
 
-  <section class="lede card">
-    <h2>The Archive</h2>
-    <p class="card-sub">AFFL history book for ESPN league 51418. Non-PPR. Twelve finished seasons, 2014–2025. Names on every card are the current franchise names. Pounders and Pollywogs are historic. Chupacabras is current. Gabagooners is new and has no 2014–2025 history. There is no 2026 season here until the draft.</p>
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Season Standings</h2>
+        <div class="card-sub" id="season-sub">final rank · ESPN Moves · current franchise names</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="season-tbl">
+        <thead>
+          <tr>
+            <th class="s" data-k="rank"></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="wins">W-L-T</th>
+            <th class="s" data-k="pf">PF</th>
+            <th class="s" data-k="pa">PA</th>
+            <th class="s" data-k="allW">All-Play</th>
+            <th class="s" data-k="moves">Moves</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </section>
 
-  <section class="year-wall" id="year-wall"></section>
+  <section class="card" id="age-scatter-block">
+    <div class="card-head">
+      <div>
+        <h2>Age is Just a Number</h2>
+        <div class="card-sub" id="age-scatter-sub">live roster age vs Power Win % · updates at midnight</div>
+      </div>
+      <label class="age-asof">As of <input type="date" id="age-asof"></label>
+    </div>
+    <div class="second-grid age-squad-grid" id="age-squads"></div>
+    <div class="chart-wrap tall" id="age-scatter-wrap"><canvas id="age-scatter-chart"></canvas></div>
+    <div class="notice" id="age-scatter-empty" hidden></div>
+  </section>
 
-  <div class="section-break"><h2>Open the ledger</h2></div>
-  <nav class="quick-links">
-    <a class="page-link" href="records.html">Franchise records · combined titles · heatmap · H2H</a>
-    <a class="page-link" href="archive-awards.html">Trophy case</a>
-    <a class="page-link" href="archive-teams.html">Franchise pages</a>
-  </nav>
+  <section class="card" id="custody-par-block">
+    <div class="card-head">
+      <div>
+        <h2>Custody PAR</h2>
+        <div class="card-sub" id="custody-par-sub">rostered-week PAR (started + benched) · the GM grade, not starter points · Trade Alpha is not in the total</div>
+      </div>
+    </div>
+    <div id="custody-par-body">
+      <div class="table-scroll">
+        <table class="tbl" id="custody-par-tbl">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="s" data-k="name">Team</th>
+              <th class="s tip" data-k="parTotal" data-tip="Sum of weekly PAR for every week a player was rostered, started or benched. Not starter points. Trade Alpha is not included.">Custody PAR</th>
+              <th class="s" data-k="parDrafted">Drafted</th>
+              <th class="s" data-k="parTradedIn">Traded in</th>
+              <th class="s" data-k="parWaiver">Waiver</th>
+              <th class="s" data-k="parFa">FA</th>
+              <th class="s" data-k="parUnknown" id="par-unknown-th" hidden>Unknown</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-  <footer class="foot" id="site-foot"></footer>
+  <section class="card" id="txn-block">
+    <div class="card-head">
+      <div>
+        <h2>Transaction Counter</h2>
+        <div class="card-sub" id="txn-sub">ESPN transactionCounter · counts only, not player names · 2014–2017 have no item log</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="txn-tbl">
+        <thead>
+          <tr>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="acq">Acq</th>
+            <th class="s" data-k="drops">Drop</th>
+            <th class="s" data-k="trades">Trade</th>
+            <th class="s" data-k="activate">Activate</th>
+            <th class="s" data-k="ir">IR</th>
+            <th class="s" data-k="misc">Misc</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="week-acq-lab">Adds by week</div>
+    <div class="table-scroll">
+      <table class="tbl week-acq" id="week-acq-tbl"></table>
+    </div>
+  </section>
+
+  <section class="card" id="tx-log-block">
+    <div class="card-head">
+      <div>
+        <h2>Transaction Log</h2>
+        <div class="card-sub" id="tx-log-sub">waiver · free agent · trade · 2018–2025</div>
+      </div>
+    </div>
+    <div class="tx-log-filters" id="tx-log-filters">
+      <select class="team-select" id="tx-pos" aria-label="Position">
+        <option value="ALL">All</option>
+        <option value="QB">QB</option>
+        <option value="RB">RB</option>
+        <option value="WR">WR</option>
+        <option value="TE">TE</option>
+        <option value="K">K</option>
+        <option value="DST">DST</option>
+      </select>
+      <select class="team-select" id="tx-team" aria-label="Team">
+        <option value="ALL">All</option>
+      </select>
+      <select class="team-select" id="tx-act" aria-label="Action">
+        <option value="ALL">All</option>
+        <option value="waiver">Waiver</option>
+        <option value="fa">FA</option>
+        <option value="trade">Trade</option>
+        <option value="failed">Failed</option>
+      </select>
+      <input class="tx-log-q" id="tx-q" type="search" placeholder="Search" aria-label="Search">
+    </div>
+    <div class="table-scroll" id="tx-log-wrap">
+      <table class="tbl tx-log" id="tx-log-tbl">
+        <thead>
+          <tr>
+            <th class="s" data-k="week">Week</th>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="detail">Detail</th>
+            <th class="s" data-k="pill">Type</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="waiver-value-block">
+    <div class="card-head">
+      <div>
+        <h2>Waiver Value</h2>
+        <div class="card-sub" id="waiver-value-sub">points after the claim week · current franchise names</div>
+      </div>
+    </div>
+    <div id="waiver-value-body"></div>
+  </section>
+
+  <section class="card" id="waiver-block">
+    <div class="card-head">
+      <div>
+        <h2>Waiver Report</h2>
+        <div class="card-sub" id="waiver-sub">ESPN waiver claims · current franchise names · 2018–2025</div>
+      </div>
+    </div>
+    <div class="picker-row" id="waiver-week-row">
+      <div class="picker-label">Week</div>
+      <div class="week-picker" id="waiver-week-picker"></div>
+    </div>
+    <div id="waiver-body"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Franchise Records</h2>
+        <div class="card-sub">current name · career totals · 2014–2025</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="franchise-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="seasons">Yrs</th>
+            <th class="s" data-k="wins">W-L-T</th>
+            <th class="s" data-k="winPct">Win%</th>
+            <th class="s" data-k="regWins">RS W</th>
+            <th class="s" data-k="titles">Titles</th>
+            <th class="s" data-k="runnerUps">2nd</th>
+            <th class="s" data-k="thirds">3rd</th>
+            <th class="s" data-k="scoreTitles">Point Title</th>
+            <th class="s" data-k="sackos">Sacko</th>
+            <th class="s" data-k="combined">Combined</th>
+            <th class="s" data-k="playoffs">Playoffs</th>
+            <th class="s" data-k="poPct">PO%</th>
+            <th class="s" data-k="bestFinish">Best</th>
+            <th class="s" data-k="worstFinish">Worst</th>
+            <th class="s" data-k="pf">PF</th>
+            <th class="s" data-k="pa">PA</th>
+            <th class="s" data-k="diff">+/-</th>
+            <th class="s" data-k="allW">All-Play</th>
+            <th class="s" data-k="allPct">AP%</th>
+            <th class="s" data-k="expWins">Exp W</th>
+            <th class="s" data-k="luck">Luck</th>
+            <th class="s" data-k="iq">IQ</th>
+            <th class="s" data-k="moves">Moves</th>
+            <th class="s" data-k="trades">Trade</th>
+            <th class="s" data-k="activate">Activate</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="ngs-block">
+    <div class="card-head">
+      <div>
+        <h2>Franchise NGS 2025</h2>
+        <div class="card-sub">routes from rostered WR/TE/RB · holes from rostered RBs · 2025 only · current franchise names</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="ngs-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="routeYards">Route yds</th>
+            <th class="s" data-k="topRoute">Top route</th>
+            <th class="s" data-k="holeYards">Hole yds</th>
+            <th class="s" data-k="topHole">Top hole</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Scoring Book</h2>
+        <div class="card-sub">weekly scoring · streaks · scoring titles</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="scoring-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Team</th>
+            <th class="s" data-k="ppg">PF/G</th>
+            <th class="s" data-k="papg">PA/G</th>
+            <th class="s" data-k="avgPts">Avg</th>
+            <th class="s" data-k="medPts">Med</th>
+            <th class="s" data-k="maxScore">Max</th>
+            <th class="s" data-k="minScore">Min</th>
+            <th class="s" data-k="sdPts">SD</th>
+            <th class="s" data-k="scoreTitles">Score titles</th>
+            <th class="s" data-k="winStreak">W streak</th>
+            <th class="s" data-k="loseStreak">L streak</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <section class="card" id="score-trend-card">
+    <div class="card-head">
+      <div>
+        <h2>Matchup Scores by Season</h2>
+        <div class="card-sub">regular-season team games · high / average / low</div>
+      </div>
+    </div>
+    <div class="chart-wrap tall"><canvas id="score-trend-chart"></canvas></div>
+    <p class="card-sub" id="score-trend-note">Average is the mean of every completed regular-season team-game score. High game and low are the max and min team-game scores. The number above each high is the spread (high − low).</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Points per Dollar</h2>
+        <div class="card-sub">auction 2018–2025 · pts / $ by position · PAR / $ is the fair grade</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="ppd-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="spend">$</th>
+            <th class="s" data-k="draftPts">Pts</th>
+            <th class="s" data-k="ppd">Pts/$</th>
+            <th class="s tip" data-k="parpd" data-tip="Points above replacement per dollar. Subtracts a replacement starter at that position, then divides by auction cost. Raw Pts/$ makes cheap QBs look like steals." title="Points above replacement per dollar. Subtracts a replacement starter at that position, then divides by auction cost. Raw Pts/$ makes cheap QBs look like steals.">PAR/$</th>
+            <th class="s" data-k="ppdQB">QB</th>
+            <th class="s" data-k="ppdRB">RB</th>
+            <th class="s" data-k="ppdWR">WR</th>
+            <th class="s" data-k="ppdTE">TE</th>
+            <th class="s" data-k="ppdK">K</th>
+            <th class="s" data-k="ppdDST">DST</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Finishes</h2>
+        <div class="card-sub">final rank by year · gold / silver / bronze · red is sacko</div>
+      </div>
+    </div>
+    <div class="table-scroll" id="finish-heat"></div>
+  </section>
+
+  <section class="card" id="books-block">
+    <div class="card-head">
+      <div>
+        <h2>Single-Season Records</h2>
+        <div class="card-sub">best individual seasons on the books</div>
+      </div>
+    </div>
+    <div class="book-grid" id="record-book"></div>
+  </section>
+
+  <section class="card" id="titles-block">
+    <div class="card-head">
+      <div>
+        <h2>Title Rank</h2>
+        <div class="card-sub">championships + seconds + thirds + point titles − sackos · current franchise names</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="titles-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="titles">Titles</th>
+            <th class="s" data-k="runnerUps">2nd</th>
+            <th class="s" data-k="thirds">3rd</th>
+            <th class="s" data-k="scoreTitles">Point Title</th>
+            <th class="s" data-k="sackos">Sacko</th>
+            <th class="s" data-k="combined">Combined</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="title-bars"></div>
+  </section>
+
+  <section class="card" id="trophy-case">
+    <div class="card-head">
+      <div>
+        <h2>Trophy Case</h2>
+        <div class="card-sub">all-time Cup / Board / All-Play / Roto · current franchise names · <a class="hist-name" href="awards.html">All-League &amp; Bush League →</a></div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="trophy-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Team</th>
+            <th class="s" data-k="cup">Cup</th>
+            <th class="s" data-k="median">Board</th>
+            <th class="s" data-k="allPlay">All-Play</th>
+            <th class="s" data-k="roto">Roto</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-break"><h2>Champions <span>2014 – 2025</span></h2></div>
+  <section class="timeline" id="timeline"></section>
+
+  <section class="card h2h-card">
+    <div class="card-head">
+      <div>
+        <h2>Head-to-Head Ledger</h2>
+        <div class="card-sub">all-time wins · current franchise names</div>
+      </div>
+    </div>
+    <div class="table-scroll"><table class="tbl h2h" id="h2h-tbl"></table></div>
+  </section>
+
+  <div class="section-break" id="rb-break"><h2>Record Book <span>AFFL data</span></h2></div>
+  <p class="rb-note" id="rb-alltime-note">All-time league table is Franchise Records above — not duplicated.</p>
+
+  <section class="card rb-card" id="rb-streaks">
+    <div class="card-head">
+      <div>
+        <h2>Winning / Losing Streaks</h2>
+        <div class="card-sub" id="rb-streaks-sub">weekly matchup results · current franchise names</div>
+      </div>
+    </div>
+    <div id="rb-streaks-body"></div>
+  </section>
+
+  <section class="card rb-card" id="rb-team-records">
+    <div class="card-head">
+      <div>
+        <h2>Team Records</h2>
+        <div class="card-sub">high / low season PF · 10-win years · playoffs · point titles · championships</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="rb-team-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="highPf">High PF</th>
+            <th class="s" data-k="lowPf">Low PF</th>
+            <th class="s" data-k="tenWins">10-win yrs</th>
+            <th class="s" data-k="playoffs">Playoffs</th>
+            <th class="s" data-k="scoreTitles">Point Title</th>
+            <th class="s" data-k="titles">Titles</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card rb-card" id="rb-hof">
+    <div class="card-head">
+      <div>
+        <h2>Hall of Fame Performances</h2>
+        <div class="card-sub" id="rb-hof-sub">top single-week AFFL scores by position</div>
+      </div>
+    </div>
+    <div id="rb-hof-body"></div>
+  </section>
+
+  <section class="card rb-card" id="rb-hof-scatter-block">
+    <div class="card-head">
+      <div>
+        <h2>HOF Scores</h2>
+        <div class="card-sub" id="rb-hof-scatter-sub">single-week AFFL scores · color by position</div>
+      </div>
+    </div>
+    <div class="chart-wrap tall" id="rb-hof-scatter-wrap"><canvas id="rb-hof-scatter-chart"></canvas></div>
+    <div class="notice" id="rb-hof-scatter-empty" hidden></div>
+  </section>
+
+  <section class="card rb-card" id="rb-owners">
+    <div class="card-head">
+      <div>
+        <h2>Owners Tenure</h2>
+        <div class="card-sub">seasons · first–last year · current franchise name</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="rb-owners-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="seasons">Seasons</th>
+            <th class="s" data-k="firstYear">First</th>
+            <th class="s" data-k="lastYear">Last</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card rb-card" id="rb-awards">
+    <div class="card-head">
+      <div>
+        <h2>Awards</h2>
+        <div class="card-sub">trophies + sackos · current franchise names</div>
+      </div>
+    </div>
+    <div class="rb-award-row" id="rb-award-row"></div>
+  </section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL History · franchise careers 2014–2025 · ESPN Fantasy API</p>
+  </footer>
 </div>
-<script src="common.js"></script>
-<script src="history-book.js"></script>
-<script>AFFLHistory.start('archive');</script>
+<script src="chart.umd.min.js?v=1"></script>
+<script src="common.js?v=18"></script>
+<script src="history.js?v=16"></script>
+<script src="score-trend.js?v=1"></script>
 </body>
 </html>
