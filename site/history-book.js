@@ -18,14 +18,20 @@
     ['scoreboard.html', 'Scoreboard'],
   ];
 
-  function bust(url) { return url + (url.includes('?') ? '&' : '?') + 'v=hist2'; }
+  function bust(url) { return url + (url.includes('?') ? '&' : '?') + 'v=hist3'; }
+
+  async function jsonOrEmpty(url) {
+    const r = await fetch(bust(url), { cache: 'no-store' });
+    if (!r.ok) return {};
+    return r.json();
+  }
 
   async function boot() {
     if (H && DATA) return { H, DATA };
     const [h, extraF, extraL, d] = await Promise.all([
       fetch(bust('history.json'), { cache: 'no-store' }).then((r) => r.json()),
-      fetch(bust('history-franchises.json'), { cache: 'no-store' }).then((r) => r.json()),
-      fetch(bust('history-ledger.json'), { cache: 'no-store' }).then((r) => r.json()),
+      jsonOrEmpty('history-franchises.json'),
+      jsonOrEmpty('history-ledger.json'),
       fetch(bust('data.json'), { cache: 'no-store' }).then((r) => r.json()),
     ]);
     H = Object.assign({}, h, extraF, extraL);
