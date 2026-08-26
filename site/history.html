@@ -37,7 +37,21 @@
 
   <div class="picker-row" id="year-row">
     <div class="picker-label">Season</div>
-    <div class="week-picker" id="year-picker"></div>
+    <select class="team-select" id="year-picker" aria-label="Season">
+      <option value="all">All</option>
+      <option value="2014">2014</option>
+      <option value="2015">2015</option>
+      <option value="2016">2016</option>
+      <option value="2017">2017</option>
+      <option value="2018">2018</option>
+      <option value="2019">2019</option>
+      <option value="2020">2020</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+      <option value="2023">2023</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+    </select>
   </div>
 
   <section class="card">
@@ -247,6 +261,17 @@
         <tbody></tbody>
       </table>
     </div>
+  </section>
+
+
+  <section class="card" id="race-block">
+    <div class="card-head">
+      <div>
+        <h2>The Race</h2>
+        <div class="card-sub" id="race-sub">cumulative wins · top four finishers</div>
+      </div>
+    </div>
+    <div class="chart-wrap tall"><canvas id="race-chart"></canvas></div>
   </section>
 
   <section class="card" id="ngs-block">
@@ -529,7 +554,7 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=18"></script>
-<script src="history.js?v=16"></script>
+<script src="history.js?v=17"></script>
 <script src="score-trend.js?v=1"></script>
 </body>
 </html>
