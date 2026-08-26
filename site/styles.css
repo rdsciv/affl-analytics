@@ -2250,16 +2250,28 @@ body.guide-lock { overflow: hidden; }
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
-img.w1-award-logo,
-.w1-award-logo,
-.w1-award .w1-award-logo.fb {
+img.w1-award-logo {
   width: 64px;
   height: 64px;
   max-width: 64px;
   max-height: 64px;
   object-fit: contain;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 0;
+  display: block;
+  flex: 0 0 64px;
+}
+.w1-award-logo.fb,
+.w1-award .w1-award-logo.fb {
+  width: 64px;
+  height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 18px;
   display: grid;
   place-items: center;
   flex: 0 0 64px;
