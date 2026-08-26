@@ -557,8 +557,19 @@
 
   async function loadPlayer(pid, push) {
     const pool = enrichedPool();
-    let p = pid ? pool.find((x) => x.pid === pid) : null;
-    if (!p && pid && INDEX[String(pid)]) p = stubPlayer(pid);
+    const want = pid == null || pid === "" ? null : Number(pid);
+    let p = want ? pool.find((x) => Number(x.pid) === want) : null;
+    if (!p && want && INDEX[String(want)]) p = stubPlayer(want);
+    if (!p && want && A.HYDRATE_PLAYERS) {
+      const rec = A.HYDRATE_PLAYERS[want] || A.HYDRATE_PLAYERS[String(want)];
+      if (rec) p = { pid: want, name: rec.name, pos: rec.pos || "", nfl: rec.nfl || "" };
+    }
+    if (!p && want) {
+      $("#pl-hero").innerHTML = A.notice("This player page is unavailable.");
+      const col = $("#pl-college"); if (col) col.innerHTML = "";
+      const ov = $("#pl-overview"); if (ov) { ov.hidden = true; ov.innerHTML = ""; }
+      return;
+    }
     if (!p) p = pool[0];
     if (!p) {
       $("#pl-hero").innerHTML = A.notice(`No player data stored for ${year}. ESPN retains weekly lineups from 2018 on.`);
