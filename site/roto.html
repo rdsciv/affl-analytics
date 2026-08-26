@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Roto Standings</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="logo.css?v=2">
+</head>
+<body>
+<div class="frame">
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <div>
+        <h1>AFFL <span>Roto</span></h1>
+        <div class="sub">category analytics · skill radar · from starter NFL stats</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html" class="on">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
+    </nav>
+  </header>
+
+  <p class="lede" id="lede"></p>
+
+  <div class="picker-row">
+    <div class="picker-label">View</div>
+    <div class="week-picker" id="scope-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Squad</div>
+    <div class="week-picker" id="squad-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Phase</div>
+    <div class="week-picker" id="phase-picker"></div>
+  </div>
+  <p class="card-sub" id="phase-note"></p>
+
+  <section class="card" id="career-block" style="margin-bottom:16px">
+    <div class="card-head">
+      <div>
+        <h2>Average Roto Finish</h2>
+        <div class="card-sub" id="career-sub"></div>
+      </div>
+    </div>
+    <div id="career-table"></div>
+  </section>
+
+  <section class="card" id="career-graph-block" style="margin-bottom:16px">
+    <div class="card-head">
+      <div>
+        <h2>Finish Over Time</h2>
+        <div class="card-sub">lower is better · click a manager in the table to highlight</div>
+      </div>
+    </div>
+    <div class="chart-wrap tall"><canvas id="career-chart"></canvas></div>
+  </section>
+
+  <div class="picker-row" id="year-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+
+  <section class="card" id="season-block" style="margin-bottom:16px">
+    <div class="card-head">
+      <div>
+        <h2>Roto Standings</h2>
+        <div class="card-sub" id="season-sub"></div>
+      </div>
+    </div>
+    <div id="season-table"></div>
+  </section>
+
+  <section class="second-grid" id="graphs-block">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Skill Radar</h2>
+          <div class="card-sub" id="radar-sub"></div>
+        </div>
+      </div>
+      <div class="radar-meta" id="radar-meta"></div>
+      <div class="chart-wrap tall"><canvas id="roto-radar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Category Breakdown</h2>
+          <div class="card-sub" id="break-sub"></div>
+        </div>
+      </div>
+      <div id="breakdown"></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">Roto methodology copied from AFFL_Pillars · radar uses the same min-max norm · totals computed from boxscores</p>
+  </footer>
+</div>
+<script src="chart.umd.min.js?v=1"></script>
+<script src="common.js?v=18"></script>
+<script src="roto-math.js?v=2"></script>
+<script src="roto.js?v=3"></script>
+</body>
+</html>

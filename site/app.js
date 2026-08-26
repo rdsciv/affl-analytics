@@ -4,9 +4,9 @@
   const $ = (s) => document.querySelector(s);
 
   const C = {
-    blue: '#2f7bff', blue2: '#47a8ff', ice: '#9fd8ff', steel: '#3a4a63',
-    orange: '#ff7a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
-    green: '#93d500', red: '#ff2d1a',
+    blue: '#00a2ff', blue2: '#47d4ff', ice: '#9fd8ff', steel: '#3a4a63',
+    orange: '#ff6a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
+    green: '#c8ff00', red: '#ff2d1a',
     mut: '#7d8aa0', ink: '#eef4ff', grid: '#1b243366',
   };
 
@@ -39,6 +39,26 @@
     return p.length > 1 ? `${p[0]} ${p[1][0]}.` : p[0];
   };
 
+  const MERGE = { m01: "m07", m03: "m08", m20: "m10" };
+  const canon = (id) => MERGE[id] || id;
+  const FRANCHISE = {};
+  (DATA.franchises || []).forEach((f) => { FRANCHISE[canon(f.owner)] = f; });
+  const FRANCHISE_LOGO = {};
+  Object.keys(DATA.seasons || {}).sort().forEach((y) => {
+    (DATA.seasons[y].teams || []).forEach((t) => {
+      if (t.owner && t.logo) FRANCHISE_LOGO[canon(t.owner)] = t.logo;
+    });
+  });
+  const franchiseName = (id) => {
+    const f = FRANCHISE[canon(id)];
+    return (f && f.currentName) || memberName(id);
+  };
+  const shortTeam = (id) => {
+    const parts = String(franchiseName(id) || "").split(/\s+/).filter(Boolean);
+    return parts.length ? parts[parts.length - 1] : franchiseName(id);
+  };
+  const franchiseTeam = (id) => ({ name: franchiseName(id), logo: FRANCHISE_LOGO[canon(id)] || "" });
+
   function avatarHTML(team, size) {
     const initial = (team.name || '?').replace(/[^A-Za-z0-9]/g, '').charAt(0).toUpperCase() || '?';
     const cls = size === 'mini' ? 'mini' : 'avatar';
@@ -65,21 +85,89 @@
   /* ================= state ================= */
   const years = Object.keys(DATA.seasons).map(Number).sort((a, b) => a - b);
   const qsYear = +new URLSearchParams(location.search).get('year');
-  let curYear = years.includes(qsYear) ? qsYear : DATA.latest;
+  let curYear = years.includes(qsYear) ? qsYear : null;
   let spotlightId = null;
+  let NG = null;
 
-  const S = () => DATA.seasons[String(curYear)];
-  const teamById = (id) => S().teams.find((t) => t.id === id);
+  const S = () => DATA.seasons[String(curYear)] || { teams: [] };
+  const teamById = (id) => (S().teams || []).find((t) => t.id === id);
+
+  function warehouseMaps() {
+    const power = {}, luck = {}, luckW = {};
+    ((NG && NG.power) || []).forEach((p) => { power[p.teamId] = p; });
+    ((NG && NG.luckFG) || []).forEach((p) => { luck[p.teamId] = p; });
+    ((NG && NG.luckWeighted) || []).forEach((p) => { luckW[p.teamId] = p; });
+    return { power, luck, luckW };
+  }
+
+  const NOTABLE_ORDER = ['min_win', 'max_loss', 'slugfest', 'pillow_fight', 'blowout', 'nail_biter'];
+  const NOTABLE_META = {
+    min_win: { t: 'Lowest win' },
+    max_loss: { t: 'Highest loss' },
+    slugfest: { t: 'Slugfest' },
+    pillow_fight: { t: 'Pillow fight' },
+    blowout: { t: 'Blowout' },
+    nail_biter: { t: 'Nail-biter' },
+  };
+  const nick = (id) => {
+    const n = (teamById(id) || { name: '?' }).name;
+    const parts = n.split(' ');
+    return parts[parts.length - 1];
+  };
 
   /* ================= season picker ================= */
+  function isCum() { return curYear == null; }
+
+  function leagueTotals() {
+    let pts = 0, games = 0;
+    years.forEach((y) => {
+      const s = DATA.seasons[String(y)];
+      if (!s) return;
+      pts += Number(s.totalPts) || 0;
+      games += (s.teams || []).reduce((a, t) => a + (t.wins || 0) + (t.losses || 0) + (t.ties || 0), 0) / 2;
+    });
+    return { pts: pts, games: games };
+  }
+
+  function setPanes() {
+    const season = document.getElementById('season-pane');
+    const cum = document.getElementById('cum-pane');
+    if (season) season.hidden = isCum();
+    if (cum) cum.hidden = !isCum();
+  }
+
+  function renderCumHome() {
+    const tot = leagueTotals();
+    const latest = DATA.seasons[String(DATA.latest)] || {};
+    const nTeams = (latest.teams || []).length || (DATA.activeOwners || []).length;
+    const nOwners = (DATA.activeOwners || []).length;
+    const lo = years[0], hi = years[years.length - 1];
+    const hdr = document.getElementById('hdr-sub');
+    if (hdr) hdr.textContent = nTeams + '-team league · all-time · est. 2014';
+    const hsT = document.getElementById('hs-total');
+    const hsG = document.getElementById('hs-games');
+    if (hsT) hsT.textContent = fmt(tot.pts, 1);
+    if (hsG) hsG.textContent = fmt(tot.games);
+    const kpi = document.getElementById('kpi-row');
+    if (kpi) {
+      kpi.innerHTML = `
+        <div class="card kpi kpi-static"><div class="kpi-title">${years.length}</div><div class="kpi-desc">seasons</div></div>
+        <div class="card kpi kpi-static"><div class="kpi-title">${nOwners}</div><div class="kpi-desc">active owners</div></div>
+        <div class="card kpi kpi-static"><div class="kpi-title">${fmt(tot.games)}</div><div class="kpi-desc">matchups</div></div>
+        <div class="card kpi kpi-static"><div class="kpi-title">${lo}–${hi}</div><div class="kpi-desc">range</div></div>`;
+    }
+  }
+
   function renderPicker() {
-    $('#season-picker').innerHTML = years
-      .map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`)
-      .join('');
+    const chips = [`<button class="season-chip${curYear == null ? ' on' : ''}" data-y="cum">Cumulative</button>`]
+      .concat(years.map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`));
+    $('#season-picker').innerHTML = chips.join('');
     document.querySelectorAll('.season-chip').forEach((b) =>
       b.addEventListener('click', () => {
-        curYear = +b.dataset.y;
-        history.replaceState(null, '', '?year=' + curYear);
+        const raw = b.dataset.y;
+        curYear = (raw === '' || raw === 'cum' || raw == null) ? null : +raw;
+        if (curYear != null && !years.includes(curYear)) curYear = null;
+        history.replaceState(null, '', curYear == null ? 'index.html' : ('?year=' + curYear));
         spotlightId = null;
         PP.q = ''; PP.pos = 'ALL'; PP.limit = 20;
         const s = $('#pp-search'); if (s) s.value = '';
@@ -94,33 +182,41 @@
     const s = S();
     const champ = teamById(s.champion);
     const ptsLeader = [...s.teams].sort((a, b) => b.pf - a.pf)[0];
-    const lucky = [...s.teams].sort((a, b) => b.luck - a.luck)[0];
-    const unlucky = [...s.teams].sort((a, b) => a.luck - b.luck)[0];
-    const apPct = (t) => t.allplayW / Math.max(1, t.allplayW + t.allplayL);
+    const { power } = warehouseMaps();
+    const powerTop = (NG.power || [])[0];
+    const powerTeam = powerTop ? teamById(powerTop.teamId) : null;
+    const luckTop = [...(NG.luckFG || [])].sort((a, b) => b.net - a.net)[0];
+    const luckTeam = luckTop ? teamById(luckTop.teamId) : null;
+    const apPct = (t) => {
+      const p = power[t.id];
+      const w = p ? p.w : t.allplayW;
+      const l = p ? p.l : t.allplayL;
+      return w / Math.max(1, w + l);
+    };
 
     const cards = [
       champ && {
         n: '01 · CROWN', color: C.gold, title: 'The Champion',
         pct: champ.wins / Math.max(1, champ.wins + champ.losses),
         label: Math.round((champ.wins / Math.max(1, champ.wins + champ.losses)) * 100) + '%',
-        desc: `<strong>${champ.name}</strong> · ${champ.wins}-${champ.losses} · ${firstName(champ.owner)} takes the crown`,
+        desc: `<strong>${champ.name}</strong> · ${champ.wins}-${champ.losses} · ${firstName(champ.owner)} · ${fmt(champ.pf, 2)} PF`,
       },
       {
-        n: '02 · FIREPOWER', color: C.fire, title: 'Points Leader',
-        pct: apPct(ptsLeader), label: fmt(ptsLeader.pf),
-        desc: `<strong>${ptsLeader.name}</strong> · ${fmt(ptsLeader.avgPts, 1)} per week, ${Math.round(apPct(ptsLeader) * 100)}% all-play`,
+        n: '02 · POINTS', color: C.blue, title: 'Points Leader',
+        pct: apPct(ptsLeader), label: fmt(ptsLeader.pf, 0),
+        desc: `<strong>${ptsLeader.name}</strong> · ${fmt(ptsLeader.pf, 2)} PF · ${fmt(ptsLeader.avgPts, 1)} / week`,
       },
-      {
-        n: '03 · FORTUNE', color: C.green, title: 'Luck Lottery',
-        pct: Math.min(1, lucky.regWins / Math.max(0.1, lucky.expWins) / 2),
-        label: '+' + fmt(lucky.luck, 1),
-        desc: `<strong>${lucky.name}</strong> won ${fmt(lucky.luck, 1)} more games than their scores deserved`,
+      powerTeam && {
+        n: '03 · POWER', color: C.blue, title: 'All-Play',
+        pct: powerTop.w / Math.max(1, powerTop.w + powerTop.l),
+        label: (powerTop.pwrPct != null ? Number(powerTop.pwrPct).toFixed(1) : (apPct(powerTeam) * 100).toFixed(1)) + '%',
+        desc: `<strong>${powerTeam.name}</strong> · ${powerTop.w}–${powerTop.l} raw all-play`,
       },
-      {
-        n: '04 · MISFORTUNE', color: C.red, title: 'Snakebitten',
-        pct: Math.min(1, unlucky.regWins / Math.max(0.1, unlucky.expWins)),
-        label: fmt(unlucky.luck, 1),
-        desc: `<strong>${unlucky.name}</strong> robbed of ${fmt(Math.abs(unlucky.luck), 1)} wins by the schedule`,
+      luckTeam && {
+        n: '04 · LUCK', color: luckTop.net >= 0 ? C.green : C.mut, title: 'Luck Index',
+        pct: Math.min(1, (Math.abs(luckTop.net) + 2) / 8),
+        label: (luckTop.net >= 0 ? '+' : '') + luckTop.net,
+        desc: `<strong>${luckTeam.name}</strong> · ${luckTop.lucky} lucky / ${luckTop.unlucky} unlucky`,
       },
     ].filter(Boolean);
 
@@ -190,28 +286,43 @@
   function renderSide() {
     const s = S();
     const champ = teamById(s.champion);
-    const tn = (id) => (teamById(id) || { name: '?' }).name;
+    const { power, luck } = warehouseMaps();
+    const p = champ ? power[champ.id] : null;
+    const lk = champ ? luck[champ.id] : null;
+    const how = [];
+    if (champ) how.push(`${champ.wins}-${champ.losses}`);
+    if (champ) how.push(`${fmt(champ.pf, 2)} PF`);
+    if (p) how.push(`Power ${p.rank} · ${p.w}–${p.l}`);
+    if (lk && lk.net != null) how.push(`Luck Index ${lk.net >= 0 ? '+' : ''}${lk.net}`);
 
     $('#champ-spot').innerHTML = champ ? `
       ${avatarHTML(champ)}
       <div>
-        <div class="tag">🏆 League Champion</div>
+        <div class="tag">League Champion</div>
         <div class="nm">${champ.name}</div>
-        <div class="rec">${memberName(champ.owner)} · ${champ.wins}-${champ.losses} · ${fmt(champ.pf)} PF</div>
+        <div class="rec">${memberName(champ.owner)} · ${how.join(' · ')}</div>
       </div>` : '<div class="rec">Season in progress</div>';
 
-    const items = [
-      { i: '💥', bg: '#ff5a1e22', t: 'Best single week', d: `${tn(s.bestWeek.teamId)} · Week ${s.bestWeek.week}`, v: fmt(s.bestWeek.pts, 1), c: '#ff8a3d' },
-      { i: '🥶', bg: '#2f7bff22', t: 'Worst single week', d: `${tn(s.worstWeek.teamId)} · Week ${s.worstWeek.week}`, v: fmt(s.worstWeek.pts, 1), c: C.blue2 },
-      { i: '⚔️', bg: '#9fd8ff22', t: 'Closest call', d: `${tn(s.closest.winnerId)} over ${tn(s.closest.loserId)} · W${s.closest.week}`, v: '+' + fmt(s.closest.margin, 2), c: C.ice },
-      { i: '🔨', bg: '#ffc40022', t: 'Biggest beatdown', d: `${tn(s.blowout.winnerId)} over ${tn(s.blowout.loserId)} · W${s.blowout.week}`, v: '+' + fmt(s.blowout.margin, 1), c: C.gold },
-    ];
-    $('#story-list').innerHTML = items.map((x) => `
-      <li>
-        <div class="story-ico" style="background:${x.bg}">${x.i}</div>
-        <div class="story-txt"><div class="t">${x.t}</div><div class="d">${x.d}</div></div>
-        <div class="story-val" style="color:${x.c}">${x.v}</div>
-      </li>`).join('');
+    const notables = [...(NG.notables || [])].sort(
+      (a, b) => NOTABLE_ORDER.indexOf(a.kind) - NOTABLE_ORDER.indexOf(b.kind));
+    $('#story-list').innerHTML = notables.map((n) => {
+      const meta = NOTABLE_META[n.kind] || { t: n.kind };
+      return `<li>
+        <div class="story-ico">${n.week}</div>
+        <div class="story-txt"><div class="t">${meta.t}</div>
+          <div class="d">${nick(n.winnerId)} ${fmt(n.winnerPts, 1)} over ${nick(n.loserId)} ${fmt(n.loserPts, 1)}</div>
+        </div>
+        <div class="story-val">${fmt(n.winnerPts, 1)}–${fmt(n.loserPts, 1)}</div>
+      </li>`;
+    }).join('');
+
+    const ss = NG.scoreSeason;
+    const storySub = $('#story-sub');
+    if (storySub) {
+      storySub.textContent = ss && ss.n
+        ? `${ss.n} regular sides · min ${fmt(ss.minPts, 1)} · median ${fmt(ss.medianPts, 1)} · max ${fmt(ss.maxPts, 1)}`
+        : 'warehouse notables · both scores';
+    }
 
     $('#side-total').textContent = fmt(s.totalPts) + ' pts';
     document.querySelector('.side-total span').textContent = 'reg-season total';
@@ -258,7 +369,7 @@
   function renderRace() {
     const s = S();
     const top4 = [...s.teams].sort((a, b) => (a.finalRank || 99) - (b.finalRank || 99)).slice(0, 4);
-    const colors = [C.blue, C.gold, C.fire, C.green];
+    const colors = [C.blue, C.gold, C.blue2, C.ice];
     mkChart('#race-chart', {
       type: 'line',
       data: {
@@ -285,31 +396,58 @@
   /* ================= standings ================= */
   function renderStandings() {
     const s = S();
+    const { power, luck } = warehouseMaps();
     const rows = [...s.teams].sort((a, b) => (a.finalRank || 99) - (b.finalRank || 99));
     const pillCls = (r) => r === 1 ? 'gold' : r === 2 ? 'slv' : r === 3 ? 'brz' : '';
-    $('#standings-tbl tbody').innerHTML = rows.map((t) => `
+    const sub = $('#standings-sub');
+    if (sub) sub.innerHTML = 'ESPN W-L-T · warehouse Power · <span class="chip-verified">verified</span>';
+    $('#standings-tbl tbody').innerHTML = rows.map((t) => {
+      const p = power[t.id];
+      const lk = luck[t.id];
+      const ap = p ? `${p.w}–${p.l}` : `${t.allplayW}–${t.allplayL}`;
+      const pwr = p && p.pwrPct != null ? Number(p.pwrPct).toFixed(1) + '%' : '';
+      const luckTxt = lk && lk.net != null ? `${lk.net > 0 ? '+' : ''}${lk.net}` : '';
+      const luckCls = lk && lk.net > 0 ? 'pos' : (lk && lk.net < 0 ? 'neg' : '');
+      return `
       <tr>
         <td><span class="rank-pill ${pillCls(t.finalRank)}">${t.finalRank || '–'}</span></td>
         <td><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></td>
         <td><strong>${t.wins}-${t.losses}${t.ties ? '-' + t.ties : ''}</strong></td>
-        <td>${fmt(t.pf, 1)}</td>
-        <td>${fmt(t.pa, 1)}</td>
-        <td>${fmt(t.avgPts, 1)}</td>
-        <td class="own">${t.allplayW}-${t.allplayL}</td>
-      </tr>`).join('');
+        <td>${fmt(t.pf, 2)}</td>
+        <td>${fmt(t.pa, 2)}</td>
+        <td>${ap}</td>
+        <td>${pwr}</td>
+        <td class="${luckCls}">${luckTxt}</td>
+      </tr>`;
+    }).join('');
   }
 
   /* ================= luck chart ================= */
   function renderLuck() {
     const s = S();
-    const rows = [...s.teams].sort((a, b) => b.luck - a.luck);
+    const { luck, luckW } = warehouseMaps();
+    const rows = [...s.teams].map((t) => {
+      const lk = luck[t.id];
+      const w = luckW[t.id];
+      return {
+        t,
+        net: lk ? lk.net : null,
+        lucky: lk ? lk.lucky : null,
+        unlucky: lk ? lk.unlucky : null,
+        weighted: w ? w.weighted : t.luck,
+      };
+    }).filter((r) => r.net != null).sort((a, b) => b.net - a.net);
+    const sub = document.querySelector('#luck-chart') &&
+      document.querySelector('#luck-chart').closest('.card') &&
+      document.querySelector('#luck-chart').closest('.card').querySelector('.card-sub');
+    if (sub) sub.textContent = 'lucky wins minus unlucky losses · weighted luck in the tooltip';
     mkChart('#luck-chart', {
       type: 'bar',
       data: {
-        labels: rows.map((t) => t.name.length > 18 ? t.name.slice(0, 17) + '…' : t.name),
+        labels: rows.map((r) => r.t.name.length > 18 ? r.t.name.slice(0, 17) + '…' : r.t.name),
         datasets: [{
-          data: rows.map((t) => t.luck),
-          backgroundColor: rows.map((t) => t.luck >= 0 ? '#93d500cc' : '#ff2d1acc'),
+          data: rows.map((r) => r.net),
+          backgroundColor: rows.map((r) => r.net >= 0 ? '#c8ff00cc' : '#3a4a63cc'),
           borderRadius: 5, maxBarThickness: 16,
         }],
       },
@@ -318,7 +456,12 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: (c) => `${c.parsed.x >= 0 ? '+' : ''}${fmt(c.parsed.x, 2)} wins vs expectation` } },
+          tooltip: { callbacks: { label: (c) => {
+            const r = rows[c.dataIndex];
+            const idx = `${r.net >= 0 ? '+' : ''}${r.net} Luck Index (${r.lucky} lucky / ${r.unlucky} unlucky)`;
+            const w = r.weighted == null ? '' : ` · weighted ${r.weighted >= 0 ? '+' : ''}${fmt(r.weighted, 2)}`;
+            return idx + w;
+          } } },
         },
         scales: {
           x: { grid: { color: C.grid }, border: { display: false }, ticks: { callback: (v) => (v > 0 ? '+' : '') + v } },
@@ -334,22 +477,31 @@
       <div class="tl-card">
         <div class="tl-year">${t.year}</div>
         <div class="tl-team">🏆 ${t.team}</div>
-        <div class="tl-own">${t.owner} · ${t.record}</div>
+        <div class="tl-own">${t.record}</div>
       </div>`).join('');
   }
 
   function renderFranchises() {
-    const rows = DATA.franchises;
-    $('#franchise-tbl tbody').innerHTML = rows.map((f) => `
+    const src = (window.AFFL && window.AFFL.visibleFranchises)
+      ? window.AFFL.visibleFranchises(DATA.franchises || [])
+      : (DATA.franchises || []);
+    const rows = src.slice().sort((a, b) => (b.titles - a.titles) || (b.winPct - a.winPct) || (b.pf - a.pf));
+    $('#franchise-tbl tbody').innerHTML = rows.map((f, i) => {
+      const rank = i + 1;
+      const pill = rank === 1 ? "gold" : rank === 2 ? "slv" : rank === 3 ? "brz" : "";
+      const t = franchiseTeam(f.owner);
+      const href = "teams.html?squad=" + encodeURIComponent(f.owner);
+      return `
       <tr>
-        <td><strong>${f.ownerName}</strong>${f.active ? '' : ' <span class="own">(inactive)</span>'}</td>
-        <td class="own">${f.currentName}</td>
+        <td><span class="rank-pill ${pill}">${rank}</span></td>
+        <td><div class="team-cell">${avatarHTML(t, "mini")}<div><a class="hist-name" href="${href}">${t.name}</a></div></div></td>
         <td>${f.seasons}</td>
         <td>${f.wins}-${f.losses}${f.ties ? '-' + f.ties : ''}</td>
         <td class="${f.winPct >= 0.5 ? 'pos' : 'neg'}"><strong>${(f.winPct * 100).toFixed(1)}%</strong></td>
-        <td>${'🏆'.repeat(f.titles) || '–'}</td>
+        <td>${f.titles || 0}</td>
         <td>${fmt(f.pf)}</td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   }
 
   function renderEra() {
@@ -363,7 +515,7 @@
       data: {
         labels: years,
         datasets: top6.map((f, i) => ({
-          label: f.ownerName.split(' ')[0],
+          label: shortTeam(f.owner),
           data: years.map((y) => f.pfBySeason[y] ?? null),
           borderColor: colors[i], backgroundColor: colors[i],
           borderWidth: 2, pointRadius: 2.5, tension: 0.3, spanGaps: true,
@@ -390,7 +542,7 @@
       rec[r.a + '|' + r.b] = [r.aW, r.bW];
       rec[r.b + '|' + r.a] = [r.bW, r.aW];
     });
-    const head = '<tr><th></th>' + owners.map((o) => `<th>${shortOwner(o)}</th>`).join('') + '</tr>';
+    const head = '<tr><th></th>' + owners.map((o) => `<th>${shortTeam(o)}</th>`).join('') + '</tr>';
     const body = owners.map((row) => {
       const cells = owners.map((col) => {
         if (row === col) return '<td class="h2h-x">—</td>';
@@ -399,7 +551,7 @@
         const cls = r[0] > r[1] ? 'h2h-w' : r[0] < r[1] ? 'h2h-l' : 'h2h-e';
         return `<td><span class="h2h-cell ${cls}">${r[0]}–${r[1]}</span></td>`;
       }).join('');
-      return `<tr><td>${shortOwner(row)}</td>${cells}</tr>`;
+      return `<tr><td>${shortTeam(row)}</td>${cells}</tr>`;
     }).join('');
     $('#h2h-tbl').innerHTML = head + body;
   }
@@ -407,7 +559,6 @@
   /* ================= next gen lab (per season) =================
      NG and T25 are reassigned every time the season changes; every renderer
      below reads them, so all lower sections follow the picker. */
-  let NG = null;
   let T25 = {};
   const tName25 = (id) => (T25[id] || { name: '?' }).name;
   const shortName25 = (id) => {
@@ -449,43 +600,50 @@
     return true;
   }
 
-  function renderLineupIQ() {
-    if (!NG.hasRosters || !NG.lineupIQ.length) return chartNotice('#lineup-chart');
-    if (!ensureCanvas('#lineup-chart')) return;
-    const rows = NG.lineupIQ;
-    mkChart('#lineup-chart', {
-      type: 'bar',
-      data: {
-        labels: rows.map((r) => shortName25(r.teamId)),
-        datasets: [
-          {
-            label: 'Points started', data: rows.map((r) => r.actual),
-            backgroundColor: '#2f7bffcc', borderRadius: 4, maxBarThickness: 15, stack: 's',
-          },
-          {
-            label: 'Left on bench', data: rows.map((r) => r.wasted),
-            backgroundColor: '#ff2d1abb', borderRadius: 4, maxBarThickness: 15, stack: 's',
-          },
-        ],
-      },
-      options: {
-        indexAxis: 'y',
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: { callbacks: {
-            afterBody: (items) => {
-              const r = rows[items[0].dataIndex];
-              return `lineup efficiency ${(r.eff * 100).toFixed(1)}% · ${r.perfect} perfect week${r.perfect === 1 ? '' : 's'}`;
-            },
-          } },
-        },
-        scales: {
-          x: { stacked: true, grid: { color: C.grid }, border: { display: false } },
-          y: { stacked: true, grid: { display: false }, border: { display: false } },
-        },
-      },
-    });
+  function renderMaxPotential() {
+    const award = $("#maxpot-award");
+    const bars = $("#maxpot-bars");
+    if (!award || !bars) return;
+    const raw = (NG && NG.lineupIQ) || [];
+    if (!NG.hasRosters || !raw.length) {
+      award.innerHTML = noLineups();
+      bars.innerHTML = "";
+      return;
+    }
+    const rows = raw.map((r) => {
+      const t = T25[r.teamId] || { name: "?", id: r.teamId };
+      const opt = Number(r.optimal) || 0;
+      const act = Number(r.actual) || 0;
+      const left = Number(r.wasted != null ? r.wasted : Math.max(0, opt - act));
+      const pct = opt ? act / opt : 0;
+      return { t, act, opt, left, pct, perfect: r.perfect || 0 };
+    }).sort((a, b) => b.opt - a.opt || b.act - a.act);
+    const top = rows[0];
+    award.innerHTML = `
+      <div class="maxpot-award">
+        ${avatarHTML(top.t)}
+        <div>
+          <div class="maxpot-kicker">Gifted Kid Maximum Potential Award</div>
+          <div class="maxpot-name">${top.t.name}</div>
+        </div>
+        <div class="maxpot-score">
+          <div class="maxpot-opt">${fmt(top.opt, 0)}</div>
+          <div class="maxpot-pct">${Math.round(top.pct * 100)}% of ideal points</div>
+        </div>
+      </div>`;
+    const max = Math.max(...rows.map((r) => r.opt), 1);
+    bars.innerHTML = rows.map((r) => {
+      const actW = Math.max(0, (r.act / max) * 100);
+      const leftW = Math.max(0, (r.left / max) * 100);
+      return `<div class="maxpot-row">
+        ${avatarHTML(r.t, "mini")}
+        <div class="maxpot-team">${r.t.name}</div>
+        <div class="maxpot-track">
+          <div class="maxpot-act" style="width:${actW.toFixed(2)}%"><span>${fmt(r.act, 0)}</span></div>
+          <div class="maxpot-left" style="width:${leftW.toFixed(2)}%"><span>${fmt(r.left, 0)}</span></div>
+        </div>
+      </div>`;
+    }).join("");
   }
 
   function renderDraft() {
@@ -563,11 +721,7 @@
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: {
-            label: (c) => `${fmt(c.parsed.x, 1)} EPA from starters`,
-            afterBody: (items) => {
-              const r = rows[items[0].dataIndex];
-              return `${fmt(r.air)} air yards · avg WOPR ${r.wopr}`;
-            },
+            label: (c) => `${fmt(c.parsed.x, 1)} EPA`,
           } },
         },
         scales: {
@@ -578,33 +732,275 @@
     });
   }
 
+  /* Home eight: opportunity / trophies / luckCard. Missing keys => empty, no crash. */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
+    }[c]));
+  }
+  function sameTid(a, b) {
+    if (a == null || b == null || a === "" || b === "") return false;
+    if (a === b) return true;
+    const na = Number(a), nb = Number(b);
+    return !Number.isNaN(na) && !Number.isNaN(nb) && na === nb;
+  }
+  function ownerForTid(tid) {
+    const t = ((S() && S().teams) || []).find((x) => sameTid(x.id, tid));
+    return t ? t.owner : null;
+  }
+  function currentFranchise(tid) {
+    const owner = ownerForTid(tid);
+    const name = franchiseName(owner);
+    const logo = (owner && FRANCHISE_LOGO[canon(owner)]) || "";
+    return { owner, name: name || "—", logo };
+  }
+  function teamCellHTML(tid) {
+    const f = currentFranchise(tid);
+    const href = f.owner ? "teams.html?squad=" + encodeURIComponent(f.owner) : "";
+    const name = href
+      ? `<a class="hist-name" href="${href}">${esc(f.name)}</a>`
+      : esc(f.name);
+    return `<div class="team-cell">${avatarHTML({ name: f.name, logo: f.logo }, "mini")}<div>${name}</div></div>`;
+  }
+  function opportunityRows(bundle) {
+    if (!bundle) return [];
+    const opp = bundle.opportunity;
+    if (Array.isArray(opp)) return opp;
+    if (opp && Array.isArray(opp.receivingUsage)) return opp.receivingUsage;
+    if (Array.isArray(bundle.receivingUsage)) return bundle.receivingUsage;
+    return [];
+  }
+  function shareTxt(v) {
+    if (v == null || v === "" || Number.isNaN(Number(v))) return "—";
+    const n = Number(v);
+    return (n <= 1.5 ? n * 100 : n).toFixed(1) + "%";
+  }
+  function numTxt(n, d) {
+    if (n == null || n === "" || Number.isNaN(Number(n))) return "—";
+    return fmt(Number(n), d);
+  }
+  function signedTxt(n, d) {
+    if (n == null || n === "" || Number.isNaN(Number(n))) return "—";
+    const v = Number(n);
+    return (v > 0 ? "+" : "") + fmt(v, d);
+  }
+
+  let oppSort = { k: "wopr", dir: -1 };
+  let luckSort = { k: "actualW", dir: -1 };
+  let eightWired = false;
+
   function renderSpotlight() {
-    if (!NG.spotlight.length) {
-      $('#spotlight-tbl tbody').innerHTML =
-        `<tr><td colspan="8">${noLineups()}</td></tr>`;
+    const tb = document.querySelector("#spotlight-tbl tbody");
+    if (!tb) return;
+    const raw = opportunityRows(NG);
+    const rows = raw.map((p) => {
+      const fp = p.fp != null ? p.fp : p.pts;
+      const xfp = p.xfp;
+      const resid = (fp != null && xfp != null) ? Number(fp) - Number(xfp) : null;
+      const tgt = p.tgtShare != null ? p.tgtShare : p.tsh;
+      return Object.assign({}, p, { fp, resid, tgtShare: tgt });
+    });
+    const sub = document.getElementById("opp-sub");
+    if (!rows.length) {
+      tb.innerHTML = `<tr><td colspan="8"><div class="notice">Opportunity board is not in the ${curYear} file yet.</div></td></tr>`;
+      if (sub) sub.textContent = curYear + " · unavailable";
       return;
     }
-    $('#spotlight-tbl tbody').innerHTML = NG.spotlight.map((p, i) => `
-      <tr>
-        <td><strong>${p.name}</strong>${i === 0 ? ' 👑' : ''}</td>
-        <td><span class="badge pos-${p.pos}">${p.pos}</span></td>
-        <td class="own">${tName25(p.teamId)}</td>
-        <td><strong>${fmt(p.pts, 1)}</strong></td>
-        <td>${fmt(p.ppg, 1)}</td>
-        <td class="${p.epa >= 0 ? 'pos' : 'neg'}">${p.epa >= 0 ? '+' : ''}${fmt(p.epa, 1)}</td>
-        <td>${p.wopr != null ? p.wopr.toFixed(2) : '—'}</td>
-        <td>${p.tsh != null ? (p.tsh * 100).toFixed(1) + '%' : '—'}</td>
-      </tr>`).join('');
+    if (sub) sub.textContent = curYear + " · tgt share, WOPR, aDOT, xFP, FP−xFP";
+    const k = oppSort.k, dir = oppSort.dir;
+    rows.sort((a, b) => {
+      if (k === "name" || k === "pos") return String(a[k] || "").localeCompare(String(b[k] || "")) * dir;
+      const an = a[k] == null ? -Infinity * dir : Number(a[k]);
+      const bn = b[k] == null ? -Infinity * dir : Number(b[k]);
+      return (an - bn) * dir;
+    });
+    tb.innerHTML = rows.map((p) => {
+      const href = (p.pid != null && p.pid !== "")
+        ? `players.html?year=${curYear}&pid=${p.pid}`
+        : "";
+      const name = href
+        ? `<a class="hist-name" href="${href}">${esc(p.name || "—")}</a>`
+        : `<strong>${esc(p.name || "—")}</strong>`;
+      const residCls = p.resid == null ? "" : (p.resid > 0 ? "pos" : p.resid < 0 ? "neg" : "");
+      return `<tr>
+        <td>${name}</td>
+        <td><span class="badge pos-${esc(p.pos || "")}">${esc(p.pos || "—")}</span></td>
+        <td>${shareTxt(p.tgtShare)}</td>
+        <td>${p.wopr == null ? "—" : Number(p.wopr).toFixed(2)}</td>
+        <td>${numTxt(p.adot, 1)}</td>
+        <td>${numTxt(p.xfp, 1)}</td>
+        <td><strong>${numTxt(p.fp, 1)}</strong></td>
+        <td class="${residCls}">${signedTxt(p.resid, 1)}</td>
+      </tr>`;
+    }).join("");
+    const tbl = document.getElementById("spotlight-tbl");
+    if (tbl) {
+      tbl.querySelectorAll("thead th.s").forEach((th) => {
+        th.classList.toggle("on", th.dataset.k === oppSort.k);
+        th.classList.toggle("asc", th.dataset.k === oppSort.k && oppSort.dir > 0);
+      });
+    }
+  }
+
+  function trophySlot(tag, tid, rec) {
+    if (tid == null || tid === "") {
+      return `<div class="trophy-slot empty">
+        <div>
+          <div class="tag">${esc(tag)}</div>
+          <div class="nm">—</div>
+          <div class="rec">unavailable</div>
+        </div>
+      </div>`;
+    }
+    const f = currentFranchise(tid);
+    return `<div class="trophy-slot">
+      ${avatarHTML({ name: f.name, logo: f.logo })}
+      <div>
+        <div class="tag">${esc(tag)}</div>
+        <div class="nm">${esc(f.name)}</div>
+        <div class="rec">${esc(rec)}</div>
+      </div>
+    </div>`;
+  }
+
+  function renderTrophies() {
+    const grid = document.getElementById("trophy-grid");
+    const sub = document.getElementById("trophy-sub");
+    if (!grid) return;
+    const t = (NG && NG.trophies) || null;
+    const hasH2H = t && t.h2hChampionTid != null && t.h2hChampionTid !== "";
+    const hasMed = t && t.medianChampionTid != null && t.medianChampionTid !== "";
+    const hasAP = t && t.allPlayChampionTid != null && t.allPlayChampionTid !== "";
+    const hasRoto = t && t.rotoChampionTid != null && t.rotoChampionTid !== "";
+    const awardsLink = ' · <a class="hist-name" href="awards.html">All-League →</a>';
+    if (!t || (!hasH2H && !hasMed && !hasAP && !hasRoto)) {
+      grid.innerHTML = `<div class="notice">Trophy board is not in the ${curYear} file yet.</div>`;
+      if (sub) sub.innerHTML = curYear + ' · unavailable' + awardsLink;
+      return;
+    }
+    if (sub) sub.innerHTML = curYear + ' · Cup · Board · Roto · current names' + awardsLink;
+    const parts = [];
+    /* 2014 trophies still render H2H if present, even when Board/Roto are missing. */
+    parts.push(trophySlot("Cup", hasH2H ? t.h2hChampionTid : null, "H2H champion"));
+    if (hasMed && hasAP && !sameTid(t.medianChampionTid, t.allPlayChampionTid)) {
+      parts.push(trophySlot("Board", t.medianChampionTid, "median champion"));
+      parts.push(trophySlot("Board", t.allPlayChampionTid, "all-play champion"));
+    } else if (hasMed || hasAP) {
+      const tid = hasMed ? t.medianChampionTid : t.allPlayChampionTid;
+      const rec = (hasMed && hasAP) ? "median / all-play" : (hasMed ? "median champion" : "all-play champion");
+      parts.push(trophySlot("Board", tid, rec));
+    } else {
+      parts.push(trophySlot("Board", null, "unavailable"));
+    }
+    parts.push(trophySlot("Roto", hasRoto ? t.rotoChampionTid : null, "roto champion"));
+    grid.innerHTML = parts.join("");
+  }
+
+  function luckRows() {
+    const list = (NG && Array.isArray(NG.luckCard)) ? NG.luckCard : [];
+    return list.map((r) => {
+      const f = currentFranchise(r.tid);
+      const tdRes = (r.tdFor != null && r.xtdFor != null)
+        ? Number(r.tdFor) - Number(r.xtdFor)
+        : null;
+      return Object.assign({}, r, { name: f.name, tdRes });
+    });
+  }
+
+  function renderLuckCard() {
+    const tb = document.querySelector("#luck-card-tbl tbody");
+    if (!tb) return;
+    const rows = luckRows();
+    const sub = document.getElementById("luck-card-sub");
+    if (!rows.length) {
+      tb.innerHTML = `<tr><td colspan="7"><div class="notice">Schedule vs roster luck is not in the ${curYear} file yet.</div></td></tr>`;
+      if (sub) sub.textContent = curYear + " · unavailable";
+      return;
+    }
+    if (sub) sub.textContent = curYear + " · actual · all-play · median · expected wins · schedule luck · TD−xTD";
+    const k = luckSort.k, dir = luckSort.dir;
+    rows.sort((a, b) => {
+      if (k === "name") return String(a.name || "").localeCompare(String(b.name || "")) * dir;
+      const an = a[k] == null ? -Infinity * dir : Number(a[k]);
+      const bn = b[k] == null ? -Infinity * dir : Number(b[k]);
+      return (an - bn) * dir;
+    });
+    const rec = (w, l) => (w == null || l == null) ? "—" : `${w}-${l}`;
+    tb.innerHTML = rows.map((r) => {
+      const luckCls = r.scheduleLuckWins == null ? "" : (r.scheduleLuckWins > 0 ? "pos" : r.scheduleLuckWins < 0 ? "neg" : "");
+      const tdCls = r.tdRes == null ? "" : (r.tdRes > 0 ? "pos" : r.tdRes < 0 ? "neg" : "");
+      const apPct = r.allPlayPct == null ? ""
+        : `<div class="own">${shareTxt(r.allPlayPct)}</div>`;
+      return `<tr>
+        <td>${teamCellHTML(r.tid)}</td>
+        <td><strong>${rec(r.actualW, r.actualL)}</strong></td>
+        <td>${rec(r.allPlayW, r.allPlayL)}${apPct}</td>
+        <td>${rec(r.medianW, r.medianL)}</td>
+        <td>${numTxt(r.expectedWins, 2)}</td>
+        <td class="${luckCls}">${signedTxt(r.scheduleLuckWins, 2)}</td>
+        <td class="${tdCls}">${signedTxt(r.tdRes, 2)}</td>
+      </tr>`;
+    }).join("");
+    const tbl = document.getElementById("luck-card-tbl");
+    if (tbl) {
+      tbl.querySelectorAll("thead th.s").forEach((th) => {
+        th.classList.toggle("on", th.dataset.k === luckSort.k);
+        th.classList.toggle("asc", th.dataset.k === luckSort.k && luckSort.dir > 0);
+      });
+    }
+  }
+
+  function wireEightSorts() {
+    if (eightWired) return;
+    eightWired = true;
+    const bind = (tableId, get, set, render) => {
+      const el = document.getElementById(tableId);
+      if (!el) return;
+      el.querySelectorAll("thead th.s").forEach((th) => {
+        th.addEventListener("click", () => {
+          const st = get();
+          if (st.k === th.dataset.k) st.dir *= -1;
+          else {
+            st.k = th.dataset.k;
+            st.dir = (th.dataset.k === "name" || th.dataset.k === "pos") ? 1 : -1;
+          }
+          set(st);
+          render();
+        });
+      });
+    };
+    bind("spotlight-tbl", () => oppSort, (s) => { oppSort = s; }, renderSpotlight);
+    bind("luck-card-tbl", () => luckSort, (s) => { luckSort = s; }, renderLuckCard);
   }
 
   /* ================= player profiler ================= */
   const PP = { q: '', pos: 'ALL', limit: 20 };
   let profilerWired = false;
 
+
+  function playerFace(p, cls) {
+    cls = cls || "pp-hs";
+    const ini = (p.name || "?").split(" ").filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
+    const pos = String(p.pos || "").toUpperCase();
+    if (pos === "DST" || pos === "D/ST" || pos === "DEF") {
+      const map = { LA: "lar", LAR: "lar", WAS: "wsh", WSH: "wsh", JAC: "jax", JAX: "jax" };
+      const slug = (map[p.nfl] || String(p.nfl || "")).toLowerCase();
+      if (slug) {
+        return `<img class="${cls}" src="logos/nfl/${slug}.png" alt="" loading="lazy"
+          onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
+      }
+    }
+    const espn = Number(p.pid) > 0
+      ? ("https://a.espncdn.com/i/headshots/nfl/players/full/" + Number(p.pid) + ".png") : "";
+    const src = p.hs || espn;
+    if (!src) return `<div class="${cls} fb">${ini}</div>`;
+    const next = (p.hs && espn && p.hs !== espn) ? espn : "";
+    return `<img class="${cls}" src="${src}" alt="" loading="lazy" data-fb="${next}"
+      onerror="if(this.dataset.fb){this.src=this.dataset.fb;this.dataset.fb='';}else if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
+  }
+
   function ppCardHTML(p, i) {
-    const hs = p.hs
-      ? `<img class="pp-hs" src="${p.hs}" alt="" loading="lazy" onerror="if(this.parentNode)this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
-      : `<div class="pp-hs fb">${p.name.split(' ').map(x => x[0]).join('').slice(0, 2)}</div>`;
+    const hs = playerFace(p, "pp-hs");
     return `<div class="pp-card" data-pid="${p.pid}">
       ${hs}
       <div>
@@ -654,9 +1050,7 @@
     if (!p) return;
     const ov = document.createElement('div');
     ov.className = 'pp-overlay';
-    const hs = p.hs
-      ? `<img class="pp-hs" src="${p.hs}" alt="" onerror="if(this.parentNode)this.outerHTML='<div class=&quot;pp-hs fb&quot;>${p.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>'">`
-      : `<div class="pp-hs fb">${p.name.split(' ').map(x => x[0]).join('').slice(0, 2)}</div>`;
+    const hs = playerFace(p, "pp-hs");
     const draft = p.draft
       ? (NG.draft.auction
           ? `Auctioned to <strong>${tName25(p.draft.teamId)}</strong> for <strong>$${p.draft.bid}</strong>`
@@ -850,6 +1244,11 @@
 
   async function renderSeason() {
     renderPicker();
+    setPanes();
+    if (curYear == null) {
+      renderCumHome();
+      return;
+    }
     await loadYearBundle(curYear);
     renderKPIs();
     renderArea();
@@ -859,11 +1258,14 @@
     renderStandings();
     renderLuck();
     sectionLabels();
-    renderLineupIQ();
+    if (document.getElementById('max-potential')) renderMaxPotential();
     renderDraft();
     renderDNA();
     renderEPA();
-    renderSpotlight();
+    try { renderSpotlight(); } catch (e) { console.warn(e); }
+    try { renderTrophies(); } catch (e) { console.warn(e); }
+    try { renderLuckCard(); } catch (e) { console.warn(e); }
+    wireEightSorts();
     renderCap();
     initProfiler();
     renderReport();
@@ -876,4 +1278,187 @@
   renderFranchises();
   renderEra();
   renderH2H();
+  document.addEventListener("affl:show-former", renderFranchises);
+  /* ================= CHI-89 Elo + Milestones (all-time / cum pane) ================= */
+  let ELO = null;
+  let MS = null;
+  let eloFilter = 'active';
+  let msBoardId = null;
+
+  async function loadEloMs() {
+    if (ELO && MS) return;
+    const [e, m] = await Promise.all([
+      fetch('elo.json?v=' + Date.now(), { cache: 'no-store' }).then((r) => r.json()),
+      fetch('milestones.json?v=' + Date.now(), { cache: 'no-store' }).then((r) => r.json()),
+    ]);
+    ELO = e;
+    MS = m;
+  }
+
+  function eloRows() {
+    const rows = (ELO && ELO.table) || [];
+    if (eloFilter === 'active') return rows.filter((r) => r.active);
+    return rows.slice();
+  }
+
+  function renderEloTable() {
+    const tbody = $('#elo-tbl tbody');
+    if (!tbody) return;
+    const rows = eloRows();
+    tbody.innerHTML = rows.map((r, i) => {
+      const team = franchiseTeam(r.owner);
+      const peakAt = r.peakAt
+        ? `${r.peakAt.season} wk ${r.peakAt.week}`
+        : '—';
+      return `<tr>
+        <td><span class="rank-pill${i === 0 ? ' gold' : ''}">${i + 1}</span></td>
+        <td><div class="team-cell">${avatarHTML(team, 'mini')}<div>
+          <div>${team.name}</div>
+          <div class="card-sub" style="margin:0">${r.name}</div>
+        </div></div></td>
+        <td class="s"><strong>${fmt(r.rating, 0)}</strong></td>
+        <td class="s" title="${peakAt}">${fmt(r.peak, 0)}</td>
+        <td class="s">${fmt(r.low, 0)}</td>
+        <td class="s">${r.games}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="6">No rated managers</td></tr>`;
+  }
+
+  function renderEloChart() {
+    const canvas = $('#elo-chart');
+    if (!canvas || !ELO) return;
+    const rows = eloRows().slice(0, 8);
+    const seasons = (ELO.seasons || []).slice();
+    const colors = [C.blue, C.gold, C.green, C.orange, C.blue2, C.red, C.ice, C.steel];
+    const datasets = rows.map((r, i) => {
+      const ser = ((ELO.series || {})[r.owner] || []);
+      const by = {};
+      ser.forEach((p) => { by[p.season] = p.elo; });
+      return {
+        label: shortTeam(r.owner),
+        data: seasons.map((s) => by[s] != null ? by[s] : null),
+        borderColor: colors[i % colors.length],
+        backgroundColor: 'transparent',
+        tension: 0.25,
+        spanGaps: true,
+        pointRadius: 2,
+        borderWidth: 2,
+      };
+    });
+    mkChart('#elo-chart', {
+      type: 'line',
+      data: { labels: seasons.map(String), datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, color: C.mut } },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { grid: { color: C.grid }, ticks: { color: C.mut } },
+          y: {
+            grid: { color: C.grid },
+            ticks: { color: C.mut },
+            suggestedMin: 1300,
+            suggestedMax: 1800,
+          },
+        },
+      },
+    });
+  }
+
+  function renderMsBoard() {
+    const boardEl = $('#ms-board');
+    const tabs = $('#ms-board-tabs');
+    if (!boardEl || !tabs || !MS) return;
+    const boards = MS.boards || [];
+    if (!msBoardId && boards[0]) msBoardId = boards[0].id;
+    tabs.innerHTML = boards.map((b) =>
+      `<button type="button" class="chip${b.id === msBoardId ? ' on' : ''}" data-ms-board="${b.id}">${b.title.replace('Fastest to ', '')}</button>`
+    ).join('');
+    const board = boards.find((b) => b.id === msBoardId) || boards[0];
+    if (!board) {
+      boardEl.innerHTML = '<p class="card-sub">No milestone boards</p>';
+      return;
+    }
+    const rows = board.rows || [];
+    boardEl.innerHTML = `
+      <h3 class="ms-board-title">${board.title}</h3>
+      <ol class="ms-list">
+        ${rows.map((r) => {
+          const team = franchiseTeam(r.owner);
+          const when = r.week != null
+            ? `${r.season} · wk ${r.week}`
+            : `${r.season}`;
+          return `<li class="ms-row">
+            <span class="ms-rank">${r.rank}</span>
+            <div class="ms-who">${avatarHTML(team, 'mini')}
+              <div>
+                <div class="ms-name">${team.name}</div>
+                <div class="ms-meta">${r.name} · ${when}${r.detail ? ' · ' + r.detail : ''}${r.record ? ' · ' + r.record : ''}</div>
+              </div>
+            </div>
+            <div class="ms-games"><strong>${r.games}</strong><span>games</span></div>
+          </li>`;
+        }).join('') || '<li class="ms-row"><div class="ms-meta">Nobody has hit this bar yet.</div></li>'}
+      </ol>`;
+    tabs.querySelectorAll('[data-ms-board]').forEach((btn) => {
+      btn.onclick = () => {
+        msBoardId = btn.getAttribute('data-ms-board');
+        renderMsBoard();
+      };
+    });
+  }
+
+  function renderMsChase() {
+    const ul = $('#ms-chase');
+    if (!ul || !MS) return;
+    const rows = (MS.chase || []).filter((c) => c.active !== false).slice(0, 8);
+    ul.innerHTML = rows.map((c) => {
+      const team = franchiseTeam(c.owner);
+      return `<li>
+        <div class="story-ico">${avatarHTML(team, 'mini')}</div>
+        <div class="story-txt">
+          <div class="t">${team.name}</div>
+          <div class="d">${c.wins} wins in ${c.games} games · bar ${c.bar}</div>
+        </div>
+        <div class="story-val">${c.need} win${c.need === 1 ? '' : 's'} away</div>
+      </li>`;
+    }).join('') || '<li><div class="story-txt"><div class="d">No active chase</div></div></li>';
+  }
+
+  async function renderEloAndMilestones() {
+    if (!$('#elo-card') && !$('#milestones-card')) return;
+    await loadEloMs();
+    const sub = $('#elo-sub');
+    if (sub && ELO) {
+      const s0 = (ELO.seasons || [])[0];
+      const s1 = (ELO.seasons || []).slice(-1)[0];
+      sub.textContent = `Elo · ${ELO.ratedGames} rated games · seasons ${s0}–${s1} · 1500 = average`;
+    }
+    const note = $('#elo-note');
+    if (note && ELO) note.textContent = ELO.note || '';
+    const msNote = $('#ms-note');
+    if (msNote && MS) msNote.textContent = MS.note || '';
+    const msSub = $('#ms-sub');
+    if (msSub && MS) {
+      const s0 = (MS.seasons || [])[0];
+      const s1 = (MS.seasons || []).slice(-1)[0];
+      msSub.textContent = `Fewest career games to each bar · ${s0}–${s1} · verified matchups`;
+    }
+    document.querySelectorAll('#elo-filters [data-elo-filter]').forEach((btn) => {
+      btn.onclick = () => {
+        eloFilter = btn.getAttribute('data-elo-filter') || 'active';
+        document.querySelectorAll('#elo-filters .chip').forEach((b) => b.classList.toggle('on', b === btn));
+        renderEloTable();
+        renderEloChart();
+      };
+    });
+    renderEloTable();
+    renderEloChart();
+    renderMsBoard();
+    renderMsChase();
+  }
+  try { await renderEloAndMilestones(); } catch (e) { console.warn("elo/milestones", e); }
 })();

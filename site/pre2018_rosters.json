@@ -1,0 +1,5320 @@
+{
+  "2014": {
+    "-16002": {
+      "name": "Bills D/ST",
+      "owner": "m08",
+      "slot": 16,
+      "tid": 3
+    },
+    "-16004": {
+      "draftTid": 3,
+      "name": "Bengals D/ST"
+    },
+    "-16007": {
+      "draftTid": 2,
+      "name": "Broncos D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16009": {
+      "name": "Packers D/ST",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "-16011": {
+      "name": "Colts D/ST",
+      "owner": "m18",
+      "slot": 16,
+      "tid": 7
+    },
+    "-16014": {
+      "draftTid": 7,
+      "name": "Rams D/ST"
+    },
+    "-16015": {
+      "name": "Dolphins D/ST",
+      "owner": "m16",
+      "slot": 16,
+      "tid": 4
+    },
+    "-16016": {
+      "name": "Vikings D/ST",
+      "owner": "m02",
+      "slot": 16,
+      "tid": 6
+    },
+    "-16017": {
+      "draftTid": 8,
+      "name": "Patriots D/ST",
+      "owner": "m15",
+      "slot": 16,
+      "tid": 8
+    },
+    "-16018": {
+      "draftTid": 6,
+      "name": "Saints D/ST"
+    },
+    "-16021": {
+      "name": "Eagles D/ST",
+      "owner": "m09",
+      "slot": 16,
+      "tid": 2
+    },
+    "-16022": {
+      "draftTid": 10,
+      "name": "Cardinals D/ST",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "-16024": {
+      "name": "Chargers D/ST",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "-16025": {
+      "draftTid": 1,
+      "name": "49ers D/ST",
+      "owner": "m11",
+      "slot": 16,
+      "tid": 1
+    },
+    "-16026": {
+      "draftTid": 9,
+      "name": "Seahawks D/ST",
+      "owner": "m17",
+      "slot": 16,
+      "tid": 9
+    },
+    "-16029": {
+      "draftTid": 4,
+      "name": "Panthers D/ST"
+    },
+    "-16033": {
+      "name": "Ravens D/ST",
+      "owner": "m13",
+      "slot": 16,
+      "tid": 10
+    },
+    "-16034": {
+      "draftTid": 5,
+      "name": "Texans D/ST",
+      "owner": "m12",
+      "slot": 16,
+      "tid": 5
+    },
+    "10195": {
+      "draftTid": 7,
+      "name": "Fred Jackson",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 10
+    },
+    "10447": {
+      "draftTid": 9,
+      "name": "Calvin Johnson",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "10452": {
+      "draftTid": 2,
+      "name": "Adrian Peterson",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "10456": {
+      "draftTid": 4,
+      "name": "Marshawn Lynch",
+      "owner": "m16",
+      "slot": 2,
+      "tid": 4
+    },
+    "10467": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "10475": {
+      "draftTid": 2,
+      "name": "Greg Olsen",
+      "owner": "m09",
+      "slot": 23,
+      "tid": 2
+    },
+    "10522": {
+      "name": "James Jones",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "10572": {
+      "name": "Scott Chandler",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "10636": {
+      "draftTid": 1,
+      "name": "Mason Crosby",
+      "owner": "m09",
+      "slot": 17,
+      "tid": 2
+    },
+    "10693": {
+      "draftTid": 1,
+      "name": "Ahmad Bradshaw",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "10713": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "1097": {
+      "draftTid": 5,
+      "name": "Adam Vinatieri",
+      "owner": "m12",
+      "slot": 17,
+      "tid": 5
+    },
+    "11122": {
+      "draftTid": 4,
+      "name": "Matt Prater"
+    },
+    "11237": {
+      "draftTid": 10,
+      "name": "Matt Ryan",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "11238": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "11247": {
+      "name": "Jonathan Stewart",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "11258": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "11270": {
+      "draftTid": 4,
+      "name": "Jordy Nelson",
+      "owner": "m16",
+      "slot": 4,
+      "tid": 4
+    },
+    "11276": {
+      "name": "Eddie Royal",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "11278": {
+      "draftTid": 7,
+      "name": "Matt Forte",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "11283": {
+      "draftTid": 2,
+      "name": "DeSean Jackson",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "11289": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "11295": {
+      "draftTid": 10,
+      "name": "Martellus Bennett",
+      "owner": "m15",
+      "slot": 6,
+      "tid": 8
+    },
+    "11307": {
+      "draftTid": 3,
+      "name": "Jamaal Charles",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "11318": {
+      "name": "Harry Douglas",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "11439": {
+      "draftTid": 1,
+      "name": "Pierre Garcon",
+      "owner": "m11",
+      "slot": 23,
+      "tid": 1
+    },
+    "11467": {
+      "name": "Justin Forsett",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "11674": {
+      "draftTid": 5,
+      "name": "Danny Amendola"
+    },
+    "11788": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "11923": {
+      "draftTid": 2,
+      "name": "Steven Hauschka",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "12483": {
+      "draftTid": 3,
+      "name": "Matthew Stafford",
+      "owner": "m08",
+      "slot": 0,
+      "tid": 3
+    },
+    "12489": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "12497": {
+      "draftTid": 4,
+      "name": "Arian Foster",
+      "owner": "m16",
+      "slot": 2,
+      "tid": 4
+    },
+    "12500": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "12503": {
+      "draftTid": 6,
+      "name": "Rashad Jennings",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "12514": {
+      "draftTid": 8,
+      "name": "LeSean McCoy",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "12516": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "12563": {
+      "draftTid": 5,
+      "name": "Michael Crabtree",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "12569": {
+      "draftTid": 8,
+      "name": "Percy Harvin",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "12576": {
+      "name": "Brandon LaFell",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "12579": {
+      "draftTid": 8,
+      "name": "Jeremy Maclin",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "12586": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "12601": {
+      "draftTid": 10,
+      "name": "Mike Wallace",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 10
+    },
+    "12649": {
+      "draftTid": 9,
+      "name": "Julian Edelman",
+      "owner": "m17",
+      "slot": 23,
+      "tid": 9
+    },
+    "13203": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "13204": {
+      "draftTid": 3,
+      "name": "Ryan Mathews",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "13210": {
+      "draftTid": 8,
+      "name": "Ben Tate",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "13211": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "13213": {
+      "draftTid": 4,
+      "name": "LeGarrette Blount",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "13215": {
+      "draftTid": 6,
+      "name": "Dez Bryant",
+      "owner": "m02",
+      "slot": 23,
+      "tid": 6
+    },
+    "13216": {
+      "draftTid": 5,
+      "name": "Demaryius Thomas",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "13217": {
+      "draftTid": 4,
+      "name": "Golden Tate",
+      "owner": "m16",
+      "slot": 4,
+      "tid": 4
+    },
+    "13225": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "13229": {
+      "draftTid": 5,
+      "name": "Rob Gronkowski",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "13231": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "13232": {
+      "draftTid": 1,
+      "name": "Jimmy Graham",
+      "owner": "m18",
+      "slot": 6,
+      "tid": 7
+    },
+    "13271": {
+      "draftTid": 1,
+      "name": "Eric Decker",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "13295": {
+      "draftTid": 7,
+      "name": "Emmanuel Sanders",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "13536": {
+      "draftTid": 8,
+      "name": "Joique Bell",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "13553": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "13587": {
+      "draftTid": 2,
+      "name": "Chris Ivory",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "13934": {
+      "draftTid": 7,
+      "name": "Antonio Brown",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "13958": {
+      "name": "Andrew Hawkins",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "13981": {
+      "draftTid": 1,
+      "name": "Mark Ingram",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "13982": {
+      "draftTid": 8,
+      "name": "Julio Jones",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "13983": {
+      "draftTid": 7,
+      "name": "A.J. Green",
+      "owner": "m18",
+      "slot": 23,
+      "tid": 7
+    },
+    "13994": {
+      "draftTid": 4,
+      "name": "Cam Newton",
+      "owner": "m13",
+      "slot": 0,
+      "tid": 10
+    },
+    "14001": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "14005": {
+      "draftTid": 10,
+      "name": "DeMarco Murray",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "14012": {
+      "draftTid": 3,
+      "name": "Andy Dalton"
+    },
+    "14017": {
+      "draftTid": 9,
+      "name": "Shane Vereen",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "14028": {
+      "draftTid": 1,
+      "name": "Stevan Ridley"
+    },
+    "14032": {
+      "draftTid": 7,
+      "name": "Torrey Smith",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "14053": {
+      "draftTid": 6,
+      "name": "Randall Cobb",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "14054": {
+      "draftTid": 9,
+      "name": "Kyle Rudolph",
+      "owner": "m08",
+      "slot": 6,
+      "tid": 3
+    },
+    "14145": {
+      "name": "Charles Clay",
+      "owner": "m17",
+      "slot": 6,
+      "tid": 9
+    },
+    "14184": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "14189": {
+      "draftTid": 3,
+      "name": "Jordan Cameron",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "14204": {
+      "draftTid": 1,
+      "name": "Julius Thomas",
+      "owner": "m11",
+      "slot": 6,
+      "tid": 1
+    },
+    "14221": {
+      "draftTid": 5,
+      "name": "Doug Baldwin",
+      "owner": "m15",
+      "slot": 23,
+      "tid": 8
+    },
+    "1428": {
+      "draftTid": 1,
+      "name": "Peyton Manning",
+      "owner": "m09",
+      "slot": 0,
+      "tid": 2
+    },
+    "14322": {
+      "draftTid": 6,
+      "name": "Dan Bailey",
+      "owner": "m02",
+      "slot": 17,
+      "tid": 6
+    },
+    "14360": {
+      "name": "Matt Asiata",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "1440": {
+      "draftTid": 10,
+      "name": "Phil Dawson",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "14874": {
+      "draftTid": 9,
+      "name": "Andrew Luck",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "14875": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "14876": {
+      "name": "Ryan Tannehill",
+      "owner": "m17",
+      "slot": 0,
+      "tid": 9
+    },
+    "14877": {
+      "draftTid": 2,
+      "name": "Nick Foles"
+    },
+    "14881": {
+      "draftTid": 7,
+      "name": "Russell Wilson",
+      "owner": "m18",
+      "slot": 0,
+      "tid": 7
+    },
+    "14884": {
+      "draftTid": 1,
+      "name": "Trent Richardson",
+      "owner": "m09",
+      "slot": 2,
+      "tid": 2
+    },
+    "14885": {
+      "draftTid": 9,
+      "name": "Doug Martin",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "14886": {
+      "draftTid": 5,
+      "name": "Lamar Miller",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "14891": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "14900": {
+      "name": "Coby Fleener",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14908": {
+      "draftTid": 3,
+      "name": "Michael Floyd",
+      "owner": "m08",
+      "slot": 23,
+      "tid": 3
+    },
+    "14909": {
+      "draftTid": 6,
+      "name": "Kendall Wright",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "14911": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "14912": {
+      "draftTid": 3,
+      "name": "Alshon Jeffery",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "14922": {
+      "name": "Mohamed Sanu",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "14924": {
+      "draftTid": 8,
+      "name": "T.Y. Hilton",
+      "owner": "m12",
+      "slot": 23,
+      "tid": 5
+    },
+    "15009": {
+      "draftTid": 2,
+      "name": "Alfred Morris",
+      "owner": "m09",
+      "slot": 2,
+      "tid": 2
+    },
+    "15058": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "15358": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "15391": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "15501": {
+      "name": "Bobby Rainey",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "15683": {
+      "draftTid": 9,
+      "name": "Justin Tucker",
+      "owner": "m13",
+      "slot": 17,
+      "tid": 10
+    },
+    "15705": {
+      "draftTid": 5,
+      "name": "Josh Gordon"
+    },
+    "15707": {
+      "name": "Larry Donnell",
+      "owner": "m02",
+      "slot": 6,
+      "tid": 6
+    },
+    "15786": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "15795": {
+      "draftTid": 1,
+      "name": "DeAndre Hopkins",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "15807": {
+      "draftTid": 6,
+      "name": "Cordarrelle Patterson",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "15818": {
+      "draftTid": 9,
+      "name": "Keenan Allen",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15823": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "15825": {
+      "draftTid": 3,
+      "name": "Le'Veon Bell",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "15826": {
+      "draftTid": 8,
+      "name": "Giovani Bernard",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "15835": {
+      "name": "Zach Ertz",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "15845": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "15847": {
+      "name": "Travis Kelce",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "15848": {
+      "draftTid": 10,
+      "name": "Eddie Lacy",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "15855": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "15860": {
+      "draftTid": 8,
+      "name": "Jordan Reed",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "15873": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "15878": {
+      "draftTid": 6,
+      "name": "Terrance Williams",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15893": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "15918": {
+      "name": "Caleb Sturgis",
+      "owner": "m17",
+      "slot": 17,
+      "tid": 9
+    },
+    "15920": {
+      "name": "Latavius Murray",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "15951": {
+      "name": "Denard Robinson",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "15996": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "16013": {
+      "name": "Joseph Randle",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "16016": {
+      "name": "Kenny Stills",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "16024": {
+      "name": "Kerwynn Williams",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "16040": {
+      "name": "C.J. Anderson",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "16285": {
+      "name": "Tim Wright",
+      "owner": "m12",
+      "slot": 6,
+      "tid": 5
+    },
+    "16530": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "16725": {
+      "draftTid": 3,
+      "name": "Sammy Watkins",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "16728": {
+      "name": "Teddy Bridgewater",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "16730": {
+      "draftTid": 9,
+      "name": "Kelvin Benjamin",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "16731": {
+      "draftTid": 1,
+      "name": "Brandin Cooks"
+    },
+    "16733": {
+      "name": "Odell Beckham Jr.",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "16737": {
+      "draftTid": 5,
+      "name": "Mike Evans",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "16763": {
+      "draftTid": 7,
+      "name": "Jordan Matthews",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "16777": {
+      "draftTid": 7,
+      "name": "Carlos Hyde"
+    },
+    "16782": {
+      "name": "Jerick McKinnon",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "16783": {
+      "draftTid": 9,
+      "name": "Terrance West",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "16784": {
+      "name": "Tre Mason",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "16787": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "16790": {
+      "name": "Jarvis Landry",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "16794": {
+      "draftTid": 6,
+      "name": "Bishop Sankey",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16800": {
+      "name": "Davante Adams",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "16803": {
+      "draftTid": 9,
+      "name": "Jeremy Hill",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "16804": {
+      "name": "John Brown",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "16886": {
+      "name": "Martavis Bryant",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "16889": {
+      "name": "Andre Williams",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16944": {
+      "draftTid": 6,
+      "name": "Devonta Freeman",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 10
+    },
+    "16976": {
+      "name": "Chandler Catanzaro",
+      "owner": "m15",
+      "slot": 17,
+      "tid": 8
+    },
+    "17082": {
+      "name": "Cody Parkey",
+      "owner": "m18",
+      "slot": 17,
+      "tid": 7
+    },
+    "17133": {
+      "name": "Isaiah Crowell",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "17452": {
+      "name": "Branden Oliver",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2330": {
+      "draftTid": 7,
+      "name": "Tom Brady"
+    },
+    "2578": {
+      "draftTid": 4,
+      "name": "Reggie Wayne",
+      "owner": "m16",
+      "slot": 20,
+      "tid": 4
+    },
+    "2580": {
+      "draftTid": 6,
+      "name": "Drew Brees",
+      "owner": "m02",
+      "slot": 0,
+      "tid": 6
+    },
+    "2622": {
+      "draftTid": 10,
+      "name": "Steve Smith Sr.",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "4333": {
+      "name": "Matt Bryant",
+      "owner": "m16",
+      "slot": 17,
+      "tid": 4
+    },
+    "4461": {
+      "draftTid": 10,
+      "name": "Andre Johnson",
+      "owner": "m13",
+      "slot": 23,
+      "tid": 10
+    },
+    "4512": {
+      "draftTid": 2,
+      "name": "Anquan Boldin",
+      "owner": "m09",
+      "slot": 4,
+      "tid": 2
+    },
+    "4527": {
+      "draftTid": 4,
+      "name": "Jason Witten",
+      "owner": "m16",
+      "slot": 6,
+      "tid": 4
+    },
+    "5209": {
+      "draftTid": 8,
+      "name": "Tony Romo",
+      "owner": "m16",
+      "slot": 0,
+      "tid": 4
+    },
+    "5362": {
+      "draftTid": 8,
+      "name": "Antonio Gates",
+      "owner": "m09",
+      "slot": 6,
+      "tid": 2
+    },
+    "5528": {
+      "draftTid": 10,
+      "name": "Larry Fitzgerald"
+    },
+    "5529": {
+      "draftTid": 8,
+      "name": "Philip Rivers",
+      "owner": "m15",
+      "slot": 0,
+      "tid": 8
+    },
+    "5536": {
+      "draftTid": 5,
+      "name": "Ben Roethlisberger",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "5549": {
+      "draftTid": 10,
+      "name": "Steven Jackson",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "5941": {
+      "draftTid": 2,
+      "name": "Wes Welker",
+      "owner": "m09",
+      "slot": 20,
+      "tid": 2
+    },
+    "6016": {
+      "name": "Malcom Floyd",
+      "owner": "m09",
+      "slot": 4,
+      "tid": 2
+    },
+    "8439": {
+      "draftTid": 5,
+      "name": "Aaron Rodgers",
+      "owner": "m12",
+      "slot": 0,
+      "tid": 5
+    },
+    "8442": {
+      "draftTid": 5,
+      "name": "Roddy White",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 10
+    },
+    "8444": {
+      "draftTid": 6,
+      "name": "Heath Miller",
+      "owner": "m13",
+      "slot": 6,
+      "tid": 10
+    },
+    "8475": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "8479": {
+      "draftTid": 4,
+      "name": "Frank Gore",
+      "owner": "m16",
+      "slot": 23,
+      "tid": 4
+    },
+    "8544": {
+      "draftTid": 9,
+      "name": "Darren Sproles",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "8664": {
+      "name": "Ryan Fitzpatrick",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "9329": {
+      "name": "Nick Novak",
+      "owner": "m11",
+      "slot": 17,
+      "tid": 1
+    },
+    "9354": {
+      "draftTid": 8,
+      "name": "Robbie Gould"
+    },
+    "9588": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "9592": {
+      "draftTid": 10,
+      "name": "Vernon Davis"
+    },
+    "9597": {
+      "draftTid": 2,
+      "name": "Jay Cutler",
+      "owner": "m11",
+      "slot": 0,
+      "tid": 1
+    },
+    "9613": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "9638": {
+      "draftTid": 2,
+      "name": "Greg Jennings",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "9646": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "9704": {
+      "draftTid": 7,
+      "name": "Stephen Gostkowski",
+      "owner": "m08",
+      "slot": 17,
+      "tid": 3
+    },
+    "9705": {
+      "draftTid": 2,
+      "name": "Brandon Marshall",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "9761": {
+      "name": "Delanie Walker",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "9838": {
+      "draftTid": 3,
+      "name": "Marques Colston",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    }
+  },
+  "2015": {
+    "-16002": {
+      "draftTid": 5,
+      "name": "Bills D/ST"
+    },
+    "-16004": {
+      "name": "Bengals D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16007": {
+      "draftTid": 2,
+      "name": "Broncos D/ST",
+      "owner": "m06",
+      "slot": 16,
+      "tid": 2
+    },
+    "-16010": {
+      "name": "Titans D/ST",
+      "owner": "m11",
+      "slot": 16,
+      "tid": 1
+    },
+    "-16011": {
+      "name": "Colts D/ST",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "-16012": {
+      "name": "Chiefs D/ST",
+      "owner": "m15",
+      "slot": 16,
+      "tid": 8
+    },
+    "-16014": {
+      "draftTid": 4,
+      "name": "Rams D/ST",
+      "owner": "m13",
+      "slot": 16,
+      "tid": 10
+    },
+    "-16015": {
+      "draftTid": 7,
+      "name": "Dolphins D/ST"
+    },
+    "-16016": {
+      "draftTid": 3,
+      "name": "Vikings D/ST"
+    },
+    "-16017": {
+      "name": "Patriots D/ST",
+      "owner": "m18",
+      "slot": 16,
+      "tid": 7
+    },
+    "-16020": {
+      "draftTid": 6,
+      "name": "Jets D/ST",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "-16022": {
+      "draftTid": 8,
+      "name": "Cardinals D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16023": {
+      "name": "Steelers D/ST",
+      "owner": "m04",
+      "slot": 16,
+      "tid": 4
+    },
+    "-16026": {
+      "draftTid": 9,
+      "name": "Seahawks D/ST",
+      "owner": "m17",
+      "slot": 16,
+      "tid": 9
+    },
+    "-16029": {
+      "name": "Panthers D/ST",
+      "owner": "m08",
+      "slot": 16,
+      "tid": 3
+    },
+    "-16030": {
+      "name": "Jaguars D/ST",
+      "owner": "m02",
+      "slot": 16,
+      "tid": 6
+    },
+    "-16033": {
+      "draftTid": 10,
+      "name": "Ravens D/ST"
+    },
+    "-16034": {
+      "draftTid": 1,
+      "name": "Texans D/ST",
+      "owner": "m12",
+      "slot": 16,
+      "tid": 5
+    },
+    "10447": {
+      "draftTid": 7,
+      "name": "Calvin Johnson",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "10452": {
+      "draftTid": 1,
+      "name": "Adrian Peterson",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "10456": {
+      "draftTid": 5,
+      "name": "Marshawn Lynch",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "10475": {
+      "draftTid": 7,
+      "name": "Greg Olsen",
+      "owner": "m04",
+      "slot": 6,
+      "tid": 4
+    },
+    "10522": {
+      "name": "James Jones",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "10636": {
+      "draftTid": 5,
+      "name": "Mason Crosby",
+      "owner": "m12",
+      "slot": 17,
+      "tid": 5
+    },
+    "1097": {
+      "draftTid": 3,
+      "name": "Adam Vinatieri"
+    },
+    "11122": {
+      "draftTid": 1,
+      "name": "Matt Prater"
+    },
+    "11237": {
+      "draftTid": 1,
+      "name": "Matt Ryan",
+      "owner": "m11",
+      "slot": 0,
+      "tid": 1
+    },
+    "11238": {
+      "draftTid": 7,
+      "name": "Darren McFadden",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "11247": {
+      "draftTid": 10,
+      "name": "Jonathan Stewart",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "11276": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "11278": {
+      "draftTid": 6,
+      "name": "Matt Forte",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "11283": {
+      "draftTid": 4,
+      "name": "DeSean Jackson",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "11295": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "11307": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "11364": {
+      "name": "Gary Barnidge",
+      "owner": "m08",
+      "slot": 6,
+      "tid": 3
+    },
+    "11383": {
+      "name": "Tim Hightower",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "11439": {
+      "draftTid": 3,
+      "name": "Pierre Garcon"
+    },
+    "11458": {
+      "name": "Stevie Johnson",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "11467": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "11674": {
+      "name": "Danny Amendola",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "11788": {
+      "draftTid": 8,
+      "name": "Danny Woodhead",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "11923": {
+      "draftTid": 9,
+      "name": "Steven Hauschka",
+      "owner": "m17",
+      "slot": 17,
+      "tid": 9
+    },
+    "12460": {
+      "name": "Graham Gano",
+      "owner": "m15",
+      "slot": 17,
+      "tid": 8
+    },
+    "12483": {
+      "draftTid": 3,
+      "name": "Matthew Stafford",
+      "owner": "m04",
+      "slot": 0,
+      "tid": 4
+    },
+    "12497": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "12503": {
+      "draftTid": 5,
+      "name": "Rashad Jennings",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "12514": {
+      "draftTid": 3,
+      "name": "LeSean McCoy",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "12563": {
+      "name": "Michael Crabtree",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "12576": {
+      "name": "Brandon LaFell",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "12579": {
+      "draftTid": 6,
+      "name": "Jeremy Maclin",
+      "owner": "m15",
+      "slot": 23,
+      "tid": 8
+    },
+    "12601": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "12649": {
+      "draftTid": 3,
+      "name": "Julian Edelman",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "12699": {
+      "name": "Zach Miller",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "13197": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "13203": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "13204": {
+      "draftTid": 8,
+      "name": "Ryan Mathews",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "13213": {
+      "draftTid": 3,
+      "name": "LeGarrette Blount"
+    },
+    "13214": {
+      "name": "James Starks",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "13215": {
+      "draftTid": 10,
+      "name": "Dez Bryant",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "13216": {
+      "draftTid": 2,
+      "name": "Demaryius Thomas",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "13217": {
+      "draftTid": 3,
+      "name": "Golden Tate",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "13229": {
+      "draftTid": 2,
+      "name": "Rob Gronkowski",
+      "owner": "m06",
+      "slot": 6,
+      "tid": 2
+    },
+    "13232": {
+      "draftTid": 5,
+      "name": "Jimmy Graham"
+    },
+    "13271": {
+      "draftTid": 2,
+      "name": "Eric Decker",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "13295": {
+      "draftTid": 10,
+      "name": "Emmanuel Sanders",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "13536": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "13553": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "13587": {
+      "draftTid": 9,
+      "name": "Chris Ivory",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "13934": {
+      "draftTid": 8,
+      "name": "Antonio Brown",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "13981": {
+      "draftTid": 2,
+      "name": "Mark Ingram II"
+    },
+    "13982": {
+      "draftTid": 8,
+      "name": "Julio Jones",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "13983": {
+      "draftTid": 4,
+      "name": "A.J. Green",
+      "owner": "m11",
+      "slot": 23,
+      "tid": 1
+    },
+    "13994": {
+      "draftTid": 10,
+      "name": "Cam Newton",
+      "owner": "m13",
+      "slot": 0,
+      "tid": 10
+    },
+    "14005": {
+      "draftTid": 3,
+      "name": "DeMarco Murray",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "14017": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "14032": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "14053": {
+      "draftTid": 1,
+      "name": "Randall Cobb",
+      "owner": "m04",
+      "slot": 23,
+      "tid": 4
+    },
+    "14129": {
+      "name": "Bilal Powell",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "14163": {
+      "name": "Tyrod Taylor",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "14189": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "14204": {
+      "name": "Julius Thomas",
+      "owner": "m12",
+      "slot": 6,
+      "tid": 5
+    },
+    "14221": {
+      "name": "Doug Baldwin",
+      "owner": "m18",
+      "slot": 23,
+      "tid": 7
+    },
+    "1428": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "14322": {
+      "draftTid": 8,
+      "name": "Dan Bailey",
+      "owner": "m02",
+      "slot": 17,
+      "tid": 6
+    },
+    "14583": {
+      "name": "Kamar Aiken",
+      "owner": "m12",
+      "slot": 23,
+      "tid": 5
+    },
+    "14874": {
+      "draftTid": 4,
+      "name": "Andrew Luck",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "14876": {
+      "draftTid": 7,
+      "name": "Ryan Tannehill",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "14880": {
+      "name": "Kirk Cousins",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14881": {
+      "draftTid": 8,
+      "name": "Russell Wilson",
+      "owner": "m15",
+      "slot": 0,
+      "tid": 8
+    },
+    "14885": {
+      "draftTid": 8,
+      "name": "Doug Martin",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "14886": {
+      "draftTid": 8,
+      "name": "Lamar Miller",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "14894": {
+      "name": "Robert Turbin",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14895": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "14901": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "14908": {
+      "draftTid": 3,
+      "name": "Michael Floyd",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "14909": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "14911": {
+      "name": "Rueben Randle",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "14912": {
+      "draftTid": 9,
+      "name": "Alshon Jeffery",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "14914": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "14924": {
+      "draftTid": 1,
+      "name": "T.Y. Hilton",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 10
+    },
+    "15009": {
+      "draftTid": 8,
+      "name": "Alfred Morris",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15041": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "15058": {
+      "name": "Blair Walsh",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "15062": {
+      "name": "Travis Benjamin",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "15072": {
+      "draftTid": 8,
+      "name": "Marvin Jones Jr."
+    },
+    "15092": {
+      "name": "Bryce Brown",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15478": {
+      "name": "Brandon Bolden",
+      "owner": "m13",
+      "slot": 23,
+      "tid": 10
+    },
+    "15683": {
+      "draftTid": 10,
+      "name": "Justin Tucker",
+      "owner": "m13",
+      "slot": 17,
+      "tid": 10
+    },
+    "15788": {
+      "draftTid": 1,
+      "name": "Tyler Eifert",
+      "owner": "m08",
+      "slot": 23,
+      "tid": 3
+    },
+    "15795": {
+      "draftTid": 9,
+      "name": "DeAndre Hopkins",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "15818": {
+      "draftTid": 10,
+      "name": "Keenan Allen"
+    },
+    "15825": {
+      "draftTid": 9,
+      "name": "Le'Veon Bell"
+    },
+    "15826": {
+      "draftTid": 2,
+      "name": "Giovani Bernard"
+    },
+    "15832": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "15835": {
+      "draftTid": 10,
+      "name": "Zach Ertz",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "15847": {
+      "draftTid": 1,
+      "name": "Travis Kelce",
+      "owner": "m17",
+      "slot": 6,
+      "tid": 9
+    },
+    "15848": {
+      "draftTid": 4,
+      "name": "Eddie Lacy",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "15855": {
+      "draftTid": 7,
+      "name": "Christine Michael",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "15860": {
+      "draftTid": 2,
+      "name": "Jordan Reed",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "15873": {
+      "name": "Markus Wheaton",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15878": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "15885": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "15893": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "15920": {
+      "draftTid": 7,
+      "name": "Latavius Murray",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "15951": {
+      "name": "Denard Robinson",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "15952": {
+      "name": "Mike Gillislee",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "15994": {
+      "name": "Theo Riddick",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "16013": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "16020": {
+      "name": "Spencer Ware",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "16040": {
+      "draftTid": 10,
+      "name": "C.J. Anderson",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "16121": {
+      "name": "Luke Willson",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "16339": {
+      "draftTid": 7,
+      "name": "Brandon McManus"
+    },
+    "16724": {
+      "name": "Blake Bortles",
+      "owner": "m08",
+      "slot": 0,
+      "tid": 3
+    },
+    "16725": {
+      "draftTid": 5,
+      "name": "Sammy Watkins",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "16731": {
+      "draftTid": 7,
+      "name": "Brandin Cooks",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 10
+    },
+    "16733": {
+      "draftTid": 5,
+      "name": "Odell Beckham Jr.",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "16737": {
+      "draftTid": 3,
+      "name": "Mike Evans",
+      "owner": "m02",
+      "slot": 23,
+      "tid": 6
+    },
+    "16749": {
+      "draftTid": 6,
+      "name": "Charles Sims",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16757": {
+      "name": "Derek Carr",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "16763": {
+      "draftTid": 6,
+      "name": "Jordan Matthews",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16777": {
+      "draftTid": 10,
+      "name": "Carlos Hyde",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "16782": {
+      "draftTid": 1,
+      "name": "Jerick McKinnon",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "16784": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "16790": {
+      "draftTid": 9,
+      "name": "Jarvis Landry",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "16791": {
+      "name": "Donte Moncrief",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "16794": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "16795": {
+      "name": "Austin Seferian-Jenkins",
+      "owner": "m15",
+      "slot": 6,
+      "tid": 8
+    },
+    "16799": {
+      "draftTid": 8,
+      "name": "Allen Robinson",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "16800": {
+      "draftTid": 1,
+      "name": "Davante Adams"
+    },
+    "16803": {
+      "draftTid": 6,
+      "name": "Jeremy Hill",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 10
+    },
+    "16804": {
+      "draftTid": 5,
+      "name": "John Brown",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "16886": {
+      "draftTid": 1,
+      "name": "Martavis Bryant",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "16889": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "16913": {
+      "name": "James White",
+      "owner": "m17",
+      "slot": 23,
+      "tid": 9
+    },
+    "16921": {
+      "draftTid": 9,
+      "name": "Alfred Blue",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "16944": {
+      "draftTid": 2,
+      "name": "Devonta Freeman",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "16950": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "16976": {
+      "name": "Chandler Catanzaro",
+      "owner": "m18",
+      "slot": 17,
+      "tid": 7
+    },
+    "17082": {
+      "draftTid": 6,
+      "name": "Cody Parkey"
+    },
+    "17105": {
+      "name": "Antonio Andrews",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "17127": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "17133": {
+      "draftTid": 4,
+      "name": "Isaiah Crowell",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "17177": {
+      "name": "Allen Hurns",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "17258": {
+      "name": "Willie Snead",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "17284": {
+      "name": "Charcandrick West",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "17372": {
+      "name": "Chris Boswell",
+      "owner": "m11",
+      "slot": 17,
+      "tid": 1
+    },
+    "17427": {
+      "name": "Cairo Santos",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "2330": {
+      "draftTid": 6,
+      "name": "Tom Brady",
+      "owner": "m02",
+      "slot": 0,
+      "tid": 6
+    },
+    "2508176": {
+      "draftTid": 10,
+      "name": "David Johnson",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "2512523": {
+      "name": "Will Tye",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2515416": {
+      "name": "Jeremy Langford",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "2573300": {
+      "name": "Jay Ajayi",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2576303": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "2576336": {
+      "draftTid": 5,
+      "name": "Ameer Abdullah"
+    },
+    "2576434": {
+      "draftTid": 6,
+      "name": "Melvin Gordon",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2576623": {
+      "draftTid": 5,
+      "name": "DeVante Parker"
+    },
+    "2576817": {
+      "name": "Karlos Williams",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "2577253": {
+      "name": "Javorius Allen",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 10
+    },
+    "2577327": {
+      "name": "Tyler Lockett",
+      "owner": "m06",
+      "slot": 23,
+      "tid": 2
+    },
+    "2580": {
+      "draftTid": 10,
+      "name": "Drew Brees",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "2622": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "2969939": {
+      "draftTid": 9,
+      "name": "Jameis Winston",
+      "owner": "m18",
+      "slot": 0,
+      "tid": 7
+    },
+    "2969962": {
+      "draftTid": 6,
+      "name": "Duke Johnson Jr.",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 10
+    },
+    "2971433": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "2971618": {
+      "draftTid": 7,
+      "name": "Nelson Agholor"
+    },
+    "2972460": {
+      "draftTid": 4,
+      "name": "Breshad Perriman"
+    },
+    "2976212": {
+      "name": "Stefon Diggs",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "2976499": {
+      "draftTid": 4,
+      "name": "Amari Cooper",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "2976516": {
+      "draftTid": 6,
+      "name": "T.J. Yeldon",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2977609": {
+      "draftTid": 10,
+      "name": "Devin Funchess"
+    },
+    "2977644": {
+      "draftTid": 7,
+      "name": "Todd Gurley",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "2979477": {
+      "draftTid": 3,
+      "name": "Tevin Coleman"
+    },
+    "2980105": {
+      "draftTid": 5,
+      "name": "Matt Jones",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "3043097": {
+      "name": "Cameron Artis-Payne",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "4333": {
+      "draftTid": 4,
+      "name": "Matt Bryant"
+    },
+    "4459": {
+      "name": "Carson Palmer",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "4461": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "4512": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "4527": {
+      "draftTid": 4,
+      "name": "Jason Witten",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "4680": {
+      "name": "Josh Brown",
+      "owner": "m08",
+      "slot": 17,
+      "tid": 3
+    },
+    "5209": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "5362": {
+      "draftTid": 3,
+      "name": "Antonio Gates",
+      "owner": "m02",
+      "slot": 6,
+      "tid": 6
+    },
+    "5526": {
+      "draftTid": 4,
+      "name": "Eli Manning",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "5528": {
+      "draftTid": 2,
+      "name": "Larry Fitzgerald",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "5536": {
+      "draftTid": 2,
+      "name": "Ben Roethlisberger",
+      "owner": "m06",
+      "slot": 0,
+      "tid": 2
+    },
+    "5549": {
+      "name": "Steven Jackson",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "5557": {
+      "name": "Benjamin Watson",
+      "owner": "m13",
+      "slot": 6,
+      "tid": 10
+    },
+    "6016": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "8416": {
+      "name": "Alex Smith",
+      "owner": "m12",
+      "slot": 0,
+      "tid": 5
+    },
+    "8439": {
+      "draftTid": 9,
+      "name": "Aaron Rodgers",
+      "owner": "m17",
+      "slot": 0,
+      "tid": 9
+    },
+    "8442": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "8444": {
+      "name": "Heath Miller",
+      "owner": "m11",
+      "slot": 6,
+      "tid": 1
+    },
+    "8475": {
+      "draftTid": 5,
+      "name": "Vincent Jackson",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "8479": {
+      "draftTid": 2,
+      "name": "Frank Gore",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "8544": {
+      "draftTid": 9,
+      "name": "Darren Sproles",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "8664": {
+      "name": "Ryan Fitzpatrick",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "9329": {
+      "name": "Nick Novak",
+      "owner": "m04",
+      "slot": 17,
+      "tid": 4
+    },
+    "9588": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "9613": {
+      "draftTid": 1,
+      "name": "DeAngelo Williams",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "9684": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "9704": {
+      "draftTid": 2,
+      "name": "Stephen Gostkowski",
+      "owner": "m06",
+      "slot": 17,
+      "tid": 2
+    },
+    "9705": {
+      "draftTid": 1,
+      "name": "Brandon Marshall",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "9761": {
+      "draftTid": 6,
+      "name": "Delanie Walker",
+      "owner": "m18",
+      "slot": 6,
+      "tid": 7
+    },
+    "9838": {
+      "draftTid": 4,
+      "name": ""
+    }
+  },
+  "2016": {
+    "-16002": {
+      "name": "Bills D/ST",
+      "owner": "m15",
+      "slot": 16,
+      "tid": 8
+    },
+    "-16004": {
+      "draftTid": 3,
+      "name": "Bengals D/ST"
+    },
+    "-16007": {
+      "draftTid": 2,
+      "name": "Broncos D/ST",
+      "owner": "m06",
+      "slot": 16,
+      "tid": 2
+    },
+    "-16008": {
+      "name": "Lions D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16010": {
+      "name": "Titans D/ST",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "-16012": {
+      "draftTid": 8,
+      "name": "Chiefs D/ST",
+      "owner": "m02",
+      "slot": 16,
+      "tid": 6
+    },
+    "-16013": {
+      "draftTid": 10,
+      "name": "Raiders D/ST",
+      "owner": "m11",
+      "slot": 16,
+      "tid": 1
+    },
+    "-16014": {
+      "name": "Rams D/ST",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "-16015": {
+      "name": "Dolphins D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16016": {
+      "draftTid": 7,
+      "name": "Vikings D/ST",
+      "owner": "m18",
+      "slot": 16,
+      "tid": 7
+    },
+    "-16017": {
+      "draftTid": 4,
+      "name": "Patriots D/ST",
+      "owner": "m04",
+      "slot": 16,
+      "tid": 4
+    },
+    "-16021": {
+      "name": "Eagles D/ST",
+      "owner": "m07",
+      "slot": 16,
+      "tid": 10
+    },
+    "-16022": {
+      "draftTid": 1,
+      "name": "Cardinals D/ST",
+      "owner": "m08",
+      "slot": 16,
+      "tid": 3
+    },
+    "-16023": {
+      "name": "Steelers D/ST",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "-16026": {
+      "draftTid": 9,
+      "name": "Seahawks D/ST",
+      "owner": "m17",
+      "slot": 16,
+      "tid": 9
+    },
+    "-16029": {
+      "draftTid": 5,
+      "name": "Panthers D/ST"
+    },
+    "-16033": {
+      "name": "Ravens D/ST",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "-16034": {
+      "draftTid": 6,
+      "name": "Texans D/ST",
+      "owner": "m12",
+      "slot": 16,
+      "tid": 5
+    },
+    "10452": {
+      "draftTid": 9,
+      "name": "Adrian Peterson",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "10453": {
+      "draftTid": 2,
+      "name": "Ted Ginn Jr."
+    },
+    "10475": {
+      "draftTid": 8,
+      "name": "Greg Olsen",
+      "owner": "m11",
+      "slot": 6,
+      "tid": 1
+    },
+    "10636": {
+      "draftTid": 9,
+      "name": "Mason Crosby"
+    },
+    "1097": {
+      "draftTid": 6,
+      "name": "Adam Vinatieri",
+      "owner": "m12",
+      "slot": 17,
+      "tid": 5
+    },
+    "11122": {
+      "name": "Matt Prater",
+      "owner": "m06",
+      "slot": 17,
+      "tid": 2
+    },
+    "11237": {
+      "name": "Matt Ryan",
+      "owner": "m15",
+      "slot": 0,
+      "tid": 8
+    },
+    "11238": {
+      "name": "Darren McFadden",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "11247": {
+      "draftTid": 2,
+      "name": "Jonathan Stewart",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "11252": {
+      "name": "Joe Flacco",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "11258": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "11270": {
+      "draftTid": 8,
+      "name": "Jordy Nelson",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "11278": {
+      "draftTid": 9,
+      "name": "Matt Forte",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "11283": {
+      "draftTid": 1,
+      "name": "DeSean Jackson",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "11295": {
+      "name": "Martellus Bennett",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "11307": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "11364": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "11467": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "11788": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "11923": {
+      "draftTid": 3,
+      "name": "Steven Hauschka",
+      "owner": "m08",
+      "slot": 17,
+      "tid": 3
+    },
+    "12460": {
+      "draftTid": 10,
+      "name": "Graham Gano",
+      "owner": "m07",
+      "slot": 17,
+      "tid": 10
+    },
+    "12483": {
+      "draftTid": 3,
+      "name": "Matthew Stafford",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "12497": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "12503": {
+      "draftTid": 6,
+      "name": "Rashad Jennings",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "12514": {
+      "draftTid": 7,
+      "name": "LeSean McCoy",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "12563": {
+      "draftTid": 5,
+      "name": "Michael Crabtree",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "12576": {
+      "name": "Brandon LaFell",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "12579": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "12649": {
+      "draftTid": 5,
+      "name": "Julian Edelman",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "12699": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "13197": {
+      "name": "Sam Bradford",
+      "owner": "m18",
+      "slot": 0,
+      "tid": 7
+    },
+    "13204": {
+      "draftTid": 2,
+      "name": "Ryan Mathews",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "13213": {
+      "draftTid": 3,
+      "name": "LeGarrette Blount",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "13215": {
+      "draftTid": 10,
+      "name": "Dez Bryant",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "13216": {
+      "draftTid": 7,
+      "name": "Demaryius Thomas",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "13217": {
+      "draftTid": 1,
+      "name": "Golden Tate",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "13229": {
+      "draftTid": 4,
+      "name": "Rob Gronkowski"
+    },
+    "13231": {
+      "name": "Dennis Pitta",
+      "owner": "m06",
+      "slot": 6,
+      "tid": 2
+    },
+    "13232": {
+      "draftTid": 1,
+      "name": "Jimmy Graham",
+      "owner": "m15",
+      "slot": 6,
+      "tid": 8
+    },
+    "13271": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "13295": {
+      "draftTid": 2,
+      "name": "Emmanuel Sanders",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "13587": {
+      "draftTid": 6,
+      "name": "Chris Ivory",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "13934": {
+      "draftTid": 3,
+      "name": "Antonio Brown",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "13981": {
+      "draftTid": 2,
+      "name": "Mark Ingram",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "13982": {
+      "draftTid": 6,
+      "name": "Julio Jones",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "13983": {
+      "draftTid": 3,
+      "name": "A.J. Green"
+    },
+    "13994": {
+      "draftTid": 7,
+      "name": "Cam Newton",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14001": {
+      "name": "Colin Kaepernick",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "14005": {
+      "draftTid": 10,
+      "name": "DeMarco Murray",
+      "owner": "m07",
+      "slot": 2,
+      "tid": 10
+    },
+    "14012": {
+      "name": "Andy Dalton",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "14032": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "14053": {
+      "draftTid": 1,
+      "name": "Randall Cobb",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "14054": {
+      "name": "Kyle Rudolph",
+      "owner": "m08",
+      "slot": 6,
+      "tid": 3
+    },
+    "14129": {
+      "draftTid": 4,
+      "name": "Bilal Powell",
+      "owner": "m17",
+      "slot": 23,
+      "tid": 9
+    },
+    "14145": {
+      "draftTid": 9,
+      "name": "Charles Clay",
+      "owner": "m07",
+      "slot": 6,
+      "tid": 10
+    },
+    "14163": {
+      "draftTid": 8,
+      "name": "Tyrod Taylor"
+    },
+    "14189": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "14193": {
+      "name": "Jacquizz Rodgers",
+      "owner": "m15",
+      "slot": 23,
+      "tid": 8
+    },
+    "14198": {
+      "draftTid": 4,
+      "name": "Dion Lewis",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "14221": {
+      "draftTid": 4,
+      "name": "Doug Baldwin",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "14322": {
+      "draftTid": 2,
+      "name": "Dan Bailey",
+      "owner": "m02",
+      "slot": 17,
+      "tid": 6
+    },
+    "14360": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "14402": {
+      "draftTid": 7,
+      "name": "Chris Hogan",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "14518": {
+      "name": "Shaun Draughn",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "14583": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "14851": {
+      "draftTid": 8,
+      "name": "Terrelle Pryor Sr.",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "14874": {
+      "draftTid": 4,
+      "name": "Andrew Luck",
+      "owner": "m04",
+      "slot": 0,
+      "tid": 4
+    },
+    "14875": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "14880": {
+      "draftTid": 10,
+      "name": "Kirk Cousins",
+      "owner": "m06",
+      "slot": 0,
+      "tid": 2
+    },
+    "14881": {
+      "draftTid": 5,
+      "name": "Russell Wilson",
+      "owner": "m12",
+      "slot": 0,
+      "tid": 5
+    },
+    "14885": {
+      "draftTid": 8,
+      "name": "Doug Martin"
+    },
+    "14886": {
+      "draftTid": 8,
+      "name": "Lamar Miller",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "14895": {
+      "name": "Ronnie Hillman",
+      "owner": "m02",
+      "slot": 23,
+      "tid": 6
+    },
+    "14900": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "14904": {
+      "name": "Ladarius Green",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "14908": {
+      "draftTid": 3,
+      "name": "Michael Floyd",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "14912": {
+      "draftTid": 6,
+      "name": "Alshon Jeffery",
+      "owner": "m07",
+      "slot": 23,
+      "tid": 10
+    },
+    "14924": {
+      "draftTid": 1,
+      "name": "T.Y. Hilton",
+      "owner": "m07",
+      "slot": 4,
+      "tid": 10
+    },
+    "15009": {
+      "draftTid": 8,
+      "name": "Alfred Morris",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "15058": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "15072": {
+      "draftTid": 9,
+      "name": "Marvin Jones Jr."
+    },
+    "15102": {
+      "name": "Rishard Matthews",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "15683": {
+      "draftTid": 4,
+      "name": "Justin Tucker",
+      "owner": "m04",
+      "slot": 17,
+      "tid": 4
+    },
+    "15705": {
+      "draftTid": 6,
+      "name": "Josh Gordon"
+    },
+    "15786": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "15788": {
+      "draftTid": 4,
+      "name": "Tyler Eifert",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "15795": {
+      "draftTid": 2,
+      "name": "DeAndre Hopkins",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "15803": {
+      "name": "EJ Manuel",
+      "owner": "m02",
+      "slot": 0,
+      "tid": 6
+    },
+    "15818": {
+      "draftTid": 8,
+      "name": "Keenan Allen"
+    },
+    "15825": {
+      "draftTid": 1,
+      "name": "Le'Veon Bell",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "15826": {
+      "draftTid": 6,
+      "name": "Giovani Bernard"
+    },
+    "15835": {
+      "draftTid": 6,
+      "name": "Zach Ertz",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "15847": {
+      "draftTid": 1,
+      "name": "Travis Kelce",
+      "owner": "m12",
+      "slot": 6,
+      "tid": 5
+    },
+    "15848": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "15855": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "15860": {
+      "draftTid": 10,
+      "name": "Jordan Reed",
+      "owner": "m18",
+      "slot": 6,
+      "tid": 7
+    },
+    "15918": {
+      "name": "Caleb Sturgis",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "15920": {
+      "draftTid": 3,
+      "name": "Latavius Murray",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "15952": {
+      "name": "Mike Gillislee",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "15965": {
+      "name": "Dustin Hopkins",
+      "owner": "m11",
+      "slot": 17,
+      "tid": 1
+    },
+    "15971": {
+      "name": "Rex Burkhead",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "15994": {
+      "draftTid": 3,
+      "name": "Theo Riddick"
+    },
+    "16020": {
+      "draftTid": 7,
+      "name": "Spencer Ware",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "16040": {
+      "draftTid": 4,
+      "name": "C.J. Anderson"
+    },
+    "16460": {
+      "name": "Adam Thielen",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "16724": {
+      "draftTid": 10,
+      "name": "Blake Bortles",
+      "owner": "m07",
+      "slot": 0,
+      "tid": 10
+    },
+    "16725": {
+      "draftTid": 6,
+      "name": "Sammy Watkins",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "16730": {
+      "draftTid": 4,
+      "name": "Kelvin Benjamin",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "16731": {
+      "draftTid": 5,
+      "name": "Brandin Cooks",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "16732": {
+      "draftTid": 3,
+      "name": "Eric Ebron",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "16733": {
+      "draftTid": 9,
+      "name": "Odell Beckham Jr.",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "16737": {
+      "draftTid": 7,
+      "name": "Mike Evans",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "16749": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "16757": {
+      "draftTid": 4,
+      "name": "Derek Carr",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "16763": {
+      "draftTid": 6,
+      "name": "Jordan Matthews",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16777": {
+      "draftTid": 3,
+      "name": "Carlos Hyde"
+    },
+    "16782": {
+      "name": "Jerick McKinnon",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "16783": {
+      "name": "Terrance West",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "16787": {
+      "name": "Marqise Lee",
+      "owner": "m08",
+      "slot": 23,
+      "tid": 3
+    },
+    "16790": {
+      "draftTid": 9,
+      "name": "Jarvis Landry",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "16791": {
+      "draftTid": 5,
+      "name": "Donte Moncrief",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "16799": {
+      "draftTid": 7,
+      "name": "Allen Robinson",
+      "owner": "m07",
+      "slot": 4,
+      "tid": 10
+    },
+    "16800": {
+      "draftTid": 2,
+      "name": "Davante Adams",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "16803": {
+      "draftTid": 1,
+      "name": "Jeremy Hill",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "16804": {
+      "draftTid": 10,
+      "name": "John Brown"
+    },
+    "16913": {
+      "draftTid": 9,
+      "name": "James White"
+    },
+    "16921": {
+      "name": "Alfred Blue",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "16944": {
+      "draftTid": 4,
+      "name": "Devonta Freeman",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "16976": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "17133": {
+      "draftTid": 7,
+      "name": "Isaiah Crowell",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "17177": {
+      "draftTid": 10,
+      "name": "Allen Hurns"
+    },
+    "17258": {
+      "draftTid": 2,
+      "name": "Willie Snead",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "17284": {
+      "name": "Charcandrick West",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "17372": {
+      "draftTid": 1,
+      "name": "Chris Boswell"
+    },
+    "17427": {
+      "name": "Cairo Santos",
+      "owner": "m17",
+      "slot": 17,
+      "tid": 9
+    },
+    "17437": {
+      "name": "Taylor Gabriel",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "17465": {
+      "name": "Fitzgerald Toussaint",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "2330": {
+      "draftTid": 2,
+      "name": "Tom Brady",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "2473037": {
+      "name": "Jason Myers",
+      "owner": "m18",
+      "slot": 17,
+      "tid": 7
+    },
+    "2508176": {
+      "draftTid": 1,
+      "name": "David Johnson",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "2512593": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "2515416": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "2515759": {
+      "name": "J.J. Nelson",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "2520698": {
+      "name": "Cameron Meredith",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "2521161": {
+      "name": "Zach Zenner",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "2573300": {
+      "draftTid": 8,
+      "name": "Jay Ajayi",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "2575408": {
+      "name": "Robert Kelley",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "2575553": {
+      "name": "Kenneth Farrow",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2576237": {
+      "draftTid": 8,
+      "name": "Thomas Rawls",
+      "owner": "m11",
+      "slot": 23,
+      "tid": 1
+    },
+    "2576336": {
+      "draftTid": 6,
+      "name": "Ameer Abdullah"
+    },
+    "2576434": {
+      "draftTid": 6,
+      "name": "Melvin Gordon"
+    },
+    "2576623": {
+      "draftTid": 9,
+      "name": "DeVante Parker",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "2576716": {
+      "name": "Jamison Crowder",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2576980": {
+      "draftTid": 8,
+      "name": "Marcus Mariota"
+    },
+    "2577134": {
+      "name": "Ty Montgomery",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "2577327": {
+      "draftTid": 8,
+      "name": "Tyler Lockett",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2577417": {
+      "draftTid": 2,
+      "name": "Dak Prescott",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "2578553": {
+      "name": "Malcolm Mitchell",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2580": {
+      "draftTid": 1,
+      "name": "Drew Brees",
+      "owner": "m08",
+      "slot": 0,
+      "tid": 3
+    },
+    "2587819": {
+      "name": "Tyrell Williams",
+      "owner": "m06",
+      "slot": 23,
+      "tid": 2
+    },
+    "2622": {
+      "draftTid": 5,
+      "name": "Steve Smith Sr.",
+      "owner": "m12",
+      "slot": 23,
+      "tid": 5
+    },
+    "2969939": {
+      "name": "Jameis Winston",
+      "owner": "m11",
+      "slot": 0,
+      "tid": 1
+    },
+    "2969962": {
+      "draftTid": 4,
+      "name": "Duke Johnson Jr."
+    },
+    "2976212": {
+      "draftTid": 5,
+      "name": "Stefon Diggs"
+    },
+    "2976316": {
+      "draftTid": 3,
+      "name": "Michael Thomas",
+      "owner": "m18",
+      "slot": 23,
+      "tid": 7
+    },
+    "2976499": {
+      "draftTid": 4,
+      "name": "Amari Cooper",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "2976516": {
+      "draftTid": 1,
+      "name": "T.J. Yeldon",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2976592": {
+      "draftTid": 8,
+      "name": "Sterling Shepard",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "2977609": {
+      "draftTid": 8,
+      "name": "Devin Funchess"
+    },
+    "2977644": {
+      "draftTid": 5,
+      "name": "Todd Gurley",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "2979477": {
+      "draftTid": 10,
+      "name": "Tevin Coleman",
+      "owner": "m07",
+      "slot": 2,
+      "tid": 10
+    },
+    "2980105": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "3042435": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "3043078": {
+      "draftTid": 3,
+      "name": "Derrick Henry"
+    },
+    "3045144": {
+      "draftTid": 7,
+      "name": "Tyler Boyd"
+    },
+    "3046409": {
+      "name": "Alex Collins",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "3051392": {
+      "draftTid": 2,
+      "name": "Ezekiel Elliott",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "3060022": {
+      "name": "Jordan Howard",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "3116406": {
+      "name": "Tyreek Hill",
+      "owner": "m04",
+      "slot": 23,
+      "tid": 4
+    },
+    "3122866": {
+      "draftTid": 7,
+      "name": "Devontae Booker",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "4333": {
+      "name": "Matt Bryant",
+      "owner": "m15",
+      "slot": 17,
+      "tid": 8
+    },
+    "4459": {
+      "draftTid": 9,
+      "name": "Carson Palmer",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "5362": {
+      "draftTid": 7,
+      "name": "Antonio Gates",
+      "owner": "m17",
+      "slot": 6,
+      "tid": 9
+    },
+    "5526": {
+      "draftTid": 7,
+      "name": "Eli Manning",
+      "owner": "m07",
+      "slot": 20,
+      "tid": 10
+    },
+    "5528": {
+      "draftTid": 9,
+      "name": "Larry Fitzgerald",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "5529": {
+      "draftTid": 6,
+      "name": "Philip Rivers"
+    },
+    "5536": {
+      "draftTid": 3,
+      "name": "Ben Roethlisberger"
+    },
+    "8416": {
+      "name": "Alex Smith",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "8439": {
+      "draftTid": 5,
+      "name": "Aaron Rodgers",
+      "owner": "m17",
+      "slot": 0,
+      "tid": 9
+    },
+    "8475": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "8479": {
+      "draftTid": 10,
+      "name": "Frank Gore",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "8544": {
+      "name": "Darren Sproles",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "8664": {
+      "draftTid": 2,
+      "name": "Ryan Fitzpatrick"
+    },
+    "9592": {
+      "name": "Vernon Davis",
+      "owner": "m04",
+      "slot": 6,
+      "tid": 4
+    },
+    "9613": {
+      "draftTid": 1,
+      "name": "DeAngelo Williams",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "9704": {
+      "draftTid": 5,
+      "name": "Stephen Gostkowski",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "9705": {
+      "draftTid": 10,
+      "name": "Brandon Marshall",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "9761": {
+      "draftTid": 2,
+      "name": "Delanie Walker",
+      "owner": "m02",
+      "slot": 6,
+      "tid": 6
+    }
+  },
+  "2017": {
+    "-16003": {
+      "name": "Bears D/ST",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "-16004": {
+      "draftTid": 5,
+      "name": "Bengals D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "-16007": {
+      "draftTid": 12,
+      "name": "Broncos D/ST",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "-16009": {
+      "draftTid": 3,
+      "name": "Packers D/ST",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "-16012": {
+      "draftTid": 9,
+      "name": "Chiefs D/ST"
+    },
+    "-16014": {
+      "name": "Rams D/ST",
+      "owner": "m15",
+      "slot": 16,
+      "tid": 8
+    },
+    "-16015": {
+      "name": "Dolphins D/ST",
+      "owner": "m17",
+      "slot": 16,
+      "tid": 9
+    },
+    "-16016": {
+      "draftTid": 2,
+      "name": "Vikings D/ST",
+      "owner": "m06",
+      "slot": 16,
+      "tid": 2
+    },
+    "-16017": {
+      "draftTid": 4,
+      "name": "Patriots D/ST",
+      "owner": "m04",
+      "slot": 16,
+      "tid": 4
+    },
+    "-16018": {
+      "name": "Saints D/ST",
+      "owner": "m02",
+      "slot": 16,
+      "tid": 6
+    },
+    "-16019": {
+      "draftTid": 7,
+      "name": "Giants D/ST"
+    },
+    "-16021": {
+      "name": "Eagles D/ST",
+      "owner": "m12",
+      "slot": 16,
+      "tid": 5
+    },
+    "-16022": {
+      "draftTid": 10,
+      "name": "Cardinals D/ST",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "-16023": {
+      "draftTid": 6,
+      "name": "Steelers D/ST",
+      "owner": "m10",
+      "slot": 16,
+      "tid": 12
+    },
+    "-16024": {
+      "draftTid": 1,
+      "name": "Chargers D/ST",
+      "owner": "m08",
+      "slot": 16,
+      "tid": 3
+    },
+    "-16026": {
+      "draftTid": 8,
+      "name": "Seahawks D/ST",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "-16028": {
+      "name": "Redskins D/ST",
+      "owner": "m13",
+      "slot": 16,
+      "tid": 11
+    },
+    "-16029": {
+      "name": "Panthers D/ST",
+      "owner": "m18",
+      "slot": 16,
+      "tid": 7
+    },
+    "-16030": {
+      "name": "Jaguars D/ST",
+      "owner": "m01",
+      "slot": 16,
+      "tid": 10
+    },
+    "-16033": {
+      "name": "Ravens D/ST",
+      "owner": "m11",
+      "slot": 16,
+      "tid": 1
+    },
+    "-16034": {
+      "draftTid": 11,
+      "name": "Texans D/ST",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "10452": {
+      "draftTid": 3,
+      "name": "Adrian Peterson"
+    },
+    "10453": {
+      "draftTid": 11,
+      "name": "Ted Ginn Jr.",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "10456": {
+      "draftTid": 3,
+      "name": "Marshawn Lynch",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "10475": {
+      "draftTid": 9,
+      "name": "Greg Olsen",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "10487": {
+      "name": "Drew Stanton",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "10636": {
+      "draftTid": 11,
+      "name": "Mason Crosby"
+    },
+    "1097": {
+      "draftTid": 4,
+      "name": "Adam Vinatieri"
+    },
+    "11122": {
+      "draftTid": 2,
+      "name": "Matt Prater",
+      "owner": "m01",
+      "slot": 17,
+      "tid": 10
+    },
+    "11237": {
+      "draftTid": 4,
+      "name": "Matt Ryan",
+      "owner": "m01",
+      "slot": 0,
+      "tid": 10
+    },
+    "11238": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "11247": {
+      "draftTid": 6,
+      "name": "Jonathan Stewart",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "11252": {
+      "name": "Joe Flacco",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "11270": {
+      "draftTid": 12,
+      "name": "Jordy Nelson",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "11278": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "11283": {
+      "draftTid": 4,
+      "name": "DeSean Jackson"
+    },
+    "11295": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "11439": {
+      "draftTid": 3,
+      "name": "Pierre Garcon"
+    },
+    "11674": {
+      "draftTid": 9,
+      "name": "Danny Amendola"
+    },
+    "11788": {
+      "draftTid": 11,
+      "name": "Danny Woodhead",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "12483": {
+      "draftTid": 10,
+      "name": "Matthew Stafford",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "12514": {
+      "draftTid": 5,
+      "name": "LeSean McCoy",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "12537": {
+      "name": "Jared Cook",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "12556": {
+      "draftTid": 12,
+      "name": ""
+    },
+    "12563": {
+      "draftTid": 8,
+      "name": "Michael Crabtree",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 11
+    },
+    "12579": {
+      "draftTid": 12,
+      "name": "Jeremy Maclin",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "12601": {
+      "draftTid": 11,
+      "name": "Mike Wallace",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "12731": {
+      "name": "Ryan Succop",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "13213": {
+      "draftTid": 5,
+      "name": "LeGarrette Blount",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "13215": {
+      "draftTid": 8,
+      "name": "Dez Bryant",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "13216": {
+      "draftTid": 4,
+      "name": "Demaryius Thomas",
+      "owner": "m18",
+      "slot": 23,
+      "tid": 7
+    },
+    "13217": {
+      "draftTid": 1,
+      "name": "Golden Tate",
+      "owner": "m08",
+      "slot": 23,
+      "tid": 3
+    },
+    "13229": {
+      "draftTid": 7,
+      "name": "Rob Gronkowski",
+      "owner": "m18",
+      "slot": 6,
+      "tid": 7
+    },
+    "13232": {
+      "draftTid": 3,
+      "name": "Jimmy Graham",
+      "owner": "m15",
+      "slot": 6,
+      "tid": 8
+    },
+    "13271": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "13295": {
+      "draftTid": 2,
+      "name": "Emmanuel Sanders"
+    },
+    "13587": {
+      "name": "Chris Ivory",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "13934": {
+      "draftTid": 8,
+      "name": "Antonio Brown",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "13981": {
+      "draftTid": 5,
+      "name": "Mark Ingram",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "13982": {
+      "draftTid": 9,
+      "name": "Julio Jones",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "13983": {
+      "draftTid": 6,
+      "name": "A.J. Green",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "13994": {
+      "draftTid": 5,
+      "name": "Cam Newton",
+      "owner": "m02",
+      "slot": 0,
+      "tid": 6
+    },
+    "14005": {
+      "draftTid": 3,
+      "name": "DeMarco Murray",
+      "owner": "m12",
+      "slot": 2,
+      "tid": 5
+    },
+    "14012": {
+      "draftTid": 4,
+      "name": "Andy Dalton",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "14017": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "14032": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "14053": {
+      "draftTid": 11,
+      "name": "Randall Cobb"
+    },
+    "14054": {
+      "draftTid": 5,
+      "name": "Kyle Rudolph",
+      "owner": "m08",
+      "slot": 6,
+      "tid": 3
+    },
+    "14129": {
+      "draftTid": 7,
+      "name": "Bilal Powell",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "14145": {
+      "name": "Charles Clay",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "14163": {
+      "draftTid": 8,
+      "name": "Tyrod Taylor",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14193": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "14198": {
+      "name": "Dion Lewis",
+      "owner": "m18",
+      "slot": 2,
+      "tid": 7
+    },
+    "14204": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "14221": {
+      "draftTid": 10,
+      "name": "Doug Baldwin",
+      "owner": "m12",
+      "slot": 4,
+      "tid": 5
+    },
+    "14322": {
+      "draftTid": 3,
+      "name": "Dan Bailey"
+    },
+    "1440": {
+      "name": "Phil Dawson",
+      "owner": "m11",
+      "slot": 17,
+      "tid": 1
+    },
+    "14402": {
+      "draftTid": 6,
+      "name": "Chris Hogan",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "14816": {
+      "name": "Kai Forbath",
+      "owner": "m13",
+      "slot": 17,
+      "tid": 11
+    },
+    "14851": {
+      "draftTid": 3,
+      "name": ""
+    },
+    "14874": {
+      "draftTid": 7,
+      "name": "Andrew Luck"
+    },
+    "14877": {
+      "name": "Nick Foles",
+      "owner": "m15",
+      "slot": 0,
+      "tid": 8
+    },
+    "14880": {
+      "draftTid": 11,
+      "name": "Kirk Cousins",
+      "owner": "m13",
+      "slot": 0,
+      "tid": 11
+    },
+    "14881": {
+      "draftTid": 8,
+      "name": "Russell Wilson",
+      "owner": "m04",
+      "slot": 0,
+      "tid": 4
+    },
+    "14885": {
+      "draftTid": 7,
+      "name": "Doug Martin"
+    },
+    "14886": {
+      "draftTid": 2,
+      "name": "Lamar Miller",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "14900": {
+      "draftTid": 1,
+      "name": ""
+    },
+    "14912": {
+      "draftTid": 4,
+      "name": "Alshon Jeffery",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "14922": {
+      "name": "Mohamed Sanu",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "14924": {
+      "draftTid": 7,
+      "name": "T.Y. Hilton",
+      "owner": "m10",
+      "slot": 4,
+      "tid": 12
+    },
+    "15058": {
+      "draftTid": 9,
+      "name": ""
+    },
+    "15072": {
+      "draftTid": 8,
+      "name": "Marvin Jones Jr.",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "15102": {
+      "draftTid": 8,
+      "name": "Rishard Matthews",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15168": {
+      "name": "Case Keenum",
+      "owner": "m06",
+      "slot": 0,
+      "tid": 2
+    },
+    "15428": {
+      "name": "Jermaine Kearse",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "15683": {
+      "draftTid": 3,
+      "name": "Justin Tucker",
+      "owner": "m18",
+      "slot": 17,
+      "tid": 7
+    },
+    "15705": {
+      "name": "Josh Gordon",
+      "owner": "m02",
+      "slot": 23,
+      "tid": 6
+    },
+    "15788": {
+      "draftTid": 6,
+      "name": "Tyler Eifert"
+    },
+    "15795": {
+      "draftTid": 7,
+      "name": "DeAndre Hopkins",
+      "owner": "m18",
+      "slot": 4,
+      "tid": 7
+    },
+    "15818": {
+      "draftTid": 3,
+      "name": "Keenan Allen",
+      "owner": "m08",
+      "slot": 4,
+      "tid": 3
+    },
+    "15825": {
+      "draftTid": 10,
+      "name": "Le'Veon Bell",
+      "owner": "m01",
+      "slot": 2,
+      "tid": 10
+    },
+    "15826": {
+      "draftTid": 9,
+      "name": "Giovani Bernard",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "15835": {
+      "draftTid": 10,
+      "name": "Zach Ertz",
+      "owner": "m01",
+      "slot": 6,
+      "tid": 10
+    },
+    "15839": {
+      "name": "Marquise Goodwin",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "15847": {
+      "draftTid": 7,
+      "name": "Travis Kelce",
+      "owner": "m02",
+      "slot": 6,
+      "tid": 6
+    },
+    "15848": {
+      "draftTid": 9,
+      "name": "Eddie Lacy",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "15860": {
+      "draftTid": 4,
+      "name": "Jordan Reed"
+    },
+    "15880": {
+      "name": "Robert Woods",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "15920": {
+      "draftTid": 8,
+      "name": "Latavius Murray",
+      "owner": "m01",
+      "slot": 23,
+      "tid": 10
+    },
+    "15952": {
+      "draftTid": 5,
+      "name": "Mike Gillislee"
+    },
+    "15965": {
+      "draftTid": 5,
+      "name": "Dustin Hopkins"
+    },
+    "15966": {
+      "draftTid": 8,
+      "name": "Chris Thompson"
+    },
+    "15971": {
+      "draftTid": 1,
+      "name": "Rex Burkhead",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "15994": {
+      "draftTid": 3,
+      "name": "Theo Riddick",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "16016": {
+      "name": "Kenny Stills",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "16024": {
+      "name": "Kerwynn Williams",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "16040": {
+      "draftTid": 6,
+      "name": "C.J. Anderson",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "16460": {
+      "draftTid": 2,
+      "name": "Adam Thielen",
+      "owner": "m12",
+      "slot": 23,
+      "tid": 5
+    },
+    "16504": {
+      "draftTid": 12,
+      "name": "Jack Doyle",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "16724": {
+      "name": "Blake Bortles",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "16725": {
+      "draftTid": 10,
+      "name": "Sammy Watkins",
+      "owner": "m15",
+      "slot": 23,
+      "tid": 8
+    },
+    "16730": {
+      "draftTid": 4,
+      "name": "Kelvin Benjamin",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "16731": {
+      "draftTid": 2,
+      "name": "Brandin Cooks",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "16732": {
+      "draftTid": 1,
+      "name": "Eric Ebron",
+      "owner": "m17",
+      "slot": 6,
+      "tid": 9
+    },
+    "16733": {
+      "draftTid": 5,
+      "name": "Odell Beckham Jr."
+    },
+    "16737": {
+      "draftTid": 2,
+      "name": "Mike Evans",
+      "owner": "m06",
+      "slot": 4,
+      "tid": 2
+    },
+    "16757": {
+      "draftTid": 7,
+      "name": "Derek Carr",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "16760": {
+      "name": "Jimmy Garoppolo",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "16763": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "16777": {
+      "draftTid": 6,
+      "name": "Carlos Hyde",
+      "owner": "m02",
+      "slot": 2,
+      "tid": 6
+    },
+    "16781": {
+      "name": "Paul Richardson",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "16782": {
+      "name": "Jerick McKinnon",
+      "owner": "m13",
+      "slot": 23,
+      "tid": 11
+    },
+    "16783": {
+      "draftTid": 4,
+      "name": ""
+    },
+    "16787": {
+      "name": "Marqise Lee",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "16790": {
+      "draftTid": 12,
+      "name": "Jarvis Landry",
+      "owner": "m10",
+      "slot": 4,
+      "tid": 12
+    },
+    "16791": {
+      "draftTid": 10,
+      "name": "Donte Moncrief"
+    },
+    "16799": {
+      "draftTid": 6,
+      "name": "Allen Robinson"
+    },
+    "16800": {
+      "draftTid": 11,
+      "name": "Davante Adams",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "16804": {
+      "draftTid": 1,
+      "name": "John Brown"
+    },
+    "16886": {
+      "draftTid": 10,
+      "name": "Martavis Bryant",
+      "owner": "m06",
+      "slot": 23,
+      "tid": 2
+    },
+    "16913": {
+      "draftTid": 9,
+      "name": "James White"
+    },
+    "16944": {
+      "draftTid": 11,
+      "name": "Devonta Freeman",
+      "owner": "m01",
+      "slot": 2,
+      "tid": 10
+    },
+    "16974": {
+      "name": "Trey Burton",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "17133": {
+      "draftTid": 4,
+      "name": "Isaiah Crowell",
+      "owner": "m04",
+      "slot": 23,
+      "tid": 4
+    },
+    "17177": {
+      "draftTid": 10,
+      "name": "Allen Hurns"
+    },
+    "17258": {
+      "draftTid": 2,
+      "name": ""
+    },
+    "17284": {
+      "draftTid": 10,
+      "name": ""
+    },
+    "17331": {
+      "name": "Orleans Darkwa",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "17372": {
+      "draftTid": 10,
+      "name": "Chris Boswell",
+      "owner": "m06",
+      "slot": 17,
+      "tid": 2
+    },
+    "17453": {
+      "name": "Cameron Brate",
+      "owner": "m04",
+      "slot": 6,
+      "tid": 4
+    },
+    "2148": {
+      "draftTid": 7,
+      "name": "Sebastian Janikowski"
+    },
+    "2330": {
+      "draftTid": 12,
+      "name": "Tom Brady",
+      "owner": "m18",
+      "slot": 0,
+      "tid": 7
+    },
+    "2508176": {
+      "draftTid": 9,
+      "name": "David Johnson"
+    },
+    "2573300": {
+      "draftTid": 7,
+      "name": "Jay Ajayi",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "2574808": {
+      "name": "Robby Anderson",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "2575408": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "2575965": {
+      "name": "Elijhaa Penny",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "2576019": {
+      "draftTid": 7,
+      "name": "Josh Doctson",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "2576237": {
+      "draftTid": 8,
+      "name": ""
+    },
+    "2576336": {
+      "draftTid": 6,
+      "name": "Ameer Abdullah",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "2576434": {
+      "draftTid": 4,
+      "name": "Melvin Gordon",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "2576623": {
+      "draftTid": 9,
+      "name": "DeVante Parker",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "2576716": {
+      "draftTid": 1,
+      "name": "Jamison Crowder",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "2576980": {
+      "draftTid": 3,
+      "name": "Marcus Mariota"
+    },
+    "2577134": {
+      "draftTid": 12,
+      "name": "Ty Montgomery"
+    },
+    "2577327": {
+      "draftTid": 9,
+      "name": "Tyler Lockett"
+    },
+    "2577417": {
+      "draftTid": 12,
+      "name": "Dak Prescott",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "2580": {
+      "draftTid": 5,
+      "name": "Drew Brees",
+      "owner": "m12",
+      "slot": 0,
+      "tid": 5
+    },
+    "2582139": {
+      "name": "Sam Ficken",
+      "owner": "m04",
+      "slot": 17,
+      "tid": 4
+    },
+    "2587819": {
+      "draftTid": 4,
+      "name": "Tyrell Williams",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "2969939": {
+      "draftTid": 2,
+      "name": "Jameis Winston",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "2969962": {
+      "draftTid": 7,
+      "name": "Duke Johnson Jr.",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "2971589": {
+      "draftTid": 7,
+      "name": ""
+    },
+    "2971618": {
+      "name": "Nelson Agholor",
+      "owner": "m17",
+      "slot": 4,
+      "tid": 9
+    },
+    "2976212": {
+      "draftTid": 6,
+      "name": "Stefon Diggs",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "2976316": {
+      "draftTid": 1,
+      "name": "Michael Thomas",
+      "owner": "m11",
+      "slot": 4,
+      "tid": 1
+    },
+    "2976499": {
+      "draftTid": 6,
+      "name": "Amari Cooper",
+      "owner": "m02",
+      "slot": 20,
+      "tid": 6
+    },
+    "2976592": {
+      "draftTid": 9,
+      "name": "Sterling Shepard",
+      "owner": "m01",
+      "slot": 4,
+      "tid": 10
+    },
+    "2977187": {
+      "draftTid": 3,
+      "name": "Cooper Kupp",
+      "owner": "m08",
+      "slot": 20,
+      "tid": 3
+    },
+    "2977609": {
+      "name": "Devin Funchess",
+      "owner": "m01",
+      "slot": 4,
+      "tid": 10
+    },
+    "2977644": {
+      "draftTid": 12,
+      "name": "Todd Gurley II",
+      "owner": "m10",
+      "slot": 2,
+      "tid": 12
+    },
+    "2978929": {
+      "draftTid": 5,
+      "name": "Corey Coleman",
+      "owner": "m18",
+      "slot": 20,
+      "tid": 7
+    },
+    "2979477": {
+      "draftTid": 9,
+      "name": "Tevin Coleman",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "2979590": {
+      "name": "Jesse James",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "2979843": {
+      "name": "Kenyan Drake",
+      "owner": "m17",
+      "slot": 2,
+      "tid": 9
+    },
+    "2980148": {
+      "draftTid": 2,
+      "name": "C.J. Prosise"
+    },
+    "2980453": {
+      "draftTid": 1,
+      "name": "Jamaal Williams",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "2985659": {
+      "draftTid": 6,
+      "name": "Wil Lutz",
+      "owner": "m02",
+      "slot": 17,
+      "tid": 6
+    },
+    "3025433": {
+      "name": "Mike Davis",
+      "owner": "m04",
+      "slot": 2,
+      "tid": 4
+    },
+    "3042435": {
+      "draftTid": 5,
+      "name": ""
+    },
+    "3042519": {
+      "name": "Aaron Jones",
+      "owner": "m10",
+      "slot": 20,
+      "tid": 12
+    },
+    "3042778": {
+      "draftTid": 2,
+      "name": "Corey Davis"
+    },
+    "3043078": {
+      "draftTid": 12,
+      "name": "Derrick Henry",
+      "owner": "m17",
+      "slot": 23,
+      "tid": 9
+    },
+    "3043275": {
+      "draftTid": 10,
+      "name": "Austin Hooper",
+      "owner": "m10",
+      "slot": 6,
+      "tid": 12
+    },
+    "3045147": {
+      "draftTid": 10,
+      "name": "James Conner"
+    },
+    "3046409": {
+      "name": "Alex Collins",
+      "owner": "m11",
+      "slot": 23,
+      "tid": 1
+    },
+    "3046439": {
+      "draftTid": 12,
+      "name": "Hunter Henry"
+    },
+    "3046779": {
+      "name": "Jared Goff",
+      "owner": "m13",
+      "slot": 20,
+      "tid": 11
+    },
+    "3050478": {
+      "name": "Jake Elliott",
+      "owner": "m08",
+      "slot": 17,
+      "tid": 3
+    },
+    "3051392": {
+      "draftTid": 1,
+      "name": "Ezekiel Elliott",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "3051806": {
+      "name": "Ricky Seals-Jones",
+      "owner": "m04",
+      "slot": 20,
+      "tid": 4
+    },
+    "3051876": {
+      "draftTid": 3,
+      "name": "Evan Engram",
+      "owner": "m12",
+      "slot": 6,
+      "tid": 5
+    },
+    "3051902": {
+      "name": "Peyton Barber",
+      "owner": "m15",
+      "slot": 20,
+      "tid": 8
+    },
+    "3052876": {
+      "name": "Will Fuller V",
+      "owner": "m13",
+      "slot": 4,
+      "tid": 11
+    },
+    "3054850": {
+      "name": "Alvin Kamara",
+      "owner": "m15",
+      "slot": 2,
+      "tid": 8
+    },
+    "3055899": {
+      "draftTid": 1,
+      "name": "Harrison Butker",
+      "owner": "m17",
+      "slot": 17,
+      "tid": 9
+    },
+    "3059722": {
+      "draftTid": 11,
+      "name": "Zay Jones"
+    },
+    "3059915": {
+      "draftTid": 10,
+      "name": "Kareem Hunt",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 11
+    },
+    "3060022": {
+      "draftTid": 1,
+      "name": "Jordan Howard",
+      "owner": "m11",
+      "slot": 2,
+      "tid": 1
+    },
+    "3066158": {
+      "name": "Tarik Cohen",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "3071572": {
+      "name": "Keelan Cole",
+      "owner": "m04",
+      "slot": 4,
+      "tid": 4
+    },
+    "3115364": {
+      "draftTid": 11,
+      "name": "Leonard Fournette",
+      "owner": "m13",
+      "slot": 2,
+      "tid": 11
+    },
+    "3116385": {
+      "draftTid": 2,
+      "name": "Joe Mixon",
+      "owner": "m06",
+      "slot": 2,
+      "tid": 2
+    },
+    "3116389": {
+      "draftTid": 1,
+      "name": "Samaje Perine",
+      "owner": "m10",
+      "slot": 2,
+      "tid": 12
+    },
+    "3116406": {
+      "draftTid": 5,
+      "name": "Tyreek Hill",
+      "owner": "m02",
+      "slot": 4,
+      "tid": 6
+    },
+    "3116593": {
+      "draftTid": 8,
+      "name": "Dalvin Cook"
+    },
+    "3117251": {
+      "draftTid": 11,
+      "name": "Christian McCaffrey",
+      "owner": "m08",
+      "slot": 2,
+      "tid": 3
+    },
+    "3120348": {
+      "name": "JuJu Smith-Schuster",
+      "owner": "m15",
+      "slot": 4,
+      "tid": 8
+    },
+    "3122866": {
+      "name": "Devontae Booker",
+      "owner": "m06",
+      "slot": 20,
+      "tid": 2
+    },
+    "3139605": {
+      "draftTid": 1,
+      "name": "Marlon Mack",
+      "owner": "m12",
+      "slot": 20,
+      "tid": 5
+    },
+    "3892889": {
+      "name": "Dede Westbrook",
+      "owner": "m11",
+      "slot": 20,
+      "tid": 1
+    },
+    "3919596": {
+      "draftTid": 4,
+      "name": "Chris Carson"
+    },
+    "4333": {
+      "draftTid": 8,
+      "name": "Matt Bryant",
+      "owner": "m12",
+      "slot": 17,
+      "tid": 5
+    },
+    "4459": {
+      "draftTid": 6,
+      "name": ""
+    },
+    "4527": {
+      "draftTid": 11,
+      "name": "Jason Witten",
+      "owner": "m17",
+      "slot": 20,
+      "tid": 9
+    },
+    "5362": {
+      "name": "Antonio Gates",
+      "owner": "m11",
+      "slot": 6,
+      "tid": 1
+    },
+    "5526": {
+      "draftTid": 1,
+      "name": "Eli Manning",
+      "owner": "m17",
+      "slot": 0,
+      "tid": 9
+    },
+    "5528": {
+      "draftTid": 11,
+      "name": "Larry Fitzgerald",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "5529": {
+      "draftTid": 2,
+      "name": "Philip Rivers",
+      "owner": "m11",
+      "slot": 0,
+      "tid": 1
+    },
+    "5536": {
+      "draftTid": 3,
+      "name": "Ben Roethlisberger",
+      "owner": "m10",
+      "slot": 0,
+      "tid": 12
+    },
+    "8416": {
+      "name": "Alex Smith",
+      "owner": "m08",
+      "slot": 0,
+      "tid": 3
+    },
+    "8439": {
+      "draftTid": 12,
+      "name": "Aaron Rodgers"
+    },
+    "8479": {
+      "draftTid": 7,
+      "name": "Frank Gore",
+      "owner": "m10",
+      "slot": 23,
+      "tid": 12
+    },
+    "8544": {
+      "draftTid": 12,
+      "name": ""
+    },
+    "9354": {
+      "name": "Robbie Gould",
+      "owner": "m15",
+      "slot": 17,
+      "tid": 8
+    },
+    "9592": {
+      "name": "Vernon Davis",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "9597": {
+      "draftTid": 9,
+      "name": "Jay Cutler",
+      "owner": "m01",
+      "slot": 20,
+      "tid": 10
+    },
+    "9704": {
+      "draftTid": 12,
+      "name": "Stephen Gostkowski",
+      "owner": "m10",
+      "slot": 17,
+      "tid": 12
+    },
+    "9705": {
+      "draftTid": 11,
+      "name": "Brandon Marshall"
+    },
+    "9761": {
+      "draftTid": 2,
+      "name": "Delanie Walker",
+      "owner": "m06",
+      "slot": 6,
+      "tid": 2
+    }
+  }
+}

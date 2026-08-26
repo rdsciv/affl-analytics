@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFFL Data Dictionary</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="logo.css?v=2">
+</head>
+<body>
+<div class="frame">
+
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <div>
+        <h1>Data <span>Dictionary</span></h1>
+        <div class="sub">Confused by a metric? Search it. Draft terms included.</div>
+      </div>
+    </div>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html" class="on">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
+    </nav>
+  </header>
+
+  <section class="card dict-wrap">
+    <div class="dict-tools">
+      <input id="dict-search" class="team-select dict-search" type="search"
+             placeholder="Search term or definition…" aria-label="Search terms">
+      <div class="dict-count" id="dict-count"></div>
+    </div>
+    <div class="dict-chips" id="dict-chips">
+      <button type="button" class="season-chip dict-chip on" data-cat="all">ALL</button>
+      <button type="button" class="season-chip dict-chip" data-cat="draft">DRAFT</button>
+      <button type="button" class="season-chip dict-chip" data-cat="league">LEAGUE</button>
+      <button type="button" class="season-chip dict-chip" data-cat="players">PLAYERS</button>
+    </div>
+    <div class="dict-list" id="dict-list"></div>
+  </section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Analytics &middot; only metrics this site actually computes</p>
+  </footer>
+</div>
+
+<script src="common.js?v=18"></script>
+<script src="dictionary.js?v=3"></script>
+</body>
+</html>

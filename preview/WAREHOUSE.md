@@ -1,0 +1,3 @@
+# Warehouse — 2026 stub
+
+CHI-72 Phase A (data only). `affl.db` is the source of truth. Owner map now matches the site: Kafka/Chupacabras canonical `m07` (merge m01→m07, no longer m07→m01); Gabagooners `m22` Andy Pietromonaco current with 0 history; Pounders `m19` and Pollywogs `m14` historic. `dim_season` 2026 + 12 `dim_team` rows, no invented W/L/PF/draft/trades. nflverse `roster_2026.csv` loaded into `dim_player` / `player_season` (espn→gsis; D/ST stay without gsis). Caleb Huntley gsis backfilled from nflverse 2021–22 when the espn id is blank. Export skipped this pass so site-only NGS/injury JSON is untouched.

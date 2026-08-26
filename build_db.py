@@ -5,15 +5,22 @@ Reads the same cached inputs fetch.py produces (data/*.json, data/*.csv) and
 lands them in the relational schema, which then becomes the single source of
 truth for metrics. Idempotent: safe to re-run, rebuilds from scratch.
 
-    python3 build_db.py            # rebuild everything
-    python3 build_db.py --check    # run verification queries only
+    python3 build_db.py                   # rebuild everything
+    python3 build_db.py --check           # run verification queries only
+    python3 build_db.py --import-matchups 2025   # CHI-24: one season, keep checksum
+    python3 build_db.py --sidecars        # CHI-72 Phase B: NGS/bio/injury/college/overview
 """
 import csv
+import gzip
 import json
 import os
+import re
 import sqlite3
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
+import adapters.espn_box_v1 as espn_box
+from process_seasons import resolve_accept_items
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
@@ -39,20 +46,33 @@ def fnum(row, key):
 # --------------------------------------------------------------------- schema
 def init(con):
     con.executescript(open(os.path.join(HERE, 'schema.sql')).read())
+    cols = {r[1] for r in con.execute('PRAGMA table_info(dim_member)')}
+    if 'owner_id' not in cols:
+        con.execute('ALTER TABLE dim_member ADD COLUMN owner_id TEXT')
 
 def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
               'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
-              'fact_cap_hit', 'player_season', 'dim_player', 'dim_team',
-              'dim_member', 'dim_scoring', 'dim_season'):
+              'fact_cap_hit', 'fact_player_season_points', 'player_season',
+              'fact_player_week_par', 'fact_player_season_par_reconstructed',
+              'fact_xtd_player_week', 'fact_projection_week', 'fact_roto_team_season',
+              'fact_roto_team_week',
+              'fact_ngs', 'dim_player_bio', 'fact_injury', 'fact_depthchart',
+              'fact_college', 'fact_player_overview',
+              'dim_player', 'dim_team',
+              'dim_member', 'dim_owner', 'dim_scoring', 'dim_season'):
         con.execute(f'DELETE FROM {t}')
 
 # ------------------------------------------------------------------ load core
 def load_seasons_and_teams(con, site):
     """dim_season / dim_member / dim_team come from the already-anonymised
     site/data.json, so no ESPN SWID ever reaches the database."""
-    con.executemany('INSERT OR REPLACE INTO dim_member(member_id, display_name, is_active) VALUES (?,?,?)',
-                    [(mid, name, 0) for mid, name in site['members'].items()])
+    for mid, name in site['members'].items():
+        con.execute("""INSERT INTO dim_member(member_id, display_name, is_active)
+                       VALUES (?,?,0)
+                       ON CONFLICT(member_id) DO UPDATE SET
+                         display_name=excluded.display_name, is_active=0""",
+                    (mid, name))
     active = set(site.get('activeOwners') or [])
     con.executemany('UPDATE dim_member SET is_active = 1 WHERE member_id = ?',
                     [(a,) for a in active])
@@ -61,17 +81,19 @@ def load_seasons_and_teams(con, site):
         year = int(yr_s)
         bundle = load(os.path.join(SITE, 'years', f'{year}.json')) or {}
         slots = bundle.get('slots') or {}
+        yardage = 'BUCKET' if year <= 2018 else 'FRACTIONAL'
         con.execute("""INSERT OR REPLACE INTO dim_season
             (season, reg_weeks, playoff_teams, team_count, auction_draft,
              has_rosters, has_tx, uses_faab,
-             slot_qb, slot_rb, slot_wr, slot_te, slot_flex, slot_dst, slot_k)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             slot_qb, slot_rb, slot_wr, slot_te, slot_flex, slot_dst, slot_k,
+             yardage_mode)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (year, max(s['regWeeks']) if s.get('regWeeks') else 13,
              s.get('playoffTeams'), len(s['teams']),
              int(bool(bundle.get('auctionDraft'))), int(bool(bundle.get('hasRosters'))),
              int(bool(bundle.get('hasTx'))), int(bool(bundle.get('usesFaab'))),
              slots.get('QB'), slots.get('RB'), slots.get('WR'), slots.get('TE'),
-             slots.get('FLEX'), slots.get('DST'), slots.get('K')))
+             slots.get('FLEX'), slots.get('DST'), slots.get('K'), yardage))
 
         con.executemany("""INSERT OR REPLACE INTO dim_team
             (season, team_id, member_id, name, abbrev, logo, wins, losses, ties,
@@ -80,6 +102,131 @@ def load_seasons_and_teams(con, site):
             [(year, t['id'], t.get('owner'), t['name'], t.get('abbrev'), t.get('logo'),
               t.get('wins'), t.get('losses'), t.get('ties'), t.get('pf'), t.get('pa'),
               t.get('playoffSeed'), t.get('finalRank')) for t in s['teams']])
+
+def parse_current_2026():
+    """Site header rail only — planning/navigation membership, not warehouse season.
+
+    CHI-75: CURRENT_2026 must never be written into dim_season / dim_team
+    before the AFFL draft. Callers may read this for UI checks; do not load.
+    """
+    path = os.path.join(SITE, 'common.js')
+    js = open(path).read()
+    block = re.search(r'const CURRENT_2026 = \[(.*?)\];', js, re.S)
+    if not block:
+        raise RuntimeError('CURRENT_2026 missing from site/common.js')
+    rows = re.findall(
+        r'owner:\s*"([^"]+)"\s*,\s*name:\s*"([^"]+)"\s*,\s*logo:\s*"([^"]*)"',
+        block.group(1))
+    return rows
+
+
+def refuse_affl_2026_season(con):
+    """CHI-75: there is no AFFL 2026 season before the draft.
+
+    Strip any leftover dim_season/dim_team 2026 rows. NFL roster identity in
+    player_season for calendar 2026 is a different grain and is left alone.
+    """
+    n_team = con.execute("SELECT COUNT(*) FROM dim_team WHERE season=2026").fetchone()[0]
+    n_season = con.execute("SELECT COUNT(*) FROM dim_season WHERE season=2026").fetchone()[0]
+    if n_team or n_season:
+        con.execute("DELETE FROM dim_team WHERE season=2026")
+        con.execute("DELETE FROM dim_season WHERE season=2026")
+    return n_team + n_season
+
+
+def load_2026_stub(con, site=None):
+    """Removed (CHI-75). Kept only so old docs/scripts fail loudly."""
+    raise RuntimeError(
+        "CHI-75: load_2026_stub is retired. There is no AFFL 2026 season "
+        "before the draft. Do not insert dim_season/dim_team 2026. "
+        "Planning membership lives in site/common.js CURRENT_2026 only."
+    )
+
+
+def iter_roster_by_espn(year):
+    """Latest nflverse roster row per espn_id. D/ST have no espn_id here."""
+    path = os.path.join(DATA, f'roster_{year}.csv')
+    if not os.path.exists(path):
+        return
+    by_eid = {}
+    for row in csv.DictReader(open(path)):
+        eid = row.get('espn_id')
+        if not eid:
+            continue
+        try:
+            eid = int(eid)
+        except ValueError:
+            continue
+        try:
+            wk = int(row.get('week') or 0)
+        except ValueError:
+            wk = 0
+        prev = by_eid.get(eid)
+        if prev is None or wk >= prev[0]:
+            by_eid[eid] = (wk, row)
+    for eid, (_wk, row) in by_eid.items():
+        yield eid, row
+
+
+def upsert_roster_players(con, year):
+    """Load nflverse roster_YEAR into dim_player / player_season. espn→gsis."""
+    existing = {r[0]: r[1] for r in con.execute(
+        'SELECT player_id, gsis_id FROM dim_player')}
+    new_players = 0
+    seasons = []
+    for eid, row in iter_roster_by_espn(year):
+        name = (row.get('full_name') or '').strip()
+        pos = (row.get('position') or '').strip()
+        gsis = (row.get('gsis_id') or '').strip() or None
+        hs = row.get('headshot_url') or ''
+        if hs:
+            hs = hs.replace('f_auto,q_auto',
+                            'c_fill,g_face,h_200,w_200,f_auto,q_auto')
+        else:
+            hs = None
+        nfl = (row.get('team') or '').strip() or None
+        if eid not in existing:
+            if not name:
+                continue
+            con.execute("""INSERT INTO dim_player
+                (player_id, name, position, gsis_id, otc_id, headshot_url)
+                VALUES (?,?,?,?,NULL,?)""", (eid, name, pos, gsis, hs))
+            existing[eid] = gsis
+            new_players += 1
+        elif gsis and not existing[eid]:
+            con.execute("""UPDATE dim_player SET gsis_id=?
+                            WHERE player_id=? AND (gsis_id IS NULL OR gsis_id='')""",
+                        (gsis, eid))
+            existing[eid] = gsis
+        seasons.append((year, eid, nfl))
+    con.executemany(
+        'INSERT OR REPLACE INTO player_season(season, player_id, nfl_team) VALUES (?,?,?)',
+        seasons)
+    return new_players, len(seasons)
+
+
+def fix_huntley_gsis(con):
+    """Caleb Huntley: nflverse has gsis but often no espn_id. Name backfill only."""
+    row = con.execute(
+        "SELECT player_id, gsis_id FROM dim_player WHERE name='Caleb Huntley'"
+    ).fetchone()
+    if not row or row[1]:
+        return 0
+    gsis = None
+    for year in range(2014, 2027):
+        path = os.path.join(DATA, f'roster_{year}.csv')
+        if not os.path.exists(path):
+            continue
+        for r in csv.DictReader(open(path)):
+            if (r.get('full_name') or '').strip() == 'Caleb Huntley' and r.get('gsis_id'):
+                gsis = r['gsis_id'].strip()
+    if not gsis:
+        return 0
+    con.execute("""UPDATE dim_player SET gsis_id=?
+                    WHERE player_id=? AND (gsis_id IS NULL OR gsis_id='')""",
+                (gsis, row[0]))
+    return 1
+
 
 def load_players_and_rosters(con):
     players, pseason, rws = {}, [], []
@@ -103,7 +250,7 @@ def load_players_and_rosters(con):
 
     # nflverse ids + headshots, so contracts and box stats can join
     gsis, shots = {}, {}
-    for year in range(2014, 2026):
+    for year in range(2014, 2027):
         p = f'{DATA}/roster_{year}.csv'
         if not os.path.exists(p):
             continue
@@ -142,40 +289,133 @@ def load_players_and_rosters(con):
     # a player can appear twice in a week if ESPN reports a mid-week move; keep the last
     con.executemany("""INSERT OR REPLACE INTO fact_roster_week
         (season, week, team_id, player_id, slot, points, started) VALUES (?,?,?,?,?,?,?)""", rws)
+    # 2026 NFL rosters: no AFFL box yet. espn→gsis same as other years; D/ST stay without gsis.
+    upsert_roster_players(con, 2026)
+    fix_huntley_gsis(con)
     return len(players), len(rws)
 
-def load_matchups(con):
-    rows = []
-    for year in range(2014, 2026):
-        box = load(f'{DATA}/box_{year}.json')
-        league = load(f'{DATA}/league_{year}.json')
-        reg = ((league or {}).get('settings') or {}).get('scheduleSettings', {}).get('matchupPeriodCount', 13)
-        weeks = (box or {}).get('weeks') or {}
-        if not weeks and league:                 # pre-2018: schedule only
-            synth = defaultdict(list)
-            for g in league.get('schedule', []):
-                h, a = g.get('home'), g.get('away')
-                if not h or not a:
-                    continue
-                hp, ap = round(h.get('totalPoints') or 0, 1), round(a.get('totalPoints') or 0, 1)
-                if not hp and not ap:
-                    continue
-                synth[str(g['matchupPeriodId'])].append(
-                    {'tier': g.get('playoffTierType', 'NONE'),
-                     'home': {'tid': h['teamId'], 'pts': hp},
-                     'away': {'tid': a['teamId'], 'pts': ap}})
-            weeks = dict(synth)
-        for wk_s, games in weeks.items():
-            wk = int(wk_s)
-            for g in games:
-                h, a = g['home'], g['away']
-                playoff = 1 if (g.get('tier', 'NONE') != 'NONE' or wk > reg) else 0
-                rows.append((year, wk, h['tid'], a['tid'], h['pts'], a['pts'], 1, g.get('tier', 'NONE'), playoff))
-                rows.append((year, wk, a['tid'], h['tid'], a['pts'], h['pts'], 0, g.get('tier', 'NONE'), playoff))
-    con.executemany("""INSERT OR REPLACE INTO fact_matchup
+def pairing_diagnostics(con, season):
+    """Row / team / week / pairing gates. Week 15 with 10 teams is a bye, not a hole."""
+    dim = con.execute(
+        "SELECT team_count, reg_weeks, playoff_teams FROM dim_season WHERE season=?",
+        (season,)).fetchone()
+    team_count, reg_weeks, playoff_teams = dim if dim else (None, None, None)
+    sides = con.execute("SELECT COUNT(*) FROM fact_matchup WHERE season=?", (season,)).fetchone()[0]
+    team_ids = [r[0] for r in con.execute(
+        "SELECT DISTINCT team_id FROM fact_matchup WHERE season=? ORDER BY 1", (season,))]
+    weeks = [r[0] for r in con.execute(
+        "SELECT DISTINCT week FROM fact_matchup WHERE season=? ORDER BY 1", (season,))]
+    mirrors = con.execute("""
+        SELECT COUNT(*) FROM fact_matchup a LEFT JOIN fact_matchup b
+          ON b.season=a.season AND b.week=a.week AND b.team_id=a.opponent_id
+         WHERE a.season=? AND b.team_id IS NULL""", (season,)).fetchone()[0]
+    self_play = con.execute(
+        "SELECT COUNT(*) FROM fact_matchup WHERE season=? AND team_id=opponent_id",
+        (season,)).fetchone()[0]
+    holes = []
+    by_week = []
+    for wk, n_sides, n_teams in con.execute("""
+            SELECT week, COUNT(*), COUNT(DISTINCT team_id)
+              FROM fact_matchup WHERE season=? GROUP BY week ORDER BY week""", (season,)):
+        expected = team_count
+        bye_week = (reg_weeks is not None and wk == reg_weeks + 1
+                    and playoff_teams == 6 and team_count == 12)
+        if bye_week:
+            expected = 10
+        by_week.append({"week": wk, "sides": n_sides, "teams": n_teams,
+                        "games": n_sides // 2, "expected_teams": expected})
+        if expected is not None and (n_teams != expected or n_sides != expected):
+            holes.append({"week": wk, "sides": n_sides, "teams": n_teams,
+                          "expected_teams": expected})
+    if mirrors:
+        holes.append({"kind": "missing_mirrors", "count": mirrors})
+    if self_play:
+        holes.append({"kind": "self_play", "count": self_play})
+    bye_ids = []
+    week15_note = None
+    if reg_weeks is not None:
+        w15 = {r[0] for r in con.execute(
+            "SELECT DISTINCT team_id FROM fact_matchup WHERE season=? AND week=?",
+            (season, reg_weeks + 1))}
+        if team_ids and w15:
+            bye_ids = [t for t in team_ids if t not in w15]
+            if bye_ids:
+                names = []
+                for tid in bye_ids:
+                    row = con.execute(
+                        "SELECT name, final_rank FROM dim_team WHERE season=? AND team_id=?",
+                        (season, tid)).fetchone()
+                    if row:
+                        names.append(f"#{row[1]} {row[0]}" if row[1] is not None else row[0])
+                    else:
+                        names.append(str(tid))
+                week15_note = (
+                    f"week {reg_weeks + 1} has {len(w15)} teams — first-round byes for "
+                    + " and ".join(names) + ". Not a pairing hole."
+                )
+    return {
+        "season": season,
+        "sides": sides,
+        "teams": len(team_ids),
+        "team_ids": team_ids,
+        "weeks": weeks,
+        "week_min": weeks[0] if weeks else None,
+        "week_max": weeks[-1] if weeks else None,
+        "mirrors_missing": mirrors,
+        "self_play": self_play,
+        "bye_team_ids": bye_ids,
+        "week15_note": week15_note,
+        "holes": holes,
+        "by_week": by_week,
+    }
+
+
+def import_matchups_season(con, season, data_dir=None):
+    """Replace one season of fact_matchup from the versioned adapter. Idempotent."""
+    data_dir = data_dir or DATA
+    started = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    dim = con.execute("SELECT reg_weeks FROM dim_season WHERE season=?", (season,)).fetchone()
+    payload = espn_box.extract(data_dir, season, reg_weeks=dim[0] if dim else None)
+    rows = payload["rows"]
+    if not rows:
+        finished = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        diag = {"error": "no matchup rows extracted", "primary": payload.get("primary")}
+        con.execute("""INSERT INTO meta_import_run
+            (adapter, adapter_version, dataset, season, started_at, finished_at,
+             status, row_count, diagnostics)
+            VALUES (?,?,?,?,?,?,?,?,?)""",
+            (payload["adapter"], payload["adapter_version"], "matchup", season,
+             started, finished, "fail", 0, json.dumps(diag, sort_keys=True)))
+        run_id = con.execute("SELECT last_insert_rowid()").fetchone()[0]
+        for s in payload["sources"]:
+            con.execute("""INSERT INTO meta_import_source (run_id, path, sha256, bytes)
+                VALUES (?,?,?,?)""", (run_id, s["path"], s["sha256"], s["bytes"]))
+        return 0
+    con.execute("DELETE FROM fact_matchup WHERE season=?", (season,))
+    con.executemany("""INSERT INTO fact_matchup
         (season, week, team_id, opponent_id, points, opponent_points, is_home, tier, is_playoff)
         VALUES (?,?,?,?,?,?,?,?,?)""", rows)
+    diag = pairing_diagnostics(con, season)
+    status = "ok" if not diag.get("holes") else "fail"
+    finished = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    con.execute("""INSERT INTO meta_import_run
+        (adapter, adapter_version, dataset, season, started_at, finished_at,
+         status, row_count, diagnostics)
+        VALUES (?,?,?,?,?,?,?,?,?)""",
+        (payload["adapter"], payload["adapter_version"], "matchup", season,
+         started, finished, status, len(rows), json.dumps(diag, sort_keys=True)))
+    run_id = con.execute("SELECT last_insert_rowid()").fetchone()[0]
+    for s in payload["sources"]:
+        con.execute("""INSERT INTO meta_import_source (run_id, path, sha256, bytes)
+            VALUES (?,?,?,?)""", (run_id, s["path"], s["sha256"], s["bytes"]))
     return len(rows)
+
+
+def load_matchups(con):
+    total = 0
+    for year in range(2014, 2026):
+        total += import_matchups_season(con, year)
+    return total
 
 def load_drafts(con):
     rows = []
@@ -218,27 +458,73 @@ def load_transactions(con):
     return len(rows)
 
 def load_trades(con):
-    """Derived from roster movement, matching process_seasons.py: the transaction
-    feed's team attribution is unusable because the commissioner executes for
-    other managers."""
+    """TRADE_ACCEPT joined to TRADE_PROPOSAL via rel (from/to on the item,
+    never executing team). One-sided ESPN rows are filled from the proposal or
+    the paired item. 2014–17 have no tx log and are skipped. Empty ACCEPTs and
+    the rest come from process_seasons reconstruction."""
     n_tr = n_it = 0
-    for year in range(2014, 2026):
+    seen = set()  # (year, pid, from, to, week) to avoid ACCEPT + recon dupes
+
+    def add_trade(year, wk, ts, items):
+        nonlocal n_tr, n_it
+        rows = []
+        for pid, frm, to in items:
+            if pid is None or not frm or not to or frm == to:
+                continue
+            key = (year, pid, frm, to, wk)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append((pid, frm, to))
+        if not rows:
+            return
+        cur = con.execute('INSERT INTO fact_trade(season, week, ts) VALUES (?,?,?)',
+                          (year, wk, ts))
+        tid = cur.lastrowid
+        n_tr += 1
+        for pid, frm, to in rows:
+            con.execute("""INSERT INTO fact_trade_item
+                (trade_id, player_id, from_team_id, to_team_id) VALUES (?,?,?,?)""",
+                (tid, pid, frm, to))
+            n_it += 1
+
+    for year in range(2018, 2026):
+        d = load(f'{DATA}/tx_{year}.json')
+        if not d:
+            continue
+        by_id = {t['id']: t for t in d.get('tx', []) if t.get('id')}
+        seen_sets = set()
+        for t in d.get('tx', []):
+            if t.get('type') != 'TRADE_ACCEPT':
+                continue
+            wk = t.get('wk') or 1
+            items = [(i.get('pid'), i.get('from'), i.get('to'))
+                     for i in resolve_accept_items(t, by_id)]
+            if not items:
+                continue
+            key = frozenset(items)
+            if key in seen_sets:
+                continue
+            seen_sets.add(key)
+            add_trade(year, wk, t.get('date'), items)
+
+    for year in range(2018, 2026):
         bundle = load(os.path.join(SITE, 'years', f'{year}.json'))
         if not bundle:
             continue
         for tr in bundle.get('trades', []):
-            cur = con.execute('INSERT INTO fact_trade(season, week, ts) VALUES (?,?,?)',
-                              (year, tr['wk'], tr.get('date')))
-            tid = cur.lastrowid
-            n_tr += 1
-            received = {s['tid']: {g['pid'] for g in s['got']} for s in tr['sides']}
-            for to_team, pids in received.items():
-                for pid in pids:
-                    frm = next((o for o in received if o != to_team), to_team)
-                    con.execute("""INSERT INTO fact_trade_item
-                        (trade_id, player_id, from_team_id, to_team_id) VALUES (?,?,?,?)""",
-                        (tid, pid, frm, to_team))
-                    n_it += 1
+            items = []
+            sides = tr.get('sides') or []
+            other = {s['tid'] for s in sides}
+            for s in sides:
+                to_team = s['tid']
+                for g in s.get('got') or []:
+                    pid = g.get('pid')
+                    frm = g.get('from')
+                    if frm is None:
+                        frm = next((o for o in other if o != to_team), None)
+                    items.append((pid, frm, to_team))
+            add_trade(year, tr['wk'], tr.get('date'), items)
     return n_tr, n_it
 
 def load_nfl_weeks(con):
@@ -383,8 +669,11 @@ def load_scoring(con):
     # validation script proves the assumption (2018 goes 0.6% -> 99%+ exact).
     have = {(s, sid) for s, sid in con.execute('SELECT season, stat_id FROM dim_scoring')}
     seasons = [r[0] for r in con.execute('SELECT season FROM dim_season ORDER BY season')]
+    scored = {s for s, _ in have}
     filled = 0
     for season in seasons:
+        if season not in scored and not os.path.exists(os.path.join(DATA, f'settings_{season}.json')):
+            continue
         for sid in (3, 24, 42):
             if (season, sid) in have:
                 continue
@@ -409,6 +698,59 @@ def load_scoring(con):
     con.execute("UPDATE dim_season SET yardage_mode = 'FRACTIONAL' WHERE season >= 2019")
     return len(rows) + filled
 
+def load_player_season_points(con):
+    """Season fantasy totals per player: ESPN's own where lineups exist, computed
+    from nflverse under dim_scoring where they don't (pre-2018).
+
+    Materialised because the equivalent view -- correlated subqueries over 208k
+    player-weeks -- made the site export take minutes.
+    """
+    modes = dict(con.execute('SELECT season, yardage_mode FROM dim_season'))
+    rules = defaultdict(dict)
+    for season, sid, pts in con.execute('SELECT season, stat_id, points FROM dim_scoring'):
+        rules[season][sid] = pts
+
+    # 1) actual, from ESPN's own weekly points
+    actual = {}
+    for season, pid, tot in con.execute("""
+            SELECT season, player_id, ROUND(SUM(points), 1)
+              FROM fact_roster_week GROUP BY season, player_id"""):
+        actual[(season, pid)] = tot
+
+    # 2) computed, for skill players in seasons with no lineups
+    gsis_to_pid = {}
+    for pid, g, pos in con.execute(
+            "SELECT player_id, gsis_id, position FROM dim_player WHERE gsis_id IS NOT NULL"):
+        if pos in ('QB', 'RB', 'WR', 'TE'):
+            gsis_to_pid[g] = pid
+
+    computed = defaultdict(float)
+    for row in con.execute("""
+            SELECT season, gsis_id, pass_yards, pass_tds, interceptions, rush_yards,
+                   rush_tds, rec_yards, rec_tds, receptions, fumbles_lost, two_pt
+              FROM fact_nfl_week"""):
+        season, g = row[0], row[1]
+        pid = gsis_to_pid.get(g)
+        if pid is None:
+            continue
+        k = rules.get(season, {})
+        py, pt, i, ry, rt, cy, ct, rc, fl, tp = row[2:]
+        if modes.get(season) == 'BUCKET':
+            yards = int(py // 25) + int(ry // 10) + int(cy // 10)
+        else:
+            yards = py * k.get(3, 0) + ry * k.get(24, 0) + cy * k.get(42, 0)
+        computed[(season, pid)] += (yards + pt * k.get(4, 0) + i * k.get(20, 0)
+                                   + rt * k.get(25, 0) + ct * k.get(43, 0)
+                                   + rc * k.get(53, 0) + fl * k.get(72, 0)
+                                   + tp * k.get(26, 0))
+
+    rows = [(s, p, t, 0) for (s, p), t in actual.items()]
+    rows += [(s, p, round(t, 1), 1) for (s, p), t in computed.items()
+             if (s, p) not in actual]
+    con.executemany("""INSERT OR REPLACE INTO fact_player_season_points
+        (season, player_id, total_points, is_computed) VALUES (?,?,?,?)""", rows)
+    return sum(1 for r in rows if not r[3]), sum(1 for r in rows if r[3])
+
 # ---------------------------------------------------------------- verification
 CHECKS = [
     ("seasons", "SELECT COUNT(*) FROM dim_season"),
@@ -424,8 +766,22 @@ CHECKS = [
     ("nfl player-weeks", "SELECT COUNT(*) FROM fact_nfl_week"),
     ("contracts", "SELECT COUNT(*) FROM fact_contract"),
     ("scoring rules", "SELECT COUNT(*) FROM dim_scoring"),
+    ("player-seasons", "SELECT COUNT(*) FROM fact_player_season_points"),
     ("cap hits", "SELECT COUNT(*) FROM fact_cap_hit"),
+    ("owners", "SELECT COUNT(*) FROM dim_owner"),
+    ("player-week PAR", "SELECT COUNT(*) FROM fact_player_week_par"),
+    ("reconstructed PAR", "SELECT COUNT(*) FROM fact_player_season_par_reconstructed"),
+    ("xTD player-weeks", "SELECT COUNT(*) FROM fact_xtd_player_week"),
+    ("projections", "SELECT COUNT(*) FROM fact_projection_week"),
+    ("import runs", "SELECT COUNT(*) FROM meta_import_run"),
+    ("ngs", "SELECT COUNT(*) FROM fact_ngs"),
+    ("player bio", "SELECT COUNT(*) FROM dim_player_bio"),
+    ("injuries", "SELECT COUNT(*) FROM fact_injury"),
+    ("depth charts", "SELECT COUNT(*) FROM fact_depthchart"),
+    ("college", "SELECT COUNT(*) FROM fact_college"),
+    ("player overview", "SELECT COUNT(*) FROM fact_player_overview"),
 ]
+
 
 INTEGRITY = [
     ("every matchup side has a mirror",
@@ -440,6 +796,21 @@ INTEGRITY = [
           ON p.player_id=r.player_id WHERE p.player_id IS NULL"""),
     ("no ESPN SWID leaked into member ids",
      "SELECT COUNT(*) FROM dim_member WHERE member_id LIKE '{%'"),
+    ("every member maps to an owner",
+     "SELECT COUNT(*) FROM dim_member WHERE owner_id IS NULL"),
+    ("every team-season has an owner",
+     """SELECT COUNT(*) FROM dim_team t LEFT JOIN dim_member m
+          ON m.member_id = t.member_id
+        WHERE m.owner_id IS NULL"""),
+    ("2025 regular matchup weeks are complete pairings",
+     """SELECT COUNT(*) FROM (
+          SELECT m.week FROM fact_matchup m
+          JOIN dim_season s ON s.season = m.season
+         WHERE m.season = 2025 AND m.is_playoff = 0
+         GROUP BY m.week, s.team_count
+        HAVING COUNT(DISTINCT m.team_id) != s.team_count
+            OR COUNT(*) != s.team_count
+        )"""),
 ]
 
 def check(con):
@@ -456,10 +827,59 @@ def check(con):
         print(f'  [{flag}] {label:44} {n}')
     return ok
 
+def _try_xtd(con):
+    """Use pbp already on disk. Downloads happen in compute_xtd.py, not here."""
+    pbp_dir = os.path.join(DATA, 'pbp')
+    have = os.path.isdir(pbp_dir) and any(
+        n.startswith('play_by_play_') and n.endswith('.csv.gz')
+        for n in os.listdir(pbp_dir))
+    if not have:
+        return 0, 'no pbp on disk — run python3 compute_xtd.py'
+    import compute_xtd
+    n = 0
+    for y in range(2014, 2026):
+        path, status = compute_xtd.ensure_pbp(y, download=False)
+        if path is None:
+            continue
+        rows, _plays = compute_xtd.fit_and_score(path)
+        if rows:
+            n += compute_xtd.persist(con, rows)
+    return n, 'ok'
+
+
 def main():
     if '--check' in sys.argv:
         con = sqlite3.connect(DB)
         sys.exit(0 if check(con) else 1)
+
+    if '--import-matchups' in sys.argv:
+        i = sys.argv.index('--import-matchups')
+        season = 2025
+        if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-'):
+            season = int(sys.argv[i + 1])
+        con = sqlite3.connect(DB)
+        init(con)
+        n = import_matchups_season(con, season)
+        con.commit()
+        run = con.execute("""
+            SELECT adapter, adapter_version, status, diagnostics
+              FROM meta_import_run
+             WHERE dataset='matchup' AND season=?
+             ORDER BY run_id DESC LIMIT 1""", (season,)).fetchone()
+        srcs = con.execute("""
+            SELECT path, sha256, bytes FROM meta_import_source
+             WHERE run_id = (SELECT MAX(run_id) FROM meta_import_run
+                              WHERE dataset='matchup' AND season=?)""", (season,)).fetchall()
+        print(f'matchup import {season}: {n} sides')
+        if run:
+            print(f'  adapter {run[0]} {run[1]}  status={run[2]}')
+            for path, sha, b in srcs:
+                print(f'  source {path} sha256={sha} bytes={b}')
+            diag = json.loads(run[3] or '{}')
+            print(f'  teams {diag.get("teams")} weeks {diag.get("week_min")}-{diag.get("week_max")} holes {len(diag.get("holes") or [])}')
+            if diag.get("week15_note"):
+                print(f'  {diag["week15_note"]}')
+        sys.exit(0 if run and run[2] == 'ok' else 1)
 
     site = json.load(open(os.path.join(SITE, 'data.json')))
     fresh = not os.path.exists(DB)
@@ -468,6 +888,11 @@ def main():
     wipe(con)
 
     load_seasons_and_teams(con, site)
+    # CHI-75: never load a fake AFFL 2026 season. Site CURRENT_2026 is nav only.
+    stripped = refuse_affl_2026_season(con)
+    print(f'  AFFL 2026 season rows stripped (CHI-75): {stripped}')
+    import contracts
+    print(f'  owners {contracts.apply_owners(con):,}')
     print(f'  scoring rules {load_scoring(con):,}')
     npl, nrw = load_players_and_rosters(con)
     print(f'  players {npl:,} · roster-weeks {nrw:,}')
@@ -478,8 +903,20 @@ def main():
     print(f'  trades {tr:,} ({it:,} items)')
     print(f'  nfl player-weeks {load_nfl_weeks(con):,}')
     print(f'  contracts {load_contracts(con):,}')
+    na, nc = load_player_season_points(con)
+    print(f'  player-seasons {na + nc:,} ({nc:,} computed from NFL stats)')
     ncap, nmatch = load_cap_hits(con)
     print(f'  cap hits {ncap:,} ({nmatch:,} resolved to an AFFL-known player)')
+    import contracts
+    print(f'  player-week PAR {contracts.load_player_week_par(con):,}')
+    print(f'  reconstructed draft PAR {contracts.load_reconstructed_par(con):,}')
+    import fetch_projections
+    n_espn, n_fp = fetch_projections.load_into(con)
+    print(f'  projections espn={n_espn:,} fantasypros={n_fp:,}')
+    nx, xmsg = _try_xtd(con)
+    print(f'  xTD player-weeks {nx:,} ({xmsg})')
+    import compute_roto
+    print(f'  roto team-seasons {compute_roto.compute_all(con):,}')
     con.commit()
     con.execute('ANALYZE')
     con.commit()

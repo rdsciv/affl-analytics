@@ -5,65 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Analytics</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
 <div class="frame">
 
   <!-- ============ HEADER ============ -->
   <header class="topbar">
-    <div class="brand">
-      <img class="brand-logo" src="data:image/jpeg;base64,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" alt="AFFL">
-      <div>
-        <h1>AFFL <span>Analytics</span></h1>
-        <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
+    <div class="topbar-row">
+      <div class="brand">
+        <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+        <div>
+          <h1>AFFL <span>Analytics</span></h1>
+          <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="index.html" class="on">Dashboard</a>
+        <a href="scoreboard.html">Scoreboard</a>
+        <a href="players.html">Players</a>
+        <a href="draft.html">Draft</a>
+        <a href="trades.html">Trades</a>
+        <a href="roto.html">Roto</a>
+        <a href="teams.html">Teams</a>
+        <a href="history.html">History</a>
+        <a href="awards.html">Awards</a>
+        <a href="dictionary.html">Dictionary</a>
+        <a href="wrapped.html">Wrapped</a>
+      </nav>
+    </div>
+    <div class="topbar-row topbar-meta">
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hs-value" id="hs-total">15,723</div>
+          <div class="hs-label">reg-season points</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-value accent" id="hs-games">84</div>
+          <div class="hs-label">reg-season games</div>
+        </div>
+      </div>
+      <div class="season-block">
+        <p class="provenance">ESPN Fantasy API &middot; verified warehouse &middot; 2014–2025</p>
+        <div class="season-picker" id="season-picker">
+          <button class="season-chip on" data-y="">Cumulative</button>
+          <button class="season-chip" data-y="2014">2014</button>
+          <button class="season-chip" data-y="2015">2015</button>
+          <button class="season-chip" data-y="2016">2016</button>
+          <button class="season-chip" data-y="2017">2017</button>
+          <button class="season-chip" data-y="2018">2018</button>
+          <button class="season-chip" data-y="2019">2019</button>
+          <button class="season-chip" data-y="2020">2020</button>
+          <button class="season-chip" data-y="2021">2021</button>
+          <button class="season-chip" data-y="2022">2022</button>
+          <button class="season-chip" data-y="2023">2023</button>
+          <button class="season-chip" data-y="2024">2024</button>
+          <button class="season-chip" data-y="2025">2025</button>
+        </div>
       </div>
     </div>
-    <nav class="site-nav">
-      <a href="index.html" class="on">Dashboard</a>
-      <a href="scoreboard.html">Scoreboard</a>
-      <a href="players.html">Players</a>
-      <a href="draft.html">Draft</a>
-      <a href="trades.html">Trades</a>
-    </nav>
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hs-value" id="hs-total">–</div>
-        <div class="hs-label">reg-season points</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hs-value accent" id="hs-games">–</div>
-        <div class="hs-label">reg-season games</div>
-      </div>
-    </div>
-    <div class="season-picker" id="season-picker"></div>
   </header>
 
-  <!-- ============ KPI DONUT ROW ============ -->
-  <section class="kpi-row" id="kpi-row"></section>
+  <!-- ============ KPI ROW (static league tiles; JS replaces with season donuts) ============ -->
+  <section class="kpi-row" id="kpi-row">
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">12</div>
+      <div class="kpi-desc">seasons</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">12</div>
+      <div class="kpi-desc">owners</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">927</div>
+      <div class="kpi-desc">matchups</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">2014–25</div>
+      <div class="kpi-desc">range</div>
+    </div>
+  </section>
 
-  <!-- ============ MAIN GRID ============ -->
+  <div id="season-pane" hidden>
+  <!-- ============ STANDINGS + SEASON STORY ============ -->
   <section class="main-grid">
-    <div class="card chart-card">
+    <div class="card">
       <div class="card-head">
-        <div>
-          <h2>Weekly Scoring</h2>
-          <div class="card-sub">league high / average / low &middot; regular season</div>
-        </div>
-        <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+        <div><h2>Final Standings</h2><div class="card-sub" id="standings-sub">ESPN W-L-T · warehouse Power</div></div>
       </div>
-      <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
+      <div class="table-scroll">
+        <table class="tbl" id="standings-tbl">
+          <thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th><th>All-Play</th><th>PWR</th><th>Luck</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
     <aside class="card side-card">
-      <div class="card-head"><h2>Season Story</h2></div>
-      <div class="champ-spot" id="champ-spot"></div>
+      <div class="card-head">
+        <div>
+          <h2>Season Story</h2>
+          <div class="card-sub" id="story-sub">warehouse notables · both scores</div>
+        </div>
+      </div>
+      <div class="champ-spot" id="champ-spot">
+        <img class="avatar" src="logos/4fd947dd128a.jpg" alt="">
+        <div>
+          <div class="tag">League Champion</div>
+          <div class="nm">San Diego Shadowcöcks</div>
+          <div class="rec">John Newton · 11-3 · 1,543.02 PF</div>
+        </div>
+      </div>
       <ul class="story-list" id="story-list"></ul>
-      <div class="side-total"><span>league total</span><strong id="side-total">–</strong></div>
+      <div class="side-total"><span>league total</span><strong id="side-total">15,723 pts</strong></div>
     </aside>
   </section>
 
-  <!-- ============ SECOND ROW ============ -->
+  <!-- ============ TROPHIES ============ -->
+  <section class="card" id="trophy-card">
+    <div class="card-head">
+      <div>
+        <h2>Trophies</h2>
+        <div class="card-sub" id="trophy-sub">Cup · Board · Roto · current franchise names</div>
+      </div>
+    </div>
+    <div class="trophy-grid" id="trophy-grid"></div>
+  </section>
+
+  <!-- ============ WEEKLY SCORING ============ -->
+  <section class="card chart-card">
+    <div class="card-head">
+      <div>
+        <h2>Weekly Scoring</h2>
+        <div class="card-sub">league high / average / low &middot; regular season</div>
+      </div>
+      <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+    </div>
+    <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
+  </section>
+
+  <!-- ============ RACE / PPW ============ -->
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
@@ -79,38 +162,57 @@
     </div>
   </section>
 
-  <!-- ============ STANDINGS + LUCK ============ -->
-  <section class="second-grid">
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Final Standings</h2><div class="card-sub" id="standings-sub">including playoffs</div></div>
-      </div>
-      <div class="table-scroll">
-        <table class="tbl" id="standings-tbl">
-          <thead><tr><th>#</th><th>Team</th><th>W-L</th><th>PF</th><th>PA</th><th>Avg</th><th>All-Play</th></tr></thead>
-          <tbody></tbody>
-        </table>
+  <!-- ============ LUCK ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Luck Index</h2><div class="card-sub">lucky wins minus unlucky losses · weighted luck in the tooltip</div></div>
+    </div>
+    <div class="chart-wrap xtall"><canvas id="luck-chart"></canvas></div>
+  </section>
+
+  <section class="card" id="luck-card">
+    <div class="card-head">
+      <div>
+        <h2>Schedule vs Roster Luck</h2>
+        <div class="card-sub" id="luck-card-sub">actual · all-play · median · expected wins · schedule luck · TD−xTD</div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Luck Index</h2><div class="card-sub">actual wins minus schedule-adjusted expected wins</div></div>
-      </div>
-      <div class="chart-wrap fill"><canvas id="luck-chart"></canvas></div>
+    <div class="table-scroll">
+      <table class="tbl" id="luck-card-tbl">
+        <thead>
+          <tr>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="actualW">W-L</th>
+            <th class="s" data-k="allPlayW">All-Play</th>
+            <th class="s" data-k="medianW">Median</th>
+            <th class="s" data-k="expectedWins">Exp W</th>
+            <th class="s" data-k="scheduleLuckWins">Sched luck</th>
+            <th class="s" data-k="tdRes">TD−xTD</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
   <!-- ============ NEXT GEN LAB ============ -->
   <div class="section-break"><h2>Next Gen Lab <span id="lab-year">joined to nflverse</span></h2></div>
 
-  <section class="second-grid">
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Lineup IQ</h2><div class="card-sub">points started vs perfect lineups &middot; wasted on the bench</div></div>
-      </div>
-      <div class="chart-wrap xtall" data-canvas="lineup-chart"><canvas id="lineup-chart"></canvas></div>
+  <section class="card maxpot-card" id="max-potential">
+    <div class="maxpot-head">
+      <h2>Maximum Potential</h2>
+      <p>Highest ideal lineup points scored</p>
     </div>
-    <div class="card">
+    <div id="maxpot-award"></div>
+    <div class="maxpot-label">All teams · actual vs ideal points</div>
+    <div id="maxpot-bars"></div>
+    <div class="maxpot-legend">
+      <span><i class="dot actual"></i> Actual points scored</span>
+      <span><i class="dot left"></i> Points left on table</span>
+    </div>
+  </section>
+
+  <section class="card">
       <div class="card-head">
         <div><h2>Draft War Room</h2><div class="card-sub">auction ROI as points <em>above replacement</em> per dollar &middot; positionally fair</div></div>
       </div>
@@ -125,7 +227,6 @@
         </div>
       </div>
       <div class="draft-note" id="draft-note"></div>
-    </div>
   </section>
 
   <section class="second-grid">
@@ -165,18 +266,27 @@
 
   <section class="card">
     <div class="card-head">
-      <div><h2>Elite Company</h2><div class="card-sub">top started scorers with real NFL advanced context &middot; EPA, WOPR, target share</div></div>
+      <div><h2>Elite Company</h2><div class="card-sub" id="opp-sub">opportunity board · tgt share, WOPR, aDOT, xFP, FP−xFP</div></div>
     </div>
     <div class="table-scroll">
       <table class="tbl" id="spotlight-tbl">
-        <thead><tr><th>Player</th><th>Pos</th><th>Started By</th><th>Fantasy Pts</th><th>PPG</th><th>NFL EPA</th><th>WOPR</th><th>Tgt Share</th></tr></thead>
+        <thead><tr>
+          <th class="s" data-k="name">Player</th>
+          <th class="s" data-k="pos">Pos</th>
+          <th class="s" data-k="tgtShare">Tgt Share</th>
+          <th class="s" data-k="wopr">WOPR</th>
+          <th class="s" data-k="adot">aDOT</th>
+          <th class="s" data-k="xfp">xFP</th>
+          <th class="s" data-k="fp">FP</th>
+          <th class="s" data-k="resid">FP−xFP</th>
+        </tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
 
-  <!-- ============ PLAYER PROFILER ============ -->
-  <div class="section-break"><h2>Player Profiler <span id="profiler-year">every rostered player</span></h2></div>
+  <!-- ============ STARS, SCRUBS, & DUDS ============ -->
+  <div class="section-break"><h2>Stars, Scrubs, &amp; Duds <span id="profiler-year">every rostered player</span></h2></div>
 
   <section class="card">
     <div class="card-head">
@@ -223,19 +333,64 @@
     </div>
   </section>
 
+  </div>
+
+  <div id="cum-pane">
   <!-- ============ ALL-TIME ============ -->
   <div class="section-break"><h2>All-Time <span>2014 – 2025</span></h2></div>
 
   <section class="timeline" id="timeline"></section>
 
+  <!-- CHI-89: Leagology-style manager milestones + Elo (verified matchups) -->
+  <section class="card" id="elo-card">
+    <div class="card-head">
+      <div>
+        <h2>League Rating</h2>
+        <div class="card-sub" id="elo-sub">Elo · 1500 average · every verified game · playoff boost · blowout weight</div>
+      </div>
+      <div class="elo-filters" id="elo-filters" role="tablist" aria-label="Elo filter">
+        <button type="button" class="chip on" data-elo-filter="active">Active</button>
+        <button type="button" class="chip" data-elo-filter="all">Everyone</button>
+      </div>
+    </div>
+    <div class="chart-wrap tall"><canvas id="elo-chart"></canvas></div>
+    <div class="table-scroll">
+      <table class="tbl" id="elo-tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Manager</th><th class="s">Rating</th><th class="s">Peak</th><th class="s">Low</th><th class="s">Games</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="draft-note" id="elo-note"></p>
+  </section>
+
+  <section class="card" id="milestones-card">
+    <div class="card-head">
+      <div>
+        <h2>Milestones</h2>
+        <div class="card-sub" id="ms-sub">Fewest career games to each bar · paced from first AFFL game · not a running total</div>
+      </div>
+    </div>
+    <div class="ms-board-tabs" id="ms-board-tabs" role="tablist" aria-label="Milestone boards"></div>
+    <div class="ms-board" id="ms-board"></div>
+    <div class="ms-chase-wrap">
+      <h3 class="ms-chase-title">The chase · next win bar</h3>
+      <ul class="story-list" id="ms-chase"></ul>
+    </div>
+    <p class="draft-note" id="ms-note"></p>
+  </section>
+
   <section class="second-grid">
     <div class="card">
       <div class="card-head">
-        <div><h2>Franchise Records</h2><div class="card-sub">every owner, every season</div></div>
+        <div><h2>Franchise Records</h2><div class="card-sub">current name · career · full book on History</div></div>
       </div>
       <div class="table-scroll">
         <table class="tbl" id="franchise-tbl">
-          <thead><tr><th>Owner</th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>🏆</th><th>PF</th></tr></thead>
+          <thead><tr><th></th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>Titles</th><th>PF</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -250,15 +405,21 @@
 
   <section class="card h2h-card">
     <div class="card-head">
-      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins, row owner vs column owner &middot; active members</div></div>
+      <div><h2>Head-to-Head Ledger</h2><div class="card-sub">all-time wins · current franchise names</div></div>
     </div>
     <div class="table-scroll"><table class="tbl h2h" id="h2h-tbl"></table></div>
   </section>
 
-  <footer class="foot">AFFL Analytics &middot; data via ESPN Fantasy API &middot; seasons 2014–2025</footer>
+  </div>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Analytics &middot; data via ESPN Fantasy API &middot; seasons 2014–2025</p>
+  </footer>
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="app.js?v=9"></script>
+<script src="common.js?v=18"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>

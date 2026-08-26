@@ -3,29 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teams · AFFL History</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
-<link rel="stylesheet" href="history-book.css">
-<link rel="stylesheet" href="logo.css">
+<title>AFFL Teams</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=38&scorers=1&sr=1&tcomp=1&act=1">
+<link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
 <div class="frame">
-  <div id="site-chrome"></div>
-  <div class="picker-row">
-    <div class="picker-label">Year</div>
-    <div class="week-picker" id="year-chips"></div>
-  </div>
-  <div id="teams-grid" class="stack"></div>
-  <section class="card">
-    <div class="card-head">
-      <div><h2>New franchises</h2><div class="card-sub">no 2014–2025 history — nothing invented</div></div>
+  <header class="topbar">
+    <div class="brand">
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <div>
+        <h1>AFFL <span>Teams</span></h1>
+        <div class="sub" id="page-sub">franchise home · record · draft · trades · roster · games</div>
+      </div>
     </div>
-    <div class="team-dir" id="new-franchises"></div>
-  </section>
-  <footer class="foot" id="site-foot"></footer>
+    <nav class="site-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="scoreboard.html">Scoreboard</a>
+      <a href="players.html">Players</a>
+      <a href="draft.html">Draft</a>
+      <a href="trades.html">Trades</a>
+      <a href="roto.html">Roto</a>
+      <a href="teams.html" class="on">Teams</a>
+      <a href="history.html">History</a>
+      <a href="awards.html">Awards</a>
+      <a href="dictionary.html">Dictionary</a>
+      <a href="wrapped.html">Wrapped</a>
+    </nav>
+  </header>
+
+  <div class="picker-row">
+    <div class="picker-label">View</div>
+    <div class="week-picker" id="scope-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Squad</div>
+    <div class="week-picker" id="squad-picker"></div>
+  </div>
+
+  <div class="picker-row" id="year-row">
+    <div class="picker-label">Season</div>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+
+  <section id="franchise-grid" class="fr-grid"></section>
+
+  <section class="card" id="team-hero" hidden></section>
+  <section class="kpi-row" id="team-kpis" hidden></section>
+  <section class="card" id="scorers-block" hidden></section>
+  <section class="card" id="games-block" hidden></section>
+  <section class="card" id="activity-block" hidden></section>
+  <section class="card" id="ngs-block" hidden></section>
+  <section class="card" id="years-block" hidden></section>
+  <section class="card" id="draft-block" hidden></section>
+  <section class="card" id="spend-block" hidden></section>
+  <section class="card" id="trades-block" hidden></section>
+  <section class="card" id="roster-block" hidden></section>
+  <section class="card" id="season-roster-block" hidden></section>
+  <section class="card" id="roto-block" hidden></section>
+  <section id="lab-block" hidden></section>
+  <section class="card" id="tcomp-block"></section>
+
+  <footer class="foot">
+    <img class="foot-banner" src="logos/affl-banner.png" alt="AFFL">
+    <p class="foot-caption">AFFL Teams &middot; pick a franchise for record, roto, draft, trades, roster, games, and the year-to-year lab</p>
+  </footer>
 </div>
-<script src="common.js"></script>
-<script src="history-book.js"></script>
-<script>AFFLHistory.start('teams');</script>
+<script src="chart.umd.min.js?v=1"></script>
+<script src="common.js?v=18"></script>
+<script src="roto-math.js?v=2"></script>
+<script src="teams.js?v=14&scorers=1&sr=1&tcomp=1&ngstree=1&ngscheme=1&act=1"></script>
 </body>
 </html>

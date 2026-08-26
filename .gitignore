@@ -16,3 +16,29 @@ affl.db-shm
 # scraped Spotrac page cache — large, and their content, not ours.
 # regenerate with: python3 fetch_spotrac.py 2018 ... 2025
 data/spotrac/
+
+# nflverse play-by-play (compute_xtd.py). ~19MB gzip per season.
+data/pbp/
+
+# raw ESPN weekly dumps for historical proj backfill (large)
+data/box_raw/
+
+# nflverse nextgen_stats downloads (scripts/extract_nfl_career.py)
+data/ngs/
+
+# python bytecode
+__pycache__/
+*.pyc
+
+# agent worktrees + local agent state (large; not source)
+.claude/
+
+# timestamped warehouse backups
+*.db.bak
+affl.db.*.bak
+affl.db.pre-*.bak
+
+# regenerable data caches
+data/_probe/
+data/compare-2025/
+data/ngs-profiles/

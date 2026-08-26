@@ -98,6 +98,11 @@ So the honest state per pre-2018 season is:
 
 - ✅ weekly team scores, standings, full auction board
 - ✅ end-of-season rosters, and how/when each surviving player was acquired
+- ✅ **season fantasy totals per player, and therefore draft value / PAR** —
+  computed from nflverse weekly stats under that season's scoring rules. No
+  lineup knowledge is needed for a season total, only for a weekly one. Stored
+  with `is_computed = 1` and labelled in the UI. Kickers and D/ST are excluded
+  because nflverse's weekly player table doesn't carry their scoring inputs.
 - ❌ weekly lineups, drops, and mid-season trades
 
 ### The one route to player-level pre-2018 history: lineup inference
