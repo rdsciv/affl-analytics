@@ -1,6 +1,6 @@
 name: Deploy to GitHub Pages
 
-# CHI-120: career All-Play on All. Touch to fire deploy.
+# CHI-122: deploy restored common.js (Rice/Boykin/Young + boot).
 on:
   push:
     branches: [main]
