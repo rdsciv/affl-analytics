@@ -276,10 +276,17 @@
     renderChart(rows);
     renderTable(rows);
 
-    const pre2018 = state.season < 2018;
-    $("sv-note").textContent = pre2018
-      ? "Weekly AFFL lineups do not exist before 2018, so “AFFL starters only” and the starts column are empty for this season. NFL data is complete."
-      : "Hover any dot for the player. AFFL starts count weeks a manager put that player in a starting slot.";
+    const cov = (META.lineupCoverage || {})[String(state.season)];
+    const base = "Hover any dot for the player. AFFL starts count weeks a manager put that player in a starting slot.";
+    if (cov != null && cov < 100) {
+      $("sv-note").textContent = base +
+        ` ESPN no longer serves ${state.season} weekly lineups, so this season is reconstructed:` +
+        ` ${cov}% of team-weeks are proven against the official score and shown here.` +
+        " The rest are left out rather than guessed, so AFFL starts read low for this season." +
+        " NFL data is complete for every season.";
+    } else {
+      $("sv-note").textContent = base;
+    }
   }
 
   /* ------------------------------------------------------------------- boot */

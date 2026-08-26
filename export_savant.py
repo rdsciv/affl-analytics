@@ -63,20 +63,75 @@ def load_rosters(season: int) -> dict:
     return out
 
 
-def affl_context(con) -> dict:
+def current_names(con) -> dict:
+    """member_id -> the franchise's current name."""
+    return {m: n for m, n in con.execute(
+        "SELECT member_id, name FROM dim_team "
+        "WHERE (member_id, season) IN "
+        "(SELECT member_id, MAX(season) FROM dim_team GROUP BY member_id)"
+    )}
+
+
+def pre2018_context(con, current) -> tuple:
+    """Weekly starts for 2014-2017 from site/pre2018_starts.json.
+
+    ESPN does not retain pre-2018 weekly lineups — leagueHistory returns only
+    season totals, verified live. This file is the surviving capture. It is
+    trusted only where it can be proved: a team-week counts if its starter
+    points sum exactly to that team's fact_matchup score. Team-weeks that do
+    not reconcile are dropped, never patched or guessed.
+
+    Returns ((season, gsis_id) -> (starts, franchise), season -> coverage%).
+    """
+    path = os.path.join(HERE, "site", "pre2018_starts.json")
+    if not os.path.exists(path):
+        return {}, {}
+    with open(path) as fh:
+        blob = json.load(fh)
+
+    pid_to_gsis = {str(p): g for p, g in con.execute(
+        "SELECT player_id, gsis_id FROM dim_player "
+        "WHERE gsis_id IS NOT NULL AND gsis_id != ''")}
+
+    out, coverage = {}, {}
+    for y_s, players in blob.items():
+        season = int(y_s)
+        member = {t: m for t, m in con.execute(
+            "SELECT team_id, member_id FROM dim_team WHERE season = ?", (season,))}
+        official = {(t, w): p for t, w, p in con.execute(
+            "SELECT team_id, week, points FROM fact_matchup WHERE season = ?", (season,))}
+
+        bucket = defaultdict(list)
+        for pid, weeks in players.items():
+            for wk, rec in weeks.items():
+                bucket[(rec.get("tid"), int(wk))].append((pid, rec.get("pts") or 0.0))
+
+        good = 0
+        considered = 0
+        for (tid, wk), rows in bucket.items():
+            off = official.get((tid, wk))
+            if off is None:
+                continue                       # NFL week outside the AFFL season
+            considered += 1
+            if abs(sum(p for _, p in rows) - off) > 0.6:
+                continue                       # cannot prove this lineup — drop it
+            good += 1
+            for pid, _ in rows:
+                gid = pid_to_gsis.get(str(pid))
+                if not gid:
+                    continue
+                starts, _fr = out.get((season, gid), (0, ""))
+                out[(season, gid)] = (starts + 1, current.get(member.get(tid), ""))
+        coverage[season] = round(100.0 * good / considered, 1) if considered else 0.0
+    return out, coverage
+
+
+def affl_context(con, current) -> dict:
     """(season, gsis_id) -> (starts, current_franchise_name).
 
     Franchise identity is member_id, never team_id — three team_ids map to
     more than one member across the league's history.
     """
-    current = {}
-    for member_id, name in con.execute(
-        "SELECT member_id, name FROM dim_team "
-        "WHERE (member_id, season) IN "
-        "(SELECT member_id, MAX(season) FROM dim_team GROUP BY member_id)"
-    ):
-        current[member_id] = name
-
     out = {}
     q = """
         SELECT r.season, p.gsis_id, m.member_id, COUNT(*) AS starts
@@ -167,7 +222,10 @@ def main() -> int:
 
     seasons = [r[0] for r in con.execute(
         "SELECT DISTINCT season FROM fact_nfl_week ORDER BY season")]
-    ctx = affl_context(con)
+    current = current_names(con)
+    ctx = affl_context(con, current)
+    pre, pre_cov = pre2018_context(con, current)
+    ctx.update(pre)          # 2014-2017 only; never overwrites a 2018+ key
 
     franchises, total = set(), 0
     for s in seasons:
@@ -182,12 +240,24 @@ def main() -> int:
         starters = sum(1 for r in rows if r[COLS.index("starts")])
         print(f"  {s}: {len(rows):4d} players  {starters:3d} AFFL-started  {kb:4d} KB")
 
+    # How much of each season's AFFL lineup history is provable.
+    # 2018+ comes from fact_roster_week and is complete. 2014-2017 is only as
+    # good as the surviving capture, measured against fact_matchup.
+    cov = {}
+    for s in seasons:
+        cov[str(s)] = 100.0 if s >= 2018 else pre_cov.get(s, 0.0)
+
     meta = {
         "cols": COLS,
         "seasons": seasons,
         "franchises": sorted(franchises),
         "positions": ["QB", "RB", "WR", "TE"],
         "scoring": "AFFL non-PPR — receptions score 0",
+        "lineupCoverage": cov,
+        "lineupNote": ("2018+ lineups are complete. ESPN does not retain "
+                       "pre-2018 weekly lineups; 2014-2017 uses the surviving "
+                       "capture and keeps only team-weeks whose starter points "
+                       "reconcile exactly to the official score."),
     }
     with open(os.path.join(OUT, "meta.json"), "w") as fh:
         json.dump(meta, fh, separators=(",", ":"))

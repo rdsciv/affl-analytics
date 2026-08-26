@@ -117,10 +117,19 @@ for y in seasons:
         fail(f" - {y}: {bad} rows do not match non-PPR scoring (receptions must score 0)")
 
     starts = sum(1 for r in rows if r[ix["starts"]])
-    if y < 2018 and starts:
-        fail(f" - {y}: {starts} rows claim AFFL starts, but weekly lineups do not exist pre-2018")
-    if y >= 2018 and starts < 100:
+    if starts < 100:
         fail(f" - {y}: only {starts} rows have AFFL starts; expected the league's starters")
+
+    # Coverage must be declared for every season, and honest: 2018+ comes from
+    # fact_roster_week and is complete; 2014-2017 is a reconstruction that keeps
+    # only team-weeks proven against fact_matchup, so it must not claim 100%.
+    cov = meta.get("lineupCoverage", {}).get(str(y))
+    if cov is None:
+        fail(f" - {y}: no lineupCoverage declared")
+    elif y >= 2018 and cov != 100.0:
+        fail(f" - {y}: coverage {cov}% but 2018+ lineups come from fact_roster_week")
+    elif y < 2018 and not (0 < cov <= 100):
+        fail(f" - {y}: implausible reconstructed coverage {cov}%")
 
     # current franchise names only
     for r in rows:
@@ -131,6 +140,42 @@ for y in seasons:
 
 if total < 6000:
     fail(f" - only {total} player-seasons exported; expected the full NFL skill pool")
+
+# Independently re-derive the pre-2018 reconstruction. The exporter may only
+# keep a team-week whose starter points sum exactly to the official score;
+# anything else would be a guessed lineup. Recompute here from the raw capture
+# and the warehouse, and fail if the published coverage disagrees.
+import sqlite3
+from collections import defaultdict
+
+raw_path = ROOT / "site" / "pre2018_starts.json"
+db_path = ROOT / "affl.db"
+if raw_path.exists() and db_path.exists():
+    blob = json.loads(raw_path.read_text())
+    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    for y_s, players in sorted(blob.items()):
+        y = int(y_s)
+        official = {(t, w): p for t, w, p in con.execute(
+            "SELECT team_id, week, points FROM fact_matchup WHERE season = ?", (y,))}
+        bucket = defaultdict(float)
+        for pid, weeks in players.items():
+            for wk, rec in weeks.items():
+                bucket[(rec.get("tid"), int(wk))] += rec.get("pts") or 0.0
+        good = considered = 0
+        for key, got in bucket.items():
+            off = official.get(key)
+            if off is None:
+                continue
+            considered += 1
+            if abs(got - off) <= 0.6:
+                good += 1
+        want = round(100.0 * good / considered, 1) if considered else 0.0
+        published = meta.get("lineupCoverage", {}).get(y_s)
+        if published is None or abs(published - want) > 0.1:
+            fail(f" - {y}: published coverage {published}% != recomputed {want}%")
+        if want >= 99.9 and y < 2017:
+            fail(f" - {y}: reconstruction claims near-total coverage; verify before trusting")
+    con.close()
 
 if fails:
     print(f"{total} player-seasons checked")
