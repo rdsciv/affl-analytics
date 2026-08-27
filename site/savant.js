@@ -75,7 +75,7 @@
   const SHARE_NULL = ["tgtsh", "aysh", "wopr", "racr"];
 
   const state = {
-    season: ALL, pos: "ALL", view: "all", franchise: "",
+    scope: "cum", season: ALL, pos: "ALL", view: "all", franchise: "",
     color: "franchise",
     x: "opp", y: "fpts", minOpp: 25,
     sort: { key: "fpts", dir: -1 },
@@ -90,7 +90,7 @@
   function n(v) { return v == null ? 0 : +v; }
   function pct(v) { return v == null ? null : +v * 100; }
 
-  function isAll() { return state.season === ALL || state.season == null; }
+  function isAll() { return state.scope !== "season"; }
 
   function fmt(v, m) {
     if (v == null || Number.isNaN(v)) return "—";
@@ -253,24 +253,63 @@
     });
   }
 
-  function stampYear(v) {
+  function stampScope() {
     try {
       const u = new URL(location.href);
-      if (v === ALL) u.searchParams.delete("year");
-      else u.searchParams.set("year", String(v));
-      u.searchParams.delete("season");
+      if (state.scope === "season") {
+        u.searchParams.set("scope", "season");
+        if (state.season !== ALL && state.season != null) u.searchParams.set("year", String(state.season));
+        else u.searchParams.delete("year");
+      } else {
+        u.searchParams.delete("scope");
+        u.searchParams.delete("year");
+        u.searchParams.delete("season");
+      }
       history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
     } catch (e) { /* ignore */ }
   }
 
+  function showYearRow(on) {
+    const row = $("year-row");
+    if (!row) return;
+    if (on) { row.hidden = false; row.style.display = ""; }
+    else { row.hidden = true; row.style.display = "none"; }
+  }
+
   function renderChips() {
-    const seasons = [[ALL, "All"]].concat(META.seasons.map((y) => [y, y]));
-    chips($("season-picker"), seasons, state.season, async (v) => {
-      state.season = v === ALL ? ALL : +v;
-      stampYear(state.season);
+    chips($("scope-picker"), [["cum", "Cumulative"], ["season", "Season"]], state.scope, async (v) => {
+      state.scope = v;
+      if (v === "season") {
+        if (state.season === ALL || state.season == null) {
+          state.season = META.seasons[META.seasons.length - 1];
+        }
+        showYearRow(true);
+      } else {
+        state.season = ALL;
+        showYearRow(false);
+      }
+      stampScope();
       await loadScope();
       renderAll();
     });
+    showYearRow(state.scope === "season");
+    const seasons = META.seasons.map((y) => [y, y]);
+    chips($("season-picker"), seasons, state.season, async (v) => {
+      state.scope = "season";
+      state.season = +v;
+      showYearRow(true);
+      stampScope();
+      await loadScope();
+      renderAll();
+    });
+    const squadEl = $("squad-picker");
+    if (squadEl && META.franchises) {
+      const items = [["", "All squads"]].concat(META.franchises.map((f) => [f, f]));
+      chips(squadEl, items, state.franchise, (v) => {
+        state.franchise = v;
+        renderAll();
+      });
+    }
     chips($("pos-picker"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
       state.pos = v; renderAll();
     });
@@ -294,11 +333,6 @@
     $("y-metric").value = state.y;
     $("x-metric").onchange = () => { state.x = $("x-metric").value; renderAll(); };
     $("y-metric").onchange = () => { state.y = $("y-metric").value; renderAll(); };
-
-    $("franchise").innerHTML = `<option value="">All franchises</option>` +
-      META.franchises.map((f) => `<option value="${f}">${f}</option>`).join("");
-    $("franchise").value = state.franchise;
-    $("franchise").onchange = () => { state.franchise = $("franchise").value; renderAll(); };
 
     $("min-opp").innerHTML = MIN_OPP
       .map((v) => `<option value="${v}">${v === 0 ? "No minimum" : v + "+"}</option>`).join("");
@@ -331,7 +365,7 @@
       const x = mx.get(r), y = my.get(r);
       if (x == null || y == null || Number.isNaN(x) || Number.isNaN(y)) return;
       const k = groupKey(r);
-      (by[k] = by[k] || []).push({ x, y, r });
+      (by[k] = by[k] || []).push({ x, y, player: r });
     });
 
     const keys = Object.keys(by).sort((a, b) => {
@@ -350,6 +384,7 @@
         borderWidth: 1,
         pointRadius: 4,
         pointHoverRadius: 7,
+        pointHitRadius: 10,
       };
     });
 
@@ -359,17 +394,20 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: "nearest", intersect: true },
+        interaction: { mode: "nearest", intersect: false, axis: "xy" },
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: true,
             callbacks: {
               title: (items) => {
-                const r = items[0].raw.r;
+                const r = items[0] && items[0].raw && items[0].raw.player;
+                if (!r) return "unavailable";
                 return `${displayName(r)} · ${r.pos || "—"} · ${r.team || "FA"}`;
               },
               label: (item) => {
-                const r = item.raw.r;
+                const r = item.raw && item.raw.player;
+                if (!r) return "unavailable";
                 const out = [
                   `${mx.label}: ${fmt(item.raw.x, mx)}`,
                   `${my.label}: ${fmt(item.raw.y, my)}`,
@@ -471,8 +509,8 @@
     $("plot-count").textContent = `${rows.length} players`;
     if (isAll()) {
       $("plot-sub").textContent = state.view === "affl"
-        ? "All · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
-        : "All · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
+        ? "Cumulative · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
+        : "Cumulative · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
     } else {
       $("plot-sub").textContent = state.view === "affl"
         ? `${state.season} · only players an AFFL manager actually started · non-PPR`
@@ -518,7 +556,16 @@
     META = meta;
     BIDS = bids || {};
     const qs = new URLSearchParams(location.search);
-    state.season = parseYearParam(qs.get("year") || qs.get("season"));
+    const wantSeason = qs.get("scope") === "season" || (qs.get("year") && String(qs.get("year")).toLowerCase() !== "all");
+    if (wantSeason) {
+      state.scope = "season";
+      state.season = parseYearParam(qs.get("year") || qs.get("season"));
+      if (state.season === ALL) state.season = META.seasons[META.seasons.length - 1];
+    } else {
+      state.scope = "cum";
+      state.season = ALL;
+    }
+    stampScope();
     await loadScope();
     renderSelects();
     renderAll();
