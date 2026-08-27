@@ -77,5 +77,27 @@ def main():
         print('FAIL — do not build pre-2018 player history until this passes.')
     return 0 if ok else 1
 
+def extra_gates():
+    """K and D/ST gates. The offense gate above predates them and covers neither,
+    which is why pre-2018 D/ST was unscoreable for so long."""
+    import subprocess
+    ok = True
+    for label, script in (('KICKERS', 'fix_kicker_rules.py'),
+                          ('D/ST', 'validate_dst.py')):
+        print(f'\n{"=" * 62}\n{label}\n{"=" * 62}')
+        sys.stdout.flush()
+        rc = subprocess.call([sys.executable,
+                              os.path.join(os.path.dirname(os.path.abspath(__file__)), script)])
+        ok = ok and rc == 0
+    return ok
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    offense_rc = main()
+    gates_ok = extra_gates()
+    print(f'\n{"=" * 62}')
+    if offense_rc == 0 and gates_ok:
+        print('ALL GATES PASSED - offense, kickers, and D/ST all reproduce ESPN.')
+        sys.exit(0)
+    print('AT LEAST ONE GATE FAILED - see above.')
+    sys.exit(1)

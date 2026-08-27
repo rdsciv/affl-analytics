@@ -28,6 +28,8 @@ PRO = {0: 'FA', 1: 'ATL', 2: 'BUF', 3: 'CHI', 4: 'CIN', 5: 'CLE', 6: 'DAL', 7: '
        23: 'PIT', 24: 'LAC', 25: 'SF', 26: 'SEA', 27: 'TB', 28: 'WSH', 29: 'CAR',
        30: 'JAX', 33: 'BAL', 34: 'HOU'}
 
+POOL_POS = {1: 'QB', 2: 'RB', 3: 'WR', 4: 'TE', 5: 'K', 16: 'DST'}
+
 def dst_name(pid):
     """ESPN encodes D/ST as playerId = -16000 - proTeamId."""
     if pid is None or pid > -16000 or pid < -16040:
@@ -79,6 +81,68 @@ def load_nflverse(year):
                     continue
                 stats[row['player_id']][wk] = row
     return e2g, stats, meta
+
+
+def load_player_pool(year):
+    """-> espn_id -> meta, from the ESPN player pool shipped with that draft.
+
+    nflverse keys on espn_id, which is blank for a lot of pre-2018 players and
+    absent entirely for anyone off an NFL roster by the time the feed was cut
+    (Ray Rice in 2014). The pool is ESPN's own snapshot of everyone draftable
+    that season, so it names every pick that nflverse cannot.
+
+    Name and defaultPositionId are era-correct (position matches nflverse on
+    99.1-99.7% of overlapping players). proTeamId is NOT: ESPN re-serves these
+    archives with a later snapshot's club, so it disagrees with the season's
+    real roster on 13-18% of players (Alex Smith reads WSH in 2017, a year
+    before he was traded there). Team is therefore left blank for pool-only
+    players rather than asserting the wrong era's club.
+    """
+    path = f'{DATA}/player_pool_{year}.json'
+    if not os.path.exists(path):
+        return {}
+    pool = {}
+    for p in json.load(open(path)):
+        pid, name = p.get('id'), (p.get('fullName') or '').strip()
+        if pid is None or not name:
+            continue
+        pool[pid] = {'name': name,
+                     'pos': POOL_POS.get(p.get('defaultPositionId'), '?'),
+                     'nfl': '', 'hs': ''}
+    return pool
+
+
+_CROSS_SEASON = None
+
+def cross_season_meta(pid):
+    """Last-resort name lookup across every other season's feeds.
+
+    A player drafted in his rookie year can be missing from that season's roster
+    file yet present in the next one (Bryce Young, drafted 2023, first appears in
+    roster_2024). Name and position carry across seasons; pro team does not, so
+    it stays blank rather than asserting the wrong era's club.
+    """
+    global _CROSS_SEASON
+    if _CROSS_SEASON is None:
+        _CROSS_SEASON = {}
+        for year in range(2014, 2027):
+            p = f'{DATA}/roster_{year}.csv'
+            if not os.path.exists(p):
+                continue
+            for row in csv.DictReader(open(p)):
+                eid, name = row.get('espn_id'), (row.get('full_name') or '').strip()
+                if not eid or not name:
+                    continue
+                try:
+                    eid = int(eid)
+                except ValueError:
+                    continue
+                _CROSS_SEASON.setdefault(eid, {
+                    'name': name, 'pos': (row.get('position') or '').strip() or '?',
+                    'nfl': '', 'hs': ''})
+            for eid, m in load_player_pool(year).items():
+                _CROSS_SEASON.setdefault(eid, dict(m))
+    return _CROSS_SEASON.get(pid)
 
 # ------------------------------------------------------------------ optimum
 def optimal_points(entries, slot_counts):
@@ -314,7 +378,9 @@ def process_year(year, league, season_teams):
                            'nfl': m.get('nfl') or v[2] or '', 'hs': m.get('hs', '')}
     # Any player referenced only by a draft pick or a transaction (never rostered
     # in a scored lineup) has no boxscore entry, and seasons before 2018 have no
-    # lineups at all. Resolve those from the nflverse roster so no id leaks to UI.
+    # lineups at all. Resolve those from the nflverse roster, then the season's
+    # own ESPN player pool, then any other season, so no id leaks to the UI.
+    pool = load_player_pool(year)
     extra_ids = [p.get('pid') for p in draft.get('picks', [])]
     for t in txd.get('tx', []):
         for i in t.get('items') or []:
@@ -330,6 +396,10 @@ def process_year(year, league, season_teams):
         if m and m.get('name'):
             pmeta[pid] = {'name': m['name'], 'pos': m.get('pos') or '?',
                           'nfl': m.get('nfl', ''), 'hs': m.get('hs', '')}
+            continue
+        m = pool.get(pid) or cross_season_meta(pid)
+        if m:
+            pmeta[pid] = dict(m)
 
     # Seasons before 2018 have no stored lineups, but the league file still has
     # the schedule with final scores — synthesise roster-less weeks so every year
@@ -470,6 +540,8 @@ def process_year(year, league, season_teams):
         })
     board.sort(key=lambda x: (x['overall'] or 0))
     auction = any(b['bid'] for b in board)
+    # A raw ESPN id on the draft board means every name source missed the pick.
+    unnamed_picks = [b['pid'] for b in board if b['pid'] and b['pid'] not in pmeta]
 
     # ---- transactions & trades ----
     # ESPN records traded players on the TRADE_PROPOSAL and emits TRADE_ACCEPT as
@@ -788,6 +860,7 @@ def process_year(year, league, season_teams):
         'auctionDraft': auction, 'players': len(players),
         'games': sum(len(v) for v in weeks_out.values()),
         'trades': len(trades), 'tx': len(moves), 'picks': len(board),
+        'unnamedPicks': unnamed_picks,
         'kb': round(os.path.getsize(path) / 1024, 1),
     }
 
@@ -873,12 +946,19 @@ def main():
         if info['hasRosters']: flags.append('lineups')
         if info['hasTx']: flags.append('tx')
         flags.append('auction' if info['auctionDraft'] else 'snake')
+        if info['unnamedPicks']:
+            flags.append(f"UNNAMED {info['unnamedPicks']}")
         print(f"  {year}: {info['games']:>3} games, {info['players']:>3} players, "
               f"{info['picks']:>3} picks, {info['trades']:>2} trades, "
               f"{info['tx']:>4} tx, {info['kb']:>6}KB  [{', '.join(flags)}]")
     json.dump({'years': manifest}, open(os.path.join(SITE, 'index_years.json'), 'w'))
     total = sum(m['kb'] for m in manifest)
     print(f"wrote site/years/*.json ({total:.0f}KB total) + site/index_years.json")
+    leaked = {m['year']: m['unnamedPicks'] for m in manifest if m['unnamedPicks']}
+    if leaked:
+        print(f"FAIL: draft picks with no resolvable name: {leaked}")
+        return 1
+    return 0
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

@@ -21,6 +21,8 @@ Owns:
   auctionDna   top-6 spend vs Cates curve (auction years only)
   awards       All-League / Bush League weekly position awards (2018+)
   w1Acquired   week-1 roster points vs later acquisitions (2018+)
+  lineupIQPre2018 start/sit for the 2014-2017 team-weeks whose bench is known
+               (dated roster snapshot). Verified roster, computed optimal.
 """
 import json
 import os
@@ -28,6 +30,7 @@ import sqlite3
 
 import compute_eight
 from affl_xfp import SAVANT_FANTASY_NOTE
+from process_seasons import load_player_pool, optimal_points
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(HERE, 'affl.db')
@@ -465,11 +468,59 @@ def export_custody(con, year):
     return {"grain": "weekly", "tradeAlpha": None, "teams": list(by.values())}
 
 
+def backfill_roster_pmeta(con, bundle, year):
+    """Name every player in the recovered pre-2018 lineups.
+
+    process_seasons builds pmeta from the boxscore, the draft and the tx log. A
+    player who was rostered but neither drafted nor transacted has no entry, and
+    the scoreboard falls through to an em-dash — 19 of 2017's starters rendered
+    that way. fact_roster_week is what the scoreboard is drawing, so it is also
+    the right list to name from. Returns the pids it filled.
+    """
+    pmeta = bundle.setdefault('pmeta', {})
+    known = dict(con.execute("""
+        SELECT player_id, name FROM dim_player WHERE name <> ''"""))
+    pos_by = dict(con.execute("""
+        SELECT player_id, position FROM dim_player WHERE name <> ''"""))
+    # Six pre-2018 starters are in the recovered lineups but never made it into
+    # dim_player (no boxscore, no nflverse espn_id). The season's ESPN pool has
+    # them, so fall back to it rather than leaving an em-dash on the scoreboard.
+    pool = load_player_pool(year)
+    # The scoreboard reads pmeta -> player_index -> roster snapshot, so only fill
+    # ids none of those name. Overwriting a name player_index already resolves
+    # would swap the ESPN form the league actually saw for nflverse's legal one
+    # (Stevie Johnson -> Steve Johnson), which is churn, not a fix.
+    named_elsewhere = set()
+    for rel, sub in (('player_index.json', None), ('pre2018_rosters.json', str(year))):
+        path = os.path.join(HERE, 'site', rel)
+        if not os.path.exists(path):
+            continue
+        src = json.load(open(path))
+        if sub is not None:
+            src = src.get(sub) or {}
+        named_elsewhere |= {int(k) for k, v in src.items() if (v or {}).get('name')}
+    filled = []
+    for (pid,) in con.execute(
+            'SELECT DISTINCT player_id FROM fact_roster_week WHERE season = ?', (year,)):
+        cur = pmeta.get(str(pid))
+        if (cur and cur[0]) or pid in named_elsewhere:
+            continue
+        if pid in known:
+            pmeta[str(pid)] = [known[pid], pos_by.get(pid) or '?', '', '']
+        elif pid in pool:
+            pmeta[str(pid)] = [pool[pid]['name'], pool[pid]['pos'], '', '']
+        else:
+            continue
+        filled.append(pid)
+    return filled
+
+
 def export_year(con, year):
     path = os.path.join(YEARS, f'{year}.json')
     if not os.path.exists(path):
         return None
     bundle = json.load(open(path))
+    filled = backfill_roster_pmeta(con, bundle, year)
 
     baselines = rows(con, """
         SELECT position, demand, ROUND(rank_based,1) AS rankBased,
@@ -596,11 +647,117 @@ def export_year(con, year):
     bundle['nflCap'] = {'byTeam': cap, 'final': capFinal, 'topPlayers': capTop}
     bundle['roto'] = export_roto(con, year)
     bundle['custody'] = export_custody(con, year)
+    # 2014-2017 only, and never merged into bundle['lineupIQ'] - that key is a
+    # season aggregate over full rosters and pre-2018 has neither.
+    iq_pre = export_pre2018_lineup_iq(con, year)
+    if iq_pre:
+        bundle['lineupIQPre2018'] = iq_pre
+    else:
+        bundle.pop('lineupIQPre2018', None)
     compute_eight.patch_year(con, bundle, year)
     json.dump(bundle, open(path, 'w'))
     return {'year': year, 'steals': len(steals), 'power': len(power),
             'cap_teams': len(cap), 'baselines': len(baselines),
             'roto': 0 if bundle['roto'] is None else len(bundle['roto']['reg']['teams'])}
+
+
+def export_pre2018_lineup_iq(con, year):
+    """Start/sit efficiency for 2014-2017, only where the bench is actually known.
+
+    Lineup IQ needs a bench, and pre-2018 has one for exactly the team-weeks whose
+    roster snapshot could be dated - see load_pre2018_bench.py. This is NOT the
+    season-aggregate `lineupIQ` that 2018+ publishes and must not be pooled with it:
+    it is one week per team, usually a playoff week, so it goes in its own key.
+
+    The two halves have different provenance, which is why every record carries the
+    counts behind it:
+
+      actual   ESPN's own starter points, exact.
+      optimal  the best legal lineup from the full snapshot roster. Starters keep
+               their ESPN points, so the lineup actually fielded is always feasible
+               and optimal >= actual holds by construction. Bench points are
+               computed by the same engine validate_scoring.py gates.
+
+    A rostered player with no stat row that week scored nothing - inactive, bye, or
+    simply no production - so 0 is the right value, not a gap. A player the engine
+    CANNOT score is a different thing, and a team-week containing one is dropped
+    rather than published with an optimum we know is too low.
+    """
+    if year > 2017:
+        return None
+    from build_candidate_scores import all_scores
+
+    dated = rows(con, """
+        SELECT DISTINCT team_id, dated_week FROM fact_roster_snapshot_pre2018
+         WHERE season = ? AND dated_week IS NOT NULL
+         ORDER BY team_id""", (year,))
+    if not dated:
+        return None
+
+    srow = con.execute(
+        'SELECT slot_qb, slot_rb, slot_wr, slot_te, slot_flex, slot_dst, slot_k, '
+        'reg_weeks FROM dim_season WHERE season = ?', (year,)).fetchone()
+    slots = {'QB': srow[0], 'RB': srow[1], 'WR': srow[2], 'TE': srow[3],
+             'FLEX': srow[4], 'DST': srow[5], 'K': srow[6]}
+    reg_weeks = srow[7]
+
+    scores = all_scores(con, year)
+    out = []
+    for r in dated:
+        tid, week = r['team_id'], r['dated_week']
+        roster = rows(con, """
+            SELECT s.player_id, s.slot, p.position
+              FROM fact_roster_snapshot_pre2018 s
+              LEFT JOIN dim_player p ON p.player_id = s.player_id
+             WHERE s.season = ? AND s.team_id = ?""", (year, tid))
+        started = {pid: pts for pid, pts in con.execute(
+            'SELECT player_id, points FROM fact_roster_week '
+            'WHERE season=? AND week=? AND team_id=? AND started=1', (year, week, tid))}
+
+        entries, unscoreable, no_stat = [], 0, 0
+        for m in roster:
+            pid = m['player_id']
+            pos = (m['position'] or '').strip()
+            if pos == 'D/ST':
+                pos = 'DST'
+            if pid in started:
+                entries.append((pos, started[pid]))
+                continue
+            hit = scores.get((week, pid))
+            if hit is not None:
+                entries.append((pos, hit[0]))
+            elif pos == 'DST':
+                # The D/ST engine covers a fixed set of team ids; a miss here is the
+                # engine, not a real zero, so the optimum for this team-week is
+                # unknown rather than low.
+                unscoreable += 1
+            else:
+                entries.append((pos, 0.0))
+                no_stat += 1
+        if unscoreable:
+            continue
+
+        actual = round(sum(started.values()), 2)
+        optimal = optimal_points(entries, slots)
+        if optimal + 0.005 < actual:
+            # Cannot happen while starters keep their ESPN points. If it ever does,
+            # the roster and the lineup disagree - say so instead of publishing it.
+            print(f'  WARN {year} w{week} team {tid}: optimal {optimal} < '
+                  f'actual {actual}; skipped')
+            continue
+        out.append({
+            'teamId': tid,
+            'week': week,
+            'phase': 'regular' if week <= reg_weeks else 'playoff',
+            'actual': round(actual, 1),
+            'optimal': round(optimal, 1),
+            'eff': round(actual / optimal, 4) if optimal else None,
+            'wasted': round(optimal - actual, 1),
+            'rosterSize': len(roster),
+            'benchNoStat': no_stat,
+        })
+    return out or None
+
 
 def main():
     con = sqlite3.connect(DB)
@@ -611,6 +768,19 @@ def main():
             print(f"  {info['year']}: {info['steals']} steals · {info['power']} power rows "
                   f"· {info['cap_teams']} teams w/ cap · {info['baselines']} baselines"
                   f" · {info.get('roto', 0)} roto")
+    # site/pre2018_starts.json is what the scoreboard and Players read for
+    # 2014-2017 lineups. It used to be hand-maintained, which is how it came to
+    # label every pre-2018 starter QB; regenerate it from the warehouse instead.
+    # It is not purely derivable: a few team-weeks the warehouse deliberately
+    # excludes survive only in the file, so the generator merges them forward and
+    # refuses to write if any complete team-week stops reconciling.
+    import regen_pre2018_starts
+    if regen_pre2018_starts.main(write=True, con=con):
+        raise SystemExit('pre2018_starts regeneration failed its reconciliation gate')
+    # site/pre2018_rosters.json stays a checked-in artifact on purpose: it also
+    # carries draft-only players (draftTid) that no warehouse table models, and
+    # players.js reads them. fact_roster_snapshot_pre2018 covers the rostered set
+    # only, so regenerating from it would silently drop the rest.
     write_roto_career(con)
     compute_eight.write_player_bio(con)
     compute_eight.write_miles(con)
