@@ -47,6 +47,15 @@
   #year-row[hidden]{display:none!important}
   .picker-row#year-row{display:flex}
   .picker-row#year-row[hidden]{display:none!important}
+  #sv-tip {
+    position: absolute; z-index: 40; pointer-events: none;
+    background: #05060bf5; border: 1px solid #1c2536; border-radius: 6px;
+    padding: 8px 10px; color: #e8edf7; font-size: 12px; line-height: 1.45;
+    max-width: 280px; display: none; white-space: nowrap;
+    box-shadow: 0 8px 24px #0008;
+  }
+  #sv-tip b { color: #fff; font-size: 13px; }
+  #sv-tip .sv-tip-mut { color: #8b95a8; }
 </style>
 </head>
 <body>
@@ -124,7 +133,7 @@
       </div>
     </div>
 
-    <div class="sv-plot"><canvas id="sv-scatter"></canvas></div>
+    <div class="sv-plot"><canvas id="sv-scatter"></canvas><div id="sv-tip" role="tooltip"></div></div>
 
     <div class="sv-legend" id="sv-legend"></div>
     <p class="sv-note" id="sv-note"></p>
@@ -152,6 +161,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=26"></script>
-<script src="savant.js?v=4"></script>
+<script src="savant.js?v=5"></script>
 </body>
 </html>
