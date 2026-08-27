@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="logo.css?v=2">
-<link rel="stylesheet" href="savant.css?v=4">
+<link rel="stylesheet" href="savant.css?v=5">
 </head>
 <body class="sv">
 <div class="frame">
@@ -139,9 +139,17 @@
     </div>
 
     <div class="sv-pickers">
-      <div class="picker-row" id="year-row">
+      <div class="picker-row">
+        <span class="sv-qb-lab">Scope</span>
+        <div class="week-picker" id="scope-picker"></div>
+      </div>
+      <div class="picker-row" id="year-row" hidden>
         <span class="sv-qb-lab">Year</span>
         <div class="week-picker" id="season-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Squad</span>
+        <div class="week-picker" id="squad-picker"></div>
       </div>
       <div class="picker-row">
         <span class="sv-qb-lab">Pos</span>
@@ -210,7 +218,10 @@
         <button type="button" id="btn-chart" class="on">Chart</button>
         <button type="button" id="btn-csv">CSV</button>
       </div>
-      <div class="sv-plot"><canvas id="sv-scatter"></canvas></div>
+          <div class="sv-plot">
+            <canvas id="sv-scatter"></canvas>
+            <div id="sv-tip" role="tooltip"></div>
+          </div>
       <div class="sv-legend" id="sv-legend"></div>
       <p class="sv-note" id="sv-note"></p>
     </section>
@@ -428,6 +439,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=27"></script>
-<script src="savant.js?v=8"></script>
+<script src="savant.js?v=9"></script>
 </body>
 </html>

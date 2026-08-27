@@ -1,9 +1,9 @@
 /* AFFL Savant — every NFL skill player, filtered, plotted, hoverable.
  *
  * CHI-129 restyle: nflsavant visual language on this page only.
- * CHI-127 locks: default All / career 2014–2025; dots colored by the
- * current-name franchise of most AFFL points; Auction $ on X and Y;
- * 2014–15 snake years unavailable, never $0.
+ * CHI-127 / CHI-131 locks: default Cumulative / career 2014–2025;
+ * dots colored by the current-name franchise of most AFFL points;
+ * Auction $ on X and Y; 2014–15 snake years unavailable, never $0.
  *
  * Data: site/savant/season_<year>.json. AFFL scoring is non-PPR
  * throughout; receptions are volume and score nothing. Auction $ lives
@@ -40,7 +40,7 @@
     sheet.remove();
   })();
 
-  const A = window.AFFL;
+  const A = window.AFFL || {};
   const $ = (id) => document.getElementById(id);
   const BASE = "savant/";
   const ALL = "all";
@@ -94,7 +94,42 @@
     "Tijuana Sanchitos": "#ff9f43",
     "Westeros Warlords": "#9b1b30",
     "Winston-Salem Wake Snakes": "#7cb342",
+    "Central Oregon Gabagooners": "#6ec6ff",
   };
+
+  /* Former names stay on that franchise. Never a second chip. */
+  const FR_ALIAS = {
+    "Green Bay Glory Holes": "Chula Vista Chupacabras",
+    "Glory Holes": "Chula Vista Chupacabras",
+    "Tittsburgh Feelers": "Grand Teeton Feelers",
+    "Pittsburgh Feelers": "Grand Teeton Feelers",
+    "Kansas City Missourians": "DC Mighty Cucks",
+    "The Dalles Cowboys": "DC Mighty Cucks",
+  };
+
+  function currentSquads() {
+    if (A.CURRENT_2026 && A.CURRENT_2026.length) return A.CURRENT_2026;
+    return [
+      { owner: "m11", name: "Squaw Valley Skinners" },
+      { owner: "m06", name: "Fairview Fat Cats" },
+      { owner: "m08", name: "Goleta Gringos" },
+      { owner: "m05", name: "San Diego Shadowcöcks" },
+      { owner: "m02", name: "DC Mighty Cucks" },
+      { owner: "m18", name: "Grand Teeton Feelers" },
+      { owner: "m15", name: "Westeros Warlords" },
+      { owner: "m17", name: "Tijuana Sanchitos" },
+      { owner: "m21", name: "Patagonia Pipers" },
+      { owner: "m13", name: "Honolulu Horndogs" },
+      { owner: "m22", name: "Central Oregon Gabagooners" },
+      { owner: "m07", name: "Chula Vista Chupacabras" },
+    ];
+  }
+
+  function currentFr(name) {
+    if (!name) return "";
+    if (FR_ALIAS[name]) return FR_ALIAS[name];
+    return name;
+  }
 
   const FR_ABBR = {
     "Charleston Chewbacca": "CC",
@@ -152,7 +187,7 @@
   const SHARE_NULL = ["tgtsh", "aysh", "wopr", "racr"];
 
   const state = {
-    season: ALL, pos: "ALL", view: "all", franchise: "",
+    scope: "cum", season: ALL, pos: "ALL", view: "all", franchise: "",
     color: "franchise",
     x: "opp", y: "fpts", minOpp: 25,
     sort: { key: "fpts", dir: -1 },
@@ -175,7 +210,7 @@
   function n(v) { return v == null ? 0 : +v; }
   function pct(v) { return v == null ? null : +v * 100; }
 
-  function isAll() { return state.season === ALL || state.season == null; }
+  function isAll() { return state.scope !== "season"; }
 
   function fmt(v, m) {
     if (v == null || Number.isNaN(v)) return "—";
@@ -202,7 +237,7 @@
 
   function frColor(fr) {
     if (!fr) return MUTED;
-    return FR_COLOR[fr] || MUTED;
+    return FR_COLOR[currentFr(fr)] || MUTED;
   }
 
   function nflBar(team) {
@@ -347,7 +382,7 @@
     return src.filter((r) => {
       if (state.pos !== "ALL" && r.pos !== state.pos) return false;
       if (state.view === "affl" && !r.starts) return false;
-      if (state.franchise && r.fr !== state.franchise) return false;
+      if (state.franchise && currentFr(r.fr) !== state.franchise) return false;
       const opp = r.opp != null ? +r.opp : n(r.tgt) + n(r.car) + n(r.att);
       if (opp < state.minOpp) return false;
       if (state.q) {
@@ -373,13 +408,57 @@
   }
 
   function stampYear(v) {
+    if (v === ALL || v == null) {
+      state.scope = "cum";
+      state.season = ALL;
+    } else {
+      state.scope = "season";
+      state.season = +v;
+    }
+    stampScope();
+  }
+
+  function stampScope() {
     try {
       const u = new URL(location.href);
-      if (v === ALL) u.searchParams.delete("year");
-      else u.searchParams.set("year", String(v));
-      u.searchParams.delete("season");
+      if (state.scope === "season") {
+        u.searchParams.set("scope", "season");
+        if (state.season !== ALL && state.season != null) u.searchParams.set("year", String(state.season));
+        else u.searchParams.delete("year");
+      } else {
+        u.searchParams.delete("scope");
+        u.searchParams.delete("year");
+        u.searchParams.delete("season");
+      }
       history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
     } catch (e) { /* ignore */ }
+  }
+
+  function showYearRow(on) {
+    const row = $("year-row");
+    if (!row) return;
+    if (on) { row.hidden = false; row.style.display = ""; }
+    else { row.hidden = true; row.style.display = "none"; }
+  }
+
+  async function applyScope(scope, year) {
+    if (scope === "season") {
+      state.scope = "season";
+      if (year === ALL || year == null) {
+        const ys = (META && META.seasons) || [];
+        state.season = ys.length ? ys[ys.length - 1] : ALL;
+      } else {
+        state.season = +year;
+      }
+      showYearRow(true);
+    } else {
+      state.scope = "cum";
+      state.season = ALL;
+      showYearRow(false);
+    }
+    stampScope();
+    await loadScope();
+    renderAll();
   }
 
   function stampPage(page) {
@@ -407,14 +486,22 @@
   }
 
   function renderChips() {
-    const seasons = [[ALL, "All"]].concat(META.seasons.map((y) => [y, y]));
-    const onSeason = async (v) => {
-      state.season = v === ALL ? ALL : +v;
-      stampYear(state.season);
-      await loadScope();
-      renderAll();
-    };
-    chips($("season-picker"), seasons, state.season, onSeason);
+    chips($("scope-picker"), [["cum", "Cumulative"], ["season", "Season"]], state.scope, (v) => {
+      applyScope(v, v === "season" ? state.season : ALL);
+    });
+    showYearRow(state.scope === "season");
+    const seasons = META.seasons.map((y) => [y, y]);
+    chips($("season-picker"), seasons, state.season, (v) => applyScope("season", +v));
+    const squadEl = $("squad-picker");
+    if (squadEl) {
+      const items = [["", "All squads"]].concat(currentSquads().map((t) => [t.name, t.name]));
+      chips(squadEl, items, state.franchise, (v) => {
+        state.franchise = v;
+        renderAll();
+      });
+    }
+    const onSeason = (v) => applyScope(v === ALL ? "cum" : "season", v === ALL ? ALL : +v);
+    const yearOpts = [[ALL, "All"]].concat(META.seasons.map((y) => [y, y]));
     chips($("pos-picker"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
       state.pos = v; renderAll();
     });
@@ -435,7 +522,7 @@
     }, "sv-chip");
     const fanYear = $("fan-year");
     if (fanYear && fanYear.tagName === "SELECT") {
-      fanYear.innerHTML = seasons.map(([v, l]) =>
+      fanYear.innerHTML = yearOpts.map(([v, l]) =>
         `<option value="${v}">${v === ALL ? "All · career 2014–2025" : l}</option>`).join("");
       fanYear.value = String(state.season);
       fanYear.onchange = () => onSeason(fanYear.value);
@@ -490,11 +577,9 @@
       $("pl-year").innerHTML = `<option value="${ALL}">All · career 2014–2025</option>` +
         META.seasons.map((y) => `<option value="${y}">${y}</option>`).join("");
       $("pl-year").value = String(state.season);
-      $("pl-year").onchange = async () => {
-        state.season = parseYearParam($("pl-year").value);
-        stampYear(state.season);
-        await loadScope();
-        renderAll();
+      $("pl-year").onchange = () => {
+        const y = parseYearParam($("pl-year").value);
+        applyScope(y === ALL ? "cum" : "season", y);
       };
     }
   }
@@ -511,7 +596,7 @@
     const where = $("qb-where");
     if (where) {
       const bits = [];
-      bits.push(`<span class="sv-metric-chip">Season = ${isAll() ? "All · career 2014–2025" : state.season}</span>`);
+      bits.push(`<span class="sv-metric-chip">Season = ${isAll() ? "Cumulative · career 2014–2025" : state.season}</span>`);
       bits.push(`<span class="sv-metric-chip">Scoring = std · non-PPR</span>`);
       if (state.pos !== "ALL") bits.push(`<span class="sv-metric-chip">Pos = ${state.pos}</span>`);
       if (state.franchise) bits.push(`<span class="sv-metric-chip">Franchise = ${esc(state.franchise)}</span>`);
@@ -524,7 +609,7 @@
       const mx = METRICS[state.x], my = METRICS[state.y];
       sum.textContent =
         `QUERY Showing one row per player` +
-        (isAll() ? " across career 2014–2025" : ` for ${state.season}`) +
+        (isAll() ? " across Cumulative career 2014–2025" : ` for ${state.season}`) +
         (state.pos !== "ALL" ? ` where position is ${state.pos}` : "") +
         `. Sorted by ${METRICS[state.sort.key] ? METRICS[state.sort.key].label : state.sort.key}` +
         ` (${state.sort.dir < 0 ? "highest first" : "lowest first"}), min Opp >= ${state.minOpp}. Top ${state.top}.` +
@@ -536,7 +621,7 @@
 
   function groupKey(r) {
     if (state.color === "position") return r.pos || "?";
-    return r.fr || "";
+    return currentFr(r.fr);
   }
 
   function groupColor(key) {
@@ -578,8 +663,52 @@
         borderWidth: 1,
         pointRadius: 4,
         pointHoverRadius: 7,
+        pointHitRadius: 14,
       };
     });
+
+    function hideTip() {
+      const tip = $("sv-tip");
+      if (tip) tip.style.display = "none";
+    }
+
+    function showTip(evt, els) {
+      const tip = $("sv-tip");
+      if (!tip) return;
+      if (!els || !els.length) { hideTip(); return; }
+      const hit = els[0];
+      const ds = chart.data.datasets[hit.datasetIndex];
+      const raw = ds && ds.data ? ds.data[hit.index] : null;
+      const r = raw && raw.r;
+      if (!r) { hideTip(); return; }
+      const fr = currentFr(r.fr);
+      const lines = [
+        `<b>${esc(displayName(r))}</b> · ${esc(r.pos || "—")} · ${esc(r.team || "FA")}`,
+        `<span class="sv-tip-mut">${esc(mx.label)}: ${esc(fmt(raw.x, mx))}</span>`,
+        `<span class="sv-tip-mut">${esc(my.label)}: ${esc(fmt(raw.y, my))}</span>`,
+        `<span class="sv-tip-mut">${r.g == null ? "—" : r.g} games · ${esc(fmt(r.fpts, { nd: 1 }))} AFFL pts</span>`,
+        `<span class="sv-tip-mut">${fr ? ("Franchise: " + esc(fr)) : "No AFFL points"}</span>`,
+        `<span class="sv-tip-mut">Auction $: ${esc(fmtBid(r.bid))}</span>`,
+      ];
+      if (r.starts) lines.push(`<span class="sv-tip-mut">Started ${r.starts}×` + (fr ? ` by ${esc(fr)}` : "") + "</span>");
+      else if (!isAll()) lines.push(`<span class="sv-tip-mut">Never started in the AFFL this season</span>`);
+      tip.innerHTML = lines.join("<br>");
+      const plot = tip.parentElement;
+      const rec = plot.getBoundingClientRect();
+      const nx = evt.native ? evt.native.clientX : (evt.clientX || 0);
+      const ny = evt.native ? evt.native.clientY : (evt.clientY || 0);
+      let left = nx - rec.left + 14;
+      let top = ny - rec.top + 14;
+      tip.style.display = "block";
+      const tw = tip.offsetWidth || 200;
+      const th = tip.offsetHeight || 80;
+      if (left + tw > rec.width - 8) left = rec.width - tw - 8;
+      if (top + th > rec.height - 8) top = rec.height - th - 8;
+      if (left < 8) left = 8;
+      if (top < 8) top = 8;
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+    }
 
     const grid = "#eef1f4";
     const tick = "#64748b";
@@ -589,10 +718,13 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: "nearest", intersect: true },
+        events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+        interaction: { mode: "nearest", intersect: true, axis: "xy" },
+        onHover: (evt, els) => { showTip(evt, els); },
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: false,
             backgroundColor: "#111827f2",
             titleColor: "#fff",
             bodyColor: "#e5e7eb",
@@ -607,10 +739,10 @@
                   `${mx.label}: ${fmt(item.raw.x, mx)}`,
                   `${my.label}: ${fmt(item.raw.y, my)}`,
                   `${r.g == null ? "—" : r.g} games · ${fmt(r.fpts, { nd: 1 })} AFFL pts`,
-                  r.fr ? `Franchise: ${r.fr}` : "No AFFL points",
+                  r.fr ? `Franchise: ${currentFr(r.fr)}` : "No AFFL points",
                   `Auction $: ${fmtBid(r.bid)}`,
                 ];
-                if (r.starts) out.push(`Started ${r.starts}×` + (r.fr ? ` by ${r.fr}` : ""));
+                if (r.starts) out.push(`Started ${r.starts}×` + (r.fr ? ` by ${currentFr(r.fr)}` : ""));
                 else if (!isAll()) out.push("Never started in the AFFL this season");
                 return out;
               },
@@ -633,7 +765,9 @@
     };
 
     if (chart) { chart.destroy(); chart = null; }
+    hideTip();
     chart = new Chart(canvas.getContext("2d"), cfg);
+    canvas.onmouseleave = hideTip;
 
     $("sv-legend").innerHTML = keys.map((k) =>
       `<span class="sv-key"><span class="sv-dot" style="background:${groupColor(k)}"></span>${esc(groupLabel(k, by[k].length))}</span>`
@@ -1493,8 +1627,8 @@
     $("plot-count").textContent = `${rows.length} players`;
     if (isAll()) {
       $("plot-sub").textContent = state.view === "affl"
-        ? "All · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
-        : "All · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
+        ? "Cumulative · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
+        : "Cumulative · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
     } else {
       $("plot-sub").textContent = state.view === "affl"
         ? `${state.season} · only players an AFFL manager actually started · non-PPR`
@@ -1592,9 +1726,8 @@
         state.y = board.chart.y;
         if (board.chart.pos && board.chart.pos !== "ALL") state.pos = board.chart.pos;
         if (state.lb.season != null) {
-          state.season = state.lb.season;
-          stampYear(state.season);
-          loadScope().then(() => { setPage("explore"); renderAll(); });
+          if (state.lb.season === ALL) applyScope("cum", ALL).then(() => setPage("explore"));
+          else applyScope("season", state.lb.season).then(() => setPage("explore"));
           return;
         }
       }
@@ -1615,7 +1748,7 @@
         $("y-metric").value = state.y;
         $("franchise").value = "";
         $("min-opp").value = "25";
-        renderAll();
+        await applyScope("cum", ALL);
       });
     }
     window.addEventListener("hashchange", () => setPage(parsePage()));
@@ -1635,7 +1768,16 @@
     META = meta;
     BIDS = bids || {};
     const qs = new URLSearchParams(location.search);
-    state.season = parseYearParam(qs.get("year") || qs.get("season"));
+    const wantSeason = qs.get("scope") === "season" || (qs.get("year") && String(qs.get("year")).toLowerCase() !== "all");
+    if (wantSeason) {
+      state.scope = "season";
+      state.season = parseYearParam(qs.get("year") || qs.get("season"));
+      if (state.season === ALL) state.season = META.seasons[META.seasons.length - 1];
+    } else {
+      state.scope = "cum";
+      state.season = ALL;
+    }
+    stampScope();
     state.page = parsePage();
     await loadScope();
     renderSelects();

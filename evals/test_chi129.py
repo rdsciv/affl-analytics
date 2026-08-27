@@ -39,8 +39,8 @@ NAV = ["Dashboard", "Scoreboard", "Players", "Savant", "Draft", "Trades",
        "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
 
 html = get("/savant.html")
-css = get("/savant.css?v=4")
-js = get("/savant.js?v=8")
+css = get("/savant.css?v=5")
+js = get("/savant.js?v=9")
 
 if html:
     if 'class="sv"' not in html and "class='sv'" not in html:
