@@ -16,6 +16,30 @@
 (async function () {
   "use strict";
 
+  /* common.js mounts an Excel left rail on every page. Put the nav back
+     in the nflsavant header so a cached common.js cannot leave a sidebar. */
+  (function restoreSavantChrome() {
+    const frame = document.querySelector(".frame");
+    const header = document.querySelector("header.sv-mast");
+    const nav = document.querySelector(".site-nav");
+    if (!frame || !header || !nav) return;
+    let navRow = header.querySelector(".topbar-nav-row");
+    if (!navRow) {
+      navRow = document.createElement("div");
+      navRow.className = "topbar-nav-row";
+      const tools = header.querySelector(".sv-tools");
+      header.insertBefore(navRow, tools || null);
+    }
+    if (nav.parentElement !== navRow) navRow.appendChild(nav);
+    const sheet = frame.querySelector(".sheet");
+    if (!sheet) return;
+    const main = sheet.querySelector(".sheet-main");
+    if (main) {
+      while (main.firstChild) frame.insertBefore(main.firstChild, sheet);
+    }
+    sheet.remove();
+  })();
+
   const A = window.AFFL;
   const $ = (id) => document.getElementById(id);
   const BASE = "savant/";
@@ -397,10 +421,20 @@
     chips($("pl-pos"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
       state.pos = v; renderAll();
     }, "sv-chip");
-    chips($("fan-pos"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
-      state.pos = v; renderAll();
-    });
-    chips($("fan-year"), seasons, state.season, onSeason);
+    const fanYear = $("fan-year");
+    if (fanYear && fanYear.tagName === "SELECT") {
+      fanYear.innerHTML = seasons.map(([v, l]) =>
+        `<option value="${v}">${v === ALL ? "All · career 2014–2025" : l}</option>`).join("");
+      fanYear.value = String(state.season);
+      fanYear.onchange = () => onSeason(fanYear.value);
+    }
+    const fanPos = $("fan-pos");
+    if (fanPos && fanPos.tagName === "SELECT") {
+      fanPos.innerHTML = POSITIONS.map((p) =>
+        `<option value="${p}">${p === "ALL" ? "All positions" : p}</option>`).join("");
+      fanPos.value = state.pos;
+      fanPos.onchange = () => { state.pos = fanPos.value; renderAll(); };
+    }
     chips($("h2h-pos"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
       state.pos = v; renderAll();
     }, "sv-chip");

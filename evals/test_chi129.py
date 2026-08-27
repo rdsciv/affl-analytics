@@ -39,8 +39,8 @@ NAV = ["Dashboard", "Scoreboard", "Players", "Savant", "Draft", "Trades",
        "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
 
 html = get("/savant.html")
-css = get("/savant.css?v=1")
-js = get("/savant.js?v=4")
+css = get("/savant.css?v=3")
+js = get("/savant.js?v=6")
 
 if html:
     if 'class="sv"' not in html and "class='sv'" not in html:
@@ -76,6 +76,8 @@ if css:
             fail(f" - savant.css missing {tok}")
     if "color-scheme: light" not in css:
         fail(" - savant.css is not a light theme")
+    if ".side-menu" not in css:
+        fail(" - savant.css does not suppress the Excel sheet rail")
 
 if js:
     if "tooltip" not in js or "callbacks" not in js:
@@ -92,6 +94,8 @@ if js:
         fail(" - savant.js dropped the snake-year never-$0 lock")
     if "sv-bar" not in js:
         fail(" - savant.js does not paint team color bars")
+    if "restoreSavantChrome" not in js:
+        fail(" - savant.js does not restore the top nav from the sheet rail")
     if "nflLogoHTML" in js or "logos/nfl/" in js:
         fail(" - savant.js paints unconstrained NFL logos")
     if re.search(r"\bPPR\b", js) and "non-PPR" not in js:

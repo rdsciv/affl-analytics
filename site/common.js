@@ -522,6 +522,8 @@ window.AFFL = (function () {
   /* Excel-style sheet menu: left rail, rounded items, hyperlinks between pages.
      Colors stay AFFL tokens. Header rail (48px logos) stays above. */
   function ensureSideMenu() {
+  /* CHI-129: nflsavant chrome keeps a single top nav. Do not pull it into the Excel sheet rail. */
+  if (document.body && document.body.classList.contains("sv")) return;
   if (document.getElementById("side-menu")) return;
   const frame = document.querySelector(".frame");
   const nav = document.querySelector(".site-nav");

@@ -37,6 +37,11 @@ body.sv #header-rail,
 body.sv .brand-strip,
 body.sv .former-toggle,
 body.sv .foot-banner { display: none !important; }
+
+/* nflsavant is a single top nav — never the Excel left sheet. */
+body.sv .sheet { display: contents; }
+body.sv .sheet-main { display: contents; }
+body.sv .side-menu { display: none !important; }
 body.sv .topbar-nav-row {
   order: unset;
   width: auto;
@@ -48,17 +53,19 @@ body.sv .topbar-nav-row {
 body.sv .sv-mast { display: flex; align-items: center; }
 
 /* ---------- masthead ---------- */
-.sv-mast {
+.sv-mast,
+body.sv header.sv-mast.topbar {
   display: flex;
   align-items: center;
-  gap: 18px 22px;
-  flex-wrap: wrap;
-  padding: 14px 0 12px;
+  gap: 12px 16px;
+  flex-wrap: nowrap;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 10px max(20px, calc((100vw - 1240px) / 2 + 20px));
   border-bottom: 1px solid var(--sv-line);
   background: var(--sv-card);
-  margin: 0 -20px 0;
-  padding-left: 20px;
-  padding-right: 20px;
+  box-sizing: border-box;
 }
 .sv-wordmark {
   display: flex;
@@ -80,23 +87,26 @@ body.sv .sv-mast { display: flex; align-items: center; }
 
 body.sv .site-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px 4px;
+  flex-wrap: nowrap;
+  gap: 0;
   margin-left: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 body.sv .site-nav a {
   color: #6b7280;
   text-decoration: none;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 6px 8px;
+  letter-spacing: 0.06em;
+  padding: 6px 7px;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  white-space: nowrap;
 }
 body.sv .site-nav a:hover { color: var(--sv-ink); border: 0; }
 body.sv .site-nav a.on {
@@ -113,8 +123,9 @@ body.sv .site-nav a.on {
   align-items: center;
   gap: 8px;
 }
+.sv-tools { flex: none; }
 .sv-tools input[type="search"] {
-  width: min(240px, 36vw);
+  width: min(200px, 22vw);
   border: 1px solid var(--sv-line);
   background: #f8fafb;
   border-radius: 999px;
@@ -205,12 +216,22 @@ body.sv .season-chip.on {
   box-shadow: none;
 }
 
+.sv-pickers { display: flex; flex-direction: column; gap: 6px; margin: 0 0 14px; }
+.sv-pickers .picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.sv-pickers .week-picker { margin: 0; }
 .sv-filters {
   display: flex;
   gap: 10px 16px;
   flex-wrap: wrap;
   margin: 0 0 16px;
 }
+.sv-fan-filters { align-items: end; }
+.sv-fan-filters .sv-field { min-width: 160px; }
 .sv-field { display: flex; flex-direction: column; gap: 5px; min-width: 140px; }
 .sv-field label,
 .sv-k {

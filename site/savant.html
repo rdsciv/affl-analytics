@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="logo.css?v=2">
-<link rel="stylesheet" href="savant.css?v=1">
+<link rel="stylesheet" href="savant.css?v=3">
 </head>
 <body class="sv">
 <div class="frame">
@@ -136,17 +136,23 @@
       <p class="sv-meta">Every NFL skill player in the warehouse, 2014–2025. Group, filter, and rank by AFFL non-PPR points, EPA, opportunity, or auction $. Empty stays empty. Scoring is std — receptions score zero.</p>
     </div>
 
-    <div class="picker-row" id="year-row">
-      <div class="week-picker" id="season-picker"></div>
-    </div>
-    <div class="picker-row">
-      <div class="week-picker" id="pos-picker"></div>
-    </div>
-    <div class="picker-row">
-      <div class="week-picker" id="view-picker"></div>
-    </div>
-    <div class="picker-row">
-      <div class="week-picker" id="color-picker"></div>
+    <div class="sv-pickers">
+      <div class="picker-row" id="year-row">
+        <span class="sv-qb-lab">Year</span>
+        <div class="week-picker" id="season-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Pos</span>
+        <div class="week-picker" id="pos-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Pool</span>
+        <div class="week-picker" id="view-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Color</span>
+        <div class="week-picker" id="color-picker"></div>
+      </div>
     </div>
 
     <section class="sv-card">
@@ -271,27 +277,27 @@
       <h1>Opportunity &amp; expected points</h1>
       <p class="sv-meta">Usage shares, WOPR, and AFFL non-PPR points from stored columns. Scoring is <strong>std</strong> — receptions score zero. There is no PPR toggle.</p>
     </div>
-    <div class="sv-filters">
+    <div class="sv-filters sv-fan-filters">
       <div class="sv-field">
-        <label>Year</label>
-        <div class="week-picker" id="fan-year"></div>
+        <label for="fan-year">Year</label>
+        <select id="fan-year" class="team-select"></select>
       </div>
       <div class="sv-field">
-        <label>Scoring</label>
+        <label for="fan-scoring">Scoring</label>
         <select id="fan-scoring" class="team-select" disabled>
           <option value="std" selected>Std · AFFL non-PPR</option>
         </select>
       </div>
       <div class="sv-field">
-        <label>Position</label>
-        <div class="week-picker" id="fan-pos"></div>
+        <label for="fan-pos">Position</label>
+        <select id="fan-pos" class="team-select"></select>
       </div>
       <div class="sv-field">
-        <label>Team</label>
+        <label for="fan-fr">Team</label>
         <select id="fan-fr" class="team-select"></select>
       </div>
       <div class="sv-field">
-        <label>Filter by name</label>
+        <label for="fan-name">Filter by name</label>
         <input id="fan-name" type="search" placeholder="Type a player name...">
       </div>
     </div>
@@ -318,7 +324,7 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=26"></script>
-<script src="savant.js?v=4"></script>
+<script src="common.js?v=27"></script>
+<script src="savant.js?v=6"></script>
 </body>
 </html>
