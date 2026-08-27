@@ -323,10 +323,43 @@ window.AFFL = (function () {
     });
   }
 
+  function franchiseYears(id) {
+    const f = franchiseRecord(id);
+    if (!f || !f.years || !f.years.length) return [];
+    return f.years.slice();
+  }
+
+  function franchisePlayedSeason(oid, year) {
+    const id = canon(oid);
+    if (!id) return false;
+    const years = franchiseYears(id);
+    if (!years.length) return false;
+    const y = +year;
+    return years.indexOf(y) >= 0 || years.indexOf(String(y)) >= 0;
+  }
+
+  function ownersForSeason(year) {
+    const y = +year;
+    if (!y) return [];
+    return ((DATA && DATA.franchises) || [])
+      .filter((f) => franchisePlayedSeason(f.owner, y))
+      .map((f) => canon(f.owner));
+  }
+
+  function seasonScope(y) {
+    if (y == null || y === "" || String(y).toLowerCase() === "all") {
+      return { year: null, all: true };
+    }
+    const n = Number(y);
+    if (!Number.isFinite(n) || n < 2014 || n > 2025) return { year: null, all: true };
+    return { year: n, all: false };
+  }
+
   function clampYear(year, squad) {
     if (!squad) return year;
     const ys = squadYears(squad);
-    return ys.indexOf(year) >= 0 ? year : (ys[0] || year);
+    if (!ys.length) return null;
+    return ys.indexOf(year) >= 0 ? year : null;
   }
 
   /* Historic teams — Pillars former-teams toggle.
@@ -718,7 +751,7 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
-           squads, squadFromURL, squadInfo, squadYears, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
+           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,
