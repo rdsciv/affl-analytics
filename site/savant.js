@@ -42,7 +42,42 @@
     "Tijuana Sanchitos": "#ff9f43",
     "Westeros Warlords": "#9b1b30",
     "Winston-Salem Wake Snakes": "#7cb342",
+    "Central Oregon Gabagooners": "#6ec6ff",
   };
+
+  /* Former names stay on that franchise. Never a second chip. */
+  const FR_ALIAS = {
+    "Green Bay Glory Holes": "Chula Vista Chupacabras",
+    "Glory Holes": "Chula Vista Chupacabras",
+    "Tittsburgh Feelers": "Grand Teeton Feelers",
+    "Pittsburgh Feelers": "Grand Teeton Feelers",
+    "Kansas City Missourians": "DC Mighty Cucks",
+    "The Dalles Cowboys": "DC Mighty Cucks",
+  };
+
+  function currentSquads() {
+    if (window.AFFL && A.CURRENT_2026 && A.CURRENT_2026.length) return A.CURRENT_2026;
+    return [
+      { owner: "m11", name: "Squaw Valley Skinners" },
+      { owner: "m06", name: "Fairview Fat Cats" },
+      { owner: "m08", name: "Goleta Gringos" },
+      { owner: "m05", name: "San Diego Shadowcöcks" },
+      { owner: "m02", name: "DC Mighty Cucks" },
+      { owner: "m18", name: "Grand Teeton Feelers" },
+      { owner: "m15", name: "Westeros Warlords" },
+      { owner: "m17", name: "Tijuana Sanchitos" },
+      { owner: "m21", name: "Patagonia Pipers" },
+      { owner: "m13", name: "Honolulu Horndogs" },
+      { owner: "m22", name: "Central Oregon Gabagooners" },
+      { owner: "m07", name: "Chula Vista Chupacabras" },
+    ];
+  }
+
+  function currentFr(name) {
+    if (!name) return "";
+    if (FR_ALIAS[name]) return FR_ALIAS[name];
+    return name;
+  }
 
   /* metric key -> label + how to read it off a row */
   const METRICS = {
@@ -235,7 +270,7 @@
     return ROWS.filter((r) => {
       if (state.pos !== "ALL" && r.pos !== state.pos) return false;
       if (state.view === "affl" && !r.starts) return false;
-      if (state.franchise && r.fr !== state.franchise) return false;
+      if (state.franchise && currentFr(r.fr) !== state.franchise) return false;
       const opp = r.opp != null ? +r.opp : n(r.tgt) + n(r.car) + n(r.att);
       if (opp < state.minOpp) return false;
       return true;
@@ -303,8 +338,8 @@
       renderAll();
     });
     const squadEl = $("squad-picker");
-    if (squadEl && META.franchises) {
-      const items = [["", "All squads"]].concat(META.franchises.map((f) => [f, f]));
+    if (squadEl) {
+      const items = [["", "All squads"]].concat(currentSquads().map((t) => [t.name, t.name]));
       chips(squadEl, items, state.franchise, (v) => {
         state.franchise = v;
         renderAll();
@@ -344,7 +379,7 @@
 
   function groupKey(r) {
     if (state.color === "position") return r.pos || "?";
-    return r.fr || "";
+    return currentFr(r.fr);
   }
 
   function groupColor(key) {
@@ -376,17 +411,67 @@
 
     const datasets = keys.map((k) => {
       const col = groupColor(k);
+      const pts = by[k];
       return {
-        label: groupLabel(k, by[k].length),
-        data: by[k],
+        label: groupLabel(k, pts.length),
+        data: pts.map((p) => ({ x: p.x, y: p.y })),
+        players: pts.map((p) => p.player),
         backgroundColor: col + "cc",
         borderColor: col,
         borderWidth: 1,
-        pointRadius: 4,
-        pointHoverRadius: 7,
-        pointHitRadius: 10,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointHitRadius: 14,
       };
     });
+
+    function playerAt(ds, idx) {
+      if (!ds || idx == null) return null;
+      const bag = ds.players || [];
+      return bag[idx] || null;
+    }
+
+    function hideTip() {
+      const tip = $("sv-tip");
+      if (tip) tip.style.display = "none";
+    }
+
+    function showTip(evt, els) {
+      const tip = $("sv-tip");
+      if (!tip) return;
+      if (!els || !els.length) { hideTip(); return; }
+      const hit = els[0];
+      const ds = chart.data.datasets[hit.datasetIndex];
+      const r = playerAt(ds, hit.index);
+      if (!r) { hideTip(); return; }
+      const fr = currentFr(r.fr);
+      const lines = [
+        `<b>${esc(displayName(r))}</b> · ${esc(r.pos || "—")} · ${esc(r.team || "FA")}`,
+        `<span class="sv-tip-mut">${esc(mx.label)}: ${esc(fmt(evt && evt.x, mx) !== "—" ? fmt((ds.data[hit.index] || {}).x, mx) : fmt((ds.data[hit.index] || {}).x, mx))}</span>`,
+        `<span class="sv-tip-mut">${esc(my.label)}: ${esc(fmt((ds.data[hit.index] || {}).y, my))}</span>`,
+        `<span class="sv-tip-mut">${r.g == null ? "—" : r.g} games · ${esc(fmt(r.fpts, { nd: 1 }))} AFFL pts</span>`,
+        `<span class="sv-tip-mut">${fr ? ("Franchise: " + esc(fr)) : "No AFFL points"}</span>`,
+        `<span class="sv-tip-mut">Auction $: ${esc(fmtBid(r.bid))}</span>`,
+      ];
+      if (r.starts) lines.push(`<span class="sv-tip-mut">Started ${r.starts}×` + (fr ? ` by ${esc(fr)}` : "") + "</span>");
+      else if (!isAll()) lines.push(`<span class="sv-tip-mut">Never started in the AFFL this season</span>`);
+      tip.innerHTML = lines.join("<br>");
+      const plot = tip.parentElement;
+      const rec = plot.getBoundingClientRect();
+      const nx = evt.native ? evt.native.clientX : (evt.clientX || 0);
+      const ny = evt.native ? evt.native.clientY : (evt.clientY || 0);
+      let left = nx - rec.left + 14;
+      let top = ny - rec.top + 14;
+      tip.style.display = "block";
+      const tw = tip.offsetWidth || 200;
+      const th = tip.offsetHeight || 80;
+      if (left + tw > rec.width - 8) left = rec.width - tw - 8;
+      if (top + th > rec.height - 8) top = rec.height - th - 8;
+      if (left < 8) left = 8;
+      if (top < 8) top = 8;
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+    }
 
     const cfg = {
       type: "scatter",
@@ -394,33 +479,12 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: "nearest", intersect: false, axis: "xy" },
+        events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+        interaction: { mode: "nearest", intersect: true, axis: "xy" },
+        onHover: (evt, els) => { showTip(evt, els); },
         plugins: {
           legend: { display: false },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              title: (items) => {
-                const r = items[0] && items[0].raw && items[0].raw.player;
-                if (!r) return "unavailable";
-                return `${displayName(r)} · ${r.pos || "—"} · ${r.team || "FA"}`;
-              },
-              label: (item) => {
-                const r = item.raw && item.raw.player;
-                if (!r) return "unavailable";
-                const out = [
-                  `${mx.label}: ${fmt(item.raw.x, mx)}`,
-                  `${my.label}: ${fmt(item.raw.y, my)}`,
-                  `${r.g == null ? "—" : r.g} games · ${fmt(r.fpts, { nd: 1 })} AFFL pts`,
-                  r.fr ? `Franchise: ${r.fr}` : "No AFFL points",
-                  `Auction $: ${fmtBid(r.bid)}`,
-                ];
-                if (r.starts) out.push(`Started ${r.starts}×` + (r.fr ? ` by ${r.fr}` : ""));
-                else if (!isAll()) out.push("Never started in the AFFL this season");
-                return out;
-              },
-            },
-          },
+          tooltip: { enabled: false },
         },
         scales: {
           x: { title: { display: true, text: mx.label }, grid: { color: "#1c2536" } },
@@ -430,7 +494,10 @@
     };
 
     if (chart) { chart.destroy(); chart = null; }
+    hideTip();
     chart = new Chart($("sv-scatter").getContext("2d"), cfg);
+    const canvas = $("sv-scatter");
+    canvas.onmouseleave = hideTip;
 
     $("sv-legend").innerHTML = keys.map((k) =>
       `<span class="sv-key"><span class="sv-dot" style="background:${groupColor(k)}"></span>${esc(groupLabel(k, by[k].length))}</span>`
