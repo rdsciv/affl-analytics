@@ -21,7 +21,7 @@ Not in primary nav: Genius, Projections, Auction Lab.
 
 ## Pre-2018
 
-Weekly lineups and the transaction feed are unavailable. Scoreboard chips those years. Roto career marks them missing, not zero.
+Weekly STARTERS are recovered and verified-partial (`slot_source` records how each slot was derived). Weekly bench and the transaction feed are unavailable, so `has_rosters` and `has_tx` both stay 0. Scoreboard chips those years. Roto career marks them missing, not zero.
 
 ## How to refresh
 

@@ -1,6 +1,10 @@
 # 2025 lineup IQ
 
-CHI-33 / AFFL-013. actual ÷ optimal. Pre-2018 unavailable (not published).
+CHI-33 / AFFL-013. actual ÷ optimal.
+
+Season aggregate is 2018+ only. 2014-2017 publish `lineupIQPre2018`: one record per
+team-week whose roster snapshot is dated, so the bench is known. Verified roster,
+computed optimal — see CONTRACTS.md. Never pooled with the season number.
 
 | team | actual | optimal | wasted | eff |
 | --- | --- | --- | --- | --- |

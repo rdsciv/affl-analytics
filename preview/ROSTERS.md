@@ -1,6 +1,6 @@
 # 2025 weekly rosters
 
-CHI-32 / AFFL-012. `fact_roster_week` 2018–2025. Pre-2018 unavailable.
+CHI-32 / AFFL-012. `fact_roster_week` 2018–2025 full rosters; 2014–2017 recovered starters only.
 
 - 2025 rows: **3382**
 - Started: **{started}**

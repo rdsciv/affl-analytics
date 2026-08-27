@@ -2,7 +2,7 @@
 
 CHI-35 / AFFL-015. `fact_trade` is reconstructed from roster movement, not the ESPN tx feed. Labeled reconstructed.
 
-- Trades: **37**
+- Trades: **40**
 - Items: **{items}**
 
 | week | from | to | player |
