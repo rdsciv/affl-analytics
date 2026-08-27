@@ -1461,7 +1461,8 @@
     const focus = picked[0];
     $("cmp-sim-title").textContent = `Players like ${displayName(focus)}`;
     const keys = TAPE.filter((r) => r.get);
-    const sim = posPool.filter((r) => r.pid !== focus.pid).map((r) => {
+    const pickedSet = new Set(picked.map((r) => r.pid));
+    const sim = posPool.filter((r) => !pickedSet.has(r.pid)).map((r) => {
       let acc = 0, used = 0;
       keys.forEach((m) => {
         const a = m.get(focus), b = m.get(r);
