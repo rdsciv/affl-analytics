@@ -751,6 +751,14 @@ window.AFFL = (function () {
     location.href = u.pathname.split("/").pop() + u.search + u.hash;
   }
 
+  function teamHref(year, tid) {
+    return `team.html?year=${year}&tid=${tid}`;
+  }
+
+  async function loadJSON(path) {
+    return fetch(path + bust(), { cache: "no-store" }).then((r) => r.json());
+  }
+
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
            squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
@@ -760,6 +768,6 @@ window.AFFL = (function () {
            fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
            playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
            loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, scopePicker, scopeFromURL, showYearRow,
-           chartDefaults, dateStr, notice,
+           chartDefaults, dateStr, notice, teamHref, loadJSON,
            get data() { return DATA; } };
 })();

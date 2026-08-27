@@ -10,10 +10,11 @@ ESPN Fantasy API and joined to real NFL data via [nflverse](https://github.com/n
 | **Dashboard** (`index.html`) | Season KPIs, weekly scoring waves, standings, schedule-luck index, Next Gen Lab (lineup IQ, draft ROI, position DNA, starter EPA), Fantasy Genius report cards, all-time records back to 2014 |
 | **Scoreboard** (`scoreboard.html`) | Every matchup of **every season**, week by week, with complete lineups — slot, player, NFL team, points, collapsible bench. Every player name links into the profiler |
 | **Players** (`players.html`) | Per-player hero card, weekly production chart, AFFL journey, and a full game log joining fantasy scoring to real NFL box scores (yards, TDs, targets, EPA) — for any season |
-| **Draft** (`draft.html`) | Every draft since 2014. Auction or snake auto-detected; position spend allocation, points-per-dollar efficiency, steals/busts, and the full searchable board |
+| **Draft** (`draft.html`) | Every draft since 2014. Auction holdout Marimekko + early/late connected scatter on **PAR** (`v_draft_value`), spend allocation, steals/busts, and the full searchable board |
+| **Team season** (`team.html`) | Per franchise-season stacked area of started points by lineup slot (QB, RB, WR, TE, FLEX, K, D/ST) through that season's roster weeks |
 | **Front Office** (`trades.html`) | Trade blotter showing both sides of every completed trade, waiver/free-agent log, and per-manager wire activity |
 
-All five pages share a season picker and lazy-load one bundle per year.
+Pages share a season picker and lazy-load one bundle per year.
 
 ## Data availability
 
