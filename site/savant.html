@@ -44,6 +44,9 @@
   .sv-pos { font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--mut); }
   .sv-fr { color: var(--blue2); font-size: 11px; }
   .sv-empty { padding: 28px; text-align: center; color: var(--mut); }
+  #year-row[hidden]{display:none!important}
+  .picker-row#year-row{display:flex}
+  .picker-row#year-row[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -54,7 +57,7 @@
       <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
       <div>
         <h1>AFFL <span>Savant</span></h1>
-        <div class="sub">Every NFL skill player, 2014–2025. Hover any dot to see who it is.</div>
+        <div class="sub">Every NFL skill player, 2014–2025. Cumulative is the book. Hover a dot for the name.</div>
       </div>
     </div>
     <nav class="site-nav">
@@ -73,8 +76,16 @@
     </nav>
   </header>
 
-  <div class="picker-row" id="year-row">
+  <div class="picker-row" id="scope-row">
+    <div class="week-picker" id="scope-picker"></div>
+  </div>
+
+  <div class="picker-row" id="year-row" hidden>
     <div class="week-picker" id="season-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="week-picker" id="squad-picker"></div>
   </div>
 
   <div class="picker-row">
@@ -106,10 +117,6 @@
       <div class="sv-field">
         <label for="y-metric">Y axis</label>
         <select id="y-metric" class="team-select"></select>
-      </div>
-      <div class="sv-field">
-        <label for="franchise">AFFL franchise</label>
-        <select id="franchise" class="team-select"></select>
       </div>
       <div class="sv-field">
         <label for="min-opp">Minimum opportunity</label>
@@ -145,6 +152,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=26"></script>
-<script src="savant.js?v=3"></script>
+<script src="savant.js?v=4"></script>
 </body>
 </html>
