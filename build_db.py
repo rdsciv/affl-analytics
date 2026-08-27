@@ -24,7 +24,10 @@ from process_seasons import resolve_accept_items
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
-DB = os.path.join(HERE, 'affl.db')
+# AFFL_DB lets a rebuild be rehearsed against a copy. This script starts by
+# deleting most of the warehouse, so being able to prove a run is non-destructive
+# before pointing it at the real file is the difference between a test and a bet.
+DB = os.environ.get('AFFL_DB') or os.path.join(HERE, 'affl.db')
 SITE = os.path.join(HERE, 'site')
 
 SLOT = {0: 'QB', 2: 'RB', 3: 'RB/WR', 4: 'WR', 5: 'WR/TE', 6: 'TE', 7: 'OP',
@@ -52,7 +55,8 @@ def init(con):
 
 def wipe(con):
     for t in ('fact_trade_item', 'fact_trade', 'fact_transaction', 'fact_draft_pick',
-              'fact_matchup', 'fact_roster_week', 'fact_nfl_week', 'fact_contract',
+              'fact_matchup', 'fact_roster_week', 'fact_roster_snapshot_pre2018',
+              'fact_nfl_week', 'fact_contract',
               'fact_cap_hit', 'fact_player_season_points', 'player_season',
               'fact_player_week_par', 'fact_player_season_par_reconstructed',
               'fact_xtd_player_week', 'fact_projection_week', 'fact_roto_team_season',
@@ -226,6 +230,45 @@ def fix_huntley_gsis(con):
                     WHERE player_id=? AND (gsis_id IS NULL OR gsis_id='')""",
                 (gsis, row[0]))
     return 1
+
+
+def backfill_pool_players(con):
+    """Name pre-2018 players that exist only in ESPN's own season player pool.
+
+    A player who was rostered or drafted before 2018 but never reached a boxscore
+    and has no nflverse espn_id gets no dim_player row, so fact_roster_week ends up
+    pointing at an unknown player. The pool ESPN shipped with that season's draft
+    has every one of them. Runs after the pre-2018 lineup load, since that is what
+    introduces the references.
+    """
+    import json as _json
+    POS = {1: 'QB', 2: 'RB', 3: 'WR', 4: 'TE', 5: 'K', 16: 'D/ST'}
+    missing = {pid for (pid,) in con.execute("""
+        SELECT DISTINCT player_id FROM fact_roster_week r
+         WHERE NOT EXISTS (SELECT 1 FROM dim_player p WHERE p.player_id = r.player_id)
+        UNION
+        SELECT DISTINCT player_id FROM fact_draft_pick d
+         WHERE player_id IS NOT NULL
+           AND NOT EXISTS (SELECT 1 FROM dim_player p WHERE p.player_id = d.player_id)""")}
+    if not missing:
+        return 0
+    rows = []
+    for year in range(2014, 2018):
+        path = f'{DATA}/player_pool_{year}.json'
+        if not os.path.exists(path):
+            continue
+        for p in _json.load(open(path)):
+            pid = p.get('id')
+            if pid not in missing:
+                continue
+            name = (p.get('fullName') or '').strip()
+            if not name:
+                continue
+            rows.append((pid, name, POS.get(p.get('defaultPositionId')), None, None, None))
+            missing.discard(pid)
+    con.executemany("""INSERT OR IGNORE INTO dim_player
+        (player_id, name, position, gsis_id, otc_id, headshot_url) VALUES (?,?,?,?,?,?)""", rows)
+    return len(rows)
 
 
 def load_players_and_rosters(con):
@@ -710,11 +753,21 @@ def load_player_season_points(con):
     for season, sid, pts in con.execute('SELECT season, stat_id, points FROM dim_scoring'):
         rules[season][sid] = pts
 
-    # 1) actual, from ESPN's own weekly points
+    # 1) actual, from ESPN's own weekly points.
+    #
+    # Only for seasons with FULL rosters. 2014-2017 hold recovered STARTERS, so
+    # summing them gives what a player scored in the weeks he was started, not what
+    # he scored that season - Jamaal Charles 2014 came out at 197.0 over 13 starts
+    # and displaced his real nflverse total. Because a row here suppresses the
+    # computed one below, that silently turned every pre-2018 season total into a
+    # partial and corrupted the draft PAR built on top of it. has_rosters is exactly
+    # the "full rosters incl. bench" flag, so gate on it. See CONTRACTS.md.
     actual = {}
     for season, pid, tot in con.execute("""
-            SELECT season, player_id, ROUND(SUM(points), 1)
-              FROM fact_roster_week GROUP BY season, player_id"""):
+            SELECT r.season, r.player_id, ROUND(SUM(r.points), 1)
+              FROM fact_roster_week r
+              JOIN dim_season s ON s.season = r.season AND s.has_rosters = 1
+             GROUP BY r.season, r.player_id"""):
         actual[(season, pid)] = tot
 
     # 2) computed, for skill players in seasons with no lineups
@@ -794,6 +847,42 @@ INTEGRITY = [
     ("no roster row points to an unknown player",
      """SELECT COUNT(*) FROM fact_roster_week r LEFT JOIN dim_player p
           ON p.player_id=r.player_id WHERE p.player_id IS NULL"""),
+    # The pre-2018 recovery is irreplaceable: ESPN no longer serves these lineups
+    # anywhere else, and wipe() clears the table every run. If a rebuild ever drops
+    # below the recovered count, it has destroyed data — fail the build, loudly.
+    # The snapshot is the only pre-2018 bench that exists anywhere. Same reasoning
+    # as the starter floor below: silence is not proof it survived a rebuild.
+    ("2014-2017 roster snapshots recovered (>= 659)",
+     """SELECT CASE WHEN COUNT(*) >= 659 THEN 0 ELSE 659 - COUNT(*) END
+          FROM fact_roster_snapshot_pre2018"""),
+    # Dating proves recovered-starters ⊆ snapshot non-bench, not equality: two 2015
+    # team-weeks are placed by containment because ESPN truncated their lineups
+    # (lineup_complete = 0), leaving the snapshot holding starters the week lost.
+    # Asserting equality would fail those two for being MORE complete.
+    ("every recovered starter appears in its dated snapshot",
+     """SELECT COUNT(*) FROM fact_roster_week r
+           JOIN (SELECT DISTINCT season, team_id, dated_week
+                   FROM fact_roster_snapshot_pre2018
+                  WHERE dated_week IS NOT NULL) d
+             ON d.season = r.season AND d.team_id = r.team_id
+            AND d.dated_week = r.week
+          WHERE r.started = 1
+            AND NOT EXISTS (SELECT 1 FROM fact_roster_snapshot_pre2018 s
+                             WHERE s.season = r.season AND s.team_id = r.team_id
+                               AND s.player_id = r.player_id
+                               AND s.started = 1)"""),
+    ("2014-2017 starters recovered (>= 4888)",
+     """SELECT CASE WHEN COUNT(*) >= 4888 THEN 0 ELSE 4888 - COUNT(*) END
+          FROM fact_roster_week WHERE season BETWEEN 2014 AND 2017"""),
+    ("every complete pre-2018 lineup still sums to ESPN's score",
+     """SELECT COUNT(*) FROM (
+          SELECT r.season, r.week, r.team_id
+            FROM fact_roster_week r
+            JOIN fact_matchup m ON m.season=r.season AND m.week=r.week
+                               AND m.team_id=r.team_id
+           WHERE r.season BETWEEN 2014 AND 2017 AND r.lineup_complete = 1
+           GROUP BY r.season, r.week, r.team_id
+          HAVING ABS(SUM(r.points) - m.points) > 0.01)"""),
     ("no ESPN SWID leaked into member ids",
      "SELECT COUNT(*) FROM dim_member WHERE member_id LIKE '{%'"),
     ("every member maps to an owner",
@@ -899,6 +988,29 @@ def main():
     print(f'  matchup sides {load_matchups(con):,}')
     print(f'  draft picks {load_drafts(con):,}')
     print(f'  transactions {load_transactions(con):,}')
+    # wipe() clears fact_roster_week, and ESPN's pre-2018 starters do not come from
+    # the box files the loader above reads — they are recovered from data/box_raw.
+    # Without this call a rebuild silently destroys 2014-2017. Runs after matchups
+    # and drafts because it reconciles against both.
+    # Two additive tables ESPN kept but nothing used to read, both out of
+    # league_YYYY.json. They must load BEFORE the pre-2018 recovery:
+    # load_pre2018_lineups reads fact_team_scoring_period to know which matchup
+    # periods span two NFL weeks, and without it the recovery cannot run at all.
+    # Neither table was in schema.sql or this script until now - they survived only
+    # because nothing wiped them, so a clean checkout could not rebuild 2014-2017.
+    import load_scoring_periods, load_transaction_counts
+    print(f'  team scoring periods {load_scoring_periods.load(con, write=True):,}')
+    print(f'  acquisition counts {load_transaction_counts.load(con, write=True):,}')
+    import load_pre2018_lineups
+    print(f'  pre-2018 starters {load_pre2018_lineups.load(con, write=True):,}')
+    # The same payloads carry a full late-season roster per team, bench included,
+    # in a different block. It is one snapshot rather than a weekly series, so it
+    # gets its own table - merging it into fact_roster_week would make 282 bench
+    # rows look like weeks ESPN never returned. Runs after the starter load, which
+    # is what dates it.
+    import load_pre2018_bench
+    print(f'  pre-2018 roster snapshots {load_pre2018_bench.load(con, write=True):,}')
+    print(f'  pool-only players named {backfill_pool_players(con):,}')
     tr, it = load_trades(con)
     print(f'  trades {tr:,} ({it:,} items)')
     print(f'  nfl player-weeks {load_nfl_weeks(con):,}')

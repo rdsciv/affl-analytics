@@ -44,7 +44,9 @@ def apply_owners(con):
 def _classify_factory(con):
     """Most recent acquisition event at or before the roster week.
 
-    Four buckets only: Drafted, Traded in, Waiver, FA.
+    Four buckets only: Drafted, Traded in, Waiver, FA. A trade leg that returns a
+    player to the roster he was already on does not count - see the reversal note
+    below.
     A recorded ADD (waiver vs FA) or trade-in wins. Drafted only on the
     team that bought them. Drafted → dropped → added is FA or Waiver
     when the ADD exists — never a trade just because someone else drafted them.
@@ -59,11 +61,33 @@ def _classify_factory(con):
             "WHERE player_id IS NOT NULL"):
         events[(s, tid, pid)].append((0, "Drafted", 1))
         drafted_by[(s, pid)] = tid
-    for s, tid, pid, wk in con.execute(
-            "SELECT t.season, i.to_team_id, i.player_id, t.week "
-            "FROM fact_trade_item i "
-            "JOIN fact_trade t ON t.trade_id = i.trade_id"):
-        events[(s, tid, pid)].append((wk, "Traded in", 3))
+    # Managers sometimes reverse a trade minutes after accepting it. ESPN records
+    # the reversal as its own accepted, upheld trade, and that is correct - both
+    # really happened - so both are loaded into fact_trade. For custody, though, a
+    # player who goes out and comes back inside one scoring week never changed
+    # hands, and neither team acquired him. Counting the return leg would overwrite
+    # how the team really got him: 2025 wk9 relabelled Deebo Samuel "Traded in" to
+    # team 7, the team that drafted him and rostered him all seventeen weeks, off a
+    # 55-minute round trip.
+    #
+    # A leg is part of a round trip when that team has both an in and an out leg
+    # for that player in that week. 17 legs league-wide qualify, in three clusters:
+    # 2023 wk6, 2024 wk10, 2025 wk9. Legs that are not round trips still count, so a
+    # genuine flip - team 7 claiming Cole Kmet off waivers in 2024 wk7 and trading
+    # him to team 9 the same week - still reads "Traded in" for team 9.
+    legs = defaultdict(lambda: [0, 0])
+    trade_items = list(con.execute(
+        "SELECT t.season, t.week, i.player_id, i.from_team_id, i.to_team_id "
+        "FROM fact_trade_item i "
+        "JOIN fact_trade t ON t.trade_id = i.trade_id"))
+    for s, wk, pid, frm, to in trade_items:
+        legs[(s, wk, pid, to)][0] += 1
+        legs[(s, wk, pid, frm)][1] += 1
+    for s, wk, pid, frm, to in trade_items:
+        got, gave = legs[(s, wk, pid, to)]
+        if got and gave:
+            continue
+        events[(s, to, pid)].append((wk, "Traded in", 3))
     for s, tid, pid, wk, tx in con.execute(
             "SELECT season, team_id, player_id, week, tx_type "
             "FROM fact_transaction WHERE direction = 'ADD'"):

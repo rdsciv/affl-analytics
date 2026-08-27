@@ -42,3 +42,13 @@ affl.db.pre-*.bak
 data/_probe/
 data/compare-2025/
 data/ngs-profiles/
+
+# reconstruction fork — solver output, never production (check_integrity.py)
+affl_reconstruct.db
+affl_reconstruct.db-wal
+affl_reconstruct.db-shm
+affl.db.pre-*.bak-wal
+affl.db.pre-*.bak-shm
+
+# fitted model weights — regenerate with fhmm_calibrate.py / train_lineup_model.py
+*.npy

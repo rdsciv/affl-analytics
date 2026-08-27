@@ -102,6 +102,27 @@ CREATE INDEX IF NOT EXISTS ix_rw_player  ON fact_roster_week(season, player_id);
 CREATE INDEX IF NOT EXISTS ix_rw_team    ON fact_roster_week(season, team_id, week);
 CREATE INDEX IF NOT EXISTS ix_rw_started ON fact_roster_week(season, started);
 
+-- 2014-2017 only. ESPN's leagueHistory response carries, alongside the weekly
+-- starters in rosterForMatchupPeriod, a `teams[].roster` block holding one FULL
+-- roster per team - bench included, with real lineupSlotId values. It is a single
+-- late-season snapshot repeated byte-identically in every weekly file, not a
+-- weekly series, so it cannot go in fact_roster_week without pretending to be a
+-- week it is not. dated_week is filled only when the snapshot's non-bench set
+-- matches a recovered lineup for that team; NULL means it could not be placed and
+-- nothing downstream may treat it as a week. See CONTRACTS.md.
+CREATE TABLE IF NOT EXISTS fact_roster_snapshot_pre2018 (
+  season          INTEGER NOT NULL,
+  team_id         INTEGER NOT NULL,
+  player_id       INTEGER NOT NULL,
+  slot            TEXT NOT NULL,          -- QB/RB/WR/TE/K/D-ST/FLEX/BE
+  started         INTEGER NOT NULL,       -- 0 for BE, 1 otherwise
+  dated_week      INTEGER,                -- NULL when the snapshot is not datable
+  PRIMARY KEY (season, team_id, player_id),
+  FOREIGN KEY (season, team_id) REFERENCES dim_team(season, team_id)
+);
+CREATE INDEX IF NOT EXISTS ix_snap_dated
+  ON fact_roster_snapshot_pre2018(season, dated_week);
+
 CREATE TABLE IF NOT EXISTS fact_matchup (
   season          INTEGER NOT NULL,
   week            INTEGER NOT NULL,
