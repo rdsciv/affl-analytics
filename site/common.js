@@ -522,6 +522,8 @@ window.AFFL = (function () {
   /* Excel-style sheet menu: left rail, rounded items, hyperlinks between pages.
      Colors stay AFFL tokens. Header rail (48px logos) stays above. */
   function ensureSideMenu() {
+  /* CHI-129: nflsavant chrome keeps a single top nav. Do not pull it into the Excel sheet rail. */
+  if (document.body && document.body.classList.contains("sv")) return;
   if (document.getElementById("side-menu")) return;
   const frame = document.querySelector(".frame");
   const nav = document.querySelector(".site-nav");
@@ -749,6 +751,14 @@ window.AFFL = (function () {
     location.href = u.pathname.split("/").pop() + u.search + u.hash;
   }
 
+  function teamHref(year, tid) {
+    return `team.html?year=${year}&tid=${tid}`;
+  }
+
+  async function loadJSON(path) {
+    return fetch(path + bust(), { cache: "no-store" }).then((r) => r.json());
+  }
+
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
            squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
@@ -758,6 +768,6 @@ window.AFFL = (function () {
            fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
            playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
            loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, scopePicker, scopeFromURL, showYearRow,
-           chartDefaults, dateStr, notice,
+           chartDefaults, dateStr, notice, teamHref, loadJSON,
            get data() { return DATA; } };
 })();

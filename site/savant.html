@@ -8,67 +8,22 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="logo.css?v=2">
-<style>
-  .sv-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 12px;
-    margin: 0 0 14px;
-  }
-  .sv-field { display: flex; flex-direction: column; gap: 5px; }
-  .sv-field label {
-    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--mut); font-weight: 600;
-  }
-  .sv-plot { position: relative; height: 520px; }
-  .sv-plot canvas { width: 100% !important; height: 100% !important; }
-  .sv-note { color: var(--mut); font-size: 12px; margin: 10px 0 0; }
-  .sv-legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 0; }
-  .sv-key { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mut); }
-  .sv-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-  .sv-count { color: var(--mut); font-size: 12px; }
-  .sv-tbl-wrap { overflow-x: auto; }
-  .sv-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .sv-tbl th {
-    text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line);
-    color: var(--mut); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
-    white-space: nowrap; cursor: pointer; user-select: none;
-  }
-  .sv-tbl th:first-child, .sv-tbl td:first-child { text-align: left; }
-  .sv-tbl th.on { color: var(--blue2); }
-  .sv-tbl td {
-    padding: 7px 10px; border-bottom: 1px solid #131a28; text-align: right;
-    font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .sv-tbl tbody tr:hover { background: #131826aa; }
-  .sv-pos { font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--mut); }
-  .sv-fr { color: var(--blue2); font-size: 11px; }
-  .sv-empty { padding: 28px; text-align: center; color: var(--mut); }
-  #year-row[hidden]{display:none!important}
-  .picker-row#year-row{display:flex}
-  .picker-row#year-row[hidden]{display:none!important}
-  #sv-tip {
-    position: absolute; z-index: 40; pointer-events: none;
-    background: #05060bf5; border: 1px solid #1c2536; border-radius: 6px;
-    padding: 8px 10px; color: #e8edf7; font-size: 12px; line-height: 1.45;
-    max-width: 280px; display: none; white-space: nowrap;
-    box-shadow: 0 8px 24px #0008;
-  }
-  #sv-tip b { color: #fff; font-size: 13px; }
-  #sv-tip .sv-tip-mut { color: #8b95a8; }
-</style>
+<link rel="stylesheet" href="savant.css?v=5">
 </head>
-<body>
+<body class="sv">
 <div class="frame">
 
-  <header class="topbar">
-    <div class="brand">
-      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
-      <div>
-        <h1>AFFL <span>Savant</span></h1>
-        <div class="sub">Every NFL skill player, 2014–2025. Cumulative is the book. Hover a dot for the name.</div>
-      </div>
-    </div>
+  <header class="sv-mast topbar">
+    <a href="index.html" class="sv-wordmark brand-home" aria-label="AFFL Savant">
+      <svg class="sv-mark" viewBox="0 0 18 18" aria-hidden="true">
+        <rect x="1" y="10" width="3.2" height="7" rx="0.6" fill="currentColor"/>
+        <rect x="7.4" y="5" width="3.2" height="12" rx="0.6" fill="currentColor"/>
+        <rect x="13.8" y="1" width="3.2" height="16" rx="0.6" fill="currentColor"/>
+      </svg>
+      <span>AFFL/<b>SAVANT</b></span>
+    </a>
+    <div id="header-rail" class="header-rail" hidden></div>
+    <div class="topbar-nav-row">
     <nav class="site-nav">
       <a href="index.html">Dashboard</a>
       <a href="scoreboard.html">Scoreboard</a>
@@ -80,87 +35,411 @@
       <a href="teams.html">Teams</a>
       <a href="history.html">History</a>
       <a href="awards.html">Awards</a>
+      <a href="pressers.html">Pressers</a>
       <a href="dictionary.html">Dictionary</a>
       <a href="wrapped.html">Wrapped</a>
     </nav>
+    </div>
+    <div class="sv-tools">
+      <input type="search" id="sv-nav-search" placeholder="Search players, teams, games..." autocomplete="off">
+    </div>
   </header>
 
-  <div class="picker-row" id="scope-row">
-    <div class="week-picker" id="scope-picker"></div>
-  </div>
+  <nav class="sv-subnav" aria-label="Savant views">
+    <button type="button" data-page="home" class="on">Home</button>
+    <button type="button" data-page="explore">Explore</button>
+    <button type="button" data-page="leaderboards">Leaderboards</button>
+    <button type="button" data-page="compare">Compare</button>
+    <button type="button" data-page="players">Players</button>
+    <button type="button" data-page="fantasy">Fantasy</button>
+  </nav>
 
-  <div class="picker-row" id="year-row" hidden>
-    <div class="week-picker" id="season-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="squad-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="pos-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="view-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="color-picker"></div>
-  </div>
-
-  <section class="card">
-    <div class="card-head">
+  <!-- HOME -->
+  <div class="sv-page" id="page-home">
+    <div class="sv-search-row">
+      <input type="search" id="home-search" placeholder="Search player, team, game, season...">
+      <div class="sv-chip-row" id="home-pos"></div>
+    </div>
+    <div class="sv-home-grid">
       <div>
-        <h2>Opportunity vs Production</h2>
-        <div class="card-sub" id="plot-sub">AFFL scoring · non-PPR · receptions score zero</div>
+        <section class="sv-card">
+          <div class="sv-card-head">
+            <div>
+              <div class="sv-kicker">Explore the data</div>
+              <h2 id="feat-title">AFFL POINTS / GAME</h2>
+              <div class="sv-meta" id="feat-sub">Non-PPR · receptions score zero</div>
+            </div>
+          </div>
+          <div id="feat-list"></div>
+          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="explore">Open in Explore →</button></p>
+        </section>
+        <section class="sv-card">
+          <div class="sv-card-head">
+            <div>
+              <div class="sv-kicker" id="slate-kicker">Week slate</div>
+              <h2 id="slate-title">AFFL MATCHUPS</h2>
+            </div>
+          </div>
+          <div id="slate-list"></div>
+        </section>
       </div>
-      <div class="sv-count" id="plot-count"></div>
-    </div>
-
-    <div class="sv-controls">
-      <div class="sv-field">
-        <label for="x-metric">X axis</label>
-        <select id="x-metric" class="team-select"></select>
-      </div>
-      <div class="sv-field">
-        <label for="y-metric">Y axis</label>
-        <select id="y-metric" class="team-select"></select>
-      </div>
-      <div class="sv-field">
-        <label for="min-opp">Minimum opportunity</label>
-        <select id="min-opp" class="team-select"></select>
-      </div>
-    </div>
-
-    <div class="sv-plot"><canvas id="sv-scatter"></canvas><div id="sv-tip" role="tooltip"></div></div>
-
-    <div class="sv-legend" id="sv-legend"></div>
-    <p class="sv-note" id="sv-note"></p>
-  </section>
-
-  <section class="card">
-    <div class="card-head">
       <div>
-        <h2>The table</h2>
-        <div class="card-sub">Click a column to sort. Same filters as the chart.</div>
+        <section class="sv-card">
+          <div class="sv-card-head">
+            <div>
+              <div class="sv-kicker">Compare · rails</div>
+              <h2>Head to head</h2>
+            </div>
+          </div>
+          <div class="sv-chip-row" id="h2h-pos" style="margin-bottom:12px"></div>
+          <div class="sv-vs">
+            <div class="sv-slot">
+              <input id="h2h-a" placeholder="+ Add player" autocomplete="off">
+              <ul class="sv-suggest" id="h2h-a-list" hidden></ul>
+              <div id="h2h-a-card"></div>
+            </div>
+            <div class="sv-vs-mark">VS</div>
+            <div class="sv-slot">
+              <input id="h2h-b" placeholder="+ Add player" autocomplete="off">
+              <ul class="sv-suggest" id="h2h-b-list" hidden></ul>
+              <div id="h2h-b-card"></div>
+            </div>
+          </div>
+          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="compare">Open full compare →</button></p>
+        </section>
+        <section class="sv-card">
+          <div class="sv-card-head">
+            <div>
+              <div class="sv-kicker">Movers · year over year</div>
+              <h2>Risers &amp; fallers</h2>
+            </div>
+          </div>
+          <div class="sv-chip-row" id="mover-pos" style="margin-bottom:8px"></div>
+          <div id="mover-list"></div>
+          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="leaderboards" data-board="movers">View complete list →</button></p>
+        </section>
       </div>
     </div>
-    <div class="sv-tbl-wrap">
-      <table class="sv-tbl" id="sv-tbl">
-        <thead><tr id="sv-head"></tr></thead>
-        <tbody id="sv-body"></tbody>
-      </table>
+    <section class="sv-card">
+      <div class="sv-card-head">
+        <div>
+          <div class="sv-kicker" id="pulse-kicker">League pulse</div>
+          <h2>From stored AFFL / nflverse columns only</h2>
+        </div>
+      </div>
+      <div class="sv-pulse" id="pulse-row"></div>
+    </section>
+  </div>
+
+  <!-- EXPLORE (existing scatter + table, nflsavant query chrome) -->
+  <div class="sv-page" id="page-explore" hidden>
+    <div class="sv-hero">
+      <div class="sv-kicker">Explore</div>
+      <h1>Explore the data</h1>
+      <p class="sv-meta">Every NFL skill player in the warehouse, 2014–2025. Group, filter, and rank by AFFL non-PPR points, EPA, opportunity, or auction $. Empty stays empty. Scoring is std — receptions score zero.</p>
     </div>
-  </section>
+
+    <div class="sv-pickers">
+      <div class="picker-row">
+        <span class="sv-qb-lab">Scope</span>
+        <div class="week-picker" id="scope-picker"></div>
+      </div>
+      <div class="picker-row" id="year-row" hidden>
+        <span class="sv-qb-lab">Year</span>
+        <div class="week-picker" id="season-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Squad</span>
+        <div class="week-picker" id="squad-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Pos</span>
+        <div class="week-picker" id="pos-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Pool</span>
+        <div class="week-picker" id="view-picker"></div>
+      </div>
+      <div class="picker-row">
+        <span class="sv-qb-lab">Color</span>
+        <div class="week-picker" id="color-picker"></div>
+      </div>
+    </div>
+
+    <section class="sv-card">
+      <div class="sv-qb">
+        <div class="sv-qb-row">
+          <span class="sv-qb-lab">Show</span>
+          <div class="sv-chip-row" id="qb-show"></div>
+          <button type="button" class="sv-reset" id="qb-reset">Reset</button>
+        </div>
+        <div class="sv-qb-row">
+          <span class="sv-qb-lab">Compute</span>
+          <div id="qb-compute"></div>
+        </div>
+        <div class="sv-qb-row">
+          <span class="sv-qb-lab">Where</span>
+          <div id="qb-where"></div>
+        </div>
+        <div class="sv-qb-row">
+          <span class="sv-qb-lab">Sort</span>
+          <div class="sv-chip-row" id="qb-top"></div>
+        </div>
+      </div>
+      <div class="sv-query" id="qb-summary"></div>
+
+      <div class="sv-card-head">
+        <div>
+          <h2>Opportunity vs Production</h2>
+          <div class="card-sub" id="plot-sub">AFFL scoring · non-PPR · receptions score zero</div>
+        </div>
+        <div class="sv-count" id="plot-count"></div>
+      </div>
+
+      <div class="sv-controls sv-filters">
+        <div class="sv-field">
+          <label for="x-metric">X axis</label>
+          <select id="x-metric" class="team-select"></select>
+        </div>
+        <div class="sv-field">
+          <label for="y-metric">Y axis</label>
+          <select id="y-metric" class="team-select"></select>
+        </div>
+        <div class="sv-field">
+          <label for="franchise">AFFL franchise</label>
+          <select id="franchise" class="team-select"></select>
+        </div>
+        <div class="sv-field">
+          <label for="min-opp">Minimum opportunity</label>
+          <select id="min-opp" class="team-select"></select>
+        </div>
+      </div>
+
+      <div class="sv-export">
+        <button type="button" id="btn-chart" class="on">Chart</button>
+        <button type="button" id="btn-csv">CSV</button>
+      </div>
+          <div class="sv-plot">
+            <canvas id="sv-scatter"></canvas>
+            <div id="sv-tip" role="tooltip"></div>
+          </div>
+      <div class="sv-legend" id="sv-legend"></div>
+      <p class="sv-note" id="sv-note"></p>
+    </section>
+
+    <section class="sv-card">
+      <div class="sv-card-head">
+        <div>
+          <h2>The table</h2>
+          <div class="sv-meta">Click a column to sort. Same filters as the chart. Team identity is the color bar — no unconstrained logos.</div>
+        </div>
+      </div>
+      <div class="sv-tbl-wrap">
+        <table class="sv-tbl" id="sv-tbl">
+          <thead><tr id="sv-head"></tr></thead>
+          <tbody id="sv-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- PLAYERS -->
+  <div class="sv-page" id="page-players" hidden>
+    <div class="sv-hero">
+      <div class="sv-kicker">Players</div>
+      <h1>Player index</h1>
+      <p class="sv-meta">Search any player by name, or browse the league's leaders by position below.</p>
+    </div>
+    <div class="sv-search-row">
+      <input type="search" id="pl-search" placeholder="Search player, team, game, season...">
+      <div class="sv-chip-row" id="pl-pos"></div>
+    </div>
+    <div class="sv-filters">
+      <div class="sv-field">
+        <label for="pl-year">Year</label>
+        <select id="pl-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="pl-fr">Team</label>
+        <select id="pl-fr" class="team-select"></select>
+      </div>
+    </div>
+    <div class="sv-card-head">
+      <h2>Player spotlight</h2>
+      <div class="sv-meta">Top 5 · league-wide · from the loaded scope</div>
+    </div>
+    <div class="sv-spot" id="pl-spot"></div>
+    <section class="sv-card">
+      <div class="sv-tbl-wrap">
+        <table class="sv-tbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Player</th><th>Pos</th><th>NFL</th><th>G</th>
+              <th>FPts</th><th>FP/G</th><th>Auction $</th><th>Franchise</th>
+            </tr>
+          </thead>
+          <tbody id="pl-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- FANTASY — AFFL is NON-PPR. Scoring stays std. Never ship PPR. -->
+  <div class="sv-page" id="page-fantasy" hidden>
+    <div class="sv-hero">
+      <div class="sv-kicker">Fantasy</div>
+      <h1>Opportunity &amp; expected points</h1>
+      <p class="sv-meta">Usage shares, WOPR, and AFFL non-PPR points from stored columns. Scoring is <strong>std</strong> — receptions score zero. There is no PPR toggle.</p>
+    </div>
+    <div class="sv-filters sv-fan-filters">
+      <div class="sv-field">
+        <label for="fan-year">Year</label>
+        <select id="fan-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="fan-scoring">Scoring</label>
+        <select id="fan-scoring" class="team-select" disabled>
+          <option value="std" selected>Std · AFFL non-PPR</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="fan-pos">Position</label>
+        <select id="fan-pos" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="fan-fr">Team</label>
+        <select id="fan-fr" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="fan-name">Filter by name</label>
+        <input id="fan-name" type="search" placeholder="Type a player name...">
+      </div>
+    </div>
+    <section class="sv-card">
+      <div class="sv-tbl-wrap">
+        <table class="sv-tbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Player</th><th>Pos</th><th>Opp</th><th>Tgt%</th>
+              <th>WOPR</th><th>FPts</th><th>FP/G</th><th>Auction $</th>
+            </tr>
+          </thead>
+          <tbody id="fan-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- LEADERBOARDS — stored columns only. Teal = top 10%, rose = bottom 10%. -->
+  <div class="sv-page" id="page-leaderboards" hidden>
+    <div class="sv-hero sv-hero-split">
+      <div>
+        <div class="sv-kicker">Leaderboards</div>
+        <h1 id="lb-title">Passing · EPA/play</h1>
+        <p class="sv-meta" id="lb-blurb">Expected points added per pass attempt from stored nflverse EPA and attempts. Success %, CPOE, and aDOT are not in this warehouse — those cells stay empty. AFFL scoring is std, non-PPR.</p>
+      </div>
+      <button type="button" class="sv-link" data-go="home">← Back to home</button>
+    </div>
+    <nav class="sv-tabs" id="lb-tabs" aria-label="Leaderboard boards"></nav>
+    <div class="sv-filters sv-fan-filters">
+      <div class="sv-field">
+        <label for="lb-view">View</label>
+        <select id="lb-view" class="team-select" disabled>
+          <option value="players" selected>Players</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-year">Year</label>
+        <select id="lb-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-week">Week</label>
+        <select id="lb-week" class="team-select" disabled>
+          <option value="season" selected>Full season</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-team">Team</label>
+        <select id="lb-team" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-qual">Qualifier</label>
+        <select id="lb-qual" class="team-select">
+          <option value="qualified" selected>Qualified (league standards)</option>
+          <option value="all">All players</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-name">Filter by name</label>
+        <input id="lb-name" type="search" placeholder="Type a player name...">
+      </div>
+    </div>
+    <div class="sv-lb-tools">
+      <div class="sv-heat-leg">
+        <span><i class="sv-heat-hi">■</i> Top 10%</span>
+        <span><i class="sv-heat-lo">■</i> Bottom 10%</span>
+      </div>
+      <div class="sv-export">
+        <button type="button" id="lb-chart">Chart</button>
+        <button type="button" id="lb-csv">CSV</button>
+      </div>
+    </div>
+    <section class="sv-card">
+      <div class="sv-tbl-wrap">
+        <table class="sv-tbl" id="lb-tbl">
+          <thead><tr id="lb-head"></tr></thead>
+          <tbody id="lb-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- COMPARE — tale of the tape. Color square, not unconstrained logos. -->
+  <div class="sv-page" id="page-compare" hidden>
+    <div class="sv-hero sv-hero-split">
+      <div>
+        <div class="sv-kicker">Apples-to-apples · season</div>
+        <h1>The tale of the tape</h1>
+        <p class="sv-meta">Side-by-side from stored AFFL non-PPR columns. Percentiles are among the same position in the selected year. Empty stays empty.</p>
+      </div>
+      <button type="button" class="sv-link" data-go="home">← Back to home</button>
+    </div>
+    <div class="sv-chip-row" id="cmp-kind" style="margin-bottom:10px"></div>
+    <div class="sv-chip-row" id="cmp-pos" style="margin-bottom:10px"></div>
+    <div class="sv-filters sv-fan-filters">
+      <div class="sv-field">
+        <label for="cmp-year">Year</label>
+        <select id="cmp-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="cmp-view">View</label>
+        <select id="cmp-view" class="team-select" disabled>
+          <option value="table" selected>Table</option>
+        </select>
+      </div>
+    </div>
+    <div class="sv-cmp-cards" id="cmp-cards"></div>
+    <section class="sv-card" id="cmp-tape"></section>
+    <section class="sv-card">
+      <div class="sv-card-head">
+        <div>
+          <div class="sv-kicker">Similar profiles</div>
+          <h2 id="cmp-sim-title">Players like these</h2>
+        </div>
+      </div>
+      <div id="cmp-sim"></div>
+    </section>
+  </div>
 
   <footer class="foot">
-    AFFL Savant · NFL data from nflverse · AFFL context keyed on franchise, not team id.
+    <div>AFFL/SAVANT · DATA 2014–25 · NFL from nflverse · AFFL keyed on franchise, not team id.</div>
+    <div><a href="dictionary.html">Glossary</a> · <a href="index.html">About</a></div>
+    <p class="sv-legal">AFFL scoring is non-PPR. Auction $ is unavailable for 2014–15 snake drafts, never $0.</p>
   </footer>
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=26"></script>
-<script src="savant.js?v=6"></script>
+<script src="common.js?v=27"></script>
+<script src="savant.js?v=9"></script>
 </body>
 </html>
