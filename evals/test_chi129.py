@@ -39,8 +39,8 @@ NAV = ["Dashboard", "Scoreboard", "Players", "Savant", "Draft", "Trades",
        "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
 
 html = get("/savant.html")
-css = get("/savant.css?v=3")
-js = get("/savant.js?v=6")
+css = get("/savant.css?v=4")
+js = get("/savant.js?v=7")
 
 if html:
     if 'class="sv"' not in html and "class='sv'" not in html:
@@ -63,6 +63,12 @@ if html:
         fail(" - savant.html missing home/explore views")
     if 'id="page-players"' not in html or 'id="page-fantasy"' not in html:
         fail(" - savant.html missing players/fantasy views")
+    if 'id="page-leaderboards"' not in html or 'id="page-compare"' not in html:
+        fail(" - savant.html missing leaderboards/compare views")
+    if "Tale of the tape" not in html and "tale of the tape" not in html:
+        fail(" - compare view is not the tale of the tape")
+    if 'id="lb-week"' not in html or "Full season" not in html:
+        fail(" - leaderboards missing a Full-season week lock")
     if re.search(r'option[^>]*value=["\']ppr["\']', html, re.I):
         fail(" - savant.html ships a PPR scoring option")
     if 'value="std"' not in html or "non-PPR" not in html:
@@ -78,6 +84,12 @@ if css:
         fail(" - savant.css is not a light theme")
     if ".side-menu" not in css:
         fail(" - savant.css does not suppress the Excel sheet rail")
+    if "sv-heat-hi" not in css or "sv-heat-lo" not in css:
+        fail(" - savant.css missing teal/rose heat chips")
+    if ".sv-sq" not in css:
+        fail(" - savant.css missing team color squares")
+    if ".sv-pbar" not in css:
+        fail(" - savant.css missing compare percentile bars")
 
 if js:
     if "tooltip" not in js or "callbacks" not in js:
@@ -100,6 +112,12 @@ if js:
         fail(" - savant.js paints unconstrained NFL logos")
     if re.search(r"\bPPR\b", js) and "non-PPR" not in js:
         fail(" - savant.js mentions PPR without the non-PPR lock")
+    if "cpoe" not in js or "empty: true" not in js:
+        fail(" - leaderboards do not keep CPOE / success / aDOT empty")
+    if "sqHTML" not in js:
+        fail(" - compare/leaderboards do not paint team color squares")
+    if "renderLeaderboards" not in js or "renderCompare" not in js:
+        fail(" - savant.js missing leaderboards/compare renderers")
 
 meta_raw = get("/savant/meta.json")
 if meta_raw:

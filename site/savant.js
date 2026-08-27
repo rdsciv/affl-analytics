@@ -44,7 +44,7 @@
   const $ = (id) => document.getElementById(id);
   const BASE = "savant/";
   const ALL = "all";
-  const PAGES = ["home", "explore", "players", "fantasy"];
+  const PAGES = ["home", "explore", "leaderboards", "compare", "players", "fantasy"];
 
   const POS_COLOR = { QB: "#00a2ff", RB: "#c8ff00", WR: "#ff6a00", TE: "#ffc400" };
   const POSITIONS = ["ALL", "QB", "RB", "WR", "TE"];
@@ -161,6 +161,8 @@
     q: "",
     h2h: { a: null, b: null },
     moverPos: "ALL",
+    lb: { board: "passing", season: null, team: "", qual: "qualified", name: "", sort: { key: "epap", dir: -1 } },
+    cmp: { season: null, pos: "QB", pids: [] },
   };
 
   let META = null;
@@ -211,6 +213,16 @@
   function barHTML(team, fr) {
     const pair = team ? nflBar(team) : [frColor(fr), frColor(fr)];
     return `<span class="sv-bar" style="--a:${pair[0]};--b:${pair[1]}" title="${esc(fr || team || "")}"></span>`;
+  }
+
+  function sqHTML(team, fr) {
+    const pair = team ? nflBar(team) : [frColor(fr), frColor(fr)];
+    return `<span class="sv-sq" style="--a:${pair[0]};--b:${pair[1]}" title="${esc(fr || team || "")}"></span>`;
+  }
+
+  function rate(num, den) {
+    if (num == null || den == null || +den === 0) return null;
+    return +num / +den;
   }
 
   /* Bids sidecar is GSIS-keyed. Missing year or pid => null, never 0. */
@@ -389,9 +401,9 @@
       b.classList.toggle("on", b.dataset.page === page);
     });
     stampPage(page);
-    if (page === "explore") {
-      renderExplore();
-    }
+    if (page === "explore") renderExplore();
+    if (page === "leaderboards") renderLeaderboards();
+    if (page === "compare") renderCompare();
   }
 
   function renderChips() {
@@ -959,13 +971,14 @@
         <div class="sv-card-head"><div class="sv-kicker">${p}</div><div class="sv-meta">${labels[p][1]}</div></div>
         <h2>${labels[p][0]}</h2>
         ${body}
-        <p style="margin-top:10px"><button type="button" class="sv-link" data-go="explore" data-pos="${p}">View full board →</button></p>
+        <p style="margin-top:10px"><button type="button" class="sv-link" data-go="leaderboards" data-board="${p === "QB" ? "passing" : p === "RB" ? "rushing" : "receiving"}" data-pos="${p}">View full board →</button></p>
       </section>`;
     }).join("");
     $("pl-spot").querySelectorAll("[data-go]").forEach((b) => {
       b.addEventListener("click", () => {
         if (b.dataset.pos) state.pos = b.dataset.pos;
-        setPage("explore");
+        if (b.dataset.board) state.lb.board = b.dataset.board;
+        setPage(b.dataset.go || "leaderboards");
         renderAll();
       });
     });
@@ -1012,6 +1025,468 @@
 
   /* -------------------------------------------------------------------- all */
 
+  /* --------------------------------------------------------- leaderboards */
+
+  function lastSeason() {
+    const ys = (META && META.seasons) || [];
+    return ys.length ? ys[ys.length - 1] : null;
+  }
+
+  function lbSeason() {
+    return state.lb.season == null ? lastSeason() : state.lb.season;
+  }
+
+  function cmpSeason() {
+    return state.cmp.season == null ? lastSeason() : state.cmp.season;
+  }
+
+  function heatClass(vals, v, lowerBetter) {
+    const xs = vals.filter((x) => x != null && !Number.isNaN(+x)).map(Number).sort((a, b) => a - b);
+    if (xs.length < 8 || v == null || Number.isNaN(+v)) return "";
+    const lo = xs[Math.floor((xs.length - 1) * 0.1)];
+    const hi = xs[Math.floor((xs.length - 1) * 0.9)];
+    if (lowerBetter) {
+      if (+v <= lo) return "sv-heat-hi";
+      if (+v >= hi) return "sv-heat-lo";
+    } else {
+      if (+v >= hi) return "sv-heat-hi";
+      if (+v <= lo) return "sv-heat-lo";
+    }
+    return "";
+  }
+
+  function percentile(vals, v) {
+    const xs = vals.filter((x) => x != null && !Number.isNaN(+x)).map(Number).sort((a, b) => a - b);
+    if (!xs.length || v == null || Number.isNaN(+v)) return null;
+    let below = 0;
+    xs.forEach((x) => { if (x <= +v) below += 1; });
+    return Math.round(100 * below / xs.length);
+  }
+
+  const BOARDS = {
+    passing: {
+      title: "Passing · EPA/play",
+      blurb: "Expected points added per pass attempt from stored nflverse EPA and attempts. Success %, CPOE, and aDOT are not in this warehouse — those cells stay empty. AFFL scoring is std, non-PPR.",
+      label: "Passing",
+      sort: "epap",
+      chart: { x: "att", y: "epa", pos: "QB" },
+      qual: (r, career) => n(r.att) >= (career ? 200 : 100),
+      cols: [
+        { k: "epap", l: "EPA/play", get: (r) => rate(r.epa, r.att), nd: 2 },
+        { k: "succ", l: "Success %", get: () => null, empty: true },
+        { k: "cmp", l: "Comp", get: (r) => r.cmp },
+        { k: "att", l: "Att", get: (r) => r.att },
+        { k: "cmpp", l: "Comp %", get: (r) => { const v = rate(r.cmp, r.att); return v == null ? null : v * 100; }, nd: 1, pct: true },
+        { k: "cpoe", l: "CPOE", get: () => null, empty: true },
+        { k: "payd", l: "Yds", get: (r) => r.payd },
+        { k: "ya", l: "Y/A", get: (r) => rate(r.payd, r.att), nd: 1 },
+        { k: "adot", l: "aDOT", get: () => null, empty: true },
+        { k: "patd", l: "TD", get: (r) => r.patd },
+        { k: "int", l: "INT", get: (r) => r.int, lower: true },
+      ],
+    },
+    receiving: {
+      title: "Receiving · AFFL pts",
+      blurb: "Receiving volume and AFFL non-PPR points from stored columns. Receptions score zero. Share stats stay empty on career.",
+      label: "Receiving",
+      sort: "fpts",
+      chart: { x: "tgt", y: "fpts", pos: "WR" },
+      qual: (r, career) => n(r.tgt) >= (career ? 80 : 40),
+      cols: [
+        { k: "fpts", l: "FPts", get: (r) => r.fpts, nd: 1 },
+        { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+        { k: "tgt", l: "Tgt", get: (r) => r.tgt },
+        { k: "rec", l: "Rec", get: (r) => r.rec },
+        { k: "recyd", l: "Yds", get: (r) => r.recyd },
+        { k: "rectd", l: "TD", get: (r) => r.rectd },
+        { k: "wopr", l: "WOPR", get: (r) => r.wopr, nd: 3 },
+        { k: "tgtsh", l: "Tgt%", get: (r) => r.tgtsh == null ? null : +r.tgtsh * 100, nd: 1, pct: true },
+      ],
+    },
+    rushing: {
+      title: "Rushing · AFFL pts",
+      blurb: "Rushing volume and AFFL non-PPR points from stored columns. Empty stays empty.",
+      label: "Rushing",
+      sort: "fpts",
+      chart: { x: "car", y: "fpts", pos: "RB" },
+      qual: (r, career) => n(r.car) >= (career ? 100 : 50),
+      cols: [
+        { k: "fpts", l: "FPts", get: (r) => r.fpts, nd: 1 },
+        { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+        { k: "car", l: "Car", get: (r) => r.car },
+        { k: "ruyd", l: "Yds", get: (r) => r.ruyd },
+        { k: "rutd", l: "TD", get: (r) => r.rutd },
+        { k: "epa", l: "EPA", get: (r) => r.epa, nd: 1 },
+      ],
+    },
+    fantasy: {
+      title: "Fantasy · AFFL pts",
+      blurb: "AFFL non-PPR points. Scoring is std — receptions score zero. There is no PPR board.",
+      label: "Fantasy",
+      sort: "fpts",
+      chart: { x: "opp", y: "fpts", pos: "ALL" },
+      qual: (r) => n(r.g) >= 8,
+      cols: [
+        { k: "fpts", l: "FPts", get: (r) => r.fpts, nd: 1 },
+        { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+        { k: "opp", l: "Opp", get: (r) => r.opp != null ? +r.opp : n(r.tgt) + n(r.car) + n(r.att) },
+        { k: "epa", l: "EPA", get: (r) => r.epa, nd: 1 },
+        { k: "starts", l: "AFFL starts", get: (r) => r.starts },
+        { k: "bid", l: "Auction $", get: (r) => r.bid, bid: true },
+      ],
+    },
+    auction: {
+      title: "Auction $",
+      blurb: "GSIS-keyed auction bids. 2014–15 snake drafts are unavailable, never $0.",
+      label: "Auction",
+      sort: "bid",
+      chart: { x: "bid", y: "fpts", pos: "ALL" },
+      qual: (r) => r.bid != null,
+      cols: [
+        { k: "bid", l: "Auction $", get: (r) => r.bid, bid: true },
+        { k: "fpts", l: "FPts", get: (r) => r.fpts, nd: 1 },
+        { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+        { k: "starts", l: "AFFL starts", get: (r) => r.starts },
+      ],
+    },
+    movers: {
+      title: "Movers · year over year",
+      blurb: "AFFL non-PPR point change versus the prior stored season. Players without both years stay out.",
+      label: "Movers",
+      sort: "delta",
+      chart: { x: "opp", y: "fpts", pos: "ALL" },
+      qual: () => true,
+      cols: [
+        { k: "delta", l: "Δ FPts", get: (r) => r.delta, nd: 1 },
+        { k: "fpts", l: "FPts", get: (r) => r.fpts, nd: 1 },
+        { k: "prev", l: "Prior", get: (r) => r.prevFpts, nd: 1 },
+        { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+      ],
+    },
+  };
+
+  async function scopeRows(year) {
+    if (year === ALL || year == null) return loadCareer();
+    return loadSeason(year);
+  }
+
+  async function renderLeaderboards() {
+    const board = BOARDS[state.lb.board] || BOARDS.passing;
+    $("lb-title").textContent = board.title;
+    $("lb-blurb").textContent = board.blurb;
+    const tabs = $("lb-tabs");
+    tabs.innerHTML = Object.keys(BOARDS).map((k) =>
+      `<button type="button" data-board="${k}" class="${k === state.lb.board ? "on" : ""}">${BOARDS[k].label}</button>`
+    ).join("");
+    tabs.querySelectorAll("button").forEach((b) => {
+      b.onclick = () => {
+        state.lb.board = b.dataset.board;
+        const next = BOARDS[state.lb.board];
+        state.lb.sort = { key: next.sort, dir: -1 };
+        renderLeaderboards();
+      };
+    });
+
+    const seasons = [[ALL, "All · career 2014–2025"]].concat(META.seasons.map((y) => [y, String(y)]));
+    const ySel = $("lb-year");
+    const yCur = lbSeason();
+    if (ySel && !ySel.dataset.ready) {
+      ySel.innerHTML = seasons.map(([v, l]) => `<option value="${v}">${l}</option>`).join("");
+      ySel.dataset.ready = "1";
+      ySel.onchange = () => {
+        state.lb.season = ySel.value === ALL ? ALL : +ySel.value;
+        renderLeaderboards();
+      };
+    }
+    if (ySel) ySel.value = String(yCur);
+
+    if ($("lb-qual")) $("lb-qual").onchange = () => {
+      state.lb.qual = $("lb-qual").value;
+      renderLeaderboards();
+    };
+    if ($("lb-qual")) $("lb-qual").value = state.lb.qual;
+    if ($("lb-name")) $("lb-name").oninput = () => {
+      state.lb.name = $("lb-name").value.trim().toLowerCase();
+      renderLeaderboards();
+    };
+
+    let rows = [];
+    try { rows = await scopeRows(yCur); } catch (e) { rows = []; }
+
+    const teams = [...new Set(rows.map((r) => r.team).filter(Boolean))].sort();
+    const tSel = $("lb-team");
+    if (tSel) {
+      const keep = tSel.value || state.lb.team || "";
+      tSel.innerHTML = `<option value="">All teams</option>` +
+        teams.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
+      tSel.value = teams.includes(keep) ? keep : "";
+      state.lb.team = tSel.value;
+      tSel.onchange = () => { state.lb.team = tSel.value; renderLeaderboards(); };
+    }
+
+    const career = yCur === ALL;
+    if (state.lb.board === "movers") {
+      rows = await moverRows(yCur);
+    }
+    rows = rows.filter((r) => {
+      if (state.lb.team && r.team !== state.lb.team) return false;
+      if (state.lb.qual === "qualified" && !board.qual(r, career)) return false;
+      if (state.lb.name) {
+        const blob = `${r.name || ""} ${r.team || ""} ${r.pos || ""}`.toLowerCase();
+        if (!blob.includes(state.lb.name)) return false;
+      }
+      return true;
+    });
+
+    const cols = board.cols;
+    const heatBag = {};
+    cols.forEach((c) => {
+      heatBag[c.k] = rows.map((r) => c.get(r));
+    });
+
+    const head = ["#", "Player", "Pos", "Team"].concat(cols.map((c) => c.l));
+    $("lb-head").innerHTML = ["#", "name", "pos", "team"].concat(cols.map((c) => c.k)).map((k, i) => {
+      const on = state.lb.sort.key === k || (i >= 4 && cols[i - 4] && cols[i - 4].k === state.lb.sort.key);
+      const label = head[i];
+      const key = i < 4 ? (k === "name" ? "name" : k) : cols[i - 4].k;
+      return `<th data-k="${key}" class="${on ? "on" : ""}">${label}${on ? (state.lb.sort.dir < 0 ? " ▾" : " ▴") : ""}</th>`;
+    }).join("");
+    $("lb-head").querySelectorAll("th").forEach((th) => {
+      th.onclick = () => {
+        const k = th.dataset.k;
+        if (state.lb.sort.key === k) state.lb.sort.dir *= -1;
+        else state.lb.sort = { key: k, dir: -1 };
+        renderLeaderboards();
+      };
+    });
+
+    const sorted = rows.slice().sort((a, b) => {
+      const col = cols.find((c) => c.k === state.lb.sort.key);
+      const av = col ? col.get(a) : (state.lb.sort.key === "name" ? displayName(a) : a[state.lb.sort.key]);
+      const bv = col ? col.get(b) : (state.lb.sort.key === "name" ? displayName(b) : b[state.lb.sort.key]);
+      if (typeof av === "string" || typeof bv === "string") {
+        return String(av || "").localeCompare(String(bv || "")) * -state.lb.sort.dir;
+      }
+      return ((bv == null ? -Infinity : bv) - (av == null ? -Infinity : av)) * (state.lb.sort.dir < 0 ? 1 : -1);
+    });
+
+    if (!sorted.length) {
+      $("lb-body").innerHTML = `<tr><td class="sv-empty" colspan="${head.length}">No players match these filters. Empty stays empty.</td></tr>`;
+      return;
+    }
+
+    const paintRow = (r, i) => `<tr>
+      <td>${i + 1}</td>
+      <td><span class="sv-player">${sqHTML(r.team, r.fr)}<span>${esc(displayName(r))}</span></span></td>
+      <td><span class="sv-pos">${esc(r.pos || "—")}</span></td>
+      <td>${esc(r.team || "—")}</td>
+      ${cols.map((c) => {
+        const v = c.get(r);
+        if (c.empty || v == null) return `<td>—</td>`;
+        const txt = c.bid ? (r.bid == null ? "—" : fmtBid(r.bid))
+          : (c.pct ? fmt(v, { nd: c.nd != null ? c.nd : 1 }) + "%" : fmt(v, { nd: c.nd != null ? c.nd : 0 }));
+        const cls = heatClass(heatBag[c.k], v, !!c.lower);
+        return `<td>${cls ? `<span class="${cls}">${txt}</span>` : txt}</td>`;
+      }).join("")}
+    </tr>`;
+
+    const chunks = [];
+    sorted.forEach((r, i) => {
+      if (i > 0 && i % 25 === 0) {
+        chunks.push(`<tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr>`);
+      }
+      chunks.push(paintRow(r, i));
+    });
+    $("lb-body").innerHTML = chunks.join("");
+    window._lbExport = { cols, rows: sorted, head };
+  }
+
+  async function moverRows(year) {
+    if (year === ALL || year == null) {
+      year = lastSeason();
+    }
+    if (!year || !META.seasons.includes(year - 1)) return [];
+    const [prev, cur] = await Promise.all([loadSeason(year - 1), loadSeason(year)]);
+    const byPrev = new Map(prev.map((r) => [r.pid, r]));
+    const out = [];
+    cur.forEach((r) => {
+      const p = byPrev.get(r.pid);
+      if (!p || r.fpts == null || p.fpts == null) return;
+      out.push(Object.assign({}, r, { delta: +r.fpts - +p.fpts, prevFpts: +p.fpts }));
+    });
+    return out;
+  }
+
+  function exportLeaderboard() {
+    const pack = window._lbExport;
+    if (!pack) return;
+    const cols = pack.cols;
+    const head = ["#", "Player", "Pos", "Team"].concat(cols.map((c) => c.l)).join(",");
+    const body = pack.rows.map((r, i) => {
+      const cells = [i + 1, displayName(r), r.pos || "", r.team || ""].concat(cols.map((c) => {
+        const v = c.get(r);
+        return v == null ? "" : v;
+      }));
+      return cells.map((v) => {
+        const s = String(v);
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      }).join(",");
+    }).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([head + "\n" + body], { type: "text/csv" }));
+    a.download = `affl-savant-leaderboard-${state.lb.board}-${lbSeason()}.csv`;
+    a.click();
+  }
+
+  /* -------------------------------------------------------------- compare */
+
+  const TAPE = [
+    { cat: "Efficiency" },
+    { k: "fppg", l: "FP/G", get: (r) => r.fppg, nd: 2 },
+    { k: "epa", l: "EPA", get: (r) => r.epa, nd: 1 },
+    { k: "epap", l: "EPA / play", get: (r) => rate(r.epa, n(r.att) + n(r.car) + n(r.tgt)), nd: 3 },
+    { k: "wopr", l: "WOPR", get: (r) => r.wopr, nd: 3 },
+    { cat: "Volume" },
+    { k: "fpts", l: "AFFL points", get: (r) => r.fpts, nd: 1 },
+    { k: "opp", l: "Opportunities", get: (r) => r.opp != null ? +r.opp : n(r.tgt) + n(r.car) + n(r.att) },
+    { k: "att", l: "Pass attempts", get: (r) => r.att },
+    { k: "tgt", l: "Targets", get: (r) => r.tgt },
+    { k: "car", l: "Carries", get: (r) => r.car },
+    { cat: "Situational" },
+    { k: "g", l: "Games", get: (r) => r.g },
+    { k: "starts", l: "AFFL starts", get: (r) => r.starts },
+    { k: "bid", l: "Auction $", get: (r) => r.bid, bid: true },
+  ];
+
+  async function renderCompare() {
+    chips($("cmp-kind"), [["players", "Players"]], "players", () => {}, "sv-chip");
+    chips($("cmp-pos"), POSITIONS.filter((p) => p !== "ALL").map((p) => [p, p]), state.cmp.pos, (v) => {
+      state.cmp.pos = v;
+      renderCompare();
+    }, "sv-chip");
+
+    const ySel = $("cmp-year");
+    const yCur = cmpSeason();
+    if (ySel && !ySel.dataset.ready) {
+      ySel.innerHTML = META.seasons.map((y) => `<option value="${y}">${y}</option>`).join("");
+      ySel.dataset.ready = "1";
+      ySel.onchange = () => { state.cmp.season = +ySel.value; renderCompare(); };
+    }
+    if (ySel) ySel.value = String(yCur);
+
+    let pool = [];
+    try { pool = await scopeRows(yCur); } catch (e) { pool = []; }
+    const posPool = pool.filter((r) => r.pos === state.cmp.pos);
+
+    if (!state.cmp.pids.length) {
+      ["a", "b"].forEach((side) => {
+        const r = state.h2h[side];
+        if (r && r.pid && !state.cmp.pids.includes(r.pid)) state.cmp.pids.push(r.pid);
+      });
+    }
+
+    const picked = state.cmp.pids.map((pid) => pool.find((r) => r.pid === pid)).filter(Boolean);
+    const cards = $("cmp-cards");
+    const addSlot = picked.length < 3
+      ? `<div class="sv-cmp-card add">
+           <input id="cmp-add" placeholder="+ Add ${state.cmp.pos}" autocomplete="off">
+           <ul class="sv-suggest" id="cmp-add-list" hidden></ul>
+         </div>` : "";
+    cards.innerHTML = picked.map((r) => `<div class="sv-cmp-card">
+        ${sqHTML(r.team, r.fr)}
+        <div class="nm">${esc(displayName(r))}</div>
+        <div class="sub">${esc(r.pos || "")} · ${esc(r.team || "FA")}</div>
+        <button type="button" class="sv-cmp-x" data-pid="${esc(r.pid)}">Remove</button>
+      </div>`).join("") + addSlot;
+    cards.querySelectorAll(".sv-cmp-x").forEach((b) => {
+      b.onclick = () => {
+        state.cmp.pids = state.cmp.pids.filter((p) => p !== b.dataset.pid);
+        renderCompare();
+      };
+    });
+    const add = $("cmp-add"), list = $("cmp-add-list");
+    if (add) {
+      add.oninput = () => {
+        const q = add.value.trim().toLowerCase();
+        if (q.length < 2) { list.hidden = true; return; }
+        const hits = posPool.filter((r) =>
+          String(r.name || "").toLowerCase().includes(q) && !state.cmp.pids.includes(r.pid)
+        ).slice(0, 8);
+        list.hidden = !hits.length;
+        list.innerHTML = hits.map((r) =>
+          `<li data-pid="${esc(r.pid)}">${esc(displayName(r))} · ${esc(r.team || "")}</li>`
+        ).join("");
+        list.querySelectorAll("li").forEach((li) => {
+          li.onclick = () => {
+            if (state.cmp.pids.length < 3) state.cmp.pids.push(li.dataset.pid);
+            renderCompare();
+          };
+        });
+      };
+    }
+
+    const tape = $("cmp-tape");
+    if (!picked.length) {
+      tape.innerHTML = `<div class="sv-empty">Add up to three players. Team identity is the color square — no unconstrained logos.</div>`;
+      $("cmp-sim").innerHTML = `<div class="sv-empty">Pick a player to see similar profiles in this season.</div>`;
+      return;
+    }
+
+    const nCol = picked.length + 1;
+    let html = `<table class="sv-tape"><tbody>`;
+    TAPE.forEach((row) => {
+      if (row.cat) {
+        html += `<tr><td class="cat" colspan="${nCol}">${row.cat}</td></tr>`;
+        return;
+      }
+      const vals = picked.map((r) => row.get(r));
+      const poolVals = posPool.map((r) => row.get(r));
+      const best = vals.reduce((m, v) => (v == null ? m : (m == null || v > m ? v : m)), null);
+      html += `<tr><td>${esc(row.l)}</td>`;
+      picked.forEach((r, i) => {
+        const v = vals[i];
+        const pctile = percentile(poolVals, v);
+        const lead = v != null && v === best && vals.filter((x) => x === best).length === 1;
+        const shown = v == null ? "—" : (row.bid ? fmtBid(v) : fmt(v, { nd: row.nd != null ? row.nd : 0 }));
+        html += `<td>
+          <div class="${lead ? "lead" : ""}">${shown}${lead ? `<span class="lead-lab">Leads ${pctile != null ? pctile + "%" : ""}</span>` : ""}</div>
+          ${pctile == null ? "" : `<div class="sv-pbar"><i style="width:${pctile}%"></i></div>`}
+        </td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    tape.innerHTML = html;
+
+    const focus = picked[0];
+    $("cmp-sim-title").textContent = `Players like ${displayName(focus)}`;
+    const keys = TAPE.filter((r) => r.get);
+    const sim = posPool.filter((r) => r.pid !== focus.pid).map((r) => {
+      let acc = 0, used = 0;
+      keys.forEach((m) => {
+        const a = m.get(focus), b = m.get(r);
+        if (a == null || b == null) return;
+        const xs = posPool.map((x) => m.get(x)).filter((v) => v != null);
+        const mu = mean(xs), sd = Math.sqrt(mean(xs.map((v) => (v - mu) ** 2)) || 1);
+        if (!sd) return;
+        acc += ((a - b) / sd) ** 2;
+        used += 1;
+      });
+      return { r, dist: used ? Math.sqrt(acc / used) : Infinity };
+    }).filter((x) => x.dist !== Infinity).sort((a, b) => a.dist - b.dist).slice(0, 6);
+    $("cmp-sim").innerHTML = sim.length
+      ? sim.map((s) => {
+        const score = Math.max(0, Math.round(100 * (1 - s.dist / 4)));
+        return `<div class="sv-row">
+          ${sqHTML(s.r.team, s.r.fr)}
+          <div class="sv-who"><div class="nm">${esc(displayName(s.r))}</div>
+            <div class="sub">${esc(s.r.pos)} · ${esc(s.r.team || "FA")}</div></div>
+          <span class="sv-val ink">${score}</span>
+        </div>`;
+      }).join("")
+      : `<div class="sv-empty">No similar profiles in this stored season.</div>`;
+  }
+
   function renderExplore() {
     const rows = visible();
     $("plot-count").textContent = `${rows.length} players`;
@@ -1051,7 +1526,9 @@
     renderPlayers();
     renderFantasy();
     if (state.page === "explore") renderExplore();
-    else {
+    if (state.page === "leaderboards") renderLeaderboards();
+    if (state.page === "compare") renderCompare();
+    if (state.page !== "explore") {
       const rows = visible();
       if ($("plot-count")) $("plot-count").textContent = `${rows.length} players`;
     }
@@ -1077,7 +1554,10 @@
       b.addEventListener("click", () => { setPage(b.dataset.page); });
     });
     document.querySelectorAll("[data-go]").forEach((b) => {
-      b.addEventListener("click", () => setPage(b.dataset.go));
+      b.addEventListener("click", () => {
+        if (b.dataset.board) state.lb.board = b.dataset.board;
+        setPage(b.dataset.go);
+      });
     });
     const jump = (q) => {
       state.q = (q || "").trim();
@@ -1102,6 +1582,22 @@
     if ($("btn-csv")) $("btn-csv").addEventListener("click", () => exportCSV(visible()));
     if ($("btn-chart")) $("btn-chart").addEventListener("click", () => {
       $("sv-scatter").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    if ($("lb-csv")) $("lb-csv").addEventListener("click", exportLeaderboard);
+    if ($("lb-chart")) $("lb-chart").addEventListener("click", () => {
+      const board = BOARDS[state.lb.board] || BOARDS.passing;
+      if (board.chart) {
+        state.x = board.chart.x;
+        state.y = board.chart.y;
+        if (board.chart.pos && board.chart.pos !== "ALL") state.pos = board.chart.pos;
+        if (state.lb.season != null) {
+          state.season = state.lb.season;
+          stampYear(state.season);
+          loadScope().then(() => { setPage("explore"); renderAll(); });
+          return;
+        }
+      }
+      setPage("explore");
     });
     if ($("qb-reset")) {
       $("qb-reset").addEventListener("click", async () => {

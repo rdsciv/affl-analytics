@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="logo.css?v=2">
-<link rel="stylesheet" href="savant.css?v=3">
+<link rel="stylesheet" href="savant.css?v=4">
 </head>
 <body class="sv">
 <div class="frame">
@@ -47,6 +47,8 @@
   <nav class="sv-subnav" aria-label="Savant views">
     <button type="button" data-page="home" class="on">Home</button>
     <button type="button" data-page="explore">Explore</button>
+    <button type="button" data-page="leaderboards">Leaderboards</button>
+    <button type="button" data-page="compare">Compare</button>
     <button type="button" data-page="players">Players</button>
     <button type="button" data-page="fantasy">Fantasy</button>
   </nav>
@@ -102,7 +104,7 @@
               <div id="h2h-b-card"></div>
             </div>
           </div>
-          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="explore">Open full compare →</button></p>
+          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="compare">Open full compare →</button></p>
         </section>
         <section class="sv-card">
           <div class="sv-card-head">
@@ -113,7 +115,7 @@
           </div>
           <div class="sv-chip-row" id="mover-pos" style="margin-bottom:8px"></div>
           <div id="mover-list"></div>
-          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="explore">View complete list →</button></p>
+          <p style="margin-top:12px"><button type="button" class="sv-link" data-go="leaderboards" data-board="movers">View complete list →</button></p>
         </section>
       </div>
     </div>
@@ -316,6 +318,107 @@
     </section>
   </div>
 
+  <!-- LEADERBOARDS — stored columns only. Teal = top 10%, rose = bottom 10%. -->
+  <div class="sv-page" id="page-leaderboards" hidden>
+    <div class="sv-hero sv-hero-split">
+      <div>
+        <div class="sv-kicker">Leaderboards</div>
+        <h1 id="lb-title">Passing · EPA/play</h1>
+        <p class="sv-meta" id="lb-blurb">Expected points added per pass attempt from stored nflverse EPA and attempts. Success %, CPOE, and aDOT are not in this warehouse — those cells stay empty. AFFL scoring is std, non-PPR.</p>
+      </div>
+      <button type="button" class="sv-link" data-go="home">← Back to home</button>
+    </div>
+    <nav class="sv-tabs" id="lb-tabs" aria-label="Leaderboard boards"></nav>
+    <div class="sv-filters sv-fan-filters">
+      <div class="sv-field">
+        <label for="lb-view">View</label>
+        <select id="lb-view" class="team-select" disabled>
+          <option value="players" selected>Players</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-year">Year</label>
+        <select id="lb-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-week">Week</label>
+        <select id="lb-week" class="team-select" disabled>
+          <option value="season" selected>Full season</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-team">Team</label>
+        <select id="lb-team" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-qual">Qualifier</label>
+        <select id="lb-qual" class="team-select">
+          <option value="qualified" selected>Qualified (league standards)</option>
+          <option value="all">All players</option>
+        </select>
+      </div>
+      <div class="sv-field">
+        <label for="lb-name">Filter by name</label>
+        <input id="lb-name" type="search" placeholder="Type a player name...">
+      </div>
+    </div>
+    <div class="sv-lb-tools">
+      <div class="sv-heat-leg">
+        <span><i class="sv-heat-hi">■</i> Top 10%</span>
+        <span><i class="sv-heat-lo">■</i> Bottom 10%</span>
+      </div>
+      <div class="sv-export">
+        <button type="button" id="lb-chart">Chart</button>
+        <button type="button" id="lb-csv">CSV</button>
+      </div>
+    </div>
+    <section class="sv-card">
+      <div class="sv-tbl-wrap">
+        <table class="sv-tbl" id="lb-tbl">
+          <thead><tr id="lb-head"></tr></thead>
+          <tbody id="lb-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- COMPARE — tale of the tape. Color square, not unconstrained logos. -->
+  <div class="sv-page" id="page-compare" hidden>
+    <div class="sv-hero sv-hero-split">
+      <div>
+        <div class="sv-kicker">Apples-to-apples · season</div>
+        <h1>The tale of the tape</h1>
+        <p class="sv-meta">Side-by-side from stored AFFL non-PPR columns. Percentiles are among the same position in the selected year. Empty stays empty.</p>
+      </div>
+      <button type="button" class="sv-link" data-go="home">← Back to home</button>
+    </div>
+    <div class="sv-chip-row" id="cmp-kind" style="margin-bottom:10px"></div>
+    <div class="sv-chip-row" id="cmp-pos" style="margin-bottom:10px"></div>
+    <div class="sv-filters sv-fan-filters">
+      <div class="sv-field">
+        <label for="cmp-year">Year</label>
+        <select id="cmp-year" class="team-select"></select>
+      </div>
+      <div class="sv-field">
+        <label for="cmp-view">View</label>
+        <select id="cmp-view" class="team-select" disabled>
+          <option value="table" selected>Table</option>
+        </select>
+      </div>
+    </div>
+    <div class="sv-cmp-cards" id="cmp-cards"></div>
+    <section class="sv-card" id="cmp-tape"></section>
+    <section class="sv-card">
+      <div class="sv-card-head">
+        <div>
+          <div class="sv-kicker">Similar profiles</div>
+          <h2 id="cmp-sim-title">Players like these</h2>
+        </div>
+      </div>
+      <div id="cmp-sim"></div>
+    </section>
+  </div>
+
   <footer class="foot">
     <div>AFFL/SAVANT · DATA 2014–25 · NFL from nflverse · AFFL keyed on franchise, not team id.</div>
     <div><a href="dictionary.html">Glossary</a> · <a href="index.html">About</a></div>
@@ -325,6 +428,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=27"></script>
-<script src="savant.js?v=6"></script>
+<script src="savant.js?v=7"></script>
 </body>
 </html>
