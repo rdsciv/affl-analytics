@@ -1125,6 +1125,31 @@
     return ages.reduce((a, b) => a + b, 0) / ages.length;
   }
 
+  function franchiseYears(oid) {
+    const id = canon(oid);
+    const f = (DATA.franchises || []).find((x) => canon(x.owner) === id);
+    return (f && f.years) ? f.years : [];
+  }
+
+  function franchisePlayedSeason(oid, year) {
+    const id = canon(oid);
+    if (!id) return false;
+    const years = franchiseYears(id);
+    if (id === "m22" && !years.length) return false;
+    const y = +year;
+    return years.indexOf(y) >= 0 || years.indexOf(String(y)) >= 0;
+  }
+
+  function ageScatterSeason() {
+    if (pickedYear != null) return pickedYear;
+    const y = (ageAsOf && typeof ageAsOf.getFullYear === "function")
+      ? ageAsOf.getFullYear()
+      : latestFinished();
+    if (y < 2014) return 2014;
+    if (y > 2025) return 2025;
+    return y;
+  }
+
   function seasonAgeRows(year, asOf) {
     const yd = yearBundle(year);
     const power = {};
@@ -1134,7 +1159,10 @@
         power[String(r.teamId)] = r.pwrPct;
       }
     });
-    const teams = ((DATA.seasons[String(year)] || {}).teams || []);
+    const teams = ((DATA.seasons[String(year)] || {}).teams || []).filter((t) => {
+      const oid = A.canon(t.owner);
+      return franchisePlayedSeason(oid, year);
+    });
     return teams.map((t) => {
       const oid = A.canon(t.owner);
       const pids = rosterPids(year, t.id);
@@ -1220,23 +1248,24 @@
     const wrap = $("age-scatter-wrap");
     if (!chips || !canvas) return;
 
-    const rows = seasonAgeRows(seasonYear, ageAsOf);
+    const scatterYear = ageScatterSeason();
+    const rows = seasonAgeRows(scatterYear, ageAsOf);
     const same = isoDay(ageAsOf) === isoDay(A.today());
     if (sub) {
       sub.textContent = rows.length
-        ? (seasonYear + " · live roster age vs Power Win % · "
+        ? (scatterYear + " · live roster age vs Power Win % · "
           + (same ? "as of today · updates at midnight" : "as of " + isoDay(ageAsOf))
           + " · current franchise names")
-        : (seasonYear + " · roster age unavailable");
+        : (scatterYear + " · roster age unavailable");
     }
 
     if (!rows.length) {
       chips.innerHTML = "";
       if (empty) {
         empty.hidden = false;
-        empty.textContent = seasonYear < 2018
-          ? seasonYear + " · no snapshot/draft roster ages"
-          : seasonYear + " · no weekly roster ages";
+        empty.textContent = scatterYear < 2018
+          ? scatterYear + " · no snapshot/draft roster ages"
+          : scatterYear + " · no weekly roster ages";
       }
       if (wrap) wrap.hidden = true;
       if (ageChart) { ageChart.destroy(); ageChart = null; }
