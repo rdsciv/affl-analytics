@@ -278,7 +278,8 @@ window.AFFL = (function () {
 
   function squadYears(id) {
     const f = squadInfo(id);
-    return f && f.years && f.years.length ? f.years.slice().sort((a, b) => b - a) : years();
+    if (!f || !f.years || !f.years.length) return [];
+    return f.years.slice().sort((a, b) => b - a);
   }
 
   function sameId(a, b) {
