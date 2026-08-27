@@ -335,12 +335,17 @@
           o = {
             pid, name: "", pos: "", team: "",
             opp: 0, bid: null, fr: null, _byFr: {},
+            _teamTgt: 0, _teamAy: 0, _racrNum: 0, _racrAy: 0,
           };
           SUM_COLS.forEach((c) => { o[c] = 0; });
           SHARE_NULL.forEach((c) => { o[c] = null; });
           by.set(pid, o);
         }
         SUM_COLS.forEach((c) => { o[c] = n(o[c]) + n(r[c]); });
+        const tgt = n(r.tgt), ay = n(r.ay);
+        if (r.tgtsh != null && +r.tgtsh > 0 && tgt > 0) o._teamTgt += tgt / +r.tgtsh;
+        if (r.aysh != null && +r.aysh > 0 && ay > 0) o._teamAy += ay / +r.aysh;
+        if (r.racr != null && ay > 0) { o._racrNum += +r.racr * ay; o._racrAy += ay; }
         if (r.name) o.name = r.name;
         if (r.pos) o.pos = r.pos;
         if (r.team) o.team = r.team;
@@ -355,9 +360,14 @@
     by.forEach((o) => {
       o.opp = n(o.tgt) + n(o.car) + n(o.att);
       o.fppg = n(o.g) > 0 ? o.fpts / o.g : null;
+      o.tgtsh = o._teamTgt > 0 ? n(o.tgt) / o._teamTgt : null;
+      o.aysh = o._teamAy > 0 ? n(o.ay) / o._teamAy : null;
+      o.wopr = (o.tgtsh != null || o.aysh != null) ? 1.5 * n(o.tgtsh) + 0.7 * n(o.aysh) : null;
+      o.racr = o._racrAy > 0 ? o._racrNum / o._racrAy : null;
       o.fr = pickHomeFranchise(o._byFr);
       o.bid = careerBid(o.pid);
       delete o._byFr;
+      delete o._teamTgt; delete o._teamAy; delete o._racrNum; delete o._racrAy;
       rows.push(o);
     });
     cache.set(ALL, rows);
