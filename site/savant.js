@@ -13,6 +13,7 @@
 (async function () {
   "use strict";
 
+  const A = window.AFFL || {};
   const $ = (id) => document.getElementById(id);
   const BASE = "savant/";
   const ALL = "all";
@@ -56,7 +57,7 @@
   };
 
   function currentSquads() {
-    if (window.AFFL && A.CURRENT_2026 && A.CURRENT_2026.length) return A.CURRENT_2026;
+    if (A.CURRENT_2026 && A.CURRENT_2026.length) return A.CURRENT_2026;
     return [
       { owner: "m11", name: "Squaw Valley Skinners" },
       { owner: "m06", name: "Fairview Fat Cats" },
@@ -141,7 +142,7 @@
 
   /* CHI-121 — never paint Player {espnId}. */
   function unresolvedName(name) {
-    if (window.AFFL && A.unresolvedPlayerName) return A.unresolvedPlayerName(name);
+    if (A.unresolvedPlayerName) return A.unresolvedPlayerName(name);
     return name == null || name === "" || /^Player \d+$/.test(String(name).trim());
   }
   function displayName(r) {
@@ -615,7 +616,7 @@
   /* ------------------------------------------------------------------- boot */
 
   try {
-    if (window.A && A.chartDefaults) A.chartDefaults(Chart);
+    if (A.chartDefaults) A.chartDefaults(Chart);
     const [meta, bids] = await Promise.all([
       fetch(`${BASE}meta.json`).then((r) => r.json()),
       fetch(`${BASE}bids.json`).then((r) => r.ok ? r.json() : {}),
