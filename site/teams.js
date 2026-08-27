@@ -77,7 +77,8 @@
   }
 
   function teamOf(owner, y) {
-    return ((A.data.seasons[String(y)] || {}).teams || []).find((x) => x.owner === owner) || null;
+    const tid = A.teamIdFor(y, owner);
+    return tid != null ? A.teams(y)[tid] : null;
   }
 
   function faceFor(owner) {

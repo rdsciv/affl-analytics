@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Commissioner Pressers</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2724%27 fill=%27%2393d500%27/%3E%3Ctext x=%2750%27 y=%2772%27 font-size=%2762%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27%3EC%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="apple-touch-icon" href="favicon.png?v=3">
+<link rel="stylesheet" href="styles.css?v=40">
+<link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
 <div class="frame">
 
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark" style="border-color: var(--green); box-shadow: 0 0 18px #93d50088, inset 0 0 14px #93d50033;">C</div>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
       <div>
         <h1>Commissioner <span>Pressers</span></h1>
-        <div class="sub">weekly recaps &middot; 2020–2022</div>
+        <div class="sub">weekly recaps · 2020–2022</div>
       </div>
     </div>
     <nav class="site-nav">
@@ -39,12 +41,11 @@
     <div class="card-head">
       <div>
         <h2>Archive</h2>
-        <div class="card-sub">weekly commissioner press releases, preserved verbatim</div>
+        <div class="card-sub">weekly commissioner press releases, preserved verbatim · missing weeks stay missing</div>
       </div>
     </div>
 
     <div id="pressers-archive">
-      <!-- 2020 -->
       <div class="presser-year">
         <h3 class="year-head">2020</h3>
         <div class="presser-list">
@@ -63,7 +64,6 @@
         </div>
       </div>
 
-      <!-- 2021 -->
       <div class="presser-year">
         <h3 class="year-head">2021</h3>
         <div class="presser-list">
@@ -74,18 +74,15 @@
           <a href="pressers/2021-w05.html" class="presser-link">Week 5</a>
           <a href="pressers/2021-w06.html" class="presser-link">Week 6</a>
           <a href="pressers/2021-w07.html" class="presser-link">Week 7</a>
-          <span class="presser-gap">week 8 not found</span>
           <a href="pressers/2021-w09.html" class="presser-link">Week 9</a>
           <a href="pressers/2021-w10.html" class="presser-link">Week 10</a>
           <a href="pressers/2021-w11.html" class="presser-link">Week 11</a>
         </div>
       </div>
 
-      <!-- 2022 -->
       <div class="presser-year">
         <h3 class="year-head">2022</h3>
         <div class="presser-list">
-          <span class="presser-gap">week 1 not found</span>
           <a href="pressers/2022-w02.html" class="presser-link">Week 2</a>
           <a href="pressers/2022-w03.html" class="presser-link">Week 3</a>
           <a href="pressers/2022-w04.html" class="presser-link">Week 4</a>
@@ -99,12 +96,12 @@
       </div>
 
       <div class="notice" style="margin-top: 20px;">
-        No pressers were found for seasons 2014–2019 or 2023–2025.
+        No pressers in the archive for 2014–2019 or 2023–2025. 2021 week 8 and 2022 week 1 are unavailable.
       </div>
     </div>
   </section>
 
-  <footer class="foot">AFFL Commissioner Pressers &middot; preserved as originally written</footer>
+  <footer class="foot">AFFL Commissioner Pressers · preserved as originally written</footer>
 </div>
 
 <style>
@@ -123,9 +120,7 @@
   font-weight: 700; font-style: italic; transition: all .15s;
 }
 .presser-link:hover { color: var(--ice); border-color: var(--blue); }
-.presser-gap {
-  font-size: 11px; color: #46536b; font-style: italic; padding: 0 4px;
-}
+.brand-logo { width: 44px; height: 44px; object-fit: contain; }
 </style>
 
 </body>

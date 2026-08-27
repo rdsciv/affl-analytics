@@ -273,13 +273,11 @@ window.AFFL = (function () {
   }
 
   function squadInfo(id) {
-    return squads().find((f) => f.owner === id) || null;
+    return squads().find((f) => canon(f.owner) === canon(id)) || null;
   }
 
   function squadYears(id) {
-    const f = squadInfo(id);
-    if (!f || !f.years || !f.years.length) return [];
-    return f.years.slice().sort((a, b) => b - a);
+    return franchiseYears(id);
   }
 
   function sameId(a, b) {
@@ -291,7 +289,7 @@ window.AFFL = (function () {
 
   function teamIdFor(year, owner) {
     if (!owner) return null;
-    const t = ((DATA.seasons[String(year)] || {}).teams || []).find((x) => x.owner === owner);
+    const t = ((DATA.seasons[String(year)] || {}).teams || []).find((x) => canon(x.owner) === canon(owner));
     return t ? t.id : null;
   }
 
@@ -324,9 +322,15 @@ window.AFFL = (function () {
   }
 
   function franchiseYears(id) {
-    const f = franchiseRecord(id);
-    if (!f || !f.years || !f.years.length) return [];
-    return f.years.slice();
+    const c = canon(id);
+    if (!c) return [];
+    const out = [];
+    const seasons = (DATA && DATA.seasons) || {};
+    Object.keys(seasons).forEach((y) => {
+      const teams = (seasons[y] && seasons[y].teams) || [];
+      if (teams.some((x) => canon(x.owner) === c)) out.push(+y);
+    });
+    return out.sort((a, b) => b - a);
   }
 
   function franchisePlayedSeason(oid, year) {
@@ -359,7 +363,9 @@ window.AFFL = (function () {
     if (!squad) return year;
     const ys = squadYears(squad);
     if (!ys.length) return null;
-    return ys.indexOf(year) >= 0 ? year : null;
+    const y = +year;
+    if (ys.indexOf(year) >= 0 || ys.indexOf(y) >= 0) return Number.isFinite(y) ? y : year;
+    return ys[0];
   }
 
   /* Historic teams — Pillars former-teams toggle.
