@@ -89,7 +89,7 @@
   const slug = window.location.pathname.split('/').pop().replace('.html', '');
   
   try {
-    const res = await fetch('pressers.json');
+    const res = await fetch('pressers.json?v=2');
     const data = await res.json();
     const pressers = data.pressers;
     
