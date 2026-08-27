@@ -20,16 +20,32 @@ def main():
         rw=con.execute("SELECT COUNT(*) FROM fact_roster_week WHERE season=?", (y,)).fetchone()[0]
         dp=con.execute("SELECT COUNT(*) FROM fact_draft_pick WHERE season=?", (y,)).fetchone()[0]
         tx=con.execute("SELECT COUNT(*) FROM fact_transaction WHERE season=?", (y,)).fetchone()[0]
-        expect_rw = rw>0 if s["has_rosters"] else rw==0
+        # has_rosters means FULL rosters including bench, which is why it gates roto
+        # season rows and the scoring validator. 2014-2017 carry recovered STARTERS
+        # only - real roster weeks with has_rosters=0 - so the flag and the count are
+        # allowed to disagree there, and only there. See CONTRACTS.md.
+        if y <= 2017:
+            if s["has_rosters"]:
+                fail(f"{y} has_rosters=1 - pre-2018 has no bench, flag must stay 0")
+            if rw == 0:
+                fail(f"{y} roster_weeks=0 - the recovered starters were lost")
+            bench = con.execute(
+                "SELECT COUNT(*) FROM fact_roster_week WHERE season=? AND started=0",
+                (y,)).fetchone()[0]
+            if bench:
+                fail(f"{y} has {bench} bench row(s) in fact_roster_week - pre-2018 is "
+                     f"starters-only; the snapshot belongs in fact_roster_snapshot_pre2018")
+        else:
+            expect_rw = rw>0 if s["has_rosters"] else rw==0
+            if not expect_rw: fail(f"{y} has_rosters={s['has_rosters']} but roster_weeks={rw}")
         expect_tx = tx>0 if s["has_tx"] else tx==0
-        if not expect_rw: fail(f"{y} has_rosters={s['has_rosters']} but roster_weeks={rw}")
         if not expect_tx: fail(f"{y} has_tx={s['has_tx']} but tx={tx}")
         if mu<100: fail(f"{y} matchups {mu} too low")
         if dp<100: fail(f"{y} draft {dp} too low")
         rows.append((y,s["team_count"],s["reg_weeks"],s["auction_draft"],s["has_rosters"],s["has_tx"],mu,rw,dp,tx))
     print(f"completeness gates: {len(rows)} seasons")
     PREVIEW.mkdir(exist_ok=True)
-    lines=["# Historical completeness gates","", "CHI-36 / AFFL-016. Flags on `dim_season` must match actual counts. Missing stays missing.","",
+    lines=["# Historical completeness gates","", "CHI-36 / AFFL-016. Flags on `dim_season` must match actual counts. Missing stays missing.\n\n2014-2017 are the one exception: `has_rosters` means full rosters *including bench* and\nstays 0, while `roster_weeks` counts recovered starters. See `CONTRACTS.md`.","",
            "| season | teams | reg_weeks | auction | rosters | tx | matchups | roster_weeks | draft | transactions |",
            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in rows:

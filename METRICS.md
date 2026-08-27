@@ -114,6 +114,14 @@ Custody PAR      = SUM of weekly PAR for every week the player was rostered
 Split every team's Custody PAR by acquisition type: Drafted / Traded in / Waiver / FA.
 Lineup IQ (actual ÷ optimal) stays. That is start/sit, not asset management.
 
+Before 2018 it exists only where the bench does. ESPN's weekly payloads hold starters
+only, but the same archive carries one late-season full-roster snapshot per team; where
+that snapshot can be dated against a recovered lineup, the bench for that week is known
+and Lineup IQ is computable. 18 team-weeks qualify (2014: 3, 2015: 4, 2016: 0, 2017: 11),
+published as `lineupIQPre2018` — one record per team-week, never pooled with the 2018+
+season aggregate. Actual starter points are ESPN's own and exact; the optimal depends on
+bench points computed by the engine `validate_scoring.py` gates. See `CONTRACTS.md`.
+
 **Trade Alpha** is the second number, not added into Custody PAR (that would
 double-count).
 

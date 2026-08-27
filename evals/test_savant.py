@@ -57,8 +57,15 @@ if html:
 
 js = get("/savant.js")
 if js:
-    if "tooltip" not in js or "callbacks" not in js:
-        fail(" - savant.js has no tooltip callbacks; hover must name the dot")
+    # Hover must name the dot. savant.js no longer uses Chart.js's built-in tooltip
+    # (plugins.tooltip.enabled is false on purpose) - it draws its own #sv-tip card
+    # from onHover, which carries name, position, team, both plotted metrics, games,
+    # AFFL points, franchise, auction $ and start count. Check the mechanism that is
+    # actually there rather than the Chart.js callbacks that used to be.
+    if "showTip" not in js or "onHover" not in js:
+        fail(" - savant.js has no onHover/showTip; hover must name the dot")
+    if 'id="sv-tip"' not in html:
+        fail(" - savant.html has no #sv-tip element for the hover card")
     if '"scatter"' not in js:
         fail(" - savant.js is not drawing a scatter")
 

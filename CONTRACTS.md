@@ -48,7 +48,31 @@ League size is 10 (2014–2016) then 12 (2017–). Replacement level and all-pla
 | **Reconstructed** | Inferred (pre-2018 lineup solver, computed season totals where ESPN has no lineup). | Explore views, labeled. Never on awards. |
 | **Unavailable** | No source. | Omitted. No invented number, no zero fill. |
 
-2014–2017: matchups, standings, draft are verified. Weekly lineups and the transaction feed are unavailable. End-of-season roster + acquisition type is verified. Season player totals computed from nflverse under that year's scoring rules are reconstructed.
+2014–2017: matchups, standings, draft are verified.
+
+ESPN deleted most pre-2018 league history in early 2025. What survives in `data/box_raw`
+has been recovered, and the grains are not all the same tier. Do not collapse them.
+
+| Grain | Tier | Detail |
+| --- | --- | --- |
+| Matchups, standings, draft | Verified | Unchanged. |
+| **Weekly starters** | **Verified, partial** | 5,530 rows in `fact_roster_week`, all `started = 1`. A team-week loads only if its lineup is legal and cannot outscore the team. `lineup_complete = 1` means the starters sum exactly to ESPN's score; `= 0` means ESPN dropped entries, so the surviving starters are real but the set is short. 8 team-weeks are excluded outright — ESPN's own entries sum to *more* than the team scored. |
+| Starter **slot** | Verified position, arbitrary FLEX | `lineupSlotId` is zeroed in every leagueHistory response, so slot comes from `defaultPositionId`. Position is exact (validated against 2018 truth; every disagreement was a FLEX/same-position swap, none cross-position). Which of two same-position starters ESPN labelled FLEX is not recoverable and is an arbitrary tiebreak. `slot_source` records which case a row is. |
+| **Weekly bench** | Unavailable | `rosterForMatchupPeriod` holds starters only. There is no weekly bench and none can be inferred from the archive. |
+| **Late-season roster snapshot** | Verified | `teams[].roster` carries one full roster per team — bench included, with real `lineupSlotId` — repeated identically in every weekly file. It dates to a late-season week and is datable for only some teams. Lives in `fact_roster_snapshot_pre2018`, never in `fact_roster_week`. |
+| Acquisition type | Unavailable | `acquisitionType` is `None` league-wide before 2018. |
+| Transaction feed | Unavailable | No source. `dim_season.has_tx = 0`. |
+| Season player totals | Reconstructed | Computed from nflverse under that year's scoring rules. |
+
+`dim_season.has_rosters` stays **0** for 2014–2017. It means *full rosters including
+bench*, and it gates roto season rows (`compute_roto.py`) and the scoring validator. There
+is no pre-2018 bench, so the flag is correct as-is. Recovered starters are not a reason to
+flip it.
+
+**Lineup IQ before 2018** may be published only for a team-week whose snapshot is dated,
+and must be labelled: the *actual* starter points are ESPN's own and exact, but the
+*optimal* depends on bench points our engine computed. Verified roster, computed optimal.
+Never on awards.
 
 2018–2025: weekly lineups, transactions, bids are verified.
 

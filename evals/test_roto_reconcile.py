@@ -207,18 +207,31 @@ def test_feelers_equals_recompute(con, recomputed, stored):
 
 
 def test_no_pre2018_rows(con):
+    """Roto season rows still must not exist for 2014-2017 - but for the right reason.
+
+    Recovered starters are not enough to build them. Roto counts a team's whole
+    season of accumulated stats, which needs full rosters; pre-2018 has starters
+    only and no transaction feed, so dim_season.has_rosters stays 0 and
+    compute_roto.py (which selects on that flag) skips those years. Assert the
+    flag, not the absence of lineups - the lineups are there now.
+    """
     n = con.execute(
         "SELECT COUNT(*) FROM fact_roto_team_season WHERE season BETWEEN 2014 AND 2017"
     ).fetchone()[0]
     lineups = con.execute(
         "SELECT COUNT(*) FROM fact_roster_week WHERE season BETWEEN 2014 AND 2017"
     ).fetchone()[0]
+    flagged = [s for (s,) in con.execute(
+        "SELECT season FROM dim_season "
+        "WHERE season BETWEEN 2014 AND 2017 AND has_rosters = 1")]
     print(f"2014-2017 fact_roto_team_season rows: {n}")
-    print(f"2014-2017 fact_roster_week rows: {lineups}")
-    if lineups:
-        fail("2014-2017 lineups exist; season rows would be allowed only with proof")
-    elif n:
-        fail(f"2014-2017 have {n} fact_roto_team_season rows but no lineups")
+    print(f"2014-2017 fact_roster_week rows: {lineups} (recovered starters)")
+    if flagged:
+        fail(f"has_rosters=1 for {flagged}; pre-2018 has no bench, so roto cannot "
+             f"be built from it")
+    if n:
+        fail(f"2014-2017 have {n} fact_roto_team_season rows; roto needs full "
+             f"rosters and pre-2018 has starters only")
 
 
 def test_weekly_sums_to_season(con):

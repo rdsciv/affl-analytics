@@ -17,6 +17,9 @@ Tickets covered (update as Linear changes):
 - Sidecar honesty: (test_sidecars_status.py)
 - Handoff / overall: (test_handoff.py)
 - CHI-76 plan only: (test_chi76_plan.py)
+- CHI-130: franchise-year lock (site/evals/franchise-year-lock.test.mjs, node)
+- CHI-33: lineup IQ, incl. the pre-2018 dated team-weeks (test_lineup_iq_2025.py)
+- Pre-2018 recovery contract: (test_historical_gates.py)
 
 Rules:
 - Run this before claiming any ticket "ready for In QA".
@@ -44,17 +47,28 @@ MATRIX = [
     ("Sidecars status (CHI-72 honesty)", "test_sidecars_status.py"),
     ("Handoff / START-HERE (CHI-82)", "test_handoff.py"),
     ("CHI-76 viz plan", "test_chi76_plan.py"),
+    ("CHI-130 franchise-year lock", "franchise-year-lock.test.mjs"),
+    ("CHI-33 lineup IQ (2018+ season, pre-2018 dated)", "test_lineup_iq_2025.py"),
+    ("Pre-2018 recovery contract", "test_historical_gates.py"),
 ]
 
 def run_one(name, script):
-    path = EVALS / script
+    # Node evals live under site/evals and are named .mjs; everything else is a
+    # python eval under evals/. Same reporting either way - a lock nobody runs is
+    # not a lock.
+    if script.endswith(".mjs"):
+        path = ROOT / "site" / "evals" / script
+        argv = ["node", str(path)]
+    else:
+        path = EVALS / script
+        argv = [sys.executable, str(path)]
     if not path.exists():
         print(f"[{name}] MISSING SCRIPT: {script}")
         return False, "MISSING"
 
     try:
         r = subprocess.run(
-            [sys.executable, str(path)],
+            argv,
             capture_output=True,
             text=True,
             timeout=60,
@@ -62,7 +76,13 @@ def run_one(name, script):
         )
         out = (r.stdout or "") + (r.stderr or "")
         last_lines = "\n".join(out.strip().splitlines()[-3:])
-        passed = (r.returncode == 0) and "FAIL" not in out.upper()
+        # Some python evals print their failures and still exit 0, so the substring
+        # is the real guard there. The node eval reports a tally ("PASS 67  FAIL 0")
+        # that the same substring would read as a failure, so it is trusted on its
+        # exit code - which it sets correctly.
+        passed = r.returncode == 0
+        if not script.endswith(".mjs"):
+            passed = passed and "FAIL" not in out.upper()
         status = "PASS" if passed else "FAIL"
         print(f"[{status}] {name}")
         if not passed:

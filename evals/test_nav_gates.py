@@ -80,16 +80,28 @@ def main():
     if n_nfl < 1000:
         fail("2025 nfl weeks missing — Roto cannot be in nav")
 
-    # pre-2018 lineup/tx must be unavailable
+    # pre-2018: starters are recovered and verified-partial; bench and tx are not.
+    # Every row must carry a slot_source, because pre-2018 slots are derived rather
+    # than read off lineupSlotId, and a row without one is a row of unknown origin.
     for year in (2014, 2015, 2016, 2017):
         row = con.execute("SELECT has_rosters, has_tx FROM dim_season WHERE season=?", (year,)).fetchone()
         rw = con.execute("SELECT COUNT(*) FROM fact_roster_week WHERE season=?", (year,)).fetchone()[0]
         tx = con.execute("SELECT COUNT(*) FROM fact_transaction WHERE season=?", (year,)).fetchone()[0]
-        if row["has_rosters"] or rw:
-            fail(f"{year} has roster weeks — CONTRACTS says unavailable")
+        bench = con.execute("SELECT COUNT(*) FROM fact_roster_week "
+                            "WHERE season=? AND started=0", (year,)).fetchone()[0]
+        nosrc = con.execute("SELECT COUNT(*) FROM fact_roster_week "
+                            "WHERE season=? AND slot_source IS NULL", (year,)).fetchone()[0]
+        if not rw:
+            fail(f"{year} has no roster weeks — the recovered starters were lost")
+        if row["has_rosters"]:
+            fail(f"{year} has_rosters=1 — no pre-2018 bench exists, flag must stay 0")
+        if bench:
+            fail(f"{year} has {bench} bench row(s) — pre-2018 is starters-only")
+        if nosrc:
+            fail(f"{year} has {nosrc} roster row(s) with no slot_source")
         if row["has_tx"] or tx:
             fail(f"{year} has transactions — CONTRACTS says unavailable")
-    print("2014-2017 lineup/tx grain is unavailable (correct)")
+    print("2014-2017 starters recovered (starters-only, slot_source set); tx unavailable")
 
     # History grain: franchise career on data.json
     data = json.loads((SITE / "data.json").read_text())
@@ -156,7 +168,9 @@ def main():
         "",
         "## Pre-2018",
         "",
-        "Weekly lineups and the transaction feed are unavailable. "
+        "Weekly STARTERS are recovered and verified-partial (`slot_source` records how "
+        "each slot was derived). Weekly bench and the transaction feed are unavailable, "
+        "so `has_rosters` and `has_tx` both stay 0. "
         "Scoreboard chips those years. Roto career marks them missing, not zero.",
         "",
         "## How to refresh",
