@@ -485,14 +485,49 @@ window.AFFL = (function () {
     rail.appendChild(strip);
   }
 
+  /* Excel-style sheet menu: left rail, rounded items, hyperlinks between pages.
+     Colors stay AFFL tokens. Header rail (48px logos) stays above. */
+  function ensureSideMenu() {
+  if (document.getElementById("side-menu")) return;
+  const frame = document.querySelector(".frame");
+  const nav = document.querySelector(".site-nav");
+  if (!frame || !nav) return;
+  const header = frame.querySelector(".topbar") || frame.querySelector("header");
+  const aside = document.createElement("aside");
+  aside.id = "side-menu";
+  aside.className = "side-menu";
+  aside.setAttribute("aria-label", "Sheets");
+  const navRow = nav.closest(".topbar-nav-row");
+  aside.appendChild(nav);
+  if (navRow && !navRow.children.length) navRow.remove();
+  nav.querySelectorAll("a").forEach((a) => {
+    const label = (a.textContent || "").trim();
+    a.setAttribute("data-sheet", label.toLowerCase());
+    if (!a.getAttribute("data-ico")) a.setAttribute("data-ico", (label[0] || "").toUpperCase());
+  });
+  const main = document.createElement("div");
+  main.className = "sheet-main";
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  Array.from(frame.children).forEach((el) => {
+    if (el === header) return;
+    main.appendChild(el);
+  });
+  sheet.appendChild(aside);
+  sheet.appendChild(main);
+  frame.appendChild(sheet);
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      mountHistoricToggle();
-      mountBrandStrip();
-    });
-  } else {
+  document.addEventListener("DOMContentLoaded", function () {
     mountHistoricToggle();
     mountBrandStrip();
+    ensureSideMenu();
+  });
+  } else {
+  mountHistoricToggle();
+  mountBrandStrip();
+  ensureSideMenu();
   }
 
 

@@ -88,6 +88,70 @@ body {
   width: 100%;
   justify-content: flex-start;
 }
+
+/* Left sheet menu — Excel dashboard rail, AFFL tokens */
+.sheet {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.side-menu {
+  position: sticky;
+  top: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 12px 10px;
+}
+.side-menu .site-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  width: 100%;
+  order: 0;
+}
+.side-menu .site-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 999px;
+  font-style: normal;
+  letter-spacing: .06em;
+}
+.side-menu .site-nav a::before {
+  content: attr(data-ico);
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  background: #1c2536;
+  color: var(--ice);
+}
+.side-menu .site-nav a.on::before {
+  background: #fff;
+  color: var(--blue);
+}
+.sheet-main { min-width: 0; }
+@media (max-width: 900px) {
+  .sheet { grid-template-columns: 1fr; }
+  .side-menu { position: static; }
+  .side-menu .site-nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .side-menu .site-nav a { width: auto; }
+}
 .topbar-meta { order: 4; }
 
 /* 2026 rail — larger marks */
