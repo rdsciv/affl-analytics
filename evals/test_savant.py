@@ -38,7 +38,7 @@ def get(path):
 
 
 NAV = ["Dashboard", "Scoreboard", "Players", "Savant", "Draft", "Trades",
-       "Roto", "Teams", "History", "Awards", "Dictionary", "Wrapped"]
+       "Roto", "Teams", "History", "Awards", "Pressers", "Dictionary", "Wrapped"]
 
 html = get("/savant.html")
 if html:
