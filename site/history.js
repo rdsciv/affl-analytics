@@ -103,6 +103,7 @@
       teams.forEach((t) => {
         const oid = canon(t.owner);
         if (!oid) return;
+        if (!franchisePlayedSeason(oid, +y)) return;
         if (!by[oid]) {
           by[oid] = {
             owner: oid, name: t.name, logo: t.logo || "",
@@ -178,8 +179,21 @@
       });
     });
     (DATA.franchises || []).forEach((f) => {
-      const r = by[canon(f.owner)];
-      if (!r) return;
+      const oid = canon(f.owner);
+      if (!by[oid]) {
+        by[oid] = {
+          owner: oid, name: f.currentName || "", logo: f.logo || "",
+          seasons: 0, wins: 0, losses: 0, ties: 0, regWins: 0,
+          pf: 0, pa: 0, allW: 0, allL: 0, expWins: 0, luck: 0,
+          titles: 0, runnerUps: 0, thirds: 0, sackos: 0, playoffs: 0,
+          scoreTitles: 0, bestFinish: 99, worstFinish: 0,
+          maxScore: null, minScore: null, weekN: 0, weekSum: 0,
+          weeks: [], finishes: {}, firstYear: null, lastYear: null, active: false,
+          highPf: null, lowPf: null, tenWins: 0,
+          winStreak: 0, loseStreak: 0, moves: 0, trades: 0, activate: 0,
+        };
+      }
+      const r = by[oid];
       if (f.currentName) r.name = f.currentName;
       if (f.logo) r.logo = f.logo;
       r.active = !!f.active;
@@ -187,6 +201,10 @@
       if (f.runnerUps != null) r.runnerUps = f.runnerUps;
       if (f.playoffs != null) r.playoffs = f.playoffs;
       if (f.bestFinish != null) r.bestFinish = f.bestFinish;
+      const ys = (f.years || []).slice().sort((a, b) => a - b);
+      r.firstYear = ys.length ? ys[0] : null;
+      r.lastYear = ys.length ? ys[ys.length - 1] : null;
+      r.seasons = ys.length;
     });
     return {
       rows: Object.values(by).map((r) => {
@@ -609,7 +627,7 @@
   }
   const qsYear = new URLSearchParams(location.search).get("year");
   let pickedYear = parseSeasonParam(qsYear);
-  let seasonYear = pickedYear == null ? latestFinished() : pickedYear;
+  let seasonYear = A.seasonScope(pickedYear).year;
   let standKey = "rank";
   let standDir = 1;
 
@@ -624,7 +642,9 @@
   };
 
   function seasonStandRows(y) {
-    return ((DATA.seasons[String(y)] || {}).teams || []).map((t) => {
+    return ((DATA.seasons[String(y)] || {}).teams || []).filter((t) => {
+      return franchisePlayedSeason(canon(t.owner), y);
+    }).map((t) => {
       const oid = canon(t.owner);
       const name = A.franchiseName(oid) || NAME[oid] || "";
       const logo = A.franchiseLogo(oid) || t.logo || "";
@@ -657,6 +677,7 @@
         ((DATA.seasons[ys] || {}).teams || []).forEach((t) => {
           const oid = canon(t.owner);
           if (!oid) return;
+          if (!franchisePlayedSeason(oid, year)) return;
           if (!by[oid]) {
             by[oid] = { owner: oid, name: "", logo: "", tid: t.id, rank: null, wins: 0, losses: 0, ties: 0, pf: 0, pa: 0, allW: 0, allL: 0, moves: 0 };
           }
@@ -727,7 +748,9 @@
   };
 
   function seasonTxnRows(y) {
-    return ((DATA.seasons[String(y)] || {}).teams || []).map((t) => {
+    return ((DATA.seasons[String(y)] || {}).teams || []).filter((t) => {
+      return franchisePlayedSeason(canon(t.owner), y);
+    }).map((t) => {
       const oid = canon(t.owner);
       const bag = movesBag(y, t.id) || {};
       return {
@@ -766,6 +789,12 @@
   function renderTxnCounter() {
     const tb = document.querySelector("#txn-tbl tbody");
     if (!tb) return;
+    if (seasonYear == null) {
+      const sub = $("txn-sub");
+      if (sub) sub.textContent = "All · pick a season";
+      tb.innerHTML = `<tr><td colspan="7"><div class="notice">Pick a season.</div></td></tr>`;
+      return;
+    }
     const rows = sortTxnRows(seasonTxnRows(seasonYear));
     tb.innerHTML = rows.map((r) => `<tr>
         <td>${teamCell(r)}</td>
@@ -793,6 +822,10 @@
   function renderAddsByWeek() {
     const tbl = $("week-acq-tbl");
     if (!tbl) return;
+    if (seasonYear == null) {
+      tbl.innerHTML = `<tbody><tr><td><div class="notice">Pick a season.</div></td></tr></tbody>`;
+      return;
+    }
     const rows = sortTxnRows(seasonTxnRows(seasonYear));
     const weeks = weekKeysFor(rows);
     const head = `<tr><th>Team</th>${weeks.map((w) => `<th>${esc(w)}</th>`).join("")}</tr>`;
@@ -1027,6 +1060,12 @@
     const sub = $("waiver-sub");
     const row = $("waiver-week-row");
     if (!body) return;
+    if (seasonYear == null) {
+      if (row) row.hidden = true;
+      if (sub) sub.textContent = "All · pick a season";
+      body.innerHTML = `<div class="notice">Pick a season.</div>`;
+      return;
+    }
     if (seasonYear < 2018) {
       if (row) row.hidden = true;
       if (sub) sub.textContent = seasonYear + " · no ESPN item log";
@@ -1042,8 +1081,8 @@
       return;
     }
     const raw = assignPos(byWeek[String(waiverWeek)] || []);
-    const waivers = raw.filter((r) => r.type === "WAIVER").map(decorateClaim);
-    const fas = raw.filter((r) => r.type === "FREEAGENT").map(decorateClaim);
+    const waivers = raw.filter((r) => r.type === "WAIVER").map(decorateClaim).filter((r) => franchisePlayedSeason(r.owner, seasonYear));
+    const fas = raw.filter((r) => r.type === "FREEAGENT").map(decorateClaim).filter((r) => franchisePlayedSeason(r.owner, seasonYear));
     const processed = (byWeek[String(waiverWeek)] || []).filter((r) => r.processDate);
     const batchMs = processed.length ? processed[0].processDate : null;
     const batchLab = batchMs ? formatBatchDate(batchMs) : ("Week " + waiverWeek);
@@ -1126,16 +1165,18 @@
   }
 
   function franchiseYears(oid) {
+    if (A.franchiseYears) return A.franchiseYears(oid) || [];
     const id = canon(oid);
     const f = (DATA.franchises || []).find((x) => canon(x.owner) === id);
-    return (f && f.years) ? f.years : [];
+    return (f && f.years) ? f.years.slice() : [];
   }
 
   function franchisePlayedSeason(oid, year) {
+    if (A.franchisePlayedSeason) return A.franchisePlayedSeason(oid, year);
     const id = canon(oid);
     if (!id) return false;
     const years = franchiseYears(id);
-    if (id === "m22" && !years.length) return false;
+    if (!years.length) return false;
     const y = +year;
     return years.indexOf(y) >= 0 || years.indexOf(String(y)) >= 0;
   }
@@ -1480,11 +1521,16 @@
   }
 
   function seasonTxRows(y) {
-    return buildClaimRows(y).concat(buildTradeRows(y));
+    return buildClaimRows(y).concat(buildTradeRows(y)).filter((r) => {
+      const owners = r.owners || (r.owner ? [r.owner] : []);
+      return owners.some((oid) => franchisePlayedSeason(oid, y));
+    });
   }
 
   function franchiseOptions() {
-    return ROWS.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    const all = ROWS.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    if (seasonYear == null) return all;
+    return all.filter((f) => franchisePlayedSeason(f.owner, seasonYear));
   }
 
   function bindTxFilters() {
@@ -1573,6 +1619,12 @@
     const sub = $("tx-log-sub");
     const filters = $("tx-log-filters");
     if (!tb) return;
+    if (seasonYear == null) {
+      if (filters) filters.hidden = true;
+      if (sub) sub.textContent = "All · pick a season";
+      tb.innerHTML = `<tr class="tx-empty"><td colspan="5"><div class="notice">Pick a season.</div></td></tr>`;
+      return;
+    }
     if (seasonYear < 2018) {
       if (filters) filters.hidden = true;
       if (sub) sub.textContent = seasonYear + " · no ESPN item log";
@@ -1666,6 +1718,7 @@
         if (!add) return;
         const drop = dropItem(raw);
         const team = teamFromTid(y, raw.tid);
+        if (!franchisePlayedSeason(team.owner, y)) return;
         const after = ptsAfterAdd(maps.byTeamPid, raw.tid, add.pid, raw.wk);
         let gave = null;
         if (drop && drop.pid != null) {
@@ -1709,6 +1762,11 @@
     const body = $("waiver-value-body");
     const sub = $("waiver-value-sub");
     if (!body) return;
+    if (seasonYear == null) {
+      if (sub) sub.textContent = "All · pick a season";
+      body.innerHTML = `<div class="notice">Pick a season.</div>`;
+      return;
+    }
     if (seasonYear < 2018) {
       if (sub) sub.textContent = seasonYear + " · no ESPN item log";
       body.innerHTML = `<div class="notice">${esc(VALUE_PRE2018)}</div>`;
@@ -1805,7 +1863,7 @@
         parFa: fa,
         parUnknown: unk,
       };
-    });
+    }).filter((r) => franchisePlayedSeason(r.owner, y));
   }
 
   function parTd(n, strong) {
@@ -1820,6 +1878,12 @@
     const tb = document.querySelector("#custody-par-tbl tbody");
     const unkTh = $("par-unknown-th");
     if (!tb) return;
+    if (seasonYear == null) {
+      if (sub) sub.textContent = "All · pick a season";
+      if (unkTh) unkTh.hidden = true;
+      tb.innerHTML = `<tr><td colspan="8"><div class="notice">Pick a season.</div></td></tr>`;
+      return;
+    }
     if (seasonYear < 2018) {
       if (sub) sub.textContent = seasonYear + " · unavailable · weekly rosters start in 2018";
       if (unkTh) unkTh.hidden = true;
@@ -1877,7 +1941,7 @@
 
   function applySeasonYear(y) {
     pickedYear = y;
-    seasonYear = y == null ? latestFinished() : y;
+    seasonYear = A.seasonScope(y).year;
     stampSeasonYear(y);
     renderSeasonStandings();
     renderTxnAndWeeks();
@@ -1904,9 +1968,14 @@
     const canvas = $("race-chart");
     const sub = $("race-sub");
     if (!canvas) return;
+    if (seasonYear == null) {
+      if (sub) sub.textContent = "All · pick a season";
+      if (raceChart) { raceChart.destroy(); raceChart = null; }
+      return;
+    }
     const y = seasonYear;
     const s = DATA.seasons[String(y)] || { teams: [], regWeeks: [] };
-    const top4 = (s.teams || []).slice().sort((a, b) => (a.finalRank || 99) - (b.finalRank || 99)).slice(0, 4);
+    const top4 = (s.teams || []).filter((t) => franchisePlayedSeason(canon(t.owner), y)).slice().sort((a, b) => (a.finalRank || 99) - (b.finalRank || 99)).slice(0, 4);
     if (sub) sub.textContent = y + " · cumulative wins · top four finishers · current franchise names";
     if (typeof Chart === "undefined") return;
     if (!top4.length) {
