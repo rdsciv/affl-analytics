@@ -277,7 +277,7 @@
         render();
       });
     });
-    $("page-sub").textContent = "pick a franchise · " + list.length + " squads";
+    $("page-sub").textContent = "pick a franchise · " + list.length + " teams";
   }
 
   function kpiCard(title, desc) {

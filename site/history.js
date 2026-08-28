@@ -1320,7 +1320,7 @@
     const ranked = rows.slice().sort((a, b) => a.mean - b.mean);
     const young = ranked[0];
     const old = ranked[ranked.length - 1];
-    chips.innerHTML = ageChip("Youngest squad", young, "young") + ageChip("Oldest squad", old, "old");
+    chips.innerHTML = ageChip("Youngest team", young, "young") + ageChip("Oldest team", old, "old");
 
     const scatterRows = rows.filter((r) => r.pwr != null && Number.isFinite(r.pwr));
     ageScatterRows = scatterRows;

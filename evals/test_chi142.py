@@ -213,6 +213,21 @@ def test_franchise_years(data, common):
         fail(f"m01 years {m01} != m07 {m07} (MERGE)")
 
 
+def test_teams_squad_copy(html, js):
+    """Picasso fail: Teams subtitle still said N squads. Word is team."""
+    vis = re.sub(r"<script[\s\S]*?</script>", " ", html)
+    vis = re.sub(r"<[^>]+>", " ", vis)
+    if re.search(r"squad", vis, re.I):
+        fail("teams.html still contains squad")
+    for m in re.finditer(r'\$\(\s*["\']page-sub["\']\s*\)\.textContent\s*=\s*([^;]+);', js):
+        if re.search(r"squad", m.group(1), re.I):
+            fail("teams.js page-sub still says squad")
+    if re.search(r'["\'] squads["\']', js):
+        fail("teams.js still paints N squads")
+    if "Youngest squad" in src("history.js") or "Oldest squad" in src("history.js"):
+        fail("history.js still paints Youngest/Oldest squad")
+
+
 def test_http():
     for page in PAGES:
         try:
@@ -245,6 +260,7 @@ def main():
         test_page_js(js_name, src(js_name))
         if "2026" in html and re.search(r'option value="2026"|data-y="2026"', html):
             fail(f"{page} offers 2026")
+    test_teams_squad_copy(src("teams.html"), src("teams.js"))
     test_http()
 
     if fails:
