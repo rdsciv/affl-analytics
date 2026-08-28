@@ -2335,7 +2335,7 @@
     S.limit = 60;
     const ylist = squad ? A.squadYears(squad) : A.years();
     A.showYearRow(true);
-    A.squadPicker(document.getElementById('squad-picker'), squad, (s) => {
+    A.remountTeamSelect(document.getElementById('squad-picker'), squad, (s) => {
       squad = s || "";
       A.stampNav(squad);
       if (squad && scope === "season") {

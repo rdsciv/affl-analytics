@@ -1965,7 +1965,7 @@
     }
     const ylist = squad ? A.squadYears(squad) : A.years();
     A.seasonPicker(el, pickedYear, applySeasonYear, ylist);
-    A.squadPicker($("squad-picker"), squad, (s) => {
+    A.remountTeamSelect($("squad-picker"), squad, (s) => {
       squad = s || "";
       A.stampNav(squad);
       if (squad && pickedYear != null) {

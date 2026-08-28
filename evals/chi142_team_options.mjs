@@ -69,18 +69,24 @@ runInContext(commonSrc, context);
 await runInContext("window.AFFL.boot()", context);
 const A = context.window.AFFL;
 
-function optionNames(year) {
-  const el = mockDiv();
-  if (typeof A.teamSelect === "function") A.teamSelect(el, "", () => {}, year);
+function paint(year, asSelect) {
+  const el = asSelect ? mockSelect() : mockDiv();
+  if (typeof A.remountTeamSelect === "function") A.remountTeamSelect(el, "", () => {}, year);
+  else if (typeof A.teamSelect === "function") A.teamSelect(el, "", () => {}, year);
   else A.squadPicker(el, "", () => {}, year);
   const html = el.innerHTML || "";
   return Array.from(html.matchAll(/<option[^>]*>([^<]*)<\/option>/g)).map((m) => m[1]);
 }
 
 const out = {
-  all: optionNames(null),
-  y2014: optionNames(2014),
-  y2025: optionNames(2025),
+  all: paint(null),
+  y2014: paint(2014),
+  y2025: paint(2025),
+  savant: {
+    all: paint(null, true),
+    y2014: paint(2014, true),
+    y2025: paint(2025, true),
+  },
   viaForSeason: {
     all: (A.squadsForSeason(null) || []).map((f) => f.currentName),
     y2014: (A.squadsForSeason(2014) || []).map((f) => f.currentName),

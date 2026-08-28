@@ -2958,7 +2958,7 @@
       squad = "";
       A.stampNav("");
     }
-    A.squadPicker($("squad-picker"), squad, (s) => {
+    A.remountTeamSelect($("squad-picker"), squad, (s) => {
       squad = s;
       scope = "cum";
       A.stampNav(squad);

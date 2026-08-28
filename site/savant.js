@@ -408,26 +408,37 @@
     renderAll();
   }
 
+  function franchiseByName(name) {
+    if (!name) return null;
+    const list = (A.squads && A.squads()) || [];
+    return list.find((x) => (x.currentName || x.name) === name)
+      || currentSquads().find((x) => x.name === name)
+      || null;
+  }
+
   function yearsForFranchise() {
     if (!state.franchise) return (META.seasons || []).slice();
-    const t = currentSquads().find((x) => x.name === state.franchise);
+    const t = franchiseByName(state.franchise);
     if (!t || !A.squadYears) return (META.seasons || []).slice();
     return A.squadYears(t.owner) || [];
   }
 
   function teamsForSeason() {
+    const year = isAll() ? null : state.season;
+    if (A.squadsForSeason) {
+      return A.squadsForSeason(year).map((f) => ({
+        owner: f.owner,
+        name: f.currentName || f.name,
+      }));
+    }
     const all = currentSquads();
     if (isAll()) return all;
-    if (A.squadsForSeason) {
-      const allow = new Set(A.squadsForSeason(state.season).map((f) => A.canon(f.owner)));
-      return all.filter((t) => allow.has(A.canon(t.owner)));
-    }
     return all.filter((t) => A.franchisePlayedSeason && A.franchisePlayedSeason(t.owner, state.season));
   }
 
   function renderControls() {
     if (!isAll() && state.franchise) {
-      const t = currentSquads().find((x) => x.name === state.franchise);
+      const t = franchiseByName(state.franchise);
       if (t && A.franchisePlayedSeason && !A.franchisePlayedSeason(t.owner, state.season)) {
         state.franchise = "";
       }
@@ -447,8 +458,20 @@
     });
 
     const shown = teamsForSeason();
-    const teams = [["", "All"]].concat(shown.map((t) => [t.name, t.name]));
-    fillSelect($("team-picker"), teams, state.franchise, setFranchise);
+    const seasonYear = isAll() ? null : state.season;
+    const curOwner = ((shown.find((t) => t.name === state.franchise) || {}).owner) || "";
+    if (A.remountTeamSelect) {
+      const next = A.remountTeamSelect($("team-picker"), curOwner, (oid) => {
+        const hit = shown.find((t) => t.owner === oid || (A.canon && A.canon(t.owner) === A.canon(oid)));
+        state.franchise = hit ? hit.name : "";
+        stampScope();
+        renderAll();
+      }, seasonYear);
+      if (curOwner && !next) state.franchise = "";
+    } else {
+      const teams = [["", "All"]].concat(shown.map((t) => [t.name, t.name]));
+      fillSelect($("team-picker"), teams, state.franchise, setFranchise);
+    }
 
     fillSelect($("pos-select"), POSITIONS.map((p) => [p, p === "ALL" ? "All" : p]), state.pos, (v) => {
       state.pos = v; renderAll();
@@ -773,6 +796,7 @@
   /* ------------------------------------------------------------------- boot */
 
   try {
+    if (A.boot) await A.boot();
     if (A.chartDefaults) A.chartDefaults(Chart);
     const [meta, bids, index] = await Promise.all([
       fetch(`${BASE}meta.json`).then((r) => r.json()),

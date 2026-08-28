@@ -363,10 +363,12 @@ window.AFFL = (function () {
     return list.filter((f) => franchisePlayedSeason(f.owner, scope.year));
   }
 
-  function squadPicker(el, squad, onPick) {
-    if (!el) return;
-    const year = arguments.length > 3 ? arguments[3] : seasonFromURL();
-    const list = squadsForSeason(year);
+  /* CHI-142 — one remount for DIV#squad-picker and SELECT#team-picker.
+     Season change must rewrite Team <option>s. A bare SELECT cannot nest another <select>. */
+  function remountTeamSelect(el, squad, onPick, year) {
+    if (!el) return "";
+    const y = arguments.length > 3 ? year : seasonFromURL();
+    const list = squadsForSeason(y);
     const still = squad && list.some((f) => f.owner === squad || canon(f.owner) === canon(squad));
     const cur = still ? squad : "";
     if (squad && !cur) {
@@ -378,28 +380,46 @@ window.AFFL = (function () {
         history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
       } catch (e) { /* ignore */ }
     }
-    el.innerHTML = `<select class="team-select" aria-label="Team">
-      <option value="">All</option>
-      ${list.map((f) => `<option value="${f.owner}"${f.owner === cur ? " selected" : ""}>${f.currentName}</option>`).join("")}
-    </select>`;
-    el.querySelector("select").addEventListener("change", (e) => {
-      rememberSquad(e.target.value);
-      const u = new URL(location.href);
-      if (e.target.value) {
-        u.searchParams.set("squad", e.target.value);
-        u.searchParams.set("team", e.target.value);
-      } else {
-        u.searchParams.delete("squad");
-        u.searchParams.delete("team");
-      }
-      history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
-      onPick(e.target.value);
-    });
+    const opts = [`<option value="">All</option>`]
+      .concat(list.map((f) => `<option value="${f.owner}"${f.owner === cur ? " selected" : ""}>${f.currentName}</option>`))
+      .join("");
+    let sel;
+    if (el.tagName === "SELECT") {
+      sel = el;
+      sel.innerHTML = opts;
+    } else {
+      el.innerHTML = `<select class="team-select" aria-label="Team">${opts}</select>`;
+      sel = el.querySelector("select");
+    }
+    sel.classList.add("team-select");
+    sel.setAttribute("aria-label", "Team");
+    sel.value = cur;
+    sel.onchange = (e) => {
+      const v = e.target.value;
+      rememberSquad(v);
+      try {
+        const u = new URL(location.href);
+        if (v) {
+          u.searchParams.set("squad", v);
+          u.searchParams.set("team", v);
+        } else {
+          u.searchParams.delete("squad");
+          u.searchParams.delete("team");
+        }
+        history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
+      } catch (err) { /* ignore */ }
+      onPick(v);
+    };
     return cur;
   }
 
+  function squadPicker(el, squad, onPick) {
+    const year = arguments.length > 3 ? arguments[3] : seasonFromURL();
+    return remountTeamSelect(el, squad, onPick, year);
+  }
+
   function teamSelect(el, team, onPick, year) {
-    return squadPicker(el, team, onPick, year);
+    return remountTeamSelect(el, team, onPick, year);
   }
 
   function stampNav(squad) {
@@ -865,7 +885,7 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
-           squads, squadFromURL, squadInfo, squadYears, squadsForSeason, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, teamSelect, stampNav, clampYear, rememberSquad,
+           squads, squadFromURL, squadInfo, squadYears, squadsForSeason, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, teamSelect, remountTeamSelect, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,

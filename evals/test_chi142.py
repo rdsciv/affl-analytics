@@ -108,17 +108,23 @@ def test_common(common):
         fail("common.js missing squadsForSeason")
     if "function teamSelect" not in common:
         fail("common.js missing teamSelect alias")
-    picker = re.search(r"function squadPicker\(el, squad, onPick\) \{([\s\S]*?)\n  \}", common)
+    if "function remountTeamSelect" not in common:
+        fail("common.js missing remountTeamSelect")
+    picker = re.search(r"function remountTeamSelect\(el, squad, onPick, year\) \{([\s\S]*?)\n  \}", common)
     if not picker:
-        fail("common.js missing squadPicker")
+        fail("common.js missing remountTeamSelect body")
     else:
         body = picker.group(1)
         if "All squads" in body:
-            fail("squadPicker still paints All squads")
+            fail("Team remount still paints All squads")
         if ">All</option>" not in body:
-            fail("squadPicker default option is not All")
-        if "squad" in body.lower() and "All squads" in body:
-            fail("squadPicker chrome still uses squad")
+            fail("Team remount default option is not All")
+        if "squadsForSeason" not in body:
+            fail("Team remount does not call squadsForSeason")
+    if "function squadPicker" not in common:
+        fail("common.js missing squadPicker")
+    if "function teamSelect" not in common:
+        fail("common.js missing teamSelect alias")
 
     from_url = re.search(r"function squadFromURL\(\) \{([\s\S]*?)\n  \}", common)
     if not from_url:
@@ -256,40 +262,50 @@ def test_visible_squad_copy():
 
 def test_pages_use_shared_team_picker():
     """Every required page remounts Team through the shared year filter."""
-    for js_name in ("history.js", "teams.js", "trades.js", "players.js", "draft.js"):
+    call = r"A\.(?:remountTeamSelect|teamSelect|squadPicker)\([\s\S]*?,\s*(pickedYear|seasonYear|scope === \"cum\" \? null : year)\s*\)"
+    for js_name in ("history.js", "teams.js", "trades.js", "players.js", "draft.js", "savant.js"):
         js = src(js_name)
-        if "A.squadPicker(" not in js and "A.teamSelect(" not in js:
+        if "A.remountTeamSelect(" not in js and "A.teamSelect(" not in js and "A.squadPicker(" not in js:
             fail(f"{js_name} does not mount the shared Team picker")
-        if not re.search(r"A\.squadPicker\([\s\S]*?,\s*(pickedYear|seasonYear|scope === \"cum\" \? null : year)\s*\)", js):
+        if not re.search(call, js):
             fail(f"{js_name} does not pass Season into the Team picker")
-        if "franchisePlayedSeason" not in js:
+        if js_name != "savant.js" and "franchisePlayedSeason" not in js:
             fail(f"{js_name} does not drop a Team that did not play the year")
     savant = src("savant.js")
-    if "squadsForSeason" not in savant and "teamsForSeason" not in savant:
-        fail("savant.js Team list does not use the shared year filter")
+    if "A.boot(" not in savant and "A.boot()" not in savant:
+        fail("savant.js does not boot AFFL before Team remount")
     if "A.squadsForSeason" not in savant:
         fail("savant.js does not call A.squadsForSeason")
+    if "A.remountTeamSelect(" not in savant:
+        fail("savant.js does not remount Team through remountTeamSelect")
+    if "currentSquads()" in savant and "allow.has" in savant:
+        fail("savant.js still intersects CURRENT_2026 with the year filter (year collapses)")
     if re.search(r"currentSquads\(\)\.map\(\s*\(t\) => \[t\.name, t\.name\]\)", savant):
         fail("savant.js still paints unfiltered CURRENT_2026 as Team options")
     for html_name in REQUIRED:
         html = src(html_name)
-        if "common.js?v=31" not in html:
-            fail(f"{html_name} did not bump common.js cache to v=31")
+        m = re.search(r"common\.js\?v=(\d+)", html)
+        if not m or int(m.group(1)) < 32:
+            fail(f"{html_name} did not bump common.js cache past v=31")
 
 
 def test_team_options_filter(common, data):
     """Gabagooners are 2026-only. Drop them from Team when a year is picked."""
     if "function squadsForSeason" not in common:
         fail("common.js missing squadsForSeason")
-    picker = re.search(r"function squadPicker\(el, squad, onPick\) \{([\s\S]*?)\n  \}", common)
+    if "function remountTeamSelect" not in common:
+        fail("common.js missing remountTeamSelect")
+    picker = re.search(r"function remountTeamSelect\(el, squad, onPick, year\) \{([\s\S]*?)\n  \}", common)
     if not picker:
-        fail("cannot parse squadPicker after year filter")
+        fail("cannot parse remountTeamSelect after year filter")
     else:
         body = picker.group(1)
         if "squadsForSeason" not in body and "franchisePlayedSeason" not in body:
-            fail("squadPicker does not re-filter Team options by Season")
+            fail("remountTeamSelect does not re-filter Team options by Season")
+        if "tagName === \"SELECT\"" not in body and 'tagName === "SELECT"' not in body:
+            fail("remountTeamSelect cannot write options onto Savant's SELECT#team-picker")
         if "const list = squads();" in body:
-            fail("squadPicker still lists every franchise regardless of Season")
+            fail("remountTeamSelect still lists every franchise regardless of Season")
     merge = parse_merge(common)
     for y in (2014, 2025):
         names = []
@@ -315,8 +331,10 @@ def test_team_options_filter(common, data):
     painted = paint_team_options()
     if not painted:
         return
+    counts = {}
     for label, key in (("All", "all"), ("2014", "y2014"), ("2025", "y2025")):
         names = painted.get(key) or []
+        counts[key] = len(names)
         gaba = [n for n in names if "Gabagooners" in n]
         if key == "all":
             if not gaba:
@@ -327,6 +345,16 @@ def test_team_options_filter(common, data):
         via_gaba = [n for n in via if "Gabagooners" in n]
         if key != "all" and via_gaba:
             fail(f"squadsForSeason({label}) still includes Gabagooners")
+        savant_names = (painted.get("savant") or {}).get(key) or names
+        if key != "all" and len(savant_names) == 1:
+            fail(f"Savant year={label} Team options collapsed to 1")
+    all_n, n14, n25 = counts.get("all") or 0, counts.get("y2014") or 0, counts.get("y2025") or 0
+    if all_n == n14 == n25:
+        fail(f"Team option counts stayed {all_n}/{n14}/{n25}")
+    if n14 == 1 or n25 == 1:
+        fail(f"year Team options collapsed to 1 (2014={n14} 2025={n25})")
+    if not (n14 > 1 and n25 > 1 and n14 < all_n and n25 < all_n):
+        fail(f"Team option counts All/2014/2025 = {all_n}/{n14}/{n25}; years must be >1 and < All")
     test_pages_use_shared_team_picker()
 
 
