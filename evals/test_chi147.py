@@ -174,8 +174,47 @@ def main() -> int:
     if 2026 in {int(y) for y in (data.get("seasons") or {})}:
         fail("AFFL 2026 season invented in data.json")
     bust = re.search(r"history\.js\?v=(\d+)", hist_html)
-    if not bust or int(bust.group(1)) < 22:
-        fail("history.js cache not bumped to v>=22")
+    if not bust or int(bust.group(1)) < 23:
+        fail("history.js cache not bumped to v=23")
+
+    # --- CHI-147 Age All is pick a season, not 2025 live ---
+    fn = re.search(r"function ageScatterSeason\(\) \{([\s\S]*?)\n  \}", hist_js)
+    if not fn:
+        fail("ageScatterSeason missing")
+    else:
+        body = fn.group(1)
+        if "getFullYear" in body:
+            fail("ageScatterSeason All path still falls through to getFullYear")
+        if re.search(r"return 2025|y > 2025", body):
+            fail("ageScatterSeason still clamps All to 2025")
+        if "return null" not in body:
+            fail("ageScatterSeason does not return null when All")
+    if "live roster age" in hist_js:
+        fail("history.js still uses live roster age")
+    if "live roster age" in hist_html:
+        fail("history.html still uses live roster age")
+    sub_m = re.search(r'id="age-scatter-sub">([^<]*)</div>', hist_html)
+    if not sub_m or sub_m.group(1).strip() != "All · pick a season":
+        fail(f"HTML default #age-scatter-sub is {sub_m.group(1) if sub_m else None} — want All · pick a season")
+    if '"All · pick a season"' not in hist_js and "'All · pick a season'" not in hist_js:
+        fail("renderAgeScatter All subtitle is not All · pick a season")
+    ra = re.search(r"function renderAgeScatter\(\) \{([\s\S]*?)\n  function ", hist_js)
+    if not ra:
+        fail("renderAgeScatter missing")
+    else:
+        body = ra.group(1)
+        pick = body.find("All · pick a season")
+        rows = body.find("seasonAgeRows")
+        if pick < 0:
+            fail("renderAgeScatter missing All · pick a season")
+        if rows >= 0 and pick > rows:
+            fail("renderAgeScatter calls seasonAgeRows before All early-return")
+        if "live roster age" in body:
+            fail("renderAgeScatter still paints live roster age")
+        if "Youngest team" not in hist_js or "Oldest team" not in hist_js:
+            fail("Youngest team / Oldest team chips missing")
+        if "new Date(+scatterYear, 11, 31)" not in body and "new Date(+scatterYear, 11, 31)" not in hist_js:
+            fail("year path does not bind asOf to Dec 31 of that season")
 
     if fails:
         print("FAIL")

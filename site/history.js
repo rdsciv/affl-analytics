@@ -1182,12 +1182,7 @@
 
   function ageScatterSeason() {
     if (pickedYear != null) return pickedYear;
-    const y = (ageAsOf && typeof ageAsOf.getFullYear === "function")
-      ? ageAsOf.getFullYear()
-      : latestFinished();
-    if (y < 2014) return 2014;
-    if (y > 2025) return 2025;
-    return y;
+    return null;
   }
 
   function seasonAgeRows(year, asOf) {
@@ -1280,23 +1275,32 @@
   };
 
   function renderAgeScatter() {
-    bindAgeAsOf();
     const chips = $("age-squads");
     const sub = $("age-scatter-sub");
     const canvas = $("age-scatter-chart");
     const empty = $("age-scatter-empty");
     const wrap = $("age-scatter-wrap");
+    const asof = document.querySelector(".age-asof");
     if (!chips || !canvas) return;
+    if (asof) { asof.hidden = true; asof.style.display = "none"; }
 
     const scatterYear = ageScatterSeason();
-    const rows = seasonAgeRows(scatterYear, ageAsOf);
-    const same = isoDay(ageAsOf) === isoDay(A.today());
+    if (scatterYear == null) {
+      if (sub) sub.textContent = "All · pick a season";
+      chips.innerHTML = "";
+      if (empty) {
+        empty.hidden = false;
+        empty.textContent = "All · pick a season";
+      }
+      if (wrap) wrap.hidden = true;
+      if (ageChart) { ageChart.destroy(); ageChart = null; }
+      return;
+    }
+
+    const asOf = new Date(+scatterYear, 11, 31);
+    const rows = seasonAgeRows(scatterYear, asOf);
     if (sub) {
-      sub.textContent = rows.length
-        ? (scatterYear + " · live roster age vs Power Win % · "
-          + (same ? "as of today · updates at midnight" : "as of " + isoDay(ageAsOf))
-          + " · current franchise names")
-        : (scatterYear + " · roster age unavailable");
+      sub.textContent = scatterYear + " · roster age vs Power Win %";
     }
 
     if (!rows.length) {
