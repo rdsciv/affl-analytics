@@ -408,8 +408,21 @@
     renderAll();
   }
 
+  function yearsForFranchise() {
+    if (!state.franchise) return (META.seasons || []).slice();
+    const t = currentSquads().find((x) => x.name === state.franchise);
+    if (!t || !A.squadYears) return (META.seasons || []).slice();
+    return A.squadYears(t.owner) || [];
+  }
+
   function renderControls() {
-    const seasons = [[ALL, "All"]].concat(META.seasons.slice().reverse().map((y) => [y, String(y)]));
+    let ylist = yearsForFranchise();
+    if (state.franchise && !ylist.length) {
+      state.season = ALL;
+    } else if (!isAll() && ylist.length && ylist.indexOf(state.season) < 0 && ylist.indexOf(+state.season) < 0) {
+      state.season = ALL;
+    }
+    const seasons = [[ALL, "All"]].concat(ylist.slice().sort((a, b) => b - a).map((y) => [y, String(y)]));
     fillSelect($("season-picker"), seasons, state.season, async (v) => {
       state.season = v === ALL || String(v).toLowerCase() === "all" ? ALL : +v;
       stampScope();
@@ -704,8 +717,8 @@
     $("plot-count").textContent = `${rows.length} players`;
     if (isAll()) {
       $("plot-sub").textContent = state.view === "affl"
-        ? "Cumulative · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
-        : "Cumulative · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
+        ? "All · career 2014–2025 · only players an AFFL manager actually started · non-PPR"
+        : "All · career 2014–2025 · every NFL skill player · AFFL scoring, non-PPR";
     } else {
       $("plot-sub").textContent = state.view === "affl"
         ? `${state.season} · only players an AFFL manager actually started · non-PPR`
@@ -768,9 +781,13 @@
     }
     const teamQ = qs.get("team") || qs.get("squad") || "";
     if (teamQ) {
-      const names = currentSquads().map((t) => t.name);
-      const hit = names.find((n) => n === teamQ || n.toLowerCase() === teamQ.toLowerCase());
-      state.franchise = hit || currentFr(teamQ) || "";
+      const byOwner = currentSquads().find((x) => x.owner === teamQ);
+      if (byOwner) state.franchise = byOwner.name;
+      else {
+        const names = currentSquads().map((x) => x.name);
+        const hit = names.find((n) => n === teamQ || n.toLowerCase() === teamQ.toLowerCase());
+        state.franchise = hit || currentFr(teamQ) || "";
+      }
     }
     stampScope();
     await loadScope();

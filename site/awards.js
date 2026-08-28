@@ -333,6 +333,7 @@
 
   let year = A.years()[0];
   let scope = "cum";
+  let squad = A.squadFromURL();
   let pos = "ALL";
   let ALL = null;
   let YD = null;
@@ -357,7 +358,9 @@
 
   function board(kind) {
     const raw = scope === "cum" ? cumRows(kind, ALL || []) : rowsFor(kind, YD, year);
-    return sortRows(kind, applyPos(raw, pos));
+    const rows = sortRows(kind, applyPos(raw, pos));
+    if (!squad) return rows;
+    return rows.filter((r) => r.owner && A.canon(r.owner) === A.canon(squad));
   }
 
   function render() {
@@ -423,11 +426,10 @@
 
   function setScopeURL(nextScope, nextYear) {
     const u = new URL(location.href);
+    u.searchParams.delete("scope");
     if (nextScope === "cum") {
-      u.searchParams.set("scope", "cum");
       u.searchParams.delete("year");
     } else {
-      u.searchParams.delete("scope");
       if (nextYear) u.searchParams.set("year", String(nextYear));
     }
     history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
@@ -436,23 +438,27 @@
   function renderYearChips() {
     const el = $("year-picker");
     if (!el) return;
-    const ys = A.years().slice().sort((a, b) => a - b);
-    const chips = [`<button type="button" class="season-chip${scope === "cum" ? " on" : ""}" data-y="cum">Cumulative</button>`]
-      .concat(ys.map((y) => `<button type="button" class="season-chip${scope !== "cum" && y === year ? " on" : ""}" data-y="${y}">${y}</button>`));
-    el.innerHTML = chips.join("");
-    el.querySelectorAll(".season-chip").forEach((b) => {
-      b.addEventListener("click", async () => {
-        const raw = b.dataset.y;
-        if (raw === "cum" || raw === "") {
-          scope = "cum";
-          setScopeURL("cum");
-        } else {
-          scope = "season";
-          year = +raw;
-          setScopeURL("season", year);
-        }
-        await pick(year);
-      });
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    A.seasonPicker(el, scope === "cum" ? null : year, async (raw) => {
+      if (raw == null) {
+        scope = "cum";
+        setScopeURL("cum");
+      } else {
+        scope = "season";
+        year = +raw;
+        setScopeURL("season", year);
+      }
+      await pick(year);
+    }, ylist);
+    A.squadPicker($("squad-picker"), squad, (s) => {
+      squad = s || "";
+      A.stampNav(squad);
+      if (squad && scope === "season") {
+        const next = A.clampYear(year, squad);
+        if (next == null) { scope = "cum"; setScopeURL("cum"); }
+        else { year = next; setScopeURL("season", year); }
+      }
+      pick(year);
     });
   }
 

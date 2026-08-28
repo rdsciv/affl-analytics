@@ -159,13 +159,13 @@
   }
 
   function renderPicker() {
-    const chips = [`<button class="season-chip${curYear == null ? ' on' : ''}" data-y="cum">Cumulative</button>`]
-      .concat(years.map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`));
+    const chips = [`<button class="season-chip${curYear == null ? ' on' : ''}" data-y="all">All</button>`]
+      .concat(years.slice().sort((a, b) => b - a).map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`));
     $('#season-picker').innerHTML = chips.join('');
     document.querySelectorAll('.season-chip').forEach((b) =>
       b.addEventListener('click', () => {
         const raw = b.dataset.y;
-        curYear = (raw === '' || raw === 'cum' || raw == null) ? null : +raw;
+        curYear = (raw === '' || raw === 'cum' || raw === 'all' || raw == null) ? null : +raw;
         if (curYear != null && !years.includes(curYear)) curYear = null;
         history.replaceState(null, '', curYear == null ? 'index.html' : ('?year=' + curYear));
         spotlightId = null;

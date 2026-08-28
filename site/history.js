@@ -628,6 +628,7 @@
   const qsYear = new URLSearchParams(location.search).get("year");
   let pickedYear = parseSeasonParam(qsYear);
   let seasonYear = A.seasonScope(pickedYear).year;
+  let squad = A.squadFromURL();
   let standKey = "rank";
   let standDir = 1;
 
@@ -697,7 +698,8 @@
       });
       return Object.values(by).sort((a, b) => (b.allW - a.allW) || (a.allL - b.allL)).map((r, i) => { r.rank = i + 1; return r; });
     }
-    const rows = (pickedYear == null ? careerStandRows() : seasonStandRows(seasonYear)).slice().sort((a, b) => {
+    const rawRows = (pickedYear == null ? careerStandRows() : seasonStandRows(seasonYear));
+    const rows = rawRows.filter((r) => !squad || A.canon(r.owner) === A.canon(squad)).slice().sort((a, b) => {
       const fn = STAND_KEYS[standKey];
       const av = fn ? fn(a) : 0;
       const bv = fn ? fn(b) : 0;
@@ -1943,6 +1945,7 @@
     pickedYear = y;
     seasonYear = A.seasonScope(y).year;
     stampSeasonYear(y);
+    bindYearSelect();
     renderSeasonStandings();
     renderTxnAndWeeks();
     renderWaiverReport();
@@ -1955,10 +1958,28 @@
 
   function bindYearSelect() {
     const el = $("year-picker");
-    if (!el || el.tagName !== "SELECT") return;
-    el.value = pickedYear == null ? "all" : String(pickedYear);
-    el.addEventListener("change", () => {
-      applySeasonYear(parseSeasonParam(el.value));
+    if (!el) return;
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    A.seasonPicker(el, pickedYear, applySeasonYear, ylist);
+    A.squadPicker($("squad-picker"), squad, (s) => {
+      squad = s || "";
+      A.stampNav(squad);
+      if (squad && pickedYear != null) {
+        const ys = A.squadYears(squad) || [];
+        if (!ys.length) applySeasonYear(null);
+        else if (ys.indexOf(pickedYear) < 0) applySeasonYear(ys[0]);
+        else applySeasonYear(pickedYear);
+      } else {
+        bindYearSelect();
+        renderSeasonStandings();
+        renderTxnAndWeeks();
+        renderWaiverReport();
+        renderTxLog();
+        renderWaiverValue();
+        renderCustodyPar();
+        renderAgeScatter();
+        renderRace();
+      }
     });
   }
   bindYearSelect();

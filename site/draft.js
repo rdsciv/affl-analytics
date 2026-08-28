@@ -79,8 +79,9 @@
   A.chartDefaults(Chart);
   const C = A.C, fmt = A.fmt;
 
-  let year = A.years()[0];
-  let scope = A.scopeFromURL();
+  let year = A.seasonFromURL();
+  if (year == null) year = A.years()[0];
+  let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
   let YD = null, T = {}, chart = null, dnaChart = null, labChart = null, ALL = null;
   let scatterChart = null, contChart = null;
@@ -2327,21 +2328,28 @@
     year = y;
     if (squad) year = A.clampYear(year, squad);
     S.limit = 60;
-    A.scopePicker(document.getElementById('scope-picker'), scope, (s) => { scope = s; pick(year); });
-    A.showYearRow(scope === 'season');
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    A.showYearRow(true);
     A.squadPicker(document.getElementById('squad-picker'), squad, (s) => {
-      if (s && scope !== "season") { A.goTeam(s, year, { scope }); return; }
       squad = s || "";
       A.stampNav(squad);
+      if (squad && scope === "season") {
+        const next = A.clampYear(year, squad);
+        if (next == null) { scope = "cum"; year = A.years()[0]; }
+        else year = next;
+      }
       pick(year);
     });
     A.stampNav(squad);
-    A.yearPicker($('#year-picker'), year, pick);
+    A.seasonPicker($('#year-picker'), scope === "cum" ? null : year, (y) => {
+      if (y == null) { scope = "cum"; pick(A.years()[0]); }
+      else { scope = "season"; pick(y); }
+    }, ylist);
     if (scope === 'cum') {
       ALL = ALL || await A.loadAllYears();
       YD = mergeDraft(ALL);
       T = A.ownerTeams();
-      $('#page-sub').textContent = `Cumulative · ${YD.draft.board.length} picks`;
+      $('#page-sub').textContent = `All · ${YD.draft.board.length} picks`;
     } else {
       YD = await A.loadYear(year);
       T = A.teams(year);
@@ -3052,7 +3060,7 @@
     const rows = guideFiltered();
     const nAll = guideViewPicks().length;
     if (sub) {
-      sub.textContent = (scope === "cum" ? "Cumulative" : String(year))
+      sub.textContent = (scope === "cum" ? "All" : String(year))
         + " · AFFL class grid · " + nAll + " draftees"
         + (S.pos && S.pos !== "ALL" ? " · " + S.pos : "")
         + " · Board position chips filter this grid";
@@ -3248,7 +3256,7 @@
 
   A.onNextMidnight(() => { asOf = A.today(); const el = document.getElementById("age-asof"); if (el) el.value = isoDay(asOf); renderAge(); renderBoard(); });
   const qs = new URLSearchParams(location.search);
-  await pick(+qs.get('year') || A.years()[0]);
+  await pick(A.seasonFromURL() || A.years()[0]);
   bindGuide();
   const bootPid = qs.get("pid");
   if (bootPid) guideOpen(bootPid);

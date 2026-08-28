@@ -38,21 +38,11 @@
 
   <div class="picker-row" id="year-row">
     <div class="picker-label">Season</div>
-    <select class="team-select" id="year-picker" aria-label="Season">
-      <option value="all">All</option>
-      <option value="2014">2014</option>
-      <option value="2015">2015</option>
-      <option value="2016">2016</option>
-      <option value="2017">2017</option>
-      <option value="2018">2018</option>
-      <option value="2019">2019</option>
-      <option value="2020">2020</option>
-      <option value="2021">2021</option>
-      <option value="2022">2022</option>
-      <option value="2023">2023</option>
-      <option value="2024">2024</option>
-      <option value="2025">2025</option>
-    </select>
+    <div class="week-picker" id="year-picker"></div>
+  </div>
+  <div class="picker-row">
+    <div class="picker-label">Team</div>
+    <div class="week-picker" id="squad-picker"></div>
   </div>
 
   <section class="card">
@@ -554,8 +544,8 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=28"></script>
-<script src="history.js?v=19"></script>
+<script src="common.js?v=29"></script>
+<script src="history.js?v=20"></script>
 <script src="score-trend.js?v=1"></script>
 </body>
 </html>

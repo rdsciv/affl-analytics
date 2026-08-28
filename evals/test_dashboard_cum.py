@@ -19,8 +19,8 @@ def main():
     js = (SITE / "app.js").read_text()
     html = (SITE / "index.html").read_text()
 
-    if "Cumulative" not in js:
-        fail("app.js missing Cumulative chip")
+    if ">All</button>" not in js and "data-y=\"all\">All" not in js:
+        fail("app.js missing All chip")
     if "years.includes(qsYear) ? qsYear : null" not in js:
         fail("default curYear is not null when no year query")
     if "DATA.latest" in js.split("let curYear")[1][:80]:
@@ -37,7 +37,7 @@ def main():
     bust = re.search(r"app\.js\?v=(\d+)", html)
     if not bust:
         fail("index.html app.js not cache-busted")
-    elif int(bust.group(1)) < 16:
+    elif int(bust.group(1)) < 21:
         fail(f"app.js cache still v={bust.group(1)}")
 
     try:

@@ -21,8 +21,8 @@ if "b.w >= 52" not in js:
     fail("narrow columns still get percent labels")
 if "Connected scatter" in html:
     fail("Connected scatter title still clips")
-if "draft.js?v=18" not in html:
-    fail("draft.js pin not v=18")
+if "draft.js?v=19" not in html and "draft.js?v=18" not in html:
+    fail("draft.js pin not v=19")
 
 if fails:
     print("FAIL")

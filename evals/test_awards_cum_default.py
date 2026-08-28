@@ -17,12 +17,12 @@ def main() -> int:
     html = (SITE / "awards.html").read_text()
     js = (SITE / "awards.js").read_text()
 
-    cum = re.search(r'<button[^>]*data-y="cum"[^>]*>', html)
+    cum = re.search(r'<button[^>]*data-y="all"[^>]*>', html) or re.search(r'<button[^>]*data-y="cum"[^>]*>', html)
     y25 = re.search(r'<button[^>]*data-y="2025"[^>]*>', html)
     if not cum:
-        fail("awards.html missing Cumulative chip")
+        fail("awards.html missing All chip")
     elif not re.search(r'class="[^"]*\bon\b', cum.group(0)):
-        fail("awards.html Cumulative chip is not on by default")
+        fail("awards.html All chip is not on by default")
     if y25 and re.search(r'class="[^"]*\bon\b', y25.group(0)):
         fail("awards.html 2025 chip is still on by default")
 
@@ -34,7 +34,7 @@ def main() -> int:
     bust = re.search(r"awards\.js\?v=(\d+)", html)
     if not bust:
         fail("awards.html awards.js not cache-busted")
-    elif int(bust.group(1)) < 5:
+    elif int(bust.group(1)) < 6:
         fail(f"awards.js cache still v={bust.group(1)}")
 
     if "let scope = A.scopeFromURL()" in js:
@@ -62,7 +62,7 @@ def main() -> int:
         for item in fails:
             print("-", item)
         return 1
-    print("PASS CHI-137 awards Cumulative default")
+    print("PASS CHI-137/142 awards All default")
     return 0
 
 

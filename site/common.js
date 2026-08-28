@@ -183,6 +183,50 @@ window.AFFL = (function () {
       b.addEventListener('click', () => onPick(+b.dataset.y)));
   }
 
+  /* CHI-142 — Season is All | 2025 … 2014. Only one selected. Bare URL is All. */
+  function seasonFromURL() {
+    const q = new URLSearchParams(location.search).get("year");
+    if (q == null || q === "" || String(q).toLowerCase() === "all" || String(q).toLowerCase() === "cum") return null;
+    const n = Number(q);
+    if (!Number.isFinite(n) || n < 2014 || n > 2025) return null;
+    return n;
+  }
+
+  function stampSeason(year) {
+    try {
+      const u = new URL(location.href);
+      u.searchParams.delete("scope");
+      if (year == null || year === "" || year === "all") u.searchParams.delete("year");
+      else u.searchParams.set("year", String(year));
+      history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
+    } catch (e) { /* ignore */ }
+  }
+
+  function seasonPicker(el, year, onPick, yearList) {
+    if (!el) return;
+    const raw = yearList == null ? years() : yearList;
+    const list = (raw || []).filter((y) => {
+      const n = Number(y);
+      return Number.isFinite(n) && n >= 2014 && n <= 2025;
+    }).slice().sort((a, b) => b - a);
+    const allOn = year == null || year === "" || year === "all";
+    const parts = [`<button type="button" class="season-chip${allOn ? " on" : ""}" data-y="all">All</button>`];
+    list.forEach((y) => {
+      const on = !allOn && Number(y) === Number(year);
+      parts.push(`<button type="button" class="season-chip${on ? " on" : ""}" data-y="${y}">${y}</button>`);
+    });
+    el.innerHTML = parts.join("");
+    el.setAttribute("aria-label", "Season");
+    el.querySelectorAll(".season-chip").forEach((b) => {
+      b.addEventListener("click", () => {
+        const rawY = b.dataset.y;
+        const next = (rawY === "all" || rawY === "" || rawY === "cum") ? null : +rawY;
+        stampSeason(next);
+        onPick(next);
+      });
+    });
+  }
+
   function chartDefaults(Chart) {
     Chart.defaults.color = C.mut;
     Chart.defaults.font.family = '"Avenir Next","Segoe UI",-apple-system,sans-serif';
@@ -257,12 +301,13 @@ window.AFFL = (function () {
   }
 
   function squadFromURL() {
-    const q = new URLSearchParams(location.search).get("squad");
+    const qs = new URLSearchParams(location.search);
+    const q = qs.get("team") || qs.get("squad") || "";
     if (q) {
       try { localStorage.setItem("affl-squad", q); } catch (e) {}
       return q;
     }
-    try { return localStorage.getItem("affl-squad") || ""; } catch (e) { return ""; }
+    return "";
   }
 
   function rememberSquad(id) {
@@ -296,15 +341,20 @@ window.AFFL = (function () {
   function squadPicker(el, squad, onPick) {
     if (!el) return;
     const list = squads();
-    el.innerHTML = `<select class="team-select squad-select" aria-label="Squad">
-      <option value="">All squads</option>
-      ${list.map((f) => `<option value="${f.owner}"${f.owner === squad ? " selected" : ""}>${f.currentName} · ${f.ownerName}${f.active ? "" : " (former)"}</option>`).join("")}
+    el.innerHTML = `<select class="team-select" aria-label="Team">
+      <option value="">All</option>
+      ${list.map((f) => `<option value="${f.owner}"${f.owner === squad ? " selected" : ""}>${f.currentName}</option>`).join("")}
     </select>`;
     el.querySelector("select").addEventListener("change", (e) => {
       rememberSquad(e.target.value);
       const u = new URL(location.href);
-      if (e.target.value) u.searchParams.set("squad", e.target.value);
-      else u.searchParams.delete("squad");
+      if (e.target.value) {
+        u.searchParams.set("squad", e.target.value);
+        u.searchParams.set("team", e.target.value);
+      } else {
+        u.searchParams.delete("squad");
+        u.searchParams.delete("team");
+      }
       history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
       onPick(e.target.value);
     });
@@ -508,7 +558,8 @@ window.AFFL = (function () {
     if (document.getElementById("brand-strip")) return;
     const rail = ensureHeaderRail();
     if (!rail) return;
-    const active = new URLSearchParams(location.search).get("squad") || "";
+    const qs = new URLSearchParams(location.search);
+    const active = qs.get("team") || qs.get("squad") || "";
     const strip = document.createElement("nav");
     strip.id = "brand-strip";
     strip.className = "brand-strip";
@@ -772,13 +823,13 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
-           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
+           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,
            fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
            playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
-           loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, scopePicker, scopeFromURL, showYearRow,
+           loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, seasonPicker, seasonFromURL, stampSeason, scopePicker, scopeFromURL, showYearRow,
            chartDefaults, dateStr, notice, teamHref, loadJSON,
            get data() { return DATA; } };
 })();

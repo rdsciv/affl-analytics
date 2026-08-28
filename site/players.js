@@ -139,8 +139,9 @@
     return scored.slice().sort((a, b) => b.w[1] - a.w[1])[0];
   }
 
-  let year = A.years()[0];
-  let scope = "cum";
+  let year = A.seasonFromURL();
+  if (year == null) year = A.years()[0];
+  let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
   let YD = null, T = {}, cur = null, chart = null, ngsChart = null, careerChart = null, careerList = null;
   const YEAR_META = {};
@@ -2341,6 +2342,17 @@
     const rows = src.filter((p) => {
       if (PP.pos !== "ALL" && p.pos !== PP.pos) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
+      if (squad) {
+        const want = A.canon(squad);
+        const hit = (tid, y) => {
+          if (tid == null) return false;
+          const owner = A.ownerId(y || year, tid) || ((A.teams(y || year)[tid] || {}).owner);
+          return owner && A.canon(owner) === want;
+        };
+        if (scope === "cum" && p.tids) {
+          if (!Object.entries(p.tids).some(([y, tid]) => hit(tid, +y))) return false;
+        } else if (!hit(p.mainTeam, year)) return false;
+      }
       return true;
     }).map((p) => {
       const box = indexCareerBox(p.pid);
@@ -2361,7 +2373,7 @@
   function renderGrid() {
     const rows = filtered();
     const sortDef = DB_SORTS.find((s) => s.key === PP.sort) || DB_SORTS[0];
-    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : PP.pos) + " · " + sortDef.short + " · all seasons";
+    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : PP.pos) + " · " + sortDef.short + " · " + (scope === "cum" ? "all seasons" : String(year));
     $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => {
       const v = dbMetric(p, PP.sort);
       const shown = v == null ? "unavailable" : fmt(v, sortDef.digits);
@@ -3038,12 +3050,31 @@
     renderCompare();
   }
 
+  function paintChrome() {
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    A.seasonPicker(document.getElementById("year-picker"), scope === "cum" ? null : year, async (y) => {
+      if (y == null) scope = "cum";
+      else { scope = "season"; year = y; try { YD = await A.loadYear(year); T = A.teams(year); } catch (e) {} }
+      renderGrid();
+    }, ylist);
+    A.squadPicker(document.getElementById("squad-picker"), squad, (s) => {
+      squad = s || "";
+      A.stampNav(squad);
+      if (squad && scope === "season") {
+        const next = A.clampYear(year, squad);
+        if (next == null) scope = "cum";
+        else year = next;
+      }
+      paintChrome();
+      renderGrid();
+    });
+  }
+
   async function pick(pid, ly) {
-    year = A.years()[0];
-    scope = "cum";
     cur = null;
     PP.limit = 24;
     A.stampNav(squad);
+    paintChrome();
     logYear = ly == null ? "all" : ly;
     // Force clean landing state immediately.
     setPageMode("landing");

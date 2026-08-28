@@ -6,8 +6,9 @@
   A.chartDefaults(Chart);
   const C = A.C, fmt = A.fmt;
 
-  let year = A.years()[0];
-  let scope = A.scopeFromURL();
+  let year = A.seasonFromURL();
+  if (year == null) year = A.years()[0];
+  let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
   let YD = null, T = {}, chart = null, ALL = null, ACT = null;
   const S = { q: '', type: 'ALL', limit: 40 };
@@ -36,6 +37,12 @@
     return A.canon(tid);
   }
   const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
+  function matchesSquad(tid, y) {
+    if (!squad) return true;
+    const want = A.canon(squad);
+    const oid = ownerKey(y || year, tid) || A.canon(tid);
+    return oid && A.canon(oid) === want;
+  }
 
   async function loadActivity() {
     if (ACT) return ACT;
@@ -188,7 +195,7 @@
     const rows = Object.entries(managers).map(([tid, v]) => ({ tid, ...v }))
       .filter((r) => {
         const n = tName(r.tid);
-        return n && n !== "unavailable";
+        return n && n !== "unavailable" && matchesSquad(r.tid, scope === "cum" ? null : year);
       })
       .sort((a, b) => (
         ((b.waiverSubmitted || 0) + (b.waiverWon || 0) + (b.faAdds || 0) + (b.tradesProposed || 0) + (b.tradesAccepted || 0)) -
@@ -282,16 +289,18 @@
   }
 
   function renderTrades() {
+    const tradeRows = (YD.trades || []).filter((tr) =>
+      !squad || (tr.sides || []).some((s) => matchesSquad(s.tid, tr.year || year)));
     $('#trade-sub').textContent = scope === 'cum'
-      ? `${YD.trades.length} completed trades across every season`
-      : `${YD.trades.length} completed trade${YD.trades.length === 1 ? '' : 's'} in ${year}`;
-    if (!YD.trades.length) {
+      ? `${tradeRows.length} completed trades across every season`
+      : `${tradeRows.length} completed trade${tradeRows.length === 1 ? '' : 's'} in ${year}`;
+    if (!tradeRows.length) {
       $('#trade-list').innerHTML = A.notice(YD.hasTx
         ? `No completed trades in ${year}.`
         : `ESPN does not retain transaction history for ${year}. Available from 2018 on.`);
       return;
     }
-    $('#trade-list').innerHTML = YD.trades.map((tr) => `
+    $('#trade-list').innerHTML = tradeRows.map((tr) => `
       <div class="trade">
         <div class="trade-head"><span class="trade-wk">${tr.year ? tr.year + " · " : ""}Week ${tr.wk}</span><span class="trade-date">${A.dateStr(tr.date)}</span></div>
         <div class="trade-body">
@@ -309,6 +318,7 @@
     const q = S.q.toLowerCase();
     const rows = (YD.moves || []).filter((m) => {
       if (S.type !== 'ALL' && m.type !== S.type) return false;
+      if (!matchesSquad(m.tid, m.year || year)) return false;
       if (!q) return true;
       const names = [...m.add, ...m.drop].map((x) => x.name.toLowerCase()).join(' ');
       return names.includes(q) || tName(m.tid).toLowerCase().includes(q);
@@ -489,19 +499,28 @@
   async function pick(y) {
     year = y;
     S.limit = 40;
-    A.scopePicker(document.getElementById('scope-picker'), scope, (s) => { scope = s; pick(year); });
-    A.showYearRow(scope === 'season');
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    A.showYearRow(true);
     A.squadPicker(document.getElementById('squad-picker'), squad, (s) => {
-      if (s) { A.goTeam(s, year, { scope }); return; }
-      squad = ''; A.stampNav(squad); pick(year);
+      squad = s || '';
+      A.stampNav(squad);
+      if (squad && scope === "season") {
+        const next = A.clampYear(year, squad);
+        if (next == null) { scope = "cum"; year = A.years()[0]; }
+        else year = next;
+      }
+      pick(year);
     });
     A.stampNav(squad);
-    A.yearPicker($('#year-picker'), year, pick, (i) => i.hasTx ? '' : '*');
+    A.seasonPicker($('#year-picker'), scope === "cum" ? null : year, (y) => {
+      if (y == null) { scope = "cum"; pick(A.years()[0]); }
+      else { scope = "season"; pick(y); }
+    }, ylist);
     if (scope === 'cum') {
       ALL = ALL || await A.loadAllYears();
       YD = mergeTx(ALL);
       T = A.ownerTeams();
-      $('#page-sub').textContent = `Cumulative · ${YD.trades.length} trades · ${fmt((YD.moves || []).length)} wire moves`;
+      $('#page-sub').textContent = `All · ${YD.trades.length} trades · ${fmt((YD.moves || []).length)} wire moves`;
     } else {
       YD = await A.loadYear(year);
       T = A.teams(year);
@@ -515,5 +534,5 @@
   }
 
   const qs = new URLSearchParams(location.search);
-  await pick(+qs.get('year') || A.years()[0]);
+  await pick(A.seasonFromURL() || A.years()[0]);
 })();

@@ -218,10 +218,10 @@ def main() -> int:
 
     if "chi114.js" not in players_html or "chi114.js" not in teams_html:
         fail("html files must load chi114.js")
-    if "players.js?v=37" not in players_html and "players.js?v=36" not in players_html:
+    if "players.js?v=39" not in players_html and "players.js?v=38" not in players_html and "players.js?v=37" not in players_html and "players.js?v=36" not in players_html:
         fail("players.js cache bust not bumped")
-    if "teams.js?v=21" not in teams_html and "teams.js?v=16" not in teams_html:
-        fail("teams.js cache bust not bumped to v=21")
+    if "teams.js?v=22" not in teams_html and "teams.js?v=21" not in teams_html and "teams.js?v=16" not in teams_html:
+        fail("teams.js cache bust not bumped to v=22")
     if "chi114.js?v=5" not in players_html or "chi114.js?v=5" not in teams_html:
         fail("chi114.js cache bust not bumped to v=5")
 

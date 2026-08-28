@@ -8,7 +8,6 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=39&scorers=1&sr=1&tcomp=1&act=1&chi114=1">
 <link rel="stylesheet" href="logo.css?v=2">
-<style>#year-row[hidden]{display:none!important}</style>
 </head>
 <body>
 <div class="frame">
@@ -37,19 +36,14 @@
     </nav>
   </header>
 
-  <div class="picker-row">
-    <div class="picker-label">View</div>
-    <div class="week-picker" id="scope-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="picker-label">Squad</div>
-    <div class="week-picker" id="squad-picker"></div>
-  </div>
-
-  <div class="picker-row" id="year-row" hidden>
+  <div class="picker-row" id="year-row">
     <div class="picker-label">Season</div>
     <div class="week-picker" id="year-picker"></div>
+  </div>
+
+  <div class="picker-row">
+    <div class="picker-label">Team</div>
+    <div class="week-picker" id="squad-picker"></div>
   </div>
 
   <section id="franchise-grid" class="fr-grid"></section>
@@ -102,9 +96,9 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=28"></script>
+<script src="common.js?v=29"></script>
 <script src="roto-math.js?v=2"></script>
 <script src="chi114.js?v=5"></script>
-<script src="teams.js?v=21&scorers=1&sr=1&tcomp=1&ngstree=1&ngscheme=1&act=1&chi114=1"></script>
+<script src="teams.js?v=22&scorers=1&sr=1&tcomp=1&ngstree=1&ngscheme=1&act=1&chi114=1"></script>
 </body>
 </html>

@@ -132,21 +132,14 @@ def test_year_row(teams_js):
         fail("cannot parse render()")
         return
     body = render.group(1)
-    if "A.years()" in body:
-        fail("render() still uses A.years() as a year-chip fallback")
     if "A.squadYears(squad)" not in body:
         fail("render() year list is not A.squadYears(squad) when a squad is set")
-    if "ylist.length" not in body and "ylist.length === 0" not in body and "ylist.length > 0" not in body:
-        fail("render() does not hide year chips when ylist is empty")
+    if "seasonPicker" not in body:
+        fail("render() does not use seasonPicker (CHI-142 All lives in the season control)")
     if "showYearRow" not in body:
         fail("render() does not call showYearRow")
-    if "yearPicker" in body and "showChips" not in body and "ylist.length" not in body:
-        fail("yearPicker may run with an empty list")
-    # all-squads must not paint league year row
-    if re.search(r"ylist = squad \? A\.squadYears\(squad\) : A\.years\(\)", body):
-        fail("all-squads grid still falls back to A.years() for chips")
-    if ": []" not in body and "squad ? A.squadYears(squad)" not in body:
-        fail("all-squads year list is not empty")
+    if re.search(r"ylist = squad \? A\.squadYears\(squad\) : \[\]", body):
+        fail("league All view has no year chips; CHI-142 needs All | 2025…2014")
 
 
 def test_links(common, teams_html):
@@ -170,10 +163,10 @@ def test_links(common, teams_html):
         if 'u.searchParams.set("year"' in body and 'scope === "season"' not in body:
             fail("goTeam still stamps year without an explicit Season jump")
 
-    if 'src="common.js?v=28"' not in teams_html:
-        fail("teams.html common.js pin is not v=28")
-    if not re.search(r'src="teams\.js\?v=20&', teams_html):
-        fail("teams.html teams.js pin is not v=20")
+    if 'src="common.js?v=29"' not in teams_html:
+        fail("teams.html common.js pin is not v=29")
+    if not re.search(r'src="teams\.js\?v=22&', teams_html):
+        fail("teams.html teams.js pin is not v=22")
 
 
 def test_opening_defaults(data, common):

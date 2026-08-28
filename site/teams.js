@@ -36,14 +36,17 @@
 
   const qs = new URLSearchParams(location.search);
   function teamScopeFromURL(owner) {
-    if (new URLSearchParams(location.search).get("scope") !== "season") return "cum";
+    if (new URLSearchParams(location.search).get("scope") !== "season"
+        && !new URLSearchParams(location.search).get("year")) return "cum";
     if (owner && !(A.squadYears(owner) || []).length) return "cum";
     return "season";
   }
   let squad = A.squadFromURL();
   let scope = teamScopeFromURL(squad);
-  let year = +qs.get("year") || A.years()[0];
-  year = A.clampYear(year, squad);
+  let year = A.seasonFromURL();
+  if (year == null) year = A.years()[0];
+  if (scope === "season" && squad) year = A.clampYear(year, squad);
+  if (year == null) scope = "cum";
 
   let radarChart = null;
   let spendChart = null;
@@ -2950,33 +2953,28 @@
   }
 
   async function render() {
-    A.scopePicker($("scope-picker"), scope, (s) => {
-      if (s === "season" && squad && !(A.squadYears(squad) || []).length) scope = "cum";
-      else scope = s;
-      if (scope === "season" && squad) year = A.clampYear(year, squad);
-      render();
-    });
     A.squadPicker($("squad-picker"), squad, (s) => {
       squad = s;
       scope = "cum";
       A.stampNav(squad);
-      year = A.clampYear(year, squad);
+      if (squad) year = A.clampYear(year, squad);
+      if (year == null) scope = "cum";
       render();
     });
     A.stampNav(squad);
     if (squad && !(A.squadYears(squad) || []).length) scope = "cum";
-    const ylist = squad ? A.squadYears(squad) : [];
-    if (squad) year = A.clampYear(year, squad);
-    const showChips = scope === "season" && !!squad && ylist.length > 0;
-    A.showYearRow(showChips);
+    const ylist = squad ? A.squadYears(squad) : A.years();
+    if (scope === "season" && squad) year = A.clampYear(year, squad);
+    if (year == null) scope = "cum";
+    A.showYearRow(true);
     const yearRow = $("year-row");
-    if (yearRow) yearRow.style.display = showChips ? "" : "none";
+    if (yearRow) { yearRow.hidden = false; yearRow.style.display = ""; }
     const yp = $("year-picker");
-    if (showChips) {
-      A.yearPicker(yp, year, (y) => { year = y; render(); }, null, ylist);
-    } else if (yp) {
-      yp.innerHTML = "";
-    }
+    A.seasonPicker(yp, scope === "cum" ? null : year, (y) => {
+      if (y == null) scope = "cum";
+      else { scope = "season"; year = y; }
+      render();
+    }, ylist);
 
     if (!squad) {
       renderGrid();
