@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """CHI-142: Season All|year and Team All|name, both default All.
 
-Fails if All+year are both selected, if the Cumulative|Season toggle still
-exists on the required pages, if the word squad appears in the new chrome,
-or if the default is not All/All.
+Fails if All+year are both selected, if Players/Trades still render a year-chip
+row (All + 2014–2025 pills) instead of one Season <select>, if the
+Cumulative|Season toggle still exists on the required pages, if the word
+squad appears in the new chrome, or if the default is not All/All.
 """
 import json
 import re
@@ -60,25 +61,31 @@ def franchise_years(data, owner, merge):
 
 
 def test_common(common):
+    if "function seasonSelect" not in common:
+        fail("common.js missing seasonSelect")
     if "function seasonPicker" not in common:
         fail("common.js missing seasonPicker")
     if "function seasonFromURL" not in common:
         fail("common.js missing seasonFromURL")
-    fn = re.search(r"function seasonPicker\(el, year, onPick, yearList\) \{([\s\S]*?)\n  \}", common)
+    fn = re.search(r"function seasonSelect\(el, year, onPick, yearList\) \{([\s\S]*?)\n  \}", common)
     if not fn:
-        fail("cannot parse seasonPicker")
+        fail("cannot parse seasonSelect")
     else:
         body = fn.group(1)
-        if 'data-y="all">All</button>' not in body and ">All</button>" not in body:
-            fail("seasonPicker does not paint an All chip")
+        if "season-chip" in body or "data-y=\"all\">All</button>" in body:
+            fail("seasonSelect still paints year chips")
+        if "<select" not in body and "tagName === \"SELECT\"" not in body:
+            fail("seasonSelect does not paint a Season <select>")
+        if 'value="all"' not in body and ">All</option>" not in body:
+            fail("seasonSelect does not paint an All option")
         if "allOn" not in body:
-            fail("seasonPicker does not gate All vs year with a single on")
-        if "const on = !allOn" not in body:
-            fail("seasonPicker can paint All and a year both on")
+            fail("seasonSelect does not gate All vs year with a single selected")
+        if "selected" not in body:
+            fail("seasonSelect does not mark only one option selected")
         if "n > 2025" not in body and "n <= 2025" not in body:
-            fail("seasonPicker does not lock out 2026")
+            fail("seasonSelect does not lock out 2026")
         if "n >= 2014" not in body:
-            fail("seasonPicker does not start at 2014")
+            fail("seasonSelect does not start at 2014")
 
     url = re.search(r"function seasonFromURL\(\) \{([\s\S]*?)\n  \}", common)
     if not url:
@@ -137,6 +144,23 @@ def test_page_html(name, html):
         if 'picker-label">Season<' not in html and 'for="season-picker">Season<' not in html and 'id="season-picker"' not in html and 'id="year-picker"' not in html:
             fail(f"{name} missing Season control")
 
+    if name in ("players.html", "trades.html", "history.html", "teams.html", "draft.html"):
+        if 'class="week-picker" id="year-picker"' in html or re.search(r'id="year-picker"[^>]*></div>', html):
+            fail(f"{name} Season is still a year-chip row (week-picker pills)")
+        if not re.search(r'<select[^>]*(id="year-picker"|id="season-picker")', html):
+            fail(f"{name} missing one Season <select>")
+        year_pills = [y for y in range(2014, 2026) if re.search(r'<button[^>]*data-y="%d"' % y, html)]
+        all_pill = re.search(r'<button[^>]*data-y="all"', html)
+        if all_pill and year_pills:
+            fail(f"{name} still renders All + year pills {year_pills} instead of one Season select")
+        sel = re.search(r'<select[^>]*(?:id="year-picker"|id="season-picker")[^>]*>([\s\S]*?)</select>', html)
+        if sel:
+            opts = re.findall(r'<option[^>]*selected[^>]*>', sel.group(1))
+            if len(opts) > 1:
+                fail(f"{name} Season select has {len(opts)} selected options")
+            if 'value="all" selected' not in sel.group(1) and "value='all' selected" not in sel.group(1):
+                fail(f"{name} Season select default is not All")
+
     if name in ("awards.html", "index.html"):
         all_btn = re.search(r'<button[^>]*data-y="all"[^>]*>', html)
         if not all_btn:
@@ -160,8 +184,11 @@ def test_page_js(name, js):
     if re.search(r'data-y="cum">Cumulative<', js):
         fail(f"{name} still paints a Cumulative chip")
     if name in ("teams.js", "trades.js", "draft.js", "history.js", "players.js", "awards.js"):
-        if "A.seasonPicker(" not in js and "seasonPicker(" not in js:
-            fail(f"{name} does not mount seasonPicker")
+        if "A.seasonSelect(" not in js and "A.seasonPicker(" not in js and "seasonSelect(" not in js and "seasonPicker(" not in js:
+            fail(f"{name} does not mount seasonSelect")
+    if name in ("players.js", "trades.js"):
+        if "A.seasonSelect(" not in js and "seasonSelect(" not in js:
+            fail(f"{name} does not mount A.seasonSelect")
     if name == "app.js":
         if 'data-y="all">All</button>' not in js:
             fail("app.js does not paint All")

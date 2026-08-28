@@ -512,7 +512,7 @@
       pick(year);
     });
     A.stampNav(squad);
-    A.seasonPicker($('#year-picker'), scope === "cum" ? null : year, (y) => {
+    A.seasonSelect($('#year-picker'), scope === "cum" ? null : year, (y) => {
       if (y == null) { scope = "cum"; pick(A.years()[0]); }
       else { scope = "season"; pick(y); }
     }, ylist);

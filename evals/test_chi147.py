@@ -56,15 +56,17 @@ def main() -> int:
         fail("year-picker is still chips — All+year can both paint on")
     if '<select class="team-select" id="year-picker"' not in hist_html:
         fail("year-picker must be a single select")
-    if '<option value="all">All</option>' not in hist_html:
+    if not re.search(r'<option[^>]*value="all"[^>]*>All</option>', hist_html):
         fail("Season select missing All")
     yp = re.search(r'<select class="team-select" id="year-picker"[^>]*>([\s\S]*?)</select>', hist_html)
     if not yp:
         fail("year-picker select body missing")
     else:
-        opts = re.findall(r'<option value="([^"]+)">', yp.group(1))
-        if opts[0] != "all" or opts[1:] != [str(y) for y in range(2014, 2026)]:
+        opts = re.findall(r'<option[^>]*value="([^"]+)"', yp.group(1))
+        if not opts or opts[0] != "all" or opts[1:] != [str(y) for y in range(2014, 2026)]:
             fail(f"year-picker options {opts} — want All then 2014-2025 exclusive")
+        if not re.search(r'<option[^>]*value="all"[^>]*selected', yp.group(1)):
+            fail("Season select default is not All")
     feel_w, feel_l = career_allplay(data, "m18")
     if (feel_w, feel_l) != (954, 727):
         fail(f"Feelers career All-Play {feel_w}-{feel_l} — expected 954-727")
@@ -86,8 +88,11 @@ def main() -> int:
         fail("PP.sort default is not career AFFL pts (tot)")
     if 'id="pp-sort"' not in players_html:
         fail("players.html missing #pp-sort")
-    if "players.js?v=38" not in players_html:
-        fail("players.js pin not v=38")
+    bust = re.search(r"players\.js\?v=(\d+)", players_html)
+    if not bust:
+        fail("players.html missing players.js cache bust")
+    elif int(bust.group(1)) < 40:
+        fail(f"players.js cache still v={bust.group(1)} (need v=40)")
     if "paintDbChips" not in players_js:
         fail("paintDbChips missing")
     sorts = re.search(r"const DB_SORTS = \[([\s\S]*?)\];", players_js)

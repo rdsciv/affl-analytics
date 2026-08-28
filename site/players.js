@@ -3052,7 +3052,7 @@
 
   function paintChrome() {
     const ylist = squad ? A.squadYears(squad) : A.years();
-    A.seasonPicker(document.getElementById("year-picker"), scope === "cum" ? null : year, async (y) => {
+    A.seasonSelect(document.getElementById("year-picker"), scope === "cum" ? null : year, async (y) => {
       if (y == null) scope = "cum";
       else { scope = "season"; year = y; try { YD = await A.loadYear(year); T = A.teams(year); } catch (e) {} }
       renderGrid();

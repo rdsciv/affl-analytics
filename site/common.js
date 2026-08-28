@@ -183,7 +183,7 @@ window.AFFL = (function () {
       b.addEventListener('click', () => onPick(+b.dataset.y)));
   }
 
-  /* CHI-142 — Season is All | 2025 … 2014. Only one selected. Bare URL is All. */
+  /* CHI-142 — Season is one <select> All | 2025 … 2014. Only one selected. Bare URL is All. */
   function seasonFromURL() {
     const q = new URLSearchParams(location.search).get("year");
     if (q == null || q === "" || String(q).toLowerCase() === "all" || String(q).toLowerCase() === "cum") return null;
@@ -202,7 +202,7 @@ window.AFFL = (function () {
     } catch (e) { /* ignore */ }
   }
 
-  function seasonPicker(el, year, onPick, yearList) {
+  function seasonSelect(el, year, onPick, yearList) {
     if (!el) return;
     const raw = yearList == null ? years() : yearList;
     const list = (raw || []).filter((y) => {
@@ -210,21 +210,31 @@ window.AFFL = (function () {
       return Number.isFinite(n) && n >= 2014 && n <= 2025;
     }).slice().sort((a, b) => b - a);
     const allOn = year == null || year === "" || year === "all";
-    const parts = [`<button type="button" class="season-chip${allOn ? " on" : ""}" data-y="all">All</button>`];
+    const val = allOn ? "all" : String(year);
+    const opts = [`<option value="all"${allOn ? " selected" : ""}>All</option>`];
     list.forEach((y) => {
       const on = !allOn && Number(y) === Number(year);
-      parts.push(`<button type="button" class="season-chip${on ? " on" : ""}" data-y="${y}">${y}</button>`);
+      opts.push(`<option value="${y}"${on ? " selected" : ""}>${y}</option>`);
     });
-    el.innerHTML = parts.join("");
-    el.setAttribute("aria-label", "Season");
-    el.querySelectorAll(".season-chip").forEach((b) => {
-      b.addEventListener("click", () => {
-        const rawY = b.dataset.y;
-        const next = (rawY === "all" || rawY === "" || rawY === "cum") ? null : +rawY;
-        stampSeason(next);
-        onPick(next);
-      });
-    });
+    let sel = el.tagName === "SELECT" ? el : el.querySelector("select");
+    if (!sel) {
+      el.innerHTML = `<select class="team-select" aria-label="Season"></select>`;
+      sel = el.querySelector("select");
+    }
+    sel.classList.add("team-select");
+    sel.setAttribute("aria-label", "Season");
+    sel.innerHTML = opts.join("");
+    sel.value = val;
+    sel.onchange = () => {
+      const rawY = sel.value;
+      const next = (rawY === "all" || rawY === "" || rawY === "cum") ? null : +rawY;
+      stampSeason(next);
+      onPick(next);
+    };
+  }
+
+  function seasonPicker(el, year, onPick, yearList) {
+    seasonSelect(el, year, onPick, yearList);
   }
 
   function chartDefaults(Chart) {
@@ -823,13 +833,13 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
-           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
+           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,
            fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
            playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
-           loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, seasonPicker, seasonFromURL, stampSeason, scopePicker, scopeFromURL, showYearRow,
+           loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, seasonSelect, seasonPicker, seasonFromURL, stampSeason, scopePicker, scopeFromURL, showYearRow,
            chartDefaults, dateStr, notice, teamHref, loadJSON,
            get data() { return DATA; } };
 })();
