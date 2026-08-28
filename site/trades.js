@@ -18,12 +18,13 @@
     }
     const named = A.franchiseName(id);
     if (named) return named;
-    const t = T[id] || T[String(id)] || {};
+    const t = T[id] || T[String(id)] || T[A.canon?.(id)] || {};
     if (t.owner) {
       const fromOwner = A.franchiseName(t.owner);
       if (fromOwner) return fromOwner;
     }
     if (t.name) return t.name;
+    if (t.owner) return t.owner;
     return "unavailable";
   }
   const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
