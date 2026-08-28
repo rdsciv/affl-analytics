@@ -2563,6 +2563,8 @@ img.avatar {
 .holdout-controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 .holdout-controls .pp-filters { margin: 0; }
 .holdout-grid { margin: 0; }
+.holdout-grid > * { min-width: 0; }
+.holdout-grid .viz-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .claim-line {
   margin: 0 0 14px;
   padding: 11px 14px;

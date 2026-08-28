@@ -2123,7 +2123,7 @@
       return;
     }
     const W = el.clientWidth || 560, H = el.clientHeight || 340;
-    const pad = { t: 12, r: 10, b: 42, l: 36 };
+    const pad = { t: 10, r: 8, b: 28, l: 32 };
     const innerW = W - pad.l - pad.r, innerH = H - pad.t - pad.b;
     const gap = 5;
     const totalShare = buckets.reduce((a, b) => a + (b.spendShare || 0), 0) || 1;
@@ -2153,18 +2153,23 @@
     });
 
     el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Marimekko of auction cost buckets">
-      ${[0, 0.25, 0.5, 0.75, 1].map((t) => {
+      ${[0, 0.5, 1].map((t) => {
         const y = pad.t + innerH * (1 - t);
-        return `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}" stroke="${C.grid}"/>`;
+        const val = Math.round(maxN * t);
+        return `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}" stroke="${C.grid}"/>
+          <text x="${pad.l - 6}" y="${y + 3}" text-anchor="end" fill="${C.mut}" font-size="9">${val}</text>`;
       }).join('')}
       ${rects.map((r, i) => `<rect data-i="${i}" x="${r.x}" y="${r.y}" width="${r.w}" height="${Math.max(1, r.h)}"
         fill="${S.mekkoStack === 'pos' ? (POS_FILL[r.key] || C.steel) : parColor(r.meanPar)}"
         stroke="#05060b" stroke-width="1" opacity="0.92"/>`).join('')}
-      ${cols.map((b) => `<text x="${b.x + b.w / 2}" y="${H - 22}" text-anchor="middle"
-        fill="${C.ink}" font-size="11" font-weight="700">${b.id}</text>
-        <text x="${b.x + b.w / 2}" y="${H - 8}" text-anchor="middle"
-        fill="${C.mut}" font-size="10">${fmt((b.spendShare || 0) * 100, 1)}% spend</text>`).join('')}
-      <text x="6" y="${pad.t + 8}" fill="${C.mut}" font-size="10">n</text>
+      ${cols.map((b) => {
+        const cx = b.x + b.w / 2;
+        const id = `<text x="${cx}" y="${H - 8}" text-anchor="middle" fill="${C.ink}" font-size="10" font-weight="700">${b.id}</text>`;
+        const pct = b.w >= 52
+          ? `<text x="${cx}" y="${H - 20}" text-anchor="middle" fill="${C.mut}" font-size="9">${fmt((b.spendShare || 0) * 100, 0)}%</text>`
+          : "";
+        return pct + id;
+      }).join('')}
     </svg>`;
     el.querySelectorAll('rect[data-i]').forEach((node) => {
       const r = rects[+node.dataset.i];
