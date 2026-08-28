@@ -167,8 +167,8 @@
       sub.textContent = unavailable
         ? `${year} transaction log unavailable`
         : scope === "cum"
-          ? "2018–2025 · waiver submitted vs won · FA adds · trades proposed vs accepted"
-          : `${year} · waiver submitted vs won · FA adds · trades proposed vs accepted`;
+          ? "2018–2025 · waiver submitted vs won · FA adds · trades proposed vs accepted · proposed on its own scale"
+          : `${year} · waiver submitted vs won · FA adds · trades proposed vs accepted · proposed on its own scale`;
     }
     if (unavailable) {
       if (chart) { chart.destroy(); chart = null; }
@@ -201,11 +201,11 @@
       data: {
         labels: names,
         datasets: [
-          { label: "Waiver submitted", data: rows.map((r) => r.waiverSubmitted || 0), backgroundColor: "#47a8ff99", maxBarThickness: 10 },
-          { label: "Waiver won", data: rows.map((r) => r.waiverWon || 0), backgroundColor: "#2f7bffcc", maxBarThickness: 10 },
-          { label: "FA adds", data: rows.map((r) => r.faAdds || 0), backgroundColor: "#93d500cc", maxBarThickness: 10 },
-          { label: "Trades proposed", data: rows.map((r) => r.tradesProposed || 0), backgroundColor: "#ff7a00cc", maxBarThickness: 10 },
-          { label: "Trades accepted", data: rows.map((r) => r.tradesAccepted || 0), backgroundColor: "#ff2d1acc", maxBarThickness: 10 },
+          { label: "Waiver submitted", data: rows.map((r) => r.waiverSubmitted || 0), backgroundColor: "#47a8ff99", maxBarThickness: 10, xAxisID: "x" },
+          { label: "Waiver won", data: rows.map((r) => r.waiverWon || 0), backgroundColor: "#2f7bffcc", maxBarThickness: 10, xAxisID: "x" },
+          { label: "FA adds", data: rows.map((r) => r.faAdds || 0), backgroundColor: "#93d500cc", maxBarThickness: 10, xAxisID: "x" },
+          { label: "Trades proposed", data: rows.map((r) => r.tradesProposed || 0), backgroundColor: "#ff7a00cc", maxBarThickness: 10, xAxisID: "xProposed" },
+          { label: "Trades accepted", data: rows.map((r) => r.tradesAccepted || 0), backgroundColor: "#ff2d1acc", maxBarThickness: 10, xAxisID: "x" },
         ],
       },
       options: {
@@ -232,7 +232,20 @@
           } },
         },
         scales: {
-          x: { stacked: false, grid: { color: C.grid }, border: { display: false } },
+          x: {
+            stacked: false,
+            position: "top",
+            title: { display: true, text: "Waivers / FA / accepted", color: C.mut || C.ink, font: { size: 10 } },
+            grid: { color: C.grid },
+            border: { display: false },
+          },
+          xProposed: {
+            stacked: false,
+            position: "bottom",
+            title: { display: true, text: "Trades proposed", color: C.mut || C.ink, font: { size: 10 } },
+            grid: { display: false },
+            border: { display: false },
+          },
           y: {
             stacked: false,
             grid: { display: false },

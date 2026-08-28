@@ -1,5 +1,5 @@
 {
-  "grain": "raw ESPN mTransactions2 week dumps; tx_id dedupes week repeats only; TRADE_PROPOSAL pairs to TRADE_ACCEPT on relatedTransactionId; TRADE_UPHOLD is commish grain not a second accept; 2014-17 stubs are unavailable (missing, never 0); owner via data.json seasons + canon MERGE; never the warehouse transaction fact table; never teamId<=0",
+  "grain": "raw ESPN mTransactions2 week dumps; tx_id dedupes week repeats only; tradesProposed is the TRADE_PROPOSAL send (PENDING), not CANCELED; ACCEPT/DECLINE/VETO credit the proposal sender via relatedTransactionId; TRADE_UPHOLD is commish grain not a second accept; 2014-17 stubs are unavailable (missing, never 0); owner via data.json seasons + canon MERGE; never the warehouse transaction fact table; never teamId<=0",
   "availableYears": [
     2018,
     2019,
@@ -40,7 +40,7 @@
           "waiverCanceled": 0,
           "faAdds": 11,
           "tradesProposed": 82,
-          "tradesAccepted": 1,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -52,7 +52,7 @@
           "waiverCanceled": 0,
           "faAdds": 23,
           "tradesProposed": 65,
-          "tradesAccepted": 4,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -64,7 +64,7 @@
           "waiverCanceled": 0,
           "faAdds": 10,
           "tradesProposed": 60,
-          "tradesAccepted": 2,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -76,7 +76,7 @@
           "waiverCanceled": 0,
           "faAdds": 18,
           "tradesProposed": 20,
-          "tradesAccepted": 3,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -88,7 +88,7 @@
           "waiverCanceled": 0,
           "faAdds": 27,
           "tradesProposed": 195,
-          "tradesAccepted": 2,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -100,7 +100,7 @@
           "waiverCanceled": 0,
           "faAdds": 16,
           "tradesProposed": 54,
-          "tradesAccepted": 3,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -112,7 +112,7 @@
           "waiverCanceled": 0,
           "faAdds": 39,
           "tradesProposed": 397,
-          "tradesAccepted": 3,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -136,7 +136,7 @@
           "waiverCanceled": 0,
           "faAdds": 17,
           "tradesProposed": 157,
-          "tradesAccepted": 2,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
@@ -172,7 +172,7 @@
           "waiverCanceled": 0,
           "faAdds": 13,
           "tradesProposed": 46,
-          "tradesAccepted": 2,
+          "tradesAccepted": 0,
           "tradesDeclined": 0,
           "tradesVetoed": 0
         }
@@ -189,9 +189,9 @@
           "waiverCanceled": 26,
           "faAdds": 41,
           "tradesProposed": 18,
-          "tradesAccepted": 7,
-          "tradesDeclined": 33,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
+          "tradesVetoed": 0
         },
         "m15": {
           "ownerKey": "m15",
@@ -201,8 +201,8 @@
           "waiverCanceled": 7,
           "faAdds": 26,
           "tradesProposed": 2,
-          "tradesAccepted": 4,
-          "tradesDeclined": 35,
+          "tradesAccepted": 1,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m18": {
@@ -213,8 +213,8 @@
           "waiverCanceled": 6,
           "faAdds": 18,
           "tradesProposed": 142,
-          "tradesAccepted": 7,
-          "tradesDeclined": 26,
+          "tradesAccepted": 5,
+          "tradesDeclined": 102,
           "tradesVetoed": 2
         },
         "m02": {
@@ -225,9 +225,9 @@
           "waiverCanceled": 25,
           "faAdds": 48,
           "tradesProposed": 1,
-          "tradesAccepted": 3,
-          "tradesDeclined": 16,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
+          "tradesVetoed": 0
         },
         "m17": {
           "ownerKey": "m17",
@@ -237,8 +237,8 @@
           "waiverCanceled": 8,
           "faAdds": 35,
           "tradesProposed": 1,
-          "tradesAccepted": 6,
-          "tradesDeclined": 25,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m05": {
@@ -249,9 +249,9 @@
           "waiverCanceled": 4,
           "faAdds": 22,
           "tradesProposed": 7,
-          "tradesAccepted": 5,
-          "tradesDeclined": 36,
-          "tradesVetoed": 3
+          "tradesAccepted": 1,
+          "tradesDeclined": 5,
+          "tradesVetoed": 1
         },
         "m08": {
           "ownerKey": "m08",
@@ -261,9 +261,9 @@
           "waiverCanceled": 11,
           "faAdds": 35,
           "tradesProposed": 3,
-          "tradesAccepted": 3,
-          "tradesDeclined": 39,
-          "tradesVetoed": 3
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         },
         "m12": {
           "ownerKey": "m12",
@@ -274,7 +274,7 @@
           "faAdds": 27,
           "tradesProposed": 9,
           "tradesAccepted": 0,
-          "tradesDeclined": 32,
+          "tradesDeclined": 9,
           "tradesVetoed": 0
         },
         "m11": {
@@ -285,9 +285,9 @@
           "waiverCanceled": 7,
           "faAdds": 48,
           "tradesProposed": 5,
-          "tradesAccepted": 7,
-          "tradesDeclined": 41,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         },
         "m06": {
           "ownerKey": "m06",
@@ -297,9 +297,9 @@
           "waiverCanceled": 39,
           "faAdds": 22,
           "tradesProposed": 0,
-          "tradesAccepted": 2,
-          "tradesDeclined": 20,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
+          "tradesVetoed": 0
         },
         "m10": {
           "ownerKey": "m10",
@@ -310,7 +310,7 @@
           "faAdds": 5,
           "tradesProposed": 5,
           "tradesAccepted": 0,
-          "tradesDeclined": 37,
+          "tradesDeclined": 2,
           "tradesVetoed": 0
         },
         "m13": {
@@ -321,9 +321,9 @@
           "waiverCanceled": 7,
           "faAdds": 20,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 37,
-          "tradesVetoed": 2
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
+          "tradesVetoed": 0
         }
       }
     },
@@ -338,9 +338,9 @@
           "waiverCanceled": 16,
           "faAdds": 52,
           "tradesProposed": 7,
-          "tradesAccepted": 3,
-          "tradesDeclined": 63,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
+          "tradesVetoed": 0
         },
         "m02": {
           "ownerKey": "m02",
@@ -350,8 +350,8 @@
           "waiverCanceled": 73,
           "faAdds": 53,
           "tradesProposed": 4,
-          "tradesAccepted": 6,
-          "tradesDeclined": 42,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m11": {
@@ -362,9 +362,9 @@
           "waiverCanceled": 14,
           "faAdds": 77,
           "tradesProposed": 17,
-          "tradesAccepted": 2,
-          "tradesDeclined": 99,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
+          "tradesVetoed": 0
         },
         "m07": {
           "ownerKey": "m07",
@@ -374,9 +374,9 @@
           "waiverCanceled": 29,
           "faAdds": 69,
           "tradesProposed": 13,
-          "tradesAccepted": 3,
-          "tradesDeclined": 45,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
+          "tradesVetoed": 0
         },
         "m10": {
           "ownerKey": "m10",
@@ -386,9 +386,9 @@
           "waiverCanceled": 7,
           "faAdds": 19,
           "tradesProposed": 7,
-          "tradesAccepted": 2,
-          "tradesDeclined": 39,
-          "tradesVetoed": 7
+          "tradesAccepted": 0,
+          "tradesDeclined": 5,
+          "tradesVetoed": 0
         },
         "m17": {
           "ownerKey": "m17",
@@ -398,8 +398,8 @@
           "waiverCanceled": 3,
           "faAdds": 53,
           "tradesProposed": 0,
-          "tradesAccepted": 4,
-          "tradesDeclined": 51,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m12": {
@@ -410,8 +410,8 @@
           "waiverCanceled": 1,
           "faAdds": 26,
           "tradesProposed": 1,
-          "tradesAccepted": 3,
-          "tradesDeclined": 30,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m18": {
@@ -423,8 +423,8 @@
           "faAdds": 49,
           "tradesProposed": 223,
           "tradesAccepted": 2,
-          "tradesDeclined": 23,
-          "tradesVetoed": 1
+          "tradesDeclined": 144,
+          "tradesVetoed": 0
         },
         "m08": {
           "ownerKey": "m08",
@@ -434,9 +434,9 @@
           "waiverCanceled": 10,
           "faAdds": 34,
           "tradesProposed": 3,
-          "tradesAccepted": 3,
-          "tradesDeclined": 33,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 3,
+          "tradesVetoed": 0
         },
         "m06": {
           "ownerKey": "m06",
@@ -446,8 +446,8 @@
           "waiverCanceled": 26,
           "faAdds": 21,
           "tradesProposed": 0,
-          "tradesAccepted": 1,
-          "tradesDeclined": 59,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m15": {
@@ -459,7 +459,7 @@
           "faAdds": 16,
           "tradesProposed": 0,
           "tradesAccepted": 0,
-          "tradesDeclined": 54,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m13": {
@@ -470,9 +470,9 @@
           "waiverCanceled": 9,
           "faAdds": 18,
           "tradesProposed": 4,
-          "tradesAccepted": 3,
-          "tradesDeclined": 26,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         }
       }
     },
@@ -487,9 +487,9 @@
           "waiverCanceled": 7,
           "faAdds": 41,
           "tradesProposed": 1,
-          "tradesAccepted": 3,
-          "tradesDeclined": 28,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
+          "tradesVetoed": 0
         },
         "m18": {
           "ownerKey": "m18",
@@ -500,7 +500,7 @@
           "faAdds": 59,
           "tradesProposed": 212,
           "tradesAccepted": 2,
-          "tradesDeclined": 28,
+          "tradesDeclined": 171,
           "tradesVetoed": 1
         },
         "m07": {
@@ -511,9 +511,9 @@
           "waiverCanceled": 28,
           "faAdds": 39,
           "tradesProposed": 23,
-          "tradesAccepted": 3,
-          "tradesDeclined": 53,
-          "tradesVetoed": 2
+          "tradesAccepted": 0,
+          "tradesDeclined": 13,
+          "tradesVetoed": 0
         },
         "m05": {
           "ownerKey": "m05",
@@ -523,9 +523,9 @@
           "waiverCanceled": 15,
           "faAdds": 47,
           "tradesProposed": 4,
-          "tradesAccepted": 2,
-          "tradesDeclined": 51,
-          "tradesVetoed": 2
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         },
         "m06": {
           "ownerKey": "m06",
@@ -535,8 +535,8 @@
           "waiverCanceled": 39,
           "faAdds": 36,
           "tradesProposed": 0,
-          "tradesAccepted": 3,
-          "tradesDeclined": 43,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m17": {
@@ -547,9 +547,9 @@
           "waiverCanceled": 0,
           "faAdds": 39,
           "tradesProposed": 3,
-          "tradesAccepted": 1,
-          "tradesDeclined": 52,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         },
         "m11": {
           "ownerKey": "m11",
@@ -559,9 +559,9 @@
           "waiverCanceled": 5,
           "faAdds": 69,
           "tradesProposed": 15,
-          "tradesAccepted": 3,
-          "tradesDeclined": 72,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 6,
+          "tradesVetoed": 0
         },
         "m13": {
           "ownerKey": "m13",
@@ -571,9 +571,9 @@
           "waiverCanceled": 2,
           "faAdds": 40,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 31,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
+          "tradesVetoed": 0
         },
         "m02": {
           "ownerKey": "m02",
@@ -584,8 +584,8 @@
           "faAdds": 32,
           "tradesProposed": 1,
           "tradesAccepted": 0,
-          "tradesDeclined": 21,
-          "tradesVetoed": 1
+          "tradesDeclined": 1,
+          "tradesVetoed": 0
         },
         "m14": {
           "ownerKey": "m14",
@@ -596,7 +596,7 @@
           "faAdds": 15,
           "tradesProposed": 4,
           "tradesAccepted": 0,
-          "tradesDeclined": 21,
+          "tradesDeclined": 3,
           "tradesVetoed": 0
         },
         "m15": {
@@ -607,8 +607,8 @@
           "waiverCanceled": 4,
           "faAdds": 20,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 23,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m19": {
@@ -619,9 +619,9 @@
           "waiverCanceled": 4,
           "faAdds": 23,
           "tradesProposed": 0,
-          "tradesAccepted": 2,
-          "tradesDeclined": 34,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
+          "tradesVetoed": 0
         }
       }
     },
@@ -637,8 +637,8 @@
           "faAdds": 42,
           "tradesProposed": 322,
           "tradesAccepted": 7,
-          "tradesDeclined": 36,
-          "tradesVetoed": 0
+          "tradesDeclined": 232,
+          "tradesVetoed": 3
         },
         "m15": {
           "ownerKey": "m15",
@@ -648,8 +648,8 @@
           "waiverCanceled": 1,
           "faAdds": 30,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 45,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m11": {
@@ -660,9 +660,9 @@
           "waiverCanceled": 11,
           "faAdds": 71,
           "tradesProposed": 10,
-          "tradesAccepted": 2,
-          "tradesDeclined": 69,
-          "tradesVetoed": 3
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
+          "tradesVetoed": 0
         },
         "m14": {
           "ownerKey": "m14",
@@ -672,9 +672,9 @@
           "waiverCanceled": 3,
           "faAdds": 31,
           "tradesProposed": 7,
-          "tradesAccepted": 2,
-          "tradesDeclined": 43,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 5,
+          "tradesVetoed": 0
         },
         "m05": {
           "ownerKey": "m05",
@@ -684,9 +684,9 @@
           "waiverCanceled": 6,
           "faAdds": 26,
           "tradesProposed": 15,
-          "tradesAccepted": 5,
-          "tradesDeclined": 58,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 6,
+          "tradesVetoed": 0
         },
         "m06": {
           "ownerKey": "m06",
@@ -696,8 +696,8 @@
           "waiverCanceled": 35,
           "faAdds": 38,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 45,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m07": {
@@ -708,9 +708,9 @@
           "waiverCanceled": 17,
           "faAdds": 37,
           "tradesProposed": 27,
-          "tradesAccepted": 4,
-          "tradesDeclined": 57,
-          "tradesVetoed": 2
+          "tradesAccepted": 0,
+          "tradesDeclined": 12,
+          "tradesVetoed": 0
         },
         "m17": {
           "ownerKey": "m17",
@@ -720,8 +720,8 @@
           "waiverCanceled": 1,
           "faAdds": 32,
           "tradesProposed": 3,
-          "tradesAccepted": 4,
-          "tradesDeclined": 48,
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
           "tradesVetoed": 0
         },
         "m08": {
@@ -732,8 +732,8 @@
           "waiverCanceled": 0,
           "faAdds": 37,
           "tradesProposed": 3,
-          "tradesAccepted": 1,
-          "tradesDeclined": 34,
+          "tradesAccepted": 0,
+          "tradesDeclined": 3,
           "tradesVetoed": 0
         },
         "m19": {
@@ -744,9 +744,9 @@
           "waiverCanceled": 9,
           "faAdds": 23,
           "tradesProposed": 1,
-          "tradesAccepted": 1,
-          "tradesDeclined": 18,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
+          "tradesVetoed": 0
         },
         "m13": {
           "ownerKey": "m13",
@@ -756,8 +756,8 @@
           "waiverCanceled": 21,
           "faAdds": 39,
           "tradesProposed": 4,
-          "tradesAccepted": 2,
-          "tradesDeclined": 85,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m02": {
@@ -768,8 +768,8 @@
           "waiverCanceled": 35,
           "faAdds": 35,
           "tradesProposed": 4,
-          "tradesAccepted": 1,
-          "tradesDeclined": 30,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         }
       }
@@ -785,9 +785,9 @@
           "waiverCanceled": 69,
           "faAdds": 52,
           "tradesProposed": 2,
-          "tradesAccepted": 6,
-          "tradesDeclined": 26,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
+          "tradesVetoed": 0
         },
         "m05": {
           "ownerKey": "m05",
@@ -797,9 +797,9 @@
           "waiverCanceled": 9,
           "faAdds": 34,
           "tradesProposed": 19,
-          "tradesAccepted": 2,
-          "tradesDeclined": 82,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 9,
+          "tradesVetoed": 0
         },
         "m07": {
           "ownerKey": "m07",
@@ -809,8 +809,8 @@
           "waiverCanceled": 13,
           "faAdds": 39,
           "tradesProposed": 35,
-          "tradesAccepted": 5,
-          "tradesDeclined": 85,
+          "tradesAccepted": 0,
+          "tradesDeclined": 10,
           "tradesVetoed": 0
         },
         "m08": {
@@ -821,9 +821,9 @@
           "waiverCanceled": 1,
           "faAdds": 47,
           "tradesProposed": 13,
-          "tradesAccepted": 1,
-          "tradesDeclined": 43,
-          "tradesVetoed": 1
+          "tradesAccepted": 0,
+          "tradesDeclined": 9,
+          "tradesVetoed": 0
         },
         "m17": {
           "ownerKey": "m17",
@@ -833,8 +833,8 @@
           "waiverCanceled": 6,
           "faAdds": 24,
           "tradesProposed": 7,
-          "tradesAccepted": 2,
-          "tradesDeclined": 58,
+          "tradesAccepted": 0,
+          "tradesDeclined": 6,
           "tradesVetoed": 0
         },
         "m11": {
@@ -845,8 +845,8 @@
           "waiverCanceled": 5,
           "faAdds": 58,
           "tradesProposed": 17,
-          "tradesAccepted": 16,
-          "tradesDeclined": 95,
+          "tradesAccepted": 1,
+          "tradesDeclined": 7,
           "tradesVetoed": 1
         },
         "m14": {
@@ -857,8 +857,8 @@
           "waiverCanceled": 4,
           "faAdds": 18,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 39,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m06": {
@@ -869,9 +869,9 @@
           "waiverCanceled": 24,
           "faAdds": 22,
           "tradesProposed": 2,
-          "tradesAccepted": 3,
-          "tradesDeclined": 58,
-          "tradesVetoed": 0
+          "tradesAccepted": 1,
+          "tradesDeclined": 0,
+          "tradesVetoed": 1
         },
         "m15": {
           "ownerKey": "m15",
@@ -881,8 +881,8 @@
           "waiverCanceled": 5,
           "faAdds": 20,
           "tradesProposed": 0,
-          "tradesAccepted": 3,
-          "tradesDeclined": 53,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m18": {
@@ -893,9 +893,9 @@
           "waiverCanceled": 31,
           "faAdds": 39,
           "tradesProposed": 338,
-          "tradesAccepted": 3,
-          "tradesDeclined": 56,
-          "tradesVetoed": 0
+          "tradesAccepted": 9,
+          "tradesDeclined": 235,
+          "tradesVetoed": 1
         },
         "m13": {
           "ownerKey": "m13",
@@ -905,8 +905,8 @@
           "waiverCanceled": 7,
           "faAdds": 29,
           "tradesProposed": 17,
-          "tradesAccepted": 4,
-          "tradesDeclined": 93,
+          "tradesAccepted": 1,
+          "tradesDeclined": 12,
           "tradesVetoed": 0
         },
         "m19": {
@@ -917,8 +917,8 @@
           "waiverCanceled": 2,
           "faAdds": 13,
           "tradesProposed": 0,
-          "tradesAccepted": 2,
-          "tradesDeclined": 45,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         }
       }
@@ -935,7 +935,7 @@
           "faAdds": 6,
           "tradesProposed": 1,
           "tradesAccepted": 0,
-          "tradesDeclined": 37,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m06": {
@@ -946,8 +946,8 @@
           "waiverCanceled": 66,
           "faAdds": 47,
           "tradesProposed": 2,
-          "tradesAccepted": 2,
-          "tradesDeclined": 41,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m14": {
@@ -958,8 +958,8 @@
           "waiverCanceled": 0,
           "faAdds": 18,
           "tradesProposed": 1,
-          "tradesAccepted": 1,
-          "tradesDeclined": 42,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m11": {
@@ -970,8 +970,8 @@
           "waiverCanceled": 14,
           "faAdds": 101,
           "tradesProposed": 25,
-          "tradesAccepted": 7,
-          "tradesDeclined": 90,
+          "tradesAccepted": 2,
+          "tradesDeclined": 11,
           "tradesVetoed": 0
         },
         "m02": {
@@ -982,8 +982,8 @@
           "waiverCanceled": 30,
           "faAdds": 21,
           "tradesProposed": 3,
-          "tradesAccepted": 5,
-          "tradesDeclined": 41,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m05": {
@@ -994,8 +994,8 @@
           "waiverCanceled": 39,
           "faAdds": 52,
           "tradesProposed": 34,
-          "tradesAccepted": 3,
-          "tradesDeclined": 47,
+          "tradesAccepted": 0,
+          "tradesDeclined": 15,
           "tradesVetoed": 0
         },
         "m17": {
@@ -1006,8 +1006,8 @@
           "waiverCanceled": 0,
           "faAdds": 18,
           "tradesProposed": 4,
-          "tradesAccepted": 3,
-          "tradesDeclined": 44,
+          "tradesAccepted": 1,
+          "tradesDeclined": 2,
           "tradesVetoed": 0
         },
         "m18": {
@@ -1018,8 +1018,8 @@
           "waiverCanceled": 9,
           "faAdds": 30,
           "tradesProposed": 394,
-          "tradesAccepted": 3,
-          "tradesDeclined": 62,
+          "tradesAccepted": 6,
+          "tradesDeclined": 202,
           "tradesVetoed": 0
         },
         "m21": {
@@ -1030,8 +1030,8 @@
           "waiverCanceled": 2,
           "faAdds": 4,
           "tradesProposed": 2,
-          "tradesAccepted": 3,
-          "tradesDeclined": 42,
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
           "tradesVetoed": 0
         },
         "m13": {
@@ -1042,8 +1042,8 @@
           "waiverCanceled": 10,
           "faAdds": 45,
           "tradesProposed": 25,
-          "tradesAccepted": 4,
-          "tradesDeclined": 100,
+          "tradesAccepted": 0,
+          "tradesDeclined": 16,
           "tradesVetoed": 0
         },
         "m15": {
@@ -1054,8 +1054,8 @@
           "waiverCanceled": 1,
           "faAdds": 20,
           "tradesProposed": 3,
-          "tradesAccepted": 5,
-          "tradesDeclined": 70,
+          "tradesAccepted": 0,
+          "tradesDeclined": 2,
           "tradesVetoed": 0
         },
         "m08": {
@@ -1066,8 +1066,8 @@
           "waiverCanceled": 3,
           "faAdds": 32,
           "tradesProposed": 20,
-          "tradesAccepted": 2,
-          "tradesDeclined": 52,
+          "tradesAccepted": 0,
+          "tradesDeclined": 13,
           "tradesVetoed": 0
         }
       }
@@ -1083,8 +1083,8 @@
           "waiverCanceled": 14,
           "faAdds": 35,
           "tradesProposed": 14,
-          "tradesAccepted": 3,
-          "tradesDeclined": 42,
+          "tradesAccepted": 0,
+          "tradesDeclined": 4,
           "tradesVetoed": 0
         },
         "m02": {
@@ -1095,8 +1095,8 @@
           "waiverCanceled": 12,
           "faAdds": 30,
           "tradesProposed": 3,
-          "tradesAccepted": 3,
-          "tradesDeclined": 33,
+          "tradesAccepted": 1,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m08": {
@@ -1107,9 +1107,9 @@
           "waiverCanceled": 6,
           "faAdds": 49,
           "tradesProposed": 16,
-          "tradesAccepted": 2,
-          "tradesDeclined": 27,
-          "tradesVetoed": 3
+          "tradesAccepted": 0,
+          "tradesDeclined": 6,
+          "tradesVetoed": 0
         },
         "m19": {
           "ownerKey": "m19",
@@ -1120,7 +1120,7 @@
           "faAdds": 18,
           "tradesProposed": 1,
           "tradesAccepted": 0,
-          "tradesDeclined": 54,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m06": {
@@ -1131,8 +1131,8 @@
           "waiverCanceled": 30,
           "faAdds": 67,
           "tradesProposed": 1,
-          "tradesAccepted": 2,
-          "tradesDeclined": 42,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m18": {
@@ -1143,8 +1143,8 @@
           "waiverCanceled": 31,
           "faAdds": 27,
           "tradesProposed": 291,
-          "tradesAccepted": 5,
-          "tradesDeclined": 33,
+          "tradesAccepted": 6,
+          "tradesDeclined": 152,
           "tradesVetoed": 0
         },
         "m17": {
@@ -1155,8 +1155,8 @@
           "waiverCanceled": 0,
           "faAdds": 19,
           "tradesProposed": 3,
-          "tradesAccepted": 4,
-          "tradesDeclined": 9,
+          "tradesAccepted": 0,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         },
         "m14": {
@@ -1167,8 +1167,8 @@
           "waiverCanceled": 0,
           "faAdds": 17,
           "tradesProposed": 0,
-          "tradesAccepted": 1,
-          "tradesDeclined": 19,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m11": {
@@ -1180,7 +1180,7 @@
           "faAdds": 51,
           "tradesProposed": 20,
           "tradesAccepted": 4,
-          "tradesDeclined": 65,
+          "tradesDeclined": 9,
           "tradesVetoed": 0
         },
         "m15": {
@@ -1191,8 +1191,8 @@
           "waiverCanceled": 9,
           "faAdds": 36,
           "tradesProposed": 1,
-          "tradesAccepted": 4,
-          "tradesDeclined": 58,
+          "tradesAccepted": 0,
+          "tradesDeclined": 0,
           "tradesVetoed": 0
         },
         "m13": {
@@ -1203,8 +1203,8 @@
           "waiverCanceled": 5,
           "faAdds": 28,
           "tradesProposed": 15,
-          "tradesAccepted": 5,
-          "tradesDeclined": 70,
+          "tradesAccepted": 0,
+          "tradesDeclined": 10,
           "tradesVetoed": 0
         },
         "m21": {
@@ -1216,7 +1216,7 @@
           "faAdds": 6,
           "tradesProposed": 1,
           "tradesAccepted": 0,
-          "tradesDeclined": 23,
+          "tradesDeclined": 1,
           "tradesVetoed": 0
         }
       }
@@ -1235,9 +1235,9 @@
         "waiverCanceled": 38,
         "faAdds": 286,
         "tradesProposed": 141,
-        "tradesAccepted": 16,
-        "tradesDeclined": 256,
-        "tradesVetoed": 9
+        "tradesAccepted": 0,
+        "tradesDeclined": 37,
+        "tradesVetoed": 0
       },
       "m17": {
         "ownerKey": "m17",
@@ -1247,9 +1247,9 @@
         "waiverCanceled": 18,
         "faAdds": 243,
         "tradesProposed": 86,
-        "tradesAccepted": 28,
-        "tradesDeclined": 287,
-        "tradesVetoed": 1
+        "tradesAccepted": 1,
+        "tradesDeclined": 13,
+        "tradesVetoed": 0
       },
       "m15": {
         "ownerKey": "m15",
@@ -1259,8 +1259,8 @@
         "waiverCanceled": 27,
         "faAdds": 178,
         "tradesProposed": 68,
-        "tradesAccepted": 22,
-        "tradesDeclined": 338,
+        "tradesAccepted": 1,
+        "tradesDeclined": 2,
         "tradesVetoed": 0
       },
       "m04": {
@@ -1271,7 +1271,7 @@
         "waiverCanceled": 0,
         "faAdds": 18,
         "tradesProposed": 20,
-        "tradesAccepted": 3,
+        "tradesAccepted": 0,
         "tradesDeclined": 0,
         "tradesVetoed": 0
       },
@@ -1283,9 +1283,9 @@
         "waiverCanceled": 113,
         "faAdds": 252,
         "tradesProposed": 311,
-        "tradesAccepted": 24,
-        "tradesDeclined": 273,
-        "tradesVetoed": 6
+        "tradesAccepted": 0,
+        "tradesDeclined": 43,
+        "tradesVetoed": 0
       },
       "m02": {
         "ownerKey": "m02",
@@ -1295,9 +1295,9 @@
         "waiverCanceled": 255,
         "faAdds": 287,
         "tradesProposed": 72,
-        "tradesAccepted": 27,
-        "tradesDeclined": 209,
-        "tradesVetoed": 3
+        "tradesAccepted": 1,
+        "tradesDeclined": 8,
+        "tradesVetoed": 0
       },
       "m11": {
         "ownerKey": "m11",
@@ -1307,9 +1307,9 @@
         "waiverCanceled": 60,
         "faAdds": 514,
         "tradesProposed": 506,
-        "tradesAccepted": 44,
-        "tradesDeclined": 531,
-        "tradesVetoed": 7
+        "tradesAccepted": 7,
+        "tradesDeclined": 43,
+        "tradesVetoed": 1
       },
       "m13": {
         "ownerKey": "m13",
@@ -1319,9 +1319,9 @@
         "waiverCanceled": 61,
         "faAdds": 246,
         "tradesProposed": 125,
-        "tradesAccepted": 22,
-        "tradesDeclined": 442,
-        "tradesVetoed": 4
+        "tradesAccepted": 1,
+        "tradesDeclined": 42,
+        "tradesVetoed": 0
       },
       "m18": {
         "ownerKey": "m18",
@@ -1331,9 +1331,9 @@
         "waiverCanceled": 134,
         "faAdds": 281,
         "tradesProposed": 2079,
-        "tradesAccepted": 31,
-        "tradesDeclined": 264,
-        "tradesVetoed": 4
+        "tradesAccepted": 37,
+        "tradesDeclined": 1238,
+        "tradesVetoed": 7
       },
       "m06": {
         "ownerKey": "m06",
@@ -1343,8 +1343,8 @@
         "waiverCanceled": 259,
         "faAdds": 262,
         "tradesProposed": 43,
-        "tradesAccepted": 15,
-        "tradesDeclined": 308,
+        "tradesAccepted": 1,
+        "tradesDeclined": 2,
         "tradesVetoed": 1
       },
       "m10": {
@@ -1355,9 +1355,9 @@
         "waiverCanceled": 11,
         "faAdds": 30,
         "tradesProposed": 34,
-        "tradesAccepted": 2,
-        "tradesDeclined": 76,
-        "tradesVetoed": 7
+        "tradesAccepted": 0,
+        "tradesDeclined": 7,
+        "tradesVetoed": 0
       },
       "m12": {
         "ownerKey": "m12",
@@ -1367,8 +1367,8 @@
         "waiverCanceled": 1,
         "faAdds": 66,
         "tradesProposed": 56,
-        "tradesAccepted": 5,
-        "tradesDeclined": 62,
+        "tradesAccepted": 0,
+        "tradesDeclined": 9,
         "tradesVetoed": 0
       },
       "m05": {
@@ -1379,9 +1379,9 @@
         "waiverCanceled": 103,
         "faAdds": 268,
         "tradesProposed": 100,
-        "tradesAccepted": 23,
-        "tradesDeclined": 379,
-        "tradesVetoed": 8
+        "tradesAccepted": 1,
+        "tradesDeclined": 45,
+        "tradesVetoed": 1
       },
       "m14": {
         "ownerKey": "m14",
@@ -1391,9 +1391,9 @@
         "waiverCanceled": 13,
         "faAdds": 99,
         "tradesProposed": 13,
-        "tradesAccepted": 6,
-        "tradesDeclined": 164,
-        "tradesVetoed": 1
+        "tradesAccepted": 0,
+        "tradesDeclined": 9,
+        "tradesVetoed": 0
       },
       "m19": {
         "ownerKey": "m19",
@@ -1403,9 +1403,9 @@
         "waiverCanceled": 19,
         "faAdds": 83,
         "tradesProposed": 3,
-        "tradesAccepted": 5,
-        "tradesDeclined": 188,
-        "tradesVetoed": 2
+        "tradesAccepted": 0,
+        "tradesDeclined": 1,
+        "tradesVetoed": 0
       },
       "m21": {
         "ownerKey": "m21",
@@ -1415,8 +1415,8 @@
         "waiverCanceled": 4,
         "faAdds": 10,
         "tradesProposed": 3,
-        "tradesAccepted": 3,
-        "tradesDeclined": 65,
+        "tradesAccepted": 0,
+        "tradesDeclined": 3,
         "tradesVetoed": 0
       }
     }

@@ -162,6 +162,10 @@ def main() -> int:
             fail(f"missing grouped series {label!r}")
     if act_fn.count("label:") < 5:
         fail("renderActivity does not define five series")
+    if "xProposed" not in act_fn and "logarithmic" not in act_fn:
+        fail("Feelers proposed still shares a linear x-axis with the other series")
+    if "xAxisID: \"xProposed\"" not in act_fn and "xAxisID: 'xProposed'" not in act_fn and "logarithmic" not in act_fn:
+        fail("Trades proposed series is not on its own scale")
 
     # rates
     if "waiverSubmitted" not in act_fn or "waiverWon" not in act_fn:
@@ -206,11 +210,15 @@ def main() -> int:
     bust = re.search(r"trades\.js\?v=(\d+)", html)
     if not bust:
         fail("trades.html missing trades.js cache bust")
-    elif int(bust.group(1)) < 8:
-        fail(f"trades.js cache still v={bust.group(1)} (need v=8)")
+    elif int(bust.group(1)) < 9:
+        fail(f"trades.js cache still v={bust.group(1)} (need v=9)")
 
     if 'id="activity-rates"' not in html:
         fail("trades.html missing the rates table")
+    if "white-space: nowrap" not in html and "white-space:nowrap" not in html:
+        fail("rates table missing nowrap — SUBMITTED will clip to SUB")
+    if "overflow-x: auto" not in html and "overflow-x:auto" not in html:
+        fail("rates wrap missing overflow-x:auto — SUB column clips instead of scrolling")
     if 'id="activity-note"' not in html:
         fail("trades.html missing the 2014–17 notice slot")
 
@@ -255,6 +263,36 @@ def main() -> int:
         if (y2018.get("m07") or {}).get("waiverWon", 0) <= 0:
             fail("2018 Chupacabras waiverWon is 0 — 2018 EXECUTED waivers have sentinel teamId; recover from items")
 
+        # Measured sender grain (Analyst 2026-08-28): proposed = PENDING send
+        m18 = (act.get("cumulative") or {}).get("managers", {}).get("m18") or {}
+        m07 = (act.get("cumulative") or {}).get("managers", {}).get("m07") or {}
+        m04 = (act.get("cumulative") or {}).get("managers", {}).get("m04") or {}
+        managers = (act.get("cumulative") or {}).get("managers") or {}
+        league_prop = sum(v.get("tradesProposed", 0) for v in managers.values())
+        league_acc = sum(v.get("tradesAccepted", 0) for v in managers.values())
+        if m18.get("tradesProposed") != 2079:
+            fail(f"Feelers proposed {m18.get('tradesProposed')} — expected 2079 PENDING sends")
+        if m18.get("tradesAccepted") != 37:
+            fail(f"Feelers accepted {m18.get('tradesAccepted')} — expected 37 sender-side")
+        if m18.get("tradesDeclined") != 1238:
+            fail(f"Feelers declined {m18.get('tradesDeclined')} — expected 1238 sender-side")
+        if m18.get("tradesVetoed") != 7:
+            fail(f"Feelers vetoed {m18.get('tradesVetoed')} — expected 7 sender-side")
+        if m07.get("tradesProposed") != 311:
+            fail(f"Chupacabras proposed {m07.get('tradesProposed')} — expected 311 PENDING sends")
+        if m04.get("tradesProposed") != 20:
+            fail(f"Chewbacca proposed {m04.get('tradesProposed')} — expected 20")
+        if m04.get("tradesAccepted", 0) != 0:
+            fail(f"Chewbacca accepted {m04.get('tradesAccepted')} — responder 3-accept / 100% bug")
+        if m04.get("tradesDeclined", 0) != 0 or m04.get("tradesVetoed", 0) != 0:
+            fail("Chewbacca rate denom must be 0 (unavailable), not responder outcomes")
+        if league_prop > 5000:
+            fail(f"league proposed {league_prop} still counts CANCELED/PENDING leak (~7545)")
+        if league_prop < 3000:
+            fail(f"league proposed {league_prop} dropped PENDING sends (closed-thread grain)")
+        if league_acc > 80:
+            fail(f"league accepted {league_acc} still looks responder-side (was 276)")
+
     # pairing grain: relatedTransactionId, UPHOLD is not accept
     spec = None
     builder_path = ROOT / "scripts/build_activity.py"
@@ -292,10 +330,12 @@ def main() -> int:
         m = mod.tally_year(2025, txs, omap)
         if (m.get("m18") or {}).get("tradesProposed") != 1:
             fail(f"proposer not credited: {m.get('m18')}")
-        if (m.get("m08") or {}).get("tradesAccepted") != 1:
-            fail(f"counterparty accept not credited: {m.get('m08')}")
-        if (m.get("m18") or {}).get("tradesAccepted", 0) != 0:
-            fail("TRADE_UPHOLD counted as Feelers accept")
+        if (m.get("m18") or {}).get("tradesAccepted") != 1:
+            fail(f"sender accept not credited: {m.get('m18')}")
+        if (m.get("m08") or {}).get("tradesAccepted", 0) != 0:
+            fail("acceptance credited to responder, not the proposal sender")
+        if (m.get("m18") or {}).get("tradesAccepted", 0) > 1:
+            fail("TRADE_UPHOLD counted as a second Feelers accept")
         sent = [
             {"id": "w1", "type": "WAIVER", "status": "EXECUTED", "teamId": -2147483648,
              "items": [{"type": "ADD", "toTeamId": 7}]},
@@ -320,6 +360,35 @@ def main() -> int:
         m_c = mod.tally_year(2025, canceled_as_proposal, omap)
         if (m_c.get("m18") or {}).get("tradesProposed") != 1:
             fail("tradesProposed counts status==CANCELED as a proposal")
+        if (m_c.get("m18") or {}).get("tradesAccepted", 0) != 0:
+            fail("CANCELED-only fixture should not invent an accept")
+        # Decline of a sent proposal credits the SENDER, not the decliner
+        sent_declined = [
+            {"id": "p-sent", "type": "TRADE_PROPOSAL", "teamId": 7, "status": "PENDING"},
+            {
+                "id": "d-resp",
+                "type": "TRADE_DECLINE",
+                "teamId": 3,
+                "status": "EXECUTED",
+                "relatedTransactionId": "p-sent",
+            },
+        ]
+        m_d = mod.tally_year(2025, sent_declined, omap)
+        if (m_d.get("m18") or {}).get("tradesDeclined") != 1:
+            fail(f"decline of a sent proposal must credit the sender: {m_d}")
+        if (m_d.get("m08") or {}).get("tradesDeclined", 0) != 0:
+            fail("decline credited to the responder")
+        # 2018 null related — do not invent a sender accept
+        y2018 = [
+            {"id": "p18", "type": "TRADE_PROPOSAL", "teamId": 2, "status": "PENDING"},
+            {"id": "a18", "type": "TRADE_ACCEPT", "teamId": 2, "status": "PENDING", "relatedTransactionId": None},
+        ]
+        o18 = {2018: {2: "m04", 7: "m18"}}
+        m18y = mod.tally_year(2018, y2018, o18)
+        if (m18y.get("m04") or {}).get("tradesProposed") != 1:
+            fail(f"2018 Chewbacca proposed missing: {m18y}")
+        if (m18y.get("m04") or {}).get("tradesAccepted", 0) != 0:
+            fail("2018 null related invented a sender accept (Chewbacca 100% bug)")
 
     if fails:
         print("FAIL")

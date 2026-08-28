@@ -8,6 +8,12 @@
 <link rel="apple-touch-icon" href="favicon.png?v=3">
 <link rel="stylesheet" href="styles.css?v=40">
 <link rel="stylesheet" href="logo.css?v=2">
+<style>
+  #activity-rates-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  #activity-rates { width: max-content; min-width: 100%; table-layout: auto; }
+  #activity-rates th, #activity-rates td { white-space: nowrap; overflow: visible; }
+  #activity-rates th { letter-spacing: .06em; }
+</style>
 </head>
 <body>
 <div class="frame">
@@ -43,7 +49,7 @@
   </div>
 
   <div class="picker-row">
-    <div class="picker-label">Squad</div>
+    <div class="picker-label">Team</div>
     <div class="week-picker" id="squad-picker"></div>
   </div>
   <div class="picker-row" id="year-row">
@@ -66,14 +72,14 @@
   </section>
 
   <section class="second-grid">
-    <div class="card">
+    <div class="card" id="activity-block" style="grid-column:1/-1">
       <div class="card-head">
         <div><h2>Activity By Manager</h2><div class="card-sub" id="activity-sub">waiver submitted vs won, FA adds, trades proposed vs accepted · 2018+</div></div>
       </div>
       <div id="activity-note"></div>
       <div class="chart-wrap xtall" id="activity-wrap"><canvas id="activity-chart"></canvas></div>
       <div class="table-scroll" id="activity-rates-wrap">
-        <table class="tbl" id="activity-rates">
+        <table class="tbl" id="activity-rates" style="width:max-content;min-width:100%">
           <thead><tr>
             <th>Team</th>
             <th>Waiver win</th>
@@ -120,6 +126,6 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=28"></script>
-<script src="trades.js?v=8"></script>
+<script src="trades.js?v=9"></script>
 </body>
 </html>

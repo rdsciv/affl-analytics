@@ -11,15 +11,13 @@ dumps. TRADE_PROPOSAL and TRADE_ACCEPT never share tx_id (0 overlap). Pair
 proposal → accept / decline / veto on relatedTransactionId when present.
 
 2018: relatedTransactionId is null on every row. Dedup by id; do not invent
-links. Each TRADE_ACCEPT is its own accepted event.
+links. Those PENDING sends stay open (out of the rate).
 
 TRADE_UPHOLD is commissioner grain after a review window — NOT a second
 accept. Skip it for accepted counts.
 
-Commissioner-executed TRADE_ACCEPT (isLeagueManager=True) is attributed to
-the roster-movement teams in items (the counterparty), never to the
-commish's ESPN slot. If a non-commish ACCEPT exists on the same related
-id, that team is the acceptor.
+Commissioner-executed TRADE_ACCEPT still pairs to the sender's PENDING id.
+Do not credit the commish's ESPN slot. TRADE_UPHOLD is never a second accept.
 
 teamId <= 0 (including ESPN sentinel -2147483648) is dropped. Never mapped.
 
@@ -33,14 +31,18 @@ Counts per owner, per available year:
   waiverFailed     WAIVER status startswith FAILED_
   waiverCanceled   WAIVER status == CANCELED
   faAdds           FREEAGENT status == EXECUTED with an ADD item (no fake claim split)
-  tradesProposed   TRADE_PROPOSAL rows after id-dedupe with status != CANCELED (PENDING is the open snapshot; CANCELED is an outcome, not a second proposal)
-  tradesAccepted   unique accepted deals (see pairing). TRADE_UPHOLD excluded.
-  tradesDeclined   unique TRADE_DECLINE (declining team)
-  tradesVetoed     unique TRADE_VETO if present; never invented
+  tradesProposed   unique TRADE_PROPOSAL sends after id-dedupe with status != CANCELED
+                   (PENDING is the send; CANCELED is a withdrawal, not a second proposal)
+  tradesAccepted   unique sent threads whose related ACCEPT landed (sender of the PROPOSAL)
+  tradesDeclined   unique sent threads whose related DECLINE landed (sender, not the decliner)
+  tradesVetoed     unique sent threads whose related VETO landed (sender, not the vetoer)
 
 Rates (UI, not stored as painted 0 for missing years):
   waiver win  = won / submitted
-  acceptance  = accept / (accept + decline + veto). PENDING not in the denominator. CANCELED is not veto.
+  acceptance  = accept / (accept + decline + veto) of THAT SENDER's closed outcomes.
+                PENDING is not in the denominator. CANCELED is not veto.
+                Pair ACCEPT/DECLINE/VETO back to the TRADE_PROPOSAL via relatedTransactionId.
+                2018 related is null — do not invent; sender outcomes stay 0 (rate unavailable).
 
 2014–17: raw files are stubs (no transactions[]). Years are available=false
 with no manager counts — missing, never 0.
@@ -270,7 +272,9 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
             continue
 
         if typ == "TRADE_PROPOSAL":
-            if valid_tid(tid):
+            # PENDING is the send. CANCELED is a withdraw, not a second proposal
+            # and not a pairing target (outcomes point at the PENDING id).
+            if status == "PENDING" and valid_tid(tid):
                 proposals[str(t.get("id"))] = t
             continue
 
@@ -292,72 +296,43 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
             vetoes.append(t)
             continue
 
-    # A proposal is the TRADE_PROPOSAL row. Do not add CANCELED (outcome)
-    # and do not collapse PENDING+CANCELED. PENDING stays out of the rate.
+    # Proposed = PENDING TRADE_PROPOSAL only. Open sends stay in proposed
+    # and out of the rate. Do not collapse to closed threads.
     for t in proposals.values():
-        if t.get("status") == "CANCELED":
-            continue
-        if valid_tid(t.get("teamId")):
-            credit(t.get("teamId"), "tradesProposed")
+        credit(t.get("teamId"), "tradesProposed")
 
-    # Pair ACCEPT to PROPOSAL on relatedTransactionId (0 overlap on tx_id).
-    deals: dict[tuple, list] = defaultdict(list)
-    for t in accepts:
-        deals[deal_key(t)].append(t)
+    def proposal_sender(tx):
+        """Sender of the related TRADE_PROPOSAL. 2018 related is null — no invent."""
+        rel = tx.get("relatedTransactionId")
+        if rel in (None, "", 0, "0"):
+            return None
+        prop = proposals.get(str(rel))
+        if not prop:
+            return None
+        tid = prop.get("teamId")
+        return tid if valid_tid(tid) else None
 
-    credited_accepts: set[tuple[str, tuple]] = set()
-    for key, group in deals.items():
-        non_lm = [t for t in group if not t.get("isLeagueManager")]
-        lm = [t for t in group if t.get("isLeagueManager")]
-        owners = []
-        if non_lm:
-            for t in non_lm:
-                oid = owner_of(omap, year, t.get("teamId"))
-                if oid and oid not in owners:
-                    owners.append(oid)
-        elif lm:
-            # Roster-movement grain, not the commish's team.
-            sample = lm[0]
-            rel = sample.get("relatedTransactionId")
-            prop = proposals.get(str(rel)) if rel not in (None, "", 0, "0") else None
-            teams = item_teams(sample) or (item_teams(prop) if prop else [])
-            proposer = None
-            if prop and valid_tid(prop.get("teamId")):
-                proposer = int(prop.get("teamId"))
-            for espn_tid in teams:
-                if proposer is not None and int(espn_tid) == proposer:
-                    continue
-                oid = owner_of(omap, year, espn_tid)
-                if oid and oid not in owners:
-                    owners.append(oid)
-        for oid in owners:
-            mark = (oid, key)
-            if mark in credited_accepts:
+    def credit_sender(rows, field):
+        seen: set[tuple[str, str]] = set()
+        for t in rows:
+            sid = proposal_sender(t)
+            if sid is None:
                 continue
-            credited_accepts.add(mark)
-            row(oid)["tradesAccepted"] += 1
+            oid = owner_of(omap, year, sid)
+            if not oid:
+                continue
+            mark = (oid, str(t.get("relatedTransactionId")))
+            if mark in seen:
+                continue
+            seen.add(mark)
+            row(oid)[field] += 1
 
-    seen_decline: set[tuple[str, tuple]] = set()
-    for t in declines:
-        oid = owner_of(omap, year, t.get("teamId"))
-        if not oid:
-            continue
-        mark = (oid, deal_key(t))
-        if mark in seen_decline:
-            continue
-        seen_decline.add(mark)
-        row(oid)["tradesDeclined"] += 1
-
-    seen_veto: set[tuple[str, tuple]] = set()
-    for t in vetoes:
-        oid = owner_of(omap, year, t.get("teamId"))
-        if not oid:
-            continue
-        mark = (oid, deal_key(t))
-        if mark in seen_veto:
-            continue
-        seen_veto.add(mark)
-        row(oid)["tradesVetoed"] += 1
+    # Outcomes hang off relatedTransactionId and credit the PROPOSER.
+    # Responder teamId on ACCEPT/DECLINE/VETO is not the series grain.
+    # TRADE_UPHOLD is commish grain — never a second accept (not in accepts).
+    credit_sender(accepts, "tradesAccepted")
+    credit_sender(declines, "tradesDeclined")
+    credit_sender(vetoes, "tradesVetoed")
 
     return managers
 
@@ -394,7 +369,8 @@ def main() -> int:
     payload = {
         "grain": (
             "raw ESPN mTransactions2 week dumps; tx_id dedupes week repeats only; "
-            "TRADE_PROPOSAL pairs to TRADE_ACCEPT on relatedTransactionId; "
+            "tradesProposed is the TRADE_PROPOSAL send (PENDING), not CANCELED; "
+            "ACCEPT/DECLINE/VETO credit the proposal sender via relatedTransactionId; "
             "TRADE_UPHOLD is commish grain not a second accept; "
             "2014-17 stubs are unavailable (missing, never 0); "
             "owner via data.json seasons + canon MERGE; "
@@ -405,6 +381,40 @@ def main() -> int:
         "years": years_out,
         "cumulative": {"available": True, "from": 2018, "to": 2025, "managers": cumulative},
     }
+    def grain_ok(cum: dict) -> bool:
+        m18 = cum.get("m18") or {}
+        m04 = cum.get("m04") or {}
+        league_prop = sum(r.get("tradesProposed", 0) for r in cum.values())
+        feelers_prop = m18.get("tradesProposed", 0)
+        feelers_closed = (
+            m18.get("tradesAccepted", 0)
+            + m18.get("tradesDeclined", 0)
+            + m18.get("tradesVetoed", 0)
+        )
+        chew_den = (
+            m04.get("tradesAccepted", 0)
+            + m04.get("tradesDeclined", 0)
+            + m04.get("tradesVetoed", 0)
+        )
+        if 7200 <= league_prop <= 8000:
+            print(f"FAIL grain: league proposed {league_prop} ~7600 (PENDING+CANCELED)", file=sys.stderr)
+            return False
+        if feelers_prop == 3964:
+            print("FAIL grain: Feelers proposed is 3964 (CANCELED counted as send)", file=sys.stderr)
+            return False
+        if feelers_prop != 2079:
+            print(f"FAIL grain: Feelers proposed {feelers_prop} != 2079 PENDING", file=sys.stderr)
+            return False
+        if chew_den and m04.get("tradesAccepted", 0) == chew_den:
+            print("FAIL grain: Chewbacca rate is 100%", file=sys.stderr)
+            return False
+        if feelers_prop == feelers_closed:
+            print("FAIL grain: proposed was set to closed threads", file=sys.stderr)
+            return False
+        return True
+
+    if not grain_ok(cumulative):
+        return 2
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n")
     print(f"wrote {OUT} years={list(years_out)} cum_managers={len(cumulative)}")
