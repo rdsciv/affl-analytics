@@ -231,6 +231,74 @@ def main() -> int:
             if m18.get("waiverSubmitted") == m18.get("waiverWon") and m18.get("waiverSubmitted", 0) > 0:
                 fail("Feelers submitted == won — looks like fact_transaction executed-only")
 
+        # BIND: m01 (Glory Holes alias) + m07 = one Chupacabras bar
+        for scope, bag in [("cumulative", act.get("cumulative") or {})]:
+            managers = bag.get("managers") or {}
+            if "m01" in managers:
+                fail("m01 is its own key in cumulative — must MERGE into m07 Chupacabras")
+        for y, rec in (act.get("years") or {}).items():
+            managers = rec.get("managers") or {}
+            if "m01" in managers:
+                fail(f"m01 is its own key in {y} — must MERGE into m07 Chupacabras")
+        m07 = (act.get("cumulative") or {}).get("managers", {}).get("m07")
+        if not m07:
+            fail("cumulative missing Chupacabras m07")
+        y2018 = ((act.get("years") or {}).get("2018") or {}).get("managers") or {}
+        if (y2018.get("m07") or {}).get("waiverWon", 0) <= 0:
+            fail("2018 Chupacabras waiverWon is 0 — 2018 EXECUTED waivers have sentinel teamId; recover from items")
+
+    # pairing grain: relatedTransactionId, UPHOLD is not accept
+    spec = None
+    builder_path = ROOT / "scripts/build_activity.py"
+    if builder_path.is_file():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("build_activity", builder_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        key = mod.deal_key({"id": "acc-1", "relatedTransactionId": "prop-9"})
+        if key != ("relatedTransactionId", "prop-9"):
+            fail(f"deal_key did not pair on relatedTransactionId: {key}")
+        key18 = mod.deal_key({"id": "acc-1", "relatedTransactionId": None})
+        if key18 != ("tx_id", "acc-1"):
+            fail(f"2018 null related invented a link: {key18}")
+        omap = {2025: {7: "m18", 3: "m08", 6: "m02", 2: "m06"}}
+        txs = [
+            {"id": "p1", "type": "TRADE_PROPOSAL", "teamId": 7, "status": "PENDING"},
+            {
+                "id": "a1",
+                "type": "TRADE_ACCEPT",
+                "teamId": 3,
+                "status": None,
+                "relatedTransactionId": "p1",
+                "isLeagueManager": False,
+            },
+            {
+                "id": "u1",
+                "type": "TRADE_UPHOLD",
+                "teamId": 7,
+                "status": "EXECUTED",
+                "relatedTransactionId": "p1",
+                "isLeagueManager": True,
+            },
+        ]
+        m = mod.tally_year(2025, txs, omap)
+        if (m.get("m18") or {}).get("tradesProposed") != 1:
+            fail(f"proposer not credited: {m.get('m18')}")
+        if (m.get("m08") or {}).get("tradesAccepted") != 1:
+            fail(f"counterparty accept not credited: {m.get('m08')}")
+        if (m.get("m18") or {}).get("tradesAccepted", 0) != 0:
+            fail("TRADE_UPHOLD counted as Feelers accept")
+        sent = [
+            {"id": "w1", "type": "WAIVER", "status": "EXECUTED", "teamId": -2147483648,
+             "items": [{"type": "ADD", "toTeamId": 7}]},
+            {"id": "w2", "type": "WAIVER", "status": "EXECUTED", "teamId": 7},
+        ]
+        m3 = mod.tally_year(2025, sent, omap)
+        if (m3.get("m18") or {}).get("waiverWon") != 2:
+            fail(f"sentinel waiver not recovered from items: {m3.get('m18')}")
+        if any(k.startswith("-") or k == "m01" for k in m3):
+            fail("sentinel or m01 leaked into managers")
+
     if fails:
         print("FAIL")
         for item in fails:

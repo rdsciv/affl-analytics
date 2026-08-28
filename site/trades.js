@@ -43,7 +43,7 @@
     return ACT;
   }
   function fmtRate(num, den) {
-    if (!den) return "n/a";
+    if (!den) return "unavailable";
     return (100 * num / den).toFixed(0) + "%";
   }
   function activityBundle() {
@@ -179,6 +179,8 @@
       }
       const tb0 = document.querySelector("#activity-rates tbody");
       if (tb0) tb0.innerHTML = "";
+      const rw0 = document.getElementById("activity-rates-wrap");
+      if (rw0) rw0.hidden = true;
       return;
     }
 
@@ -242,6 +244,8 @@
       },
     });
 
+    const rw = document.getElementById("activity-rates-wrap");
+    if (rw) rw.hidden = false;
     const tb = document.querySelector("#activity-rates tbody");
     if (tb) {
       tb.innerHTML = rows.map((r) => {

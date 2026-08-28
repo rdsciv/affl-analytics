@@ -1,5 +1,5 @@
 {
-  "grain": "raw ESPN mTransactions2 week dumps; tx_id dedupes week repeats only; TRADE_PROPOSAL pairs to TRADE_ACCEPT on relatedTransactionId; TRADE_UPHOLD is commish grain not a second accept; 2014-17 stubs are unavailable (missing, never 0); owner via data.json seasons + canon MERGE; never fact_transaction; never teamId<=0",
+  "grain": "raw ESPN mTransactions2 week dumps; tx_id dedupes week repeats only; TRADE_PROPOSAL pairs to TRADE_ACCEPT on relatedTransactionId; TRADE_UPHOLD is commish grain not a second accept; 2014-17 stubs are unavailable (missing, never 0); owner via data.json seasons + canon MERGE; never the warehouse transaction fact table; never teamId<=0",
   "availableYears": [
     2018,
     2019,
@@ -34,8 +34,8 @@
       "managers": {
         "m11": {
           "ownerKey": "m11",
-          "waiverSubmitted": 48,
-          "waiverWon": 0,
+          "waiverSubmitted": 125,
+          "waiverWon": 32,
           "waiverFailed": 30,
           "waiverCanceled": 0,
           "faAdds": 39,
@@ -46,8 +46,8 @@
         },
         "m02": {
           "ownerKey": "m02",
-          "waiverSubmitted": 25,
-          "waiverWon": 0,
+          "waiverSubmitted": 74,
+          "waiverWon": 20,
           "waiverFailed": 22,
           "waiverCanceled": 0,
           "faAdds": 16,
@@ -58,8 +58,8 @@
         },
         "m17": {
           "ownerKey": "m17",
-          "waiverSubmitted": 16,
-          "waiverWon": 0,
+          "waiverSubmitted": 55,
+          "waiverWon": 25,
           "waiverFailed": 13,
           "waiverCanceled": 0,
           "faAdds": 23,
@@ -70,8 +70,8 @@
         },
         "m07": {
           "ownerKey": "m07",
-          "waiverSubmitted": 34,
-          "waiverWon": 0,
+          "waiverSubmitted": 92,
+          "waiverWon": 23,
           "waiverFailed": 23,
           "waiverCanceled": 0,
           "faAdds": 27,
@@ -80,10 +80,22 @@
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
+        "m08": {
+          "ownerKey": "m08",
+          "waiverSubmitted": 50,
+          "waiverWon": 22,
+          "waiverFailed": 9,
+          "waiverCanceled": 0,
+          "faAdds": 11,
+          "tradesProposed": 82,
+          "tradesAccepted": 1,
+          "tradesDeclined": 0,
+          "tradesVetoed": 0
+        },
         "m10": {
           "ownerKey": "m10",
-          "waiverSubmitted": 7,
-          "waiverWon": 0,
+          "waiverSubmitted": 21,
+          "waiverWon": 7,
           "waiverFailed": 7,
           "waiverCanceled": 0,
           "faAdds": 6,
@@ -94,8 +106,8 @@
         },
         "m18": {
           "ownerKey": "m18",
-          "waiverSubmitted": 45,
-          "waiverWon": 0,
+          "waiverSubmitted": 122,
+          "waiverWon": 16,
           "waiverFailed": 36,
           "waiverCanceled": 0,
           "faAdds": 17,
@@ -104,22 +116,10 @@
           "tradesDeclined": 0,
           "tradesVetoed": 0
         },
-        "m08": {
-          "ownerKey": "m08",
-          "waiverSubmitted": 19,
-          "waiverWon": 0,
-          "waiverFailed": 9,
-          "waiverCanceled": 0,
-          "faAdds": 11,
-          "tradesProposed": 82,
-          "tradesAccepted": 1,
-          "tradesDeclined": 0,
-          "tradesVetoed": 0
-        },
         "m15": {
           "ownerKey": "m15",
-          "waiverSubmitted": 32,
-          "waiverWon": 0,
+          "waiverSubmitted": 76,
+          "waiverWon": 18,
           "waiverFailed": 23,
           "waiverCanceled": 0,
           "faAdds": 10,
@@ -130,8 +130,8 @@
         },
         "m04": {
           "ownerKey": "m04",
-          "waiverSubmitted": 15,
-          "waiverWon": 0,
+          "waiverSubmitted": 72,
+          "waiverWon": 30,
           "waiverFailed": 11,
           "waiverCanceled": 0,
           "faAdds": 18,
@@ -142,8 +142,8 @@
         },
         "m06": {
           "ownerKey": "m06",
-          "waiverSubmitted": 30,
-          "waiverWon": 0,
+          "waiverSubmitted": 86,
+          "waiverWon": 17,
           "waiverFailed": 13,
           "waiverCanceled": 0,
           "faAdds": 9,
@@ -154,8 +154,8 @@
         },
         "m12": {
           "ownerKey": "m12",
-          "waiverSubmitted": 13,
-          "waiverWon": 0,
+          "waiverSubmitted": 42,
+          "waiverWon": 11,
           "waiverFailed": 12,
           "waiverCanceled": 0,
           "faAdds": 13,
@@ -166,8 +166,8 @@
         },
         "m13": {
           "ownerKey": "m13",
-          "waiverSubmitted": 33,
-          "waiverWon": 0,
+          "waiverSubmitted": 82,
+          "waiverWon": 19,
           "waiverFailed": 27,
           "waiverCanceled": 0,
           "faAdds": 27,
@@ -1229,8 +1229,8 @@
     "managers": {
       "m11": {
         "ownerKey": "m11",
-        "waiverSubmitted": 279,
-        "waiverWon": 81,
+        "waiverSubmitted": 356,
+        "waiverWon": 113,
         "waiverFailed": 120,
         "waiverCanceled": 60,
         "faAdds": 514,
@@ -1241,8 +1241,8 @@
       },
       "m02": {
         "ownerKey": "m02",
-        "waiverSubmitted": 565,
-        "waiverWon": 140,
+        "waiverSubmitted": 614,
+        "waiverWon": 160,
         "waiverFailed": 167,
         "waiverCanceled": 255,
         "faAdds": 287,
@@ -1253,8 +1253,8 @@
       },
       "m17": {
         "ownerKey": "m17",
-        "waiverSubmitted": 137,
-        "waiverWon": 61,
+        "waiverSubmitted": 176,
+        "waiverWon": 86,
         "waiverFailed": 55,
         "waiverCanceled": 18,
         "faAdds": 243,
@@ -1265,8 +1265,8 @@
       },
       "m07": {
         "ownerKey": "m07",
-        "waiverSubmitted": 321,
-        "waiverWon": 80,
+        "waiverSubmitted": 379,
+        "waiverWon": 103,
         "waiverFailed": 117,
         "waiverCanceled": 113,
         "faAdds": 252,
@@ -1275,10 +1275,22 @@
         "tradesDeclined": 273,
         "tradesVetoed": 6
       },
+      "m08": {
+        "ownerKey": "m08",
+        "waiverSubmitted": 189,
+        "waiverWon": 70,
+        "waiverFailed": 62,
+        "waiverCanceled": 38,
+        "faAdds": 286,
+        "tradesProposed": 224,
+        "tradesAccepted": 16,
+        "tradesDeclined": 256,
+        "tradesVetoed": 9
+      },
       "m10": {
         "ownerKey": "m10",
-        "waiverSubmitted": 72,
-        "waiverWon": 35,
+        "waiverSubmitted": 86,
+        "waiverWon": 42,
         "waiverFailed": 26,
         "waiverCanceled": 11,
         "faAdds": 30,
@@ -1289,8 +1301,8 @@
       },
       "m18": {
         "ownerKey": "m18",
-        "waiverSubmitted": 635,
-        "waiverWon": 66,
+        "waiverSubmitted": 712,
+        "waiverWon": 82,
         "waiverFailed": 131,
         "waiverCanceled": 134,
         "faAdds": 281,
@@ -1299,22 +1311,10 @@
         "tradesDeclined": 264,
         "tradesVetoed": 4
       },
-      "m08": {
-        "ownerKey": "m08",
-        "waiverSubmitted": 158,
-        "waiverWon": 48,
-        "waiverFailed": 62,
-        "waiverCanceled": 38,
-        "faAdds": 286,
-        "tradesProposed": 224,
-        "tradesAccepted": 16,
-        "tradesDeclined": 256,
-        "tradesVetoed": 9
-      },
       "m15": {
         "ownerKey": "m15",
-        "waiverSubmitted": 193,
-        "waiverWon": 77,
+        "waiverSubmitted": 237,
+        "waiverWon": 95,
         "waiverFailed": 80,
         "waiverCanceled": 27,
         "faAdds": 178,
@@ -1325,8 +1325,8 @@
       },
       "m04": {
         "ownerKey": "m04",
-        "waiverSubmitted": 15,
-        "waiverWon": 0,
+        "waiverSubmitted": 72,
+        "waiverWon": 30,
         "waiverFailed": 11,
         "waiverCanceled": 0,
         "faAdds": 18,
@@ -1337,8 +1337,8 @@
       },
       "m06": {
         "ownerKey": "m06",
-        "waiverSubmitted": 515,
-        "waiverWon": 97,
+        "waiverSubmitted": 571,
+        "waiverWon": 114,
         "waiverFailed": 142,
         "waiverCanceled": 259,
         "faAdds": 262,
@@ -1349,8 +1349,8 @@
       },
       "m12": {
         "ownerKey": "m12",
-        "waiverSubmitted": 77,
-        "waiverWon": 32,
+        "waiverSubmitted": 106,
+        "waiverWon": 43,
         "waiverFailed": 43,
         "waiverCanceled": 1,
         "faAdds": 66,
@@ -1361,8 +1361,8 @@
       },
       "m13": {
         "ownerKey": "m13",
-        "waiverSubmitted": 301,
-        "waiverWon": 106,
+        "waiverSubmitted": 350,
+        "waiverWon": 125,
         "waiverFailed": 128,
         "waiverCanceled": 61,
         "faAdds": 246,

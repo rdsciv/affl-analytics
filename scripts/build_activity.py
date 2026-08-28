@@ -33,7 +33,7 @@ Counts per owner, per available year:
   waiverFailed     WAIVER status startswith FAILED_
   waiverCanceled   WAIVER status == CANCELED
   faAdds           FREEAGENT status == EXECUTED with an ADD item (no fake claim split)
-  tradesProposed   unique TRADE_PROPOSAL (proposer teamId)
+  tradesProposed   unique TRADE_PROPOSAL threads (CANCELED that points at a PENDING id is not a second proposal)
   tradesAccepted   unique accepted deals (see pairing). TRADE_UPHOLD excluded.
   tradesDeclined   unique TRADE_DECLINE (declining team)
   tradesVetoed     unique TRADE_VETO if present; never invented
@@ -183,6 +183,26 @@ def has_add(tx) -> bool:
     return any(it.get("type") == "ADD" for it in (tx.get("items") or []))
 
 
+def movement_tid(tx):
+    """Claimant / FA team. 2018 EXECUTED waivers use sentinel teamId; items.toTeamId is the roster move."""
+    tid = tx.get("teamId")
+    if valid_tid(tid):
+        return tid
+    for it in tx.get("items") or []:
+        if it.get("type") == "ADD" and valid_tid(it.get("toTeamId")):
+            return it.get("toTeamId")
+    ta = tx.get("teamActions") or {}
+    if isinstance(ta, dict):
+        for k, v in ta.items():
+            if str(v).upper() == "INVOLVED" and valid_tid(k):
+                return k
+    for it in tx.get("items") or []:
+        for key in ("toTeamId", "fromTeamId"):
+            if valid_tid(it.get(key)):
+                return it.get(key)
+    return None
+
+
 def deal_key(tx) -> tuple:
     """Pair on relatedTransactionId when ESPN set it. Else this tx's own id.
 
@@ -226,15 +246,16 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
         tid = t.get("teamId")
 
         if typ == "WAIVER":
-            if not valid_tid(tid):
+            claimant = movement_tid(t)
+            if not valid_tid(claimant):
                 continue
-            credit(tid, "waiverSubmitted")
+            credit(claimant, "waiverSubmitted")
             if status == "EXECUTED":
-                credit(tid, "waiverWon")
+                credit(claimant, "waiverWon")
             elif isinstance(status, str) and status.startswith("FAILED"):
-                credit(tid, "waiverFailed")
+                credit(claimant, "waiverFailed")
             elif status == "CANCELED":
-                credit(tid, "waiverCanceled")
+                credit(claimant, "waiverCanceled")
             continue
 
         if typ == "FREEAGENT":
@@ -242,14 +263,14 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
                 continue
             if not has_add(t):
                 continue
-            if not valid_tid(tid):
+            dest = movement_tid(t)
+            if not valid_tid(dest):
                 continue
-            credit(tid, "faAdds")
+            credit(dest, "faAdds")
             continue
 
         if typ == "TRADE_PROPOSAL":
             if valid_tid(tid):
-                credit(tid, "tradesProposed")
                 proposals[str(t.get("id"))] = t
             continue
 
@@ -270,6 +291,16 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
         if typ == "TRADE_VETO":
             vetoes.append(t)
             continue
+
+    # A CANCELED proposal's relatedTransactionId points at the PENDING
+    # proposal id. That is one thread, not two submitted offers.
+    proposal_ids = set(proposals)
+    for pid, t in proposals.items():
+        rel = t.get("relatedTransactionId")
+        if rel not in (None, "", 0, "0") and str(rel) in proposal_ids:
+            continue
+        if valid_tid(t.get("teamId")):
+            credit(t.get("teamId"), "tradesProposed")
 
     # Pair ACCEPT to PROPOSAL on relatedTransactionId (0 overlap on tx_id).
     deals: dict[tuple, list] = defaultdict(list)
