@@ -81,10 +81,18 @@ def main() -> int:
         fail("renderActivity still paints warehouse txByTeam (executed-only lump)")
 
     # --- pairing grain ---
+    # Old collapse: one thread from PENDING+CANCELED pair via proposal_ids = set(proposals).
+    # Proposed is the TRADE_PROPOSAL row; CANCELED is an outcome; PENDING stays out of the rate.
+    if "proposal_ids = set(proposals)" in builder_src:
+        fail("builder still collapses PENDING+CANCELED via proposal_ids = set(proposals)")
     if "relatedTransactionId" not in builder_src:
         fail("builder missing relatedTransactionId pairing")
     if re.search(r"relatedTransactionId", builder_src) is None:
         fail("builder does not read relatedTransactionId")
+
+    # CHI-145: do not invent a PENDING+CANCELED thread collapse
+    if re.search(r"if rel\b.*in proposal_ids", builder_src):
+        fail("builder collapses PENDING+CANCELED via 'if rel ... in proposal_ids'")
 
     # --- UPHOLD is commish grain, not a second accept ---
     if "TRADE_UPHOLD" not in builder_src:
@@ -298,6 +306,20 @@ def main() -> int:
             fail(f"sentinel waiver not recovered from items: {m3.get('m18')}")
         if any(k.startswith("-") or k == "m01" for k in m3):
             fail("sentinel or m01 leaked into managers")
+        canceled_as_proposal = [
+            {"id": "pend1", "type": "TRADE_PROPOSAL", "teamId": 7, "status": "PENDING"},
+            {
+                "id": "canc1",
+                "type": "TRADE_PROPOSAL",
+                "teamId": 7,
+                "status": "CANCELED",
+                "relatedTransactionId": "pend1",
+            },
+            {"id": "canc2", "type": "TRADE_PROPOSAL", "teamId": 7, "status": "CANCELED"},
+        ]
+        m_c = mod.tally_year(2025, canceled_as_proposal, omap)
+        if (m_c.get("m18") or {}).get("tradesProposed") != 1:
+            fail("tradesProposed counts status==CANCELED as a proposal")
 
     if fails:
         print("FAIL")

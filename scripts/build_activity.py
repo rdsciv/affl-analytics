@@ -33,14 +33,14 @@ Counts per owner, per available year:
   waiverFailed     WAIVER status startswith FAILED_
   waiverCanceled   WAIVER status == CANCELED
   faAdds           FREEAGENT status == EXECUTED with an ADD item (no fake claim split)
-  tradesProposed   unique TRADE_PROPOSAL threads (CANCELED that points at a PENDING id is not a second proposal)
+  tradesProposed   TRADE_PROPOSAL rows after id-dedupe with status != CANCELED (PENDING is the open snapshot; CANCELED is an outcome, not a second proposal)
   tradesAccepted   unique accepted deals (see pairing). TRADE_UPHOLD excluded.
   tradesDeclined   unique TRADE_DECLINE (declining team)
   tradesVetoed     unique TRADE_VETO if present; never invented
 
 Rates (UI, not stored as painted 0 for missing years):
   waiver win  = won / submitted
-  acceptance  = accept / (accept + decline + veto)
+  acceptance  = accept / (accept + decline + veto). PENDING not in the denominator. CANCELED is not veto.
 
 2014–17: raw files are stubs (no transactions[]). Years are available=false
 with no manager counts — missing, never 0.
@@ -292,12 +292,10 @@ def tally_year(year: int, txs: list[dict], omap: dict) -> dict[str, dict]:
             vetoes.append(t)
             continue
 
-    # A CANCELED proposal's relatedTransactionId points at the PENDING
-    # proposal id. That is one thread, not two submitted offers.
-    proposal_ids = set(proposals)
-    for pid, t in proposals.items():
-        rel = t.get("relatedTransactionId")
-        if rel not in (None, "", 0, "0") and str(rel) in proposal_ids:
+    # A proposal is the TRADE_PROPOSAL row. Do not add CANCELED (outcome)
+    # and do not collapse PENDING+CANCELED. PENDING stays out of the rate.
+    for t in proposals.values():
+        if t.get("status") == "CANCELED":
             continue
         if valid_tid(t.get("teamId")):
             credit(t.get("teamId"), "tradesProposed")
