@@ -189,6 +189,20 @@
     return rows;
   }
 
+  /* CHI-139 — "Started Nx by {fr}" is starter weeks THAT franchise
+   * actually started him. Career starts stay on r.starts. Missing
+   * stint stays unavailable, never 0, never hung on pickHomeFranchise. */
+  function hoverStartedLine(r, fr) {
+    if (isAll()) {
+      const n = r.frStarts;
+      if (n == null || n === "") return "";
+      if (!(+n > 0)) return "";
+      return "Started " + (+n) + "\u00d7" + (fr ? " by " + fr : "");
+    }
+    if (r.starts) return "Started " + r.starts + "\u00d7" + (fr ? " by " + fr : "");
+    return "Never started in the AFFL this season";
+  }
+
   function pickHomeFranchise(byFr) {
     const names = Object.keys(byFr).filter((fr) => byFr[fr].fpts > 0);
     if (!names.length) return null;
@@ -246,7 +260,8 @@
         if (r.pos) o.pos = r.pos;
         if (r.team) o.team = r.team;
         if (r.fr) {
-          const bag = o._byFr[r.fr] || (o._byFr[r.fr] = { fpts: 0, starts: 0 });
+          const fr = currentFr(r.fr);
+          const bag = o._byFr[fr] || (o._byFr[fr] = { fpts: 0, starts: 0 });
           bag.fpts += n(r.fpts);
           bag.starts += n(r.starts);
         }
@@ -261,6 +276,10 @@
       o.wopr = (o.tgtsh != null || o.aysh != null) ? 1.5 * n(o.tgtsh) + 0.7 * n(o.aysh) : null;
       o.racr = o._racrAy > 0 ? o._racrNum / o._racrAy : null;
       o.fr = pickHomeFranchise(o._byFr);
+      /* CHI-139 — starts by the home franchise, not career starts. */
+      o.frStarts = (o.fr && o._byFr[o.fr] && o._byFr[o.fr].starts != null)
+        ? o._byFr[o.fr].starts
+        : null;
       o.bid = careerBid(o.pid);
       delete o._byFr;
       delete o._teamTgt; delete o._teamAy; delete o._racrNum; delete o._racrAy;
@@ -460,12 +479,13 @@
         `<b>${esc(displayName(r))}</b> · ${esc(r.pos || "—")} · ${esc(r.team || "FA")}`,
         `<span class="sv-tip-mut">${esc(mx.label)}: ${esc(fmt(evt && evt.x, mx) !== "—" ? fmt((ds.data[hit.index] || {}).x, mx) : fmt((ds.data[hit.index] || {}).x, mx))}</span>`,
         `<span class="sv-tip-mut">${esc(my.label)}: ${esc(fmt((ds.data[hit.index] || {}).y, my))}</span>`,
-        `<span class="sv-tip-mut">${r.g == null ? "—" : r.g} games · ${esc(fmt(r.fpts, { nd: 1 }))} AFFL pts</span>`,
+        `<span class="sv-tip-mut">${r.g == null ? "—" : r.g} games · ${esc(fmt(r.fpts, { nd: 1 }))} AFFL pts` +
+          (isAll() && r.starts ? ` · ${esc(String(r.starts))} AFFL starts` : "") + `</span>`,
         `<span class="sv-tip-mut">${fr ? ("Franchise: " + esc(fr)) : "No AFFL points"}</span>`,
         `<span class="sv-tip-mut">Auction $: ${esc(fmtBid(r.bid))}</span>`,
       ];
-      if (r.starts) lines.push(`<span class="sv-tip-mut">Started ${r.starts}×` + (fr ? ` by ${esc(fr)}` : "") + "</span>");
-      else if (!isAll()) lines.push(`<span class="sv-tip-mut">Never started in the AFFL this season</span>`);
+      const started = hoverStartedLine(r, fr);
+      if (started) lines.push(`<span class="sv-tip-mut">${esc(started)}</span>`);
       tip.innerHTML = lines.join("<br>");
       const plot = tip.parentElement;
       const rec = plot.getBoundingClientRect();
