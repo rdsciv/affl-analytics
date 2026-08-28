@@ -13,9 +13,18 @@
   const S = { q: '', type: 'ALL', limit: 40 };
 
   function tName(id) {
+    if (id == null || id === "" || (typeof id === "number" && Number.isNaN(id))) {
+      return "unavailable";
+    }
+    const named = A.franchiseName(id);
+    if (named) return named;
     const t = T[id] || T[String(id)] || {};
-    if (t.owner) return A.franchiseName(t.owner) || t.name || "—";
-    return A.franchiseName(id) || t.name || "—";
+    if (t.owner) {
+      const fromOwner = A.franchiseName(t.owner);
+      if (fromOwner) return fromOwner;
+    }
+    if (t.name) return t.name;
+    return "unavailable";
   }
   const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
 
@@ -67,7 +76,7 @@
 
   function renderKPIs() {
     const byTeam = YD.txByTeam || {};
-    const entries = Object.entries(byTeam).map(([tid, v]) => ({ tid: +tid, ...v }));
+    const entries = Object.entries(byTeam).map(([tid, v]) => ({ tid, ...v }));
     const waivers = entries.reduce((a, e) => a + e.waiver, 0);
     const fas = entries.reduce((a, e) => a + e.fa, 0);
     const spend = entries.reduce((a, e) => a + e.spent, 0);
@@ -120,7 +129,7 @@
   }
 
   function renderActivity() {
-    const rows = Object.entries(YD.txByTeam || {}).map(([tid, v]) => ({ tid: +tid, ...v }))
+    const rows = Object.entries(YD.txByTeam || {}).map(([tid, v]) => ({ tid, ...v }))
       .sort((a, b) => (b.waiver + b.fa + b.trades) - (a.waiver + a.fa + a.trades));
     if (chart) chart.destroy();
     const names = rows.map((r) => tName(r.tid));
