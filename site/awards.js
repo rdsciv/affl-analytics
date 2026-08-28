@@ -332,7 +332,7 @@
   }
 
   let year = A.years()[0];
-  let scope = A.scopeFromURL();
+  let scope = "cum";
   let pos = "ALL";
   let ALL = null;
   let YD = null;
@@ -392,6 +392,8 @@
         th.classList.toggle("asc", th.dataset.k === st.k && st.dir > 0);
       });
     });
+    const leads = $("award-leaders");
+    if (leads) leads.hidden = false;
   }
 
   function bindSort(sel, kind) {
@@ -496,5 +498,12 @@
   bindExpand();
   bindPos();
   const qs = new URLSearchParams(location.search);
-  await pick(+qs.get("year") || A.years()[0]);
+  const yearQ = qs.get("year");
+  if (yearQ) {
+    scope = "season";
+    await pick(+yearQ);
+  } else {
+    scope = "cum";
+    await pick(year);
+  }
 })();
