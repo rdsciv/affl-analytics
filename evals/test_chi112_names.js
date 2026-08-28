@@ -87,6 +87,23 @@ if (tName(NaN) !== "unavailable") fail("tName(NaN) => " + tName(NaN));
 if (tName("m99") !== "unavailable") fail("tName(m99) => " + tName("m99"));
 if (!String(tName("m01")).includes("Chupacabras")) fail("canon m01 did not resolve Chupacabras: " + tName("m01"));
 
+
+const ghost = Object.entries({
+  m18: { waiver: 10, fa: 0, trades: 0 },
+  "-2147483648": { waiver: 580, fa: 0, trades: 0 },
+  m01: { waiver: 20, fa: 0, trades: 0 },
+}).map(([tid, v]) => ({ tid, ...v })).filter((r) => {
+  const n = tName(r.tid);
+  return n && n !== "unavailable";
+});
+const ghostNames = ghost.map((r) => tName(r.tid));
+if (ghostNames.some((n) => n === "unavailable" || String(n).includes("2147483648"))) {
+  fail("sentinel or unavailable still on axis: " + ghostNames.join(", "));
+}
+if (!ghostNames.some((n) => String(n).includes("Feelers"))) fail("filter dropped Feelers");
+if (!ghostNames.some((n) => String(n).includes("Chupacabras"))) fail("canon m01 dropped from chart");
+if (ghost.length !== 2) fail("expected 2 named rows after dropping sentinel, got " + ghost.length + " " + ghostNames.join(", "));
+
 if (fails.length) {
   console.log("FAIL");
   fails.forEach((f) => console.log(" -", f));

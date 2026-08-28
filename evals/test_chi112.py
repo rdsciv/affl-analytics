@@ -69,11 +69,17 @@ def main() -> int:
         fail("tName must call A.franchiseName(id) first")
     if "A.canon" not in tname:
         fail("tName must consult T[A.canon?.(id)]")
+    if "function ownerKey" not in js:
+        fail("ownerKey missing — ESPN sentinel -2147483648 must be dropped")
+    if 'n !== "unavailable"' not in act and "n !== 'unavailable'" not in act:
+        fail("renderActivity must drop unnamed / unavailable rows")
+    if "2147483648" not in (ROOT / "evals/test_chi112_names.js").read_text():
+        fail("name helper must assert the 2018 ESPN sentinel is dropped")
 
     bust = re.search(r"trades\.js\?v=(\d+)", html)
     if not bust:
         fail("trades.html missing trades.js cache bust")
-    elif int(bust.group(1)) < 6:
+    elif int(bust.group(1)) < 7:
         fail(f"trades.js cache still v={bust.group(1)}")
 
     helper = ROOT / "evals/test_chi112_names.js"

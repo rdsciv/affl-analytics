@@ -24,8 +24,16 @@
       if (fromOwner) return fromOwner;
     }
     if (t.name) return t.name;
-    if (t.owner) return t.owner;
     return "unavailable";
+  }
+  function ownerKey(year, tid) {
+    const n = Number(tid);
+    if (Number.isFinite(n) && n <= 0) return null;
+    if (Number.isFinite(n) && n < 1000) {
+      const oid = A.ownerId(year, n);
+      return oid ? A.canon(oid) : null;
+    }
+    return A.canon(tid);
   }
   const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
 
@@ -64,7 +72,8 @@
         moves.push(Object.assign({}, m, { year: y, tid: A.ownerId(y, m.tid) || m.tid }));
       }
       Object.entries(data.txByTeam || {}).forEach(([tid, v]) => {
-        const oid = A.ownerId(y, +tid) || tid;
+        const oid = ownerKey(y, tid);
+        if (!oid) return;
         const a = txByTeam[oid] || { waiver: 0, fa: 0, trades: 0, drop: 0, spent: 0 };
         a.waiver += v.waiver || 0; a.fa += v.fa || 0; a.trades += v.trades || 0;
         a.drop += v.drop || 0; a.spent += v.spent || 0;
@@ -131,6 +140,10 @@
 
   function renderActivity() {
     const rows = Object.entries(YD.txByTeam || {}).map(([tid, v]) => ({ tid, ...v }))
+      .filter((r) => {
+        const n = tName(r.tid);
+        return n && n !== "unavailable";
+      })
       .sort((a, b) => (b.waiver + b.fa + b.trades) - (a.waiver + a.fa + a.trades));
     if (chart) chart.destroy();
     const names = rows.map((r) => tName(r.tid));
@@ -166,7 +179,7 @@
             grid: { display: false },
             border: { display: false },
             ticks: { display: true, autoSkip: false, color: C.ink, font: { size: 11, weight: '600' } },
-            afterFit(scale) { scale.width = Math.max(scale.width, 128); },
+            afterFit(scale) { scale.width = Math.max(scale.width, 196); },
           },
         },
       },
