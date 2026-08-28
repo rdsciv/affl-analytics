@@ -156,7 +156,7 @@
   let franSortKey = "pts";
   let franSortDir = -1;
   let careerView = null;
-  const PP = { q: "", pos: "ALL", limit: 24 };
+  const PP = { q: "", pos: "QB", sort: "tot", limit: 24 };
 
   function tName(id, y) {
     const t = A.teams(y || year)[id];
@@ -2295,33 +2295,86 @@
     return careerList;
   }
 
+  const DB_SORTS = [
+    { key: "tot", label: "AFFL pts", short: "career pts", digits: 1 },
+    { key: "td", label: "TD", short: "TD", digits: 0 },
+    { key: "xtd", label: "xTD", short: "xTD", digits: 2 },
+    { key: "starts", label: "AFFL starts", short: "starts", digits: 0 },
+    { key: "yds", label: "Yards", short: "yards", digits: 0 },
+  ];
+
+  function indexCareerBox(pid) {
+    const bag = (meta(pid).xtd || {});
+    let td = 0, xtd = 0, nTd = 0, nXtd = 0;
+    Object.keys(bag).forEach((y) => {
+      const r = bag[y];
+      if (!r) return;
+      if (r.td != null && Number.isFinite(Number(r.td))) { td += Number(r.td); nTd += 1; }
+      if (r.xtd != null && Number.isFinite(Number(r.xtd))) { xtd += Number(r.xtd); nXtd += 1; }
+    });
+    let yds = 0, nYds = 0;
+    const rec = nflBlock(pid);
+    Object.keys(rec).forEach((y) => {
+      if (!isYearKey(y)) return;
+      const weeks = rec[y] || {};
+      Object.keys(weeks).forEach((wk) => {
+        if (!isWeekKey(wk)) return;
+        const w = weeks[wk];
+        if (w && w.yds != null && Number.isFinite(Number(w.yds))) { yds += Number(w.yds); nYds += 1; }
+      });
+    });
+    return { td: nTd ? td : null, xtd: nXtd ? xtd : null, yds: nYds ? yds : null };
+  }
+
+  function dbMetric(p, key) {
+    if (key === "tot") return (p.tot != null && Number.isFinite(Number(p.tot))) ? Number(p.tot) : null;
+    if (key === "starts") return p.starts ? Number(p.starts) : null;
+    if (key === "td") return p.td != null ? Number(p.td) : null;
+    if (key === "xtd") return p.xtd != null ? Number(p.xtd) : null;
+    if (key === "yds") return p.yds != null ? Number(p.yds) : null;
+    return null;
+  }
+
   function filtered() {
     const q = PP.q.toLowerCase();
     const src = enrichedPool();
-    return src.filter((p) => {
+    const rows = src.filter((p) => {
       if (PP.pos !== "ALL" && p.pos !== PP.pos) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
       return true;
-    }).sort((a, b) => {
-      const tb = Number(b.tot) || 0;
-      const ta = Number(a.tot) || 0;
-      if (tb !== ta) return tb - ta;
+    }).map((p) => {
+      const box = indexCareerBox(p.pid);
+      return Object.assign({}, p, box);
+    });
+    rows.sort((a, b) => {
+      const vb = dbMetric(b, PP.sort);
+      const va = dbMetric(a, PP.sort);
+      if (vb == null && va == null) return String(a.name || "").localeCompare(String(b.name || ""));
+      if (vb == null) return 1;
+      if (va == null) return -1;
+      if (vb !== va) return vb - va;
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
+    return rows;
   }
 
   function renderGrid() {
     const rows = filtered();
-    $("#db-span").textContent = "rostered players · all seasons";
-    $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => `
+    const sortDef = DB_SORTS.find((s) => s.key === PP.sort) || DB_SORTS[0];
+    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : PP.pos) + " · " + sortDef.short + " · all seasons";
+    $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => {
+      const v = dbMetric(p, PP.sort);
+      const shown = v == null ? "unavailable" : fmt(v, sortDef.digits);
+      return `
       <div class="pp-card${cur && p.pid === cur.pid ? " cur" : ""}" data-pid="${p.pid}">
         ${A.headshotHTML(p, "pp-hs")}
         <div>
           <div class="pp-nm">${A.playerLink(p.pid, p.name, { log: "all" })}</div>
           <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ""} · ${(tName(p.mainTeam, year) || "—").slice(0, 16)}</div>
         </div>
-        <div class="pp-pts"><b>${fmt(p.tot, 1)}</b><span>career pts</span></div>
-      </div>`).join("") ||
+        <div class="pp-pts"><b>${shown}</b><span>${sortDef.short}</span></div>
+      </div>`;
+    }).join("") ||
       A.notice(enrichedPool().length ? "No players match." :
         "No player profiles stored.");
     $("#pp-more").style.display = rows.length > PP.limit ? "block" : "none";
@@ -2335,14 +2388,28 @@
   }
 
   const POSES = ["ALL", "QB", "RB", "WR", "TE", "K", "DST"];
-  $("#pp-filters").innerHTML = POSES.map((p) =>
-    `<button class="pp-chip${p === "ALL" ? " on" : ""}" data-pos="${p}">${p}</button>`).join("");
-  document.querySelectorAll(".pp-chip").forEach((b) =>
-    b.addEventListener("click", () => {
-      PP.pos = b.dataset.pos; PP.limit = 24;
-      document.querySelectorAll(".pp-chip").forEach((x) => x.classList.toggle("on", x === b));
-      renderGrid();
-    }));
+  function paintDbChips() {
+    $("#pp-filters").innerHTML = POSES.map((p) =>
+      `<button class="pp-chip${p === PP.pos ? " on" : ""}" data-pos="${p}">${p}</button>`).join("");
+    const sortEl = $("#pp-sort");
+    if (sortEl) {
+      sortEl.innerHTML = DB_SORTS.map((s) =>
+        `<button class="pp-chip${s.key === PP.sort ? " on" : ""}" data-sort="${s.key}">${s.label}</button>`).join("");
+    }
+    document.querySelectorAll("#pp-filters .pp-chip").forEach((b) =>
+      b.addEventListener("click", () => {
+        PP.pos = b.dataset.pos; PP.limit = 24;
+        paintDbChips();
+        renderGrid();
+      }));
+    document.querySelectorAll("#pp-sort .pp-chip").forEach((b) =>
+      b.addEventListener("click", () => {
+        PP.sort = b.dataset.sort; PP.limit = 24;
+        paintDbChips();
+        renderGrid();
+      }));
+  }
+  paintDbChips();
   $("#pp-search").addEventListener("input", (e) => { PP.q = e.target.value; PP.limit = 24; renderGrid(); });
   $("#pp-more").addEventListener("click", () => { PP.limit += 24; renderGrid(); });
 
