@@ -31,8 +31,9 @@ else:
         fail("YPC is not on the career row; do not invent it")
 if 'id="pp-sort"' not in html:
     fail("players.html missing #pp-sort")
-if "players.js?v=38" not in html:
-    fail("players.js pin not v=38")
+_m = re.search(r"players\.js\?v=(\d+)", html)
+if not _m or int(_m.group(1)) < 38:
+    fail("players.js pin not v>=38")
 if 'key: "tot"' not in js or 'key: "xtd"' not in js or 'key: "td"' not in js:
     fail("DB_SORTS missing tot/td/xtd")
 for need in ["Russell Wilson", "Aaron Rodgers", "Matthew Stafford"]:

@@ -7,6 +7,7 @@ Cumulative|Season toggle still exists on the required pages, if the word
 squad appears in the new chrome, or if the default is not All/All.
 """
 import json
+import subprocess
 import re
 import sys
 import urllib.error
@@ -103,6 +104,10 @@ def test_common(common):
         fail("common.js picker still labeled Squad")
     if 'aria-label="Team"' not in common:
         fail("common.js team picker is not labeled Team")
+    if "function squadsForSeason" not in common:
+        fail("common.js missing squadsForSeason")
+    if "function teamSelect" not in common:
+        fail("common.js missing teamSelect alias")
     picker = re.search(r"function squadPicker\(el, squad, onPick\) \{([\s\S]*?)\n  \}", common)
     if not picker:
         fail("common.js missing squadPicker")
@@ -234,6 +239,44 @@ def test_teams_squad_copy(html, js):
 
 
 
+def test_visible_squad_copy():
+    """Visible chrome is Team, not squad. Players COMPARE Per game|Season is grain."""
+    for name in REQUIRED:
+        html = src(name)
+        vis = re.sub(r"<script[\s\S]*?</script>", " ", html)
+        vis = re.sub(r"<[^>]+>", " ", vis)
+        if re.search(r"squad", vis, re.I):
+            fail(f"{name} visible copy still says squad")
+    hist = src("history.js")
+    if re.search(r"YOUNGEST SQUAD|OLDEST SQUAD|Youngest squad|Oldest squad", hist):
+        fail("History age cards still say squad")
+    if "Youngest team" not in hist or "Oldest team" not in hist:
+        fail("History age cards are not Youngest/Oldest team")
+
+
+def test_pages_use_shared_team_picker():
+    """Every required page remounts Team through the shared year filter."""
+    for js_name in ("history.js", "teams.js", "trades.js", "players.js", "draft.js"):
+        js = src(js_name)
+        if "A.squadPicker(" not in js and "A.teamSelect(" not in js:
+            fail(f"{js_name} does not mount the shared Team picker")
+        if not re.search(r"A\.squadPicker\([\s\S]*?,\s*(pickedYear|seasonYear|scope === \"cum\" \? null : year)\s*\)", js):
+            fail(f"{js_name} does not pass Season into the Team picker")
+        if "franchisePlayedSeason" not in js:
+            fail(f"{js_name} does not drop a Team that did not play the year")
+    savant = src("savant.js")
+    if "squadsForSeason" not in savant and "teamsForSeason" not in savant:
+        fail("savant.js Team list does not use the shared year filter")
+    if "A.squadsForSeason" not in savant:
+        fail("savant.js does not call A.squadsForSeason")
+    if re.search(r"currentSquads\(\)\.map\(\s*\(t\) => \[t\.name, t\.name\]\)", savant):
+        fail("savant.js still paints unfiltered CURRENT_2026 as Team options")
+    for html_name in REQUIRED:
+        html = src(html_name)
+        if "common.js?v=31" not in html:
+            fail(f"{html_name} did not bump common.js cache to v=31")
+
+
 def test_team_options_filter(common, data):
     """Gabagooners are 2026-only. Drop them from Team when a year is picked."""
     if "function squadsForSeason" not in common:
@@ -255,8 +298,7 @@ def test_team_options_filter(common, data):
             if y in ys:
                 names.append(f.get("currentName") or "")
         if any("Gabagooners" in n for n in names):
-            fail(f"Gabagooners is a Team option when year is {y}")
-        # source must actually use the filter so UI matches this data
+            fail(f"data.json still places Gabagooners in {y}")
     draft_js = src("draft.js")
     draft_html = src("draft.html")
     if "A.yearPicker(" in draft_js or re.search(r"(?<![A-Za-z.])yearPicker\(", draft_js):
@@ -270,6 +312,39 @@ def test_team_options_filter(common, data):
         fail("cannot parse yearPicker")
     elif "tagName === \"SELECT\"" not in yp.group(1) and 'tagName === "SELECT"' not in yp.group(1):
         fail("yearPicker can still paint chips over a Season <select>")
+    painted = paint_team_options()
+    if not painted:
+        return
+    for label, key in (("All", "all"), ("2014", "y2014"), ("2025", "y2025")):
+        names = painted.get(key) or []
+        gaba = [n for n in names if "Gabagooners" in n]
+        if key == "all":
+            if not gaba:
+                fail("Gabagooners missing from Team when Season is All")
+        elif gaba:
+            fail(f"Gabagooners is a Team option for year={label} on the shared picker")
+        via = (painted.get("viaForSeason") or {}).get(key) or []
+        via_gaba = [n for n in via if "Gabagooners" in n]
+        if key != "all" and via_gaba:
+            fail(f"squadsForSeason({label}) still includes Gabagooners")
+    test_pages_use_shared_team_picker()
+
+
+def paint_team_options():
+    script = Path(__file__).resolve().parent / "chi142_team_options.mjs"
+    if not script.is_file():
+        fail("missing evals/chi142_team_options.mjs")
+        return None
+    try:
+        raw = subprocess.check_output(["node", str(script)], cwd=str(ROOT), timeout=20)
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+        fail(f"shared Team picker did not paint: {e}")
+        return None
+    try:
+        return json.loads(raw.decode())
+    except json.JSONDecodeError as e:
+        fail(f"Team picker paint is not JSON: {e}")
+        return None
 
 
 def test_http():
@@ -305,6 +380,7 @@ def main():
         if "2026" in html and re.search(r'option value="2026"|data-y="2026"', html):
             fail(f"{page} offers 2026")
     test_teams_squad_copy(src("teams.html"), src("teams.js"))
+    test_visible_squad_copy()
     test_team_options_filter(common, data)
     test_http()
 
