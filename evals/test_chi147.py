@@ -150,6 +150,33 @@ def main() -> int:
     if "PPR" in trades_js and "non-PPR" not in players_js:
         fail("PPR leaked")
 
+    # --- Gabagooners career book: no empty 0-0-0 on History ---
+    if "function inCareerBook" not in hist_js:
+        fail("history.js missing inCareerBook")
+    cr = re.search(r"function careerRows\(\) \{([\s\S]*?)\n  \}", hist_js)
+    if not cr or "inCareerBook" not in cr.group(1):
+        fail("History franchise records still include no-career Gabagooners")
+    h2h = re.search(r"function renderH2H\(\) \{([\s\S]*?)\n  \}", hist_js)
+    if not h2h or "inCareerBook" not in h2h.group(1):
+        fail("History H2H still includes Gabagooners")
+    if "inCareerBook(r.owner)" not in hist_js:
+        fail("History All-Play still allows a 0-0-0 m22 row")
+    if "if (!by[oid]) return" not in hist_js:
+        fail("rollFranchises still seeds empty Gabagooners")
+    if 'id === "m22"' not in hist_js:
+        fail("inCareerBook does not drop m22")
+    gaba = next((f for f in (data.get("franchises") or []) if f.get("owner") == "m22"), None)
+    if gaba and ((gaba.get("years") or []) or (gaba.get("seasons") or 0)):
+        fail("Gabagooners have 2014-2025 seasons")
+    for ys, season in (data.get("seasons") or {}).items():
+        if any(t.get("owner") == "m22" for t in (season.get("teams") or [])):
+            fail(f"Gabagooners appear in season {ys}")
+    if 2026 in {int(y) for y in (data.get("seasons") or {})}:
+        fail("AFFL 2026 season invented in data.json")
+    bust = re.search(r"history\.js\?v=(\d+)", hist_html)
+    if not bust or int(bust.group(1)) < 22:
+        fail("history.js cache not bumped to v>=22")
+
     if fails:
         print("FAIL")
         for item in fails:

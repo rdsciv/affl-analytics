@@ -180,19 +180,8 @@
     });
     (DATA.franchises || []).forEach((f) => {
       const oid = canon(f.owner);
-      if (!by[oid]) {
-        by[oid] = {
-          owner: oid, name: f.currentName || "", logo: f.logo || "",
-          seasons: 0, wins: 0, losses: 0, ties: 0, regWins: 0,
-          pf: 0, pa: 0, allW: 0, allL: 0, expWins: 0, luck: 0,
-          titles: 0, runnerUps: 0, thirds: 0, sackos: 0, playoffs: 0,
-          scoreTitles: 0, bestFinish: 99, worstFinish: 0,
-          maxScore: null, minScore: null, weekN: 0, weekSum: 0,
-          weeks: [], finishes: {}, firstYear: null, lastYear: null, active: false,
-          highPf: null, lowPf: null, tenWins: 0,
-          winStreak: 0, loseStreak: 0, moves: 0, trades: 0, activate: 0,
-        };
-      }
+      /* Career book is 2014–2025. Do not invent a 0–0–0 Gabagooners row. */
+      if (!by[oid]) return;
       const r = by[oid];
       if (f.currentName) r.name = f.currentName;
       if (f.logo) r.logo = f.logo;
@@ -311,7 +300,7 @@
   ROWS.forEach((r) => { NAME[r.owner] = r.name; });
 
   function careerRows() {
-    return A.visibleFranchises(ROWS);
+    return A.visibleFranchises(ROWS).filter((r) => inCareerBook(r.owner));
   }
 
   const KEYS = {
@@ -575,7 +564,7 @@
   }
 
   function renderH2H() {
-    const owners = (DATA.activeOwners || []).slice().sort((a, b) => {
+    const owners = (DATA.activeOwners || []).filter((a) => inCareerBook(a)).slice().sort((a, b) => {
       const an = NAME[canon(a)] || "";
       const bn = NAME[canon(b)] || "";
       return an.localeCompare(bn);
@@ -696,7 +685,7 @@
           if (mv != null) r.moves += mv;
         });
       });
-      return Object.values(by).sort((a, b) => (b.allW - a.allW) || (a.allL - b.allL)).map((r, i) => { r.rank = i + 1; return r; });
+      return Object.values(by).filter((r) => inCareerBook(r.owner)).sort((a, b) => (b.allW - a.allW) || (a.allL - b.allL)).map((r, i) => { r.rank = i + 1; return r; });
     }
     const rawRows = (pickedYear == null ? careerStandRows() : seasonStandRows(seasonYear));
     const rows = rawRows.filter((r) => !squad || A.canon(r.owner) === A.canon(squad)).slice().sort((a, b) => {
@@ -1164,6 +1153,14 @@
   function meanAge(ages) {
     if (!ages.length) return null;
     return ages.reduce((a, b) => a + b, 0) / ages.length;
+  }
+
+  /* Career book is 2014–2025. Gabagooners (m22) have not played. */
+  function inCareerBook(oid) {
+    const id = canon(oid);
+    if (!id || id === "m22") return false;
+    const years = franchiseYears(id);
+    return years.some((y) => +y >= 2014 && +y <= 2025);
   }
 
   function franchiseYears(oid) {
