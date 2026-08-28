@@ -3051,10 +3051,20 @@
   }
 
   function paintChrome() {
+    const seasonYear = scope === "cum" ? null : year;
+    if (seasonYear != null && squad && !A.franchisePlayedSeason(squad, seasonYear)) {
+      squad = "";
+      A.stampNav("");
+    }
     const ylist = squad ? A.squadYears(squad) : A.years();
-    A.seasonSelect(document.getElementById("year-picker"), scope === "cum" ? null : year, async (y) => {
+    A.seasonSelect(document.getElementById("year-picker"), seasonYear, async (y) => {
       if (y == null) scope = "cum";
       else { scope = "season"; year = y; try { YD = await A.loadYear(year); T = A.teams(year); } catch (e) {} }
+      if (year != null && squad && !A.franchisePlayedSeason(squad, year)) {
+        squad = "";
+        A.stampNav("");
+      }
+      paintChrome();
       renderGrid();
     }, ylist);
     A.squadPicker(document.getElementById("squad-picker"), squad, (s) => {
@@ -3067,7 +3077,7 @@
       }
       paintChrome();
       renderGrid();
-    });
+    }, seasonYear);
   }
 
   async function pick(pid, ly) {

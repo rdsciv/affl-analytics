@@ -1959,6 +1959,10 @@
   function bindYearSelect() {
     const el = $("year-picker");
     if (!el) return;
+    if (pickedYear != null && squad && !A.franchisePlayedSeason(squad, pickedYear)) {
+      squad = "";
+      A.stampNav("");
+    }
     const ylist = squad ? A.squadYears(squad) : A.years();
     A.seasonPicker(el, pickedYear, applySeasonYear, ylist);
     A.squadPicker($("squad-picker"), squad, (s) => {
@@ -1980,7 +1984,7 @@
         renderAgeScatter();
         renderRace();
       }
-    });
+    }, pickedYear);
   }
   bindYearSelect();
 

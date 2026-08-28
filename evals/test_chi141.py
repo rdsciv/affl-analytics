@@ -21,8 +21,10 @@ if "b.w >= 52" not in js:
     fail("narrow columns still get percent labels")
 if "Connected scatter" in html:
     fail("Connected scatter title still clips")
-if "draft.js?v=19" not in html and "draft.js?v=18" not in html:
-    fail("draft.js pin not v=19")
+import re as _re
+_m = _re.search(r"draft\.js\?v=(\d+)", html)
+if not _m or int(_m.group(1)) < 18:
+    fail("draft.js pin not v>=18")
 
 if fails:
     print("FAIL")

@@ -172,8 +172,14 @@ window.AFFL = (function () {
       onerror="if(this.dataset.fb){this.src=this.dataset.fb;this.dataset.fb='';}else if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
   }
 
-  /** Year chips. onPick(year) is called on click. */
+  /** Year chips. onPick(year) is called on click.
+     If the target is already a Season <select> (History/Teams/Draft), keep the select. */
   function yearPicker(el, cur, onPick, decorate, list) {
+    if (!el) return;
+    if (el.tagName === "SELECT" || el.querySelector("select")) {
+      seasonSelect(el, cur, onPick, list);
+      return;
+    }
     el.innerHTML = (list || years()).map((y) => {
       const info = yearInfo(y);
       const extra = decorate ? decorate(info) : '';
@@ -348,12 +354,33 @@ window.AFFL = (function () {
     return t ? t.id : null;
   }
 
+  /* Team All|name for a Season. All = every franchise including Gabagooners.
+     A picked year drops anyone who did not play that year (Gabagooners are 2026-only). */
+  function squadsForSeason(year) {
+    const list = squads();
+    const scope = seasonScope(year);
+    if (scope.all) return list;
+    return list.filter((f) => franchisePlayedSeason(f.owner, scope.year));
+  }
+
   function squadPicker(el, squad, onPick) {
     if (!el) return;
-    const list = squads();
+    const year = arguments.length > 3 ? arguments[3] : seasonFromURL();
+    const list = squadsForSeason(year);
+    const still = squad && list.some((f) => f.owner === squad || canon(f.owner) === canon(squad));
+    const cur = still ? squad : "";
+    if (squad && !cur) {
+      rememberSquad("");
+      try {
+        const u = new URL(location.href);
+        u.searchParams.delete("squad");
+        u.searchParams.delete("team");
+        history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
+      } catch (e) { /* ignore */ }
+    }
     el.innerHTML = `<select class="team-select" aria-label="Team">
       <option value="">All</option>
-      ${list.map((f) => `<option value="${f.owner}"${f.owner === squad ? " selected" : ""}>${f.currentName}</option>`).join("")}
+      ${list.map((f) => `<option value="${f.owner}"${f.owner === cur ? " selected" : ""}>${f.currentName}</option>`).join("")}
     </select>`;
     el.querySelector("select").addEventListener("change", (e) => {
       rememberSquad(e.target.value);
@@ -368,6 +395,11 @@ window.AFFL = (function () {
       history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
       onPick(e.target.value);
     });
+    return cur;
+  }
+
+  function teamSelect(el, team, onPick, year) {
+    return squadPicker(el, team, onPick, year);
   }
 
   function stampNav(squad) {
@@ -833,7 +865,7 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
-           squads, squadFromURL, squadInfo, squadYears, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, stampNav, clampYear, rememberSquad,
+           squads, squadFromURL, squadInfo, squadYears, squadsForSeason, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, teamSelect, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,

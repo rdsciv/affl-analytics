@@ -54,7 +54,8 @@ def main():
         fail("draft.js does not read parByOverall")
     if "A.loadAllYears" not in js and "loadAllYears" not in js:
         fail("overview does not use loadAllYears")
-    if "draft.js?v=19" not in html and "draft.js?v=18" not in html and "draft.js?v=17" not in html:
+    _m = re.search(r"draft\.js\?v=(\d+)", html)
+    if not _m or int(_m.group(1)) < 17:
         fail("draft.html did not bump draft.js cache")
     if "AFFL does not use keepers" not in html and "AFFL does not use keepers" not in js:
         fail("missing one-line keepers denial")

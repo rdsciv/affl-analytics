@@ -226,6 +226,50 @@ def test_teams_squad_copy(html, js):
         fail("teams.js still paints N squads")
     if "Youngest squad" in src("history.js") or "Oldest squad" in src("history.js"):
         fail("history.js still paints Youngest/Oldest squad")
+    hist = src("history.js")
+    if re.search(r"YOUNGEST SQUAD|OLDEST SQUAD", hist, re.I):
+        fail("History still has YOUNGEST SQUAD / OLDEST SQUAD")
+    if "Youngest team" not in hist or "Oldest team" not in hist:
+        fail("History age cards are not YOUNGEST TEAM / OLDEST TEAM")
+
+
+
+def test_team_options_filter(common, data):
+    """Gabagooners are 2026-only. Drop them from Team when a year is picked."""
+    if "function squadsForSeason" not in common:
+        fail("common.js missing squadsForSeason")
+    picker = re.search(r"function squadPicker\(el, squad, onPick\) \{([\s\S]*?)\n  \}", common)
+    if not picker:
+        fail("cannot parse squadPicker after year filter")
+    else:
+        body = picker.group(1)
+        if "squadsForSeason" not in body and "franchisePlayedSeason" not in body:
+            fail("squadPicker does not re-filter Team options by Season")
+        if "const list = squads();" in body:
+            fail("squadPicker still lists every franchise regardless of Season")
+    merge = parse_merge(common)
+    for y in (2014, 2025):
+        names = []
+        for f in data.get("franchises") or []:
+            ys = franchise_years(data, f.get("owner"), merge)
+            if y in ys:
+                names.append(f.get("currentName") or "")
+        if any("Gabagooners" in n for n in names):
+            fail(f"Gabagooners is a Team option when year is {y}")
+        # source must actually use the filter so UI matches this data
+    draft_js = src("draft.js")
+    draft_html = src("draft.html")
+    if "A.yearPicker(" in draft_js or re.search(r"(?<![A-Za-z.])yearPicker\(", draft_js):
+        fail("Draft still paints year pills")
+    if re.search(r'class="week-picker" id="year-picker"', draft_html):
+        fail("Draft Season is still a chip strip")
+    if not re.search(r'<select[^>]*(id="year-picker"|id="season-picker")', draft_html):
+        fail("Draft missing one Season <select>")
+    yp = re.search(r"function yearPicker\(el, cur, onPick, decorate, list\) \{([\s\S]*?)\n  \}", common)
+    if not yp:
+        fail("cannot parse yearPicker")
+    elif "tagName === \"SELECT\"" not in yp.group(1) and 'tagName === "SELECT"' not in yp.group(1):
+        fail("yearPicker can still paint chips over a Season <select>")
 
 
 def test_http():
@@ -261,6 +305,7 @@ def main():
         if "2026" in html and re.search(r'option value="2026"|data-y="2026"', html):
             fail(f"{page} offers 2026")
     test_teams_squad_copy(src("teams.html"), src("teams.js"))
+    test_team_options_filter(common, data)
     test_http()
 
     if fails:

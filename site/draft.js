@@ -2326,6 +2326,11 @@
 
   async function pick(y) {
     year = y;
+    const seasonYear = scope === "cum" ? null : year;
+    if (seasonYear != null && squad && !A.franchisePlayedSeason(squad, seasonYear)) {
+      squad = "";
+      A.stampNav("");
+    }
     if (squad) year = A.clampYear(year, squad);
     S.limit = 60;
     const ylist = squad ? A.squadYears(squad) : A.years();
@@ -2339,9 +2344,9 @@
         else year = next;
       }
       pick(year);
-    });
+    }, scope === "cum" ? null : year);
     A.stampNav(squad);
-    A.seasonPicker($('#year-picker'), scope === "cum" ? null : year, (y) => {
+    A.seasonSelect($('#year-picker'), scope === "cum" ? null : year, (y) => {
       if (y == null) { scope = "cum"; pick(A.years()[0]); }
       else { scope = "season"; pick(y); }
     }, ylist);

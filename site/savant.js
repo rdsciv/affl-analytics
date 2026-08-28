@@ -415,7 +415,23 @@
     return A.squadYears(t.owner) || [];
   }
 
+  function teamsForSeason() {
+    const all = currentSquads();
+    if (isAll()) return all;
+    if (A.squadsForSeason) {
+      const allow = new Set(A.squadsForSeason(state.season).map((f) => A.canon(f.owner)));
+      return all.filter((t) => allow.has(A.canon(t.owner)));
+    }
+    return all.filter((t) => A.franchisePlayedSeason && A.franchisePlayedSeason(t.owner, state.season));
+  }
+
   function renderControls() {
+    if (!isAll() && state.franchise) {
+      const t = currentSquads().find((x) => x.name === state.franchise);
+      if (t && A.franchisePlayedSeason && !A.franchisePlayedSeason(t.owner, state.season)) {
+        state.franchise = "";
+      }
+    }
     let ylist = yearsForFranchise();
     if (state.franchise && !ylist.length) {
       state.season = ALL;
@@ -430,7 +446,8 @@
       renderAll();
     });
 
-    const teams = [["", "All"]].concat(currentSquads().map((t) => [t.name, t.name]));
+    const shown = teamsForSeason();
+    const teams = [["", "All"]].concat(shown.map((t) => [t.name, t.name]));
     fillSelect($("team-picker"), teams, state.franchise, setFranchise);
 
     fillSelect($("pos-select"), POSITIONS.map((p) => [p, p === "ALL" ? "All" : p]), state.pos, (v) => {
@@ -446,7 +463,7 @@
 
     const chipEl = $("team-chips");
     if (chipEl) {
-      const items = [["", "All"]].concat(currentSquads().map((t) => [t.name, t.name]));
+      const items = [["", "All"]].concat(shown.map((t) => [t.name, t.name]));
       chips(chipEl, items, state.franchise, setFranchise);
     }
     chips($("view-picker"), [["all", "All NFL"], ["affl", "AFFL starters only"]], state.view, (v) => {
