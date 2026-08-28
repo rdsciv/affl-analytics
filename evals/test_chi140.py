@@ -18,6 +18,73 @@ fails: list[str] = []
 def fail(msg: str) -> None:
     fails.append(msg)
 
+def _css_block(html: str, selector: str) -> str:
+    pat = re.escape(selector) + r"\s*\{([^}]+)\}"
+    m = re.search(pat, html)
+    return m.group(1) if m else ""
+
+
+def _px(css: str, prop: str, default: int = 0) -> int:
+    m = re.search(rf"{re.escape(prop)}:\s*(\d+)px", css)
+    return int(m.group(1)) if m else default
+
+
+def _nowrap_clips_axis_labels(html: str) -> bool:
+    """True when a nowrap control bar would clip Y AXIS / MIN OPP.
+
+    Picasso fail: nowrap on a too-narrow rigid bar without overflow:visible
+    or wrap — visible text becomes "Y AXI".
+    """
+    row = _css_block(html, ".sv-control-row")
+    field = _css_block(html, ".sv-control-row .sv-field")
+    wide = _css_block(html, ".sv-control-row .sv-field.wide")
+    lab = _css_block(html, ".sv-field label")
+    if not row:
+        return True
+
+    wraps = bool(re.search(r"flex-wrap:\s*wrap(?!\s*-)", row)) and "nowrap" not in row
+    if wraps:
+        return False
+
+    nowrap = "nowrap" in row
+    if not nowrap:
+        return False
+
+    overflow_visible = bool(re.search(r"overflow(?:-x)?:\s*visible", row + lab))
+    shrinks = (
+        bool(re.search(r"min-width:\s*0\b", field))
+        or bool(re.search(r"flex:\s*[^;]*[1-9]\s+", field))
+    )
+    lab_hidden = bool(re.search(r"overflow:\s*hidden", lab))
+    if lab_hidden:
+        return True
+
+    n_reg = len(re.findall(r'class="sv-field"', html))
+    n_wide = len(re.findall(r'class="sv-field wide"', html))
+    gap = _px(row, "gap", 10)
+    min_reg = _px(field, "min-width", 0)
+    min_wide = _px(wide, "min-width", min_reg)
+    # flex-basis like 72px counts as the reserved slot when min-width is 0
+    if min_reg == 0:
+        m = re.search(r"flex:\s*[\d.]+\s+[\d.]+\s+(\d+)px", field)
+        min_reg = int(m.group(1)) if m else 0
+    if min_wide == 0:
+        m = re.search(r"flex:\s*[\d.]+\s+[\d.]+\s+(\d+)px", wide)
+        min_wide = int(m.group(1)) if m else min_reg
+    total = n_reg * min_reg + n_wide * min_wide + gap * max(n_reg + n_wide - 1, 0)
+    # ~1000px is sheet-main at a 1280 Picasso viewport beside the 188px rail.
+    too_narrow = total > 900 and not shrinks
+    if too_narrow and not overflow_visible:
+        return True
+    # overflow:auto/hidden/scroll is a clipping scrollport — "Y AXI" still paints.
+    row_clips = bool(re.search(r"overflow(?:-x)?:\s*(hidden|auto|scroll)", row))
+    rigid = bool(re.search(r"flex:\s*0\s+0", field))
+    if row_clips and rigid and not overflow_visible:
+        return True
+    return False
+
+
+
 
 def main() -> int:
     html = (SITE / "savant.html").read_text()
@@ -110,8 +177,14 @@ def main() -> int:
     bust = re.search(r"savant\.js\?v=(\d+)", html)
     if not bust:
         fail("savant.js not cache-busted")
-    elif int(bust.group(1)) < 9:
+    elif int(bust.group(1)) < 10:
         fail(f"savant.js cache still v={bust.group(1)}")
+
+    if _nowrap_clips_axis_labels(html):
+        fail("control row CSS nowrap would clip axis labels (Y AXIS / MIN OPP)")
+    for needle in ("Season", "Team", "Y axis", "Min opp", "X axis"):
+        if f">{needle}<" not in html:
+            fail(f"control label {needle!r} missing")
 
     if fails:
         print("FAIL CHI-140")

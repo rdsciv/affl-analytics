@@ -12,19 +12,27 @@
   /* CHI-140: brand-strip / historic rail are not the landing. */
   #header-rail, .header-rail, .brand-strip, .former-toggle { display: none !important; }
 
+  /* CHI-140: one control bar. nowrap must not clip Y AXIS / MIN OPP. */
   .sv-control-row {
     display: flex;
     flex-wrap: nowrap;
     align-items: flex-end;
-    gap: 10px;
+    gap: 8px;
     margin: 0 0 10px;
-    overflow-x: auto;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
   }
-  .sv-control-row .sv-field { display: flex; flex-direction: column; gap: 4px; min-width: 108px; flex: 0 0 auto; }
-  .sv-control-row .sv-field.wide { min-width: 168px; }
+  .sv-control-row .sv-field {
+    display: flex; flex-direction: column; gap: 4px;
+    min-width: 0; flex: 1 1 72px;
+  }
+  .sv-control-row .sv-field.wide { flex: 1.4 1 96px; min-width: 0; }
+  .sv-control-row .team-select { width: 100%; min-width: 0; max-width: 100%; }
   .sv-field label {
-    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
     color: var(--mut); font-weight: 600;
+    white-space: nowrap; overflow: visible;
   }
   .sv-tuck {
     margin: 0 0 12px;
@@ -201,6 +209,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=29"></script>
-<script src="savant.js?v=9"></script>
+<script src="savant.js?v=10"></script>
 </body>
 </html>
