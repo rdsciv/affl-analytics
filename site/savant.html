@@ -9,19 +9,57 @@
 <link rel="stylesheet" href="styles.css?v=38">
 <link rel="stylesheet" href="logo.css?v=2">
 <style>
-  .sv-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 12px;
-    margin: 0 0 14px;
+  /* CHI-140: brand-strip / historic rail are not the landing. */
+  #header-rail, .header-rail, .brand-strip, .former-toggle { display: none !important; }
+
+  .sv-control-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 10px;
+    margin: 0 0 10px;
+    overflow-x: auto;
   }
-  .sv-field { display: flex; flex-direction: column; gap: 5px; }
+  .sv-control-row .sv-field { display: flex; flex-direction: column; gap: 4px; min-width: 108px; flex: 0 0 auto; }
+  .sv-control-row .sv-field.wide { min-width: 168px; }
   .sv-field label {
     font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
     color: var(--mut); font-weight: 600;
   }
-  .sv-plot { position: relative; height: 520px; }
+  .sv-tuck {
+    margin: 0 0 12px;
+    color: var(--mut);
+    font-size: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: #0c1220;
+  }
+  .sv-tuck summary { cursor: pointer; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+  .sv-tuck .picker-row { margin: 8px 0 0; }
+  .sv-tuck-lab { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); margin: 10px 0 4px; }
+  .sv-plot { position: relative; height: min(560px, calc(100vh - 220px)); min-height: 380px; }
   .sv-plot canvas { width: 100% !important; height: 100% !important; }
+  .sv-marks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .sv-mark {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background: transparent;
+    line-height: 0;
+  }
+  .sv-mark-face, img.sv-mark-face {
+    width: 28px; height: 28px; max-width: 28px; max-height: 28px;
+    object-fit: contain; background: transparent; border: 0;
+    display: block;
+  }
+  .sv-mark-abbr, span.sv-mark-abbr {
+    display: flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; max-width: 16px; max-height: 16px;
+    object-fit: contain; background: transparent;
+    color: #d7dde8; font-size: 7px; font-weight: 800; letter-spacing: .02em;
+    line-height: 1; text-transform: uppercase;
+  }
   .sv-note { color: var(--mut); font-size: 12px; margin: 10px 0 0; }
   .sv-legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 0; }
   .sv-key { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mut); }
@@ -44,9 +82,6 @@
   .sv-pos { font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--mut); }
   .sv-fr { color: var(--blue2); font-size: 11px; }
   .sv-empty { padding: 28px; text-align: center; color: var(--mut); }
-  #year-row[hidden]{display:none!important}
-  .picker-row#year-row{display:flex}
-  .picker-row#year-row[hidden]{display:none!important}
   #sv-tip {
     position: absolute; z-index: 40; pointer-events: none;
     background: #05060bf5; border: 1px solid #1c2536; border-radius: 6px;
@@ -66,7 +101,7 @@
       <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
       <div>
         <h1>AFFL <span>Savant</span></h1>
-        <div class="sub">Every NFL skill player, 2014–2025. Cumulative is the book. Hover a dot for the name.</div>
+        <div class="sub">Every NFL skill player, 2014–2025. Cumulative is the book. Hover a mark for the name.</div>
       </div>
     </div>
     <nav class="site-nav">
@@ -85,29 +120,49 @@
     </nav>
   </header>
 
-  <div class="picker-row" id="scope-row">
-    <div class="week-picker" id="scope-picker"></div>
+  <div class="sv-control-row" id="sv-control-row">
+    <div class="sv-field">
+      <label for="season-picker">Season</label>
+      <select id="season-picker" class="team-select"></select>
+    </div>
+    <div class="sv-field wide">
+      <label for="team-picker">Team</label>
+      <select id="team-picker" class="team-select"></select>
+    </div>
+    <div class="sv-field">
+      <label for="pos-select">Pos</label>
+      <select id="pos-select" class="team-select"></select>
+    </div>
+    <div class="sv-field">
+      <label for="color-select">Marks</label>
+      <select id="color-select" class="team-select"></select>
+    </div>
+    <div class="sv-field wide">
+      <label for="x-metric">X axis</label>
+      <select id="x-metric" class="team-select"></select>
+    </div>
+    <div class="sv-field wide">
+      <label for="y-metric">Y axis</label>
+      <select id="y-metric" class="team-select"></select>
+    </div>
+    <div class="sv-field">
+      <label for="min-opp">Min opp</label>
+      <select id="min-opp" class="team-select"></select>
+    </div>
   </div>
 
-  <div class="picker-row" id="year-row" hidden>
-    <div class="week-picker" id="season-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="squad-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="pos-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="view-picker"></div>
-  </div>
-
-  <div class="picker-row">
-    <div class="week-picker" id="color-picker"></div>
-  </div>
+  <details class="sv-tuck" id="sv-tuck">
+    <summary>Teams, pool, historic</summary>
+    <div class="sv-tuck-lab">Team</div>
+    <div class="picker-row">
+      <div class="week-picker" id="team-chips"></div>
+    </div>
+    <div class="sv-tuck-lab">Pool</div>
+    <div class="picker-row">
+      <div class="week-picker" id="view-picker"></div>
+    </div>
+    <p class="sv-note">Historic names stay on the current franchise. Glory Holes are Chupacabras. Gabagooners stay on this list, 0 players.</p>
+  </details>
 
   <section class="card">
     <div class="card-head">
@@ -118,22 +173,7 @@
       <div class="sv-count" id="plot-count"></div>
     </div>
 
-    <div class="sv-controls">
-      <div class="sv-field">
-        <label for="x-metric">X axis</label>
-        <select id="x-metric" class="team-select"></select>
-      </div>
-      <div class="sv-field">
-        <label for="y-metric">Y axis</label>
-        <select id="y-metric" class="team-select"></select>
-      </div>
-      <div class="sv-field">
-        <label for="min-opp">Minimum opportunity</label>
-        <select id="min-opp" class="team-select"></select>
-      </div>
-    </div>
-
-    <div class="sv-plot"><canvas id="sv-scatter"></canvas><div id="sv-tip" role="tooltip"></div></div>
+    <div class="sv-plot"><canvas id="sv-scatter"></canvas><div class="sv-marks" id="sv-marks"></div><div id="sv-tip" role="tooltip"></div></div>
 
     <div class="sv-legend" id="sv-legend"></div>
     <p class="sv-note" id="sv-note"></p>
@@ -161,6 +201,6 @@
 
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=28"></script>
-<script src="savant.js?v=8"></script>
+<script src="savant.js?v=9"></script>
 </body>
 </html>

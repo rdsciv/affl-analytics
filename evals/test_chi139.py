@@ -157,10 +157,10 @@ def test_source_gates(js: str, html: str) -> None:
     bust = re.search(r"savant\.js\?v=(\d+)", html)
     if not bust:
         fail("savant.html savant.js not cache-busted")
-    elif int(bust.group(1)) < 8:
+    elif int(bust.group(1)) < 9:
         fail(f"savant.js cache still v={bust.group(1)}")
-    if 'src="savant.js?v=8"' not in html:
-        fail("savant.html pin is not savant.js?v=8")
+    if 'src="savant.js?v=9"' not in html:
+        fail("savant.html pin is not savant.js?v=9")
 
 
 def test_synthetic_mixup() -> None:

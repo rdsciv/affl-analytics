@@ -9,6 +9,10 @@
  * AFFL context is keyed on franchise (member_id upstream), so a rename never
  * splits a franchise — Tittsburgh and Grand Teeton are one team, shown under
  * the current name.
+ *
+ * CHI-140 landing: identity marks (face / NFL abbrev / AFFL abbrev), one
+ * compact control row, Season All|year and Team All|name. Franchise color
+ * is a toggle, off on arrival.
  */
 (async function () {
   "use strict";
@@ -56,6 +60,28 @@
     "The Dalles Cowboys": "DC Mighty Cucks",
   };
 
+  const FR_ABBREV = {
+    "Charleston Chewbacca": "CHW",
+    "Chula Vista Chupacabras": "CVC",
+    "DC Mighty Cucks": "DMC",
+    "Fairview Fat Cats": "FFC",
+    "Goleta Gringos": "GOL",
+    "Grand Teeton Feelers": "GTF",
+    "Honolulu Horndogs": "HNL",
+    "L.O.B. Thunder": "LOB",
+    "Muck City Mad Dawgs": "MCK",
+    "Pasco Pounders": "PSC",
+    "Patagonia Pipers": "PIP",
+    "Pawtucket Patriots": "PWT",
+    "Poulsbo Pollywogs": "PLB",
+    "San Diego Shadowcöcks": "SDS",
+    "Squaw Valley Skinners": "SVS",
+    "Tijuana Sanchitos": "TIJ",
+    "Westeros Warlords": "WAR",
+    "Winston-Salem Wake Snakes": "WSS",
+    "Central Oregon Gabagooners": "GAB",
+  };
+
   function currentSquads() {
     if (A.CURRENT_2026 && A.CURRENT_2026.length) return A.CURRENT_2026;
     return [
@@ -78,6 +104,13 @@
     if (!name) return "";
     if (FR_ALIAS[name]) return FR_ALIAS[name];
     return name;
+  }
+
+  function afflAbbrev(fr) {
+    if (!fr) return "";
+    if (FR_ABBREV[fr]) return FR_ABBREV[fr];
+    const parts = String(fr).split(/\s+/).filter(Boolean);
+    return parts.map((p) => p[0]).join("").slice(0, 3).toUpperCase();
   }
 
   /* metric key -> label + how to read it off a row */
@@ -111,8 +144,8 @@
   const SHARE_NULL = ["tgtsh", "aysh", "wopr", "racr"];
 
   const state = {
-    scope: "cum", season: ALL, pos: "ALL", view: "all", franchise: "",
-    color: "franchise",
+    season: ALL, pos: "ALL", view: "all", franchise: "",
+    color: "identity",
     x: "opp", y: "fpts", minOpp: 25,
     sort: { key: "fpts", dir: -1 },
   };
@@ -121,12 +154,13 @@
   let BIDS = {};
   let ROWS = [];
   let chart = null;
+  let ESPN_BY_NAME = new Map();
   const cache = new Map();
 
   function n(v) { return v == null ? 0 : +v; }
   function pct(v) { return v == null ? null : +v * 100; }
 
-  function isAll() { return state.scope !== "season"; }
+  function isAll() { return state.season === ALL || state.season == null; }
 
   function fmt(v, m) {
     if (v == null || Number.isNaN(v)) return "—";
@@ -154,6 +188,29 @@
   function frColor(fr) {
     if (!fr) return MUTED;
     return FR_COLOR[fr] || MUTED;
+  }
+
+  function espnIdFor(r) {
+    if (!r || !ESPN_BY_NAME.size) return "";
+    return ESPN_BY_NAME.get((r.name || "") + "|" + (r.pos || "")) || "";
+  }
+
+  function identityKind(r) {
+    if (espnIdFor(r)) return "face";
+    if (r && r.team) return "nfl";
+    return "affl";
+  }
+
+  function markHTML(r) {
+    const espn = espnIdFor(r);
+    if (espn) {
+      const src = "https://a.espncdn.com/i/headshots/nfl/players/full/" + espn + ".png";
+      const fb = (r.team ? r.team : (afflAbbrev(currentFr(r.fr)) || "?"));
+      return `<img class="sv-mark-face" src="${src}" alt="" width="28" height="28" loading="lazy" data-fb="${esc(fb)}"
+        onerror="this.outerHTML='<span class=&quot;sv-mark-abbr&quot;>'+this.getAttribute('data-fb')+'</span>'">`;
+    }
+    if (r && r.team) return `<span class="sv-mark-abbr">${esc(r.team)}</span>`;
+    return `<span class="sv-mark-abbr">${esc(afflAbbrev(currentFr(r && r.fr)) || "?")}</span>`;
   }
 
   /* Bids sidecar is GSIS-keyed. Missing year or pid => null, never 0. */
@@ -310,6 +367,7 @@
   /* ------------------------------------------------------------------ chips */
 
   function chips(el, items, current, onPick) {
+    if (!el) return;
     el.innerHTML = items.map(([v, l]) =>
       `<button type="button" class="season-chip${String(v) === String(current) ? " on" : ""}" data-v="${v}">${l}</button>`
     ).join("");
@@ -318,75 +376,69 @@
     });
   }
 
+  function fillSelect(el, items, current, onPick) {
+    if (!el) return;
+    el.innerHTML = items.map(([v, l]) =>
+      `<option value="${esc(v)}"${String(v) === String(current) ? " selected" : ""}>${l}</option>`
+    ).join("");
+    el.onchange = () => onPick(el.value);
+  }
+
   function stampScope() {
     try {
       const u = new URL(location.href);
-      if (state.scope === "season") {
-        u.searchParams.set("scope", "season");
-        if (state.season !== ALL && state.season != null) u.searchParams.set("year", String(state.season));
-        else u.searchParams.delete("year");
+      if (!isAll()) {
+        u.searchParams.set("year", String(state.season));
+        u.searchParams.delete("scope");
+        u.searchParams.delete("season");
       } else {
         u.searchParams.delete("scope");
         u.searchParams.delete("year");
         u.searchParams.delete("season");
       }
+      if (state.franchise) u.searchParams.set("team", state.franchise);
+      else u.searchParams.delete("team");
       history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
     } catch (e) { /* ignore */ }
   }
 
-  function showYearRow(on) {
-    const row = $("year-row");
-    if (!row) return;
-    if (on) { row.hidden = false; row.style.display = ""; }
-    else { row.hidden = true; row.style.display = "none"; }
+  function setFranchise(v) {
+    state.franchise = v || "";
+    stampScope();
+    renderAll();
   }
 
-  function renderChips() {
-    chips($("scope-picker"), [["cum", "Cumulative"], ["season", "Season"]], state.scope, async (v) => {
-      state.scope = v;
-      if (v === "season") {
-        if (state.season === ALL || state.season == null) {
-          state.season = META.seasons[META.seasons.length - 1];
-        }
-        showYearRow(true);
-      } else {
-        state.season = ALL;
-        showYearRow(false);
-      }
+  function renderControls() {
+    const seasons = [[ALL, "All"]].concat(META.seasons.slice().reverse().map((y) => [y, String(y)]));
+    fillSelect($("season-picker"), seasons, state.season, async (v) => {
+      state.season = v === ALL || String(v).toLowerCase() === "all" ? ALL : +v;
       stampScope();
       await loadScope();
       renderAll();
     });
-    showYearRow(state.scope === "season");
-    const seasons = META.seasons.map((y) => [y, y]);
-    chips($("season-picker"), seasons, state.season, async (v) => {
-      state.scope = "season";
-      state.season = +v;
-      showYearRow(true);
-      stampScope();
-      await loadScope();
-      renderAll();
-    });
-    const squadEl = $("squad-picker");
-    if (squadEl) {
-      const items = [["", "All squads"]].concat(currentSquads().map((t) => [t.name, t.name]));
-      chips(squadEl, items, state.franchise, (v) => {
-        state.franchise = v;
-        renderAll();
-      });
-    }
-    chips($("pos-picker"), POSITIONS.map((p) => [p, p]), state.pos, (v) => {
+
+    const teams = [["", "All"]].concat(currentSquads().map((t) => [t.name, t.name]));
+    fillSelect($("team-picker"), teams, state.franchise, setFranchise);
+
+    fillSelect($("pos-select"), POSITIONS.map((p) => [p, p === "ALL" ? "All" : p]), state.pos, (v) => {
       state.pos = v; renderAll();
     });
+
+    fillSelect($("color-select"), [
+      ["identity", "Identity"],
+      ["franchise", "Franchise color"],
+    ], state.color, (v) => {
+      state.color = v; renderAll();
+    });
+
+    const chipEl = $("team-chips");
+    if (chipEl) {
+      const items = [["", "All"]].concat(currentSquads().map((t) => [t.name, t.name]));
+      chips(chipEl, items, state.franchise, setFranchise);
+    }
     chips($("view-picker"), [["all", "All NFL"], ["affl", "AFFL starters only"]], state.view, (v) => {
       state.view = v; renderAll();
     });
-    const colorEl = $("color-picker");
-    if (colorEl) {
-      chips(colorEl, [["franchise", "Franchise"], ["position", "Position"]], state.color, (v) => {
-        state.color = v; renderAll();
-      });
-    }
   }
 
   function renderSelects() {
@@ -409,18 +461,52 @@
 
   function groupKey(r) {
     if (state.color === "position") return r.pos || "?";
+    if (state.color === "identity") return "identity";
     return currentFr(r.fr);
   }
 
   function groupColor(key) {
+    if (state.color === "identity") return MUTED;
     if (state.color === "position") return POS_COLOR[key] || MUTED;
     return key ? frColor(key) : MUTED;
   }
 
   function groupLabel(key, count) {
+    if (state.color === "identity") return `Players (${count})`;
     if (state.color === "position") return `${key || "?"} (${count})`;
     if (!key) return `No AFFL points (${count})`;
     return `${key} (${count})`;
+  }
+
+  function clearMarks() {
+    const layer = $("sv-marks");
+    if (layer) layer.innerHTML = "";
+  }
+
+  function paintMarks() {
+    const layer = $("sv-marks");
+    if (!layer || !chart) return;
+    layer.innerHTML = "";
+    if (state.color !== "identity") return;
+    const canvas = $("sv-scatter");
+    if (!canvas) return;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if (!meta || !meta.data) return;
+      const players = ds.players || [];
+      meta.data.forEach((pt, i) => {
+        if (!pt || pt.skip) return;
+        const r = players[i];
+        if (!r) return;
+        const el = document.createElement("div");
+        el.className = "sv-mark";
+        el.dataset.kind = identityKind(r);
+        el.style.left = pt.x + "px";
+        el.style.top = pt.y + "px";
+        el.innerHTML = markHTML(r);
+        layer.appendChild(el);
+      });
+    });
   }
 
   function renderChart(rows) {
@@ -439,6 +525,7 @@
       return a.localeCompare(b);
     });
 
+    const identity = state.color === "identity";
     const datasets = keys.map((k) => {
       const col = groupColor(k);
       const pts = by[k];
@@ -446,12 +533,12 @@
         label: groupLabel(k, pts.length),
         data: pts.map((p) => ({ x: p.x, y: p.y })),
         players: pts.map((p) => p.player),
-        backgroundColor: col + "cc",
-        borderColor: col,
-        borderWidth: 1,
-        pointRadius: 5,
-        pointHoverRadius: 8,
-        pointHitRadius: 14,
+        backgroundColor: identity ? "rgba(180,190,210,0.12)" : col + "cc",
+        borderColor: identity ? "rgba(180,190,210,0.28)" : col,
+        borderWidth: identity ? 0 : 1,
+        pointRadius: identity ? 9 : 5,
+        pointHoverRadius: identity ? 11 : 8,
+        pointHitRadius: identity ? 14 : 14,
       };
     });
 
@@ -477,7 +564,7 @@
       const fr = currentFr(r.fr);
       const lines = [
         `<b>${esc(displayName(r))}</b> · ${esc(r.pos || "—")} · ${esc(r.team || "FA")}`,
-        `<span class="sv-tip-mut">${esc(mx.label)}: ${esc(fmt(evt && evt.x, mx) !== "—" ? fmt((ds.data[hit.index] || {}).x, mx) : fmt((ds.data[hit.index] || {}).x, mx))}</span>`,
+        `<span class="sv-tip-mut">${esc(mx.label)}: ${esc(fmt((ds.data[hit.index] || {}).x, mx))}</span>`,
         `<span class="sv-tip-mut">${esc(my.label)}: ${esc(fmt((ds.data[hit.index] || {}).y, my))}</span>`,
         `<span class="sv-tip-mut">${r.g == null ? "—" : r.g} games · ${esc(fmt(r.fpts, { nd: 1 }))} AFFL pts` +
           (isAll() && r.starts ? ` · ${esc(String(r.starts))} AFFL starts` : "") + `</span>`,
@@ -513,6 +600,10 @@
         events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
         interaction: { mode: "nearest", intersect: true, axis: "xy" },
         onHover: (evt, els) => { showTip(evt, els); },
+        onResize: () => { requestAnimationFrame(paintMarks); },
+        animation: {
+          onComplete: () => { paintMarks(); },
+        },
         plugins: {
           legend: { display: false },
           tooltip: { enabled: false },
@@ -526,13 +617,19 @@
 
     if (chart) { chart.destroy(); chart = null; }
     hideTip();
+    clearMarks();
     chart = new Chart($("sv-scatter").getContext("2d"), cfg);
     const canvas = $("sv-scatter");
     canvas.onmouseleave = hideTip;
+    requestAnimationFrame(paintMarks);
 
-    $("sv-legend").innerHTML = keys.map((k) =>
-      `<span class="sv-key"><span class="sv-dot" style="background:${groupColor(k)}"></span>${esc(groupLabel(k, by[k].length))}</span>`
-    ).join("");
+    if (identity) {
+      $("sv-legend").innerHTML = `<span class="sv-key">Identity marks · face if we have one, else NFL abbrev, else AFFL abbrev</span>`;
+    } else {
+      $("sv-legend").innerHTML = keys.map((k) =>
+        `<span class="sv-key"><span class="sv-dot" style="background:${groupColor(k)}"></span>${esc(groupLabel(k, by[k].length))}</span>`
+      ).join("");
+    }
   }
 
   /* ------------------------------------------------------------------ table */
@@ -602,7 +699,7 @@
   /* -------------------------------------------------------------------- all */
 
   function renderAll() {
-    renderChips();
+    renderControls();
     const rows = visible();
     $("plot-count").textContent = `${rows.length} players`;
     if (isAll()) {
@@ -618,7 +715,7 @@
     renderChart(rows);
     renderTable(rows);
 
-    const base = "Hover any dot for the player. AFFL starts count weeks a manager put that player in a starting slot.";
+    const base = "Hover any mark for the player. AFFL starts count weeks a manager put that player in a starting slot.";
     if (isAll()) {
       $("sv-note").textContent = base +
         " 2014–2017 weekly lineups are incomplete (ESPN no longer serves them); those seasons keep only team-weeks that reconcile to the official score, so AFFL starts read low. NFL data is complete for every season. Auction $ sums auction-year bids; snake drafts are unavailable, never $0.";
@@ -647,21 +744,33 @@
 
   try {
     if (A.chartDefaults) A.chartDefaults(Chart);
-    const [meta, bids] = await Promise.all([
+    const [meta, bids, index] = await Promise.all([
       fetch(`${BASE}meta.json`).then((r) => r.json()),
       fetch(`${BASE}bids.json`).then((r) => r.ok ? r.json() : {}),
+      fetch("player_index.json").then((r) => r.ok ? r.json() : {}),
     ]);
     META = meta;
     BIDS = bids || {};
+    ESPN_BY_NAME = new Map();
+    Object.keys(index || {}).forEach((id) => {
+      const rec = index[id];
+      if (!rec || !rec.name || !rec.pos) return;
+      ESPN_BY_NAME.set(rec.name + "|" + rec.pos, String(id));
+    });
     const qs = new URLSearchParams(location.search);
-    const wantSeason = qs.get("scope") === "season" || (qs.get("year") && String(qs.get("year")).toLowerCase() !== "all");
-    if (wantSeason) {
-      state.scope = "season";
-      state.season = parseYearParam(qs.get("year") || qs.get("season"));
+    const yearRaw = qs.get("year") || qs.get("season");
+    const wantYear = yearRaw && String(yearRaw).toLowerCase() !== "all";
+    if (wantYear) {
+      state.season = parseYearParam(yearRaw);
       if (state.season === ALL) state.season = META.seasons[META.seasons.length - 1];
     } else {
-      state.scope = "cum";
       state.season = ALL;
+    }
+    const teamQ = qs.get("team") || qs.get("squad") || "";
+    if (teamQ) {
+      const names = currentSquads().map((t) => t.name);
+      const hit = names.find((n) => n === teamQ || n.toLowerCase() === teamQ.toLowerCase());
+      state.franchise = hit || currentFr(teamQ) || "";
     }
     stampScope();
     await loadScope();
