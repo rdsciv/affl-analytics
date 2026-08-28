@@ -566,6 +566,7 @@
     }
     if (!p && want) {
       $("#pl-hero").innerHTML = A.notice("This player page is unavailable.");
+      const chiMiss = $("#pl-chi114"); if (chiMiss) chiMiss.hidden = true;
       const col = $("#pl-college"); if (col) col.innerHTML = "";
       const ov = $("#pl-overview"); if (ov) { ov.hidden = true; ov.innerHTML = ""; }
       return;
@@ -662,6 +663,7 @@
     renderCustody(focus, rows);
     renderAchievements(focus, rows);
     renderFgCharts(focus, rows);
+    await renderPlayerChi114(p.pid);
     setPageMode("profile");
   }
 
@@ -704,6 +706,78 @@
     return (v == null || v === "") ? "—" : v;
   }
 
+
+  function playerChi114Logo(pid) {
+    const rec = nflBlock(pid);
+    const md = (rec && rec.meta) || {};
+    let nfl = md.nfl || "";
+    if (!nfl) {
+      const ys = Object.keys(rec || {}).filter(isYearKey).sort();
+      if (ys.length) nfl = nflTeam(pid, +ys[ys.length - 1]) || "";
+    }
+    if (!nfl && A.nflSlug) {
+      const bio = A.playerBio(pid, null, A.today()) || {};
+      nfl = bio.nfl || "";
+    }
+    if (!nfl || !A.nflSlug) return "";
+    const slug = A.nflSlug(nfl);
+    return slug ? ("logos/nfl/" + slug + ".png") : "";
+  }
+
+  /* CHI-114 season grain: playerSeasonXfp → FP / XFP only. 2013 skipped. */
+  function renderChi114SeasonXfp(pid) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawSeasonXfp({
+      canvas: $("#pl-chi114-season"),
+      chips: $("#pl-chi114-season-years"),
+      marks: $("#pl-chi114-season-marks"),
+      pane: $("#pl-chi114-season-pane"),
+      rows: X.seasonRowsForPid(pid),
+      mode: "player",
+      logoUrl: playerChi114Logo(pid),
+    });
+  }
+
+  /* CHI-114 season grain: playerSeasonXfp → FPOE on its own scale. 2013 skipped. */
+  function renderChi114SeasonFpoe(pid) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawSeasonFpoe({
+      canvas: $("#pl-chi114-fpoe"),
+      chips: $("#pl-chi114-fpoe-years"),
+      marks: $("#pl-chi114-fpoe-marks"),
+      pane: $("#pl-chi114-fpoe-pane"),
+      rows: X.seasonRowsForPid(pid),
+      mode: "player",
+      logoUrl: playerChi114Logo(pid),
+    });
+  }
+
+  /* CHI-114 week grain: playerWeekNfl → yards / TDs / volume only. */
+  function renderChi114WeekNfl(pid) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawWeekNfl({
+      canvas: $("#pl-chi114-week"),
+      yearChips: $("#pl-chi114-week-years"),
+      weekChips: $("#pl-chi114-week-weeks"),
+      pane: $("#pl-chi114-week-pane"),
+      rows: X.weekRowsForPid(pid),
+      mode: "player",
+    });
+  }
+
+  async function renderPlayerChi114(pid) {
+    const block = $("#pl-chi114");
+    if (!block || !window.CHI114) return;
+    block.hidden = false;
+    await window.CHI114.ensure();
+    renderChi114SeasonXfp(pid);
+    renderChi114SeasonFpoe(pid);
+    renderChi114WeekNfl(pid);
+  }
+
   function setPageMode(mode) {
     const profile = mode === "profile";
     const hide = (sel, on) => { const el = $(sel); if (el) el.hidden = !!on; };
@@ -721,6 +795,7 @@
     hide("#pl-custody", !profile);
     hide("#pl-achievements", !profile);
     hide("#pl-fg-charts", !profile);
+    hide("#pl-chi114", !profile);
     hide("#pl-db-break", profile);
     hide("#pl-db", profile);
     if (!profile) {

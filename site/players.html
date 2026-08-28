@@ -6,7 +6,7 @@
 <title>Stars, Scrubs, &amp; Duds — AFFL</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
 <link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=38">
+<link rel="stylesheet" href="styles.css?v=39&chi114=1">
 <link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
@@ -80,6 +80,34 @@
   <p class="pl-back" id="pl-back" hidden><a href="players.html">All players</a></p>
 
   <section class="card" id="pl-overview" hidden></section>
+
+
+  <section class="card chi114-block" id="pl-chi114" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Expected vs Weekly Box</h2>
+        <div class="card-sub">three panes · season FP/XFP and FPOE never mixed with weekly yards · non-PPR · receptions are volume</div>
+      </div>
+    </div>
+    <div class="chi114-pane" id="pl-chi114-season-pane">
+      <div class="card-sub">Season FP / XFP · one scale · hover a year to isolate · 2014–2025 (2013 has no season grain) · non-PPR</div>
+      <div class="week-picker chi114-year-chips" id="pl-chi114-season-years"></div>
+      <div class="chi114-marks" id="pl-chi114-season-marks"></div>
+      <div class="chart-wrap tall"><canvas id="pl-chi114-season"></canvas></div>
+    </div>
+    <div class="chi114-pane" id="pl-chi114-fpoe-pane">
+      <div class="card-sub">Season FPOE · residual on its own scale · hover a year to isolate · 2014–2025 · non-PPR</div>
+      <div class="week-picker chi114-year-chips" id="pl-chi114-fpoe-years"></div>
+      <div class="chi114-marks" id="pl-chi114-fpoe-marks"></div>
+      <div class="chart-wrap tall"><canvas id="pl-chi114-fpoe"></canvas></div>
+    </div>
+    <div class="chi114-pane" id="pl-chi114-week-pane">
+      <div class="card-sub">Weekly yards / TDs / volume · pass/rush yards · targets · receptions · rush/pass/rec TDs · hover week-to-week</div>
+      <div class="week-picker chi114-year-chips" id="pl-chi114-week-years"></div>
+      <div class="week-picker chi114-week-chips" id="pl-chi114-week-weeks"></div>
+      <div class="chart-wrap tall"><canvas id="pl-chi114-week"></canvas></div>
+    </div>
+  </section>
 
   <div class="picker-row" id="player-year-row" hidden>
     <div class="picker-label">Player years</div>
@@ -208,6 +236,7 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=28"></script>
-<script src="players.js?v=36"></script>
+<script src="chi114.js?v=5"></script>
+<script src="players.js?v=37"></script>
 </body>
 </html>

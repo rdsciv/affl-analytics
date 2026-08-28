@@ -2625,3 +2625,41 @@ a.team-link:hover { color: var(--blue2); text-decoration: underline; text-underl
   .holdout-grid { grid-template-columns: 1fr; }
 }
 
+
+/* CHI-114 — two grains, logos only on labeled marks, hard cap 28px */
+.chi114-block { margin-top: 16px; }
+.chi114-pane { margin-top: 14px; }
+.chi114-pane .card-sub { margin-bottom: 6px; }
+.chi114-year-chips, .chi114-week-chips { margin: 4px 0 10px; }
+.chi114-marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 8px;
+  min-height: 28px;
+}
+.chi114-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--mut);
+}
+.chi114-mark.is-on { color: var(--ink); }
+.chi114-logo,
+img.chi114-logo {
+  max-width: 28px;
+  max-height: 28px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  flex: 0 0 28px;
+  background: transparent;
+}
+#pl-chi114 .chart-wrap.tall,
+#tm-chi114 .chart-wrap.tall { height: 360px; }
+#tm-chi114[hidden] { display: none !important; }

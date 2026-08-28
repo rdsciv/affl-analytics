@@ -136,13 +136,107 @@
     return { picks: picks, trades: trades, players: players, mine: mine };
   }
 
+
+  function teamRosterPids(y, tid, yd) {
+    const set = new Set();
+    if (tid == null) return set;
+    (yd && yd.players || []).forEach((p) => {
+      if (p.pid == null) return;
+      if (A.sameId(p.mainTeam, tid) || (p.wk || []).some((w) => A.sameId(w[3], tid))) {
+        set.add(p.pid);
+        set.add(Number(p.pid));
+      }
+    });
+    if (y < 2018) {
+      (seasonRosterRows(y, tid) || []).forEach((p) => {
+        if (p && p.pid != null) {
+          set.add(p.pid);
+          set.add(Number(p.pid));
+        }
+      });
+    }
+    return set;
+  }
+
+  async function teamPidMap(yearOrNull) {
+    const ys = yearOrNull != null ? [yearOrNull] : A.squadYears(squad);
+    const map = {};
+    for (const y of ys) {
+      if (y === 2013) continue;
+      const tid = A.teamIdFor(y, squad);
+      if (tid == null) continue;
+      let yd = {};
+      try { yd = await A.loadYear(y); } catch (e) { yd = {}; }
+      map[y] = teamRosterPids(y, tid, yd);
+    }
+    return map;
+  }
+
+  function renderChi114SeasonXfp(rows, logoUrl) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawSeasonXfp({
+      canvas: $("tm-chi114-season"),
+      chips: $("tm-chi114-season-years"),
+      marks: $("tm-chi114-season-marks"),
+      pane: $("tm-chi114-season-pane"),
+      rows: rows,
+      mode: "team",
+      logoUrl: logoUrl,
+    });
+  }
+
+  function renderChi114SeasonFpoe(rows, logoUrl) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawSeasonFpoe({
+      canvas: $("tm-chi114-fpoe"),
+      chips: $("tm-chi114-fpoe-years"),
+      marks: $("tm-chi114-fpoe-marks"),
+      pane: $("tm-chi114-fpoe-pane"),
+      rows: rows,
+      mode: "team",
+      logoUrl: logoUrl,
+    });
+  }
+
+  function renderChi114WeekNfl(rows) {
+    const X = window.CHI114;
+    if (!X) return;
+    X.drawWeekNfl({
+      canvas: $("tm-chi114-week"),
+      yearChips: $("tm-chi114-week-years"),
+      weekChips: $("tm-chi114-week-weeks"),
+      pane: $("tm-chi114-week-pane"),
+      rows: rows,
+      mode: "team",
+    });
+  }
+
+  async function renderTeamChi114(yearOrNull) {
+    const block = $("tm-chi114");
+    if (!block || !window.CHI114 || !squad) {
+      if (block) block.hidden = true;
+      return;
+    }
+    block.hidden = false;
+    await window.CHI114.ensure();
+    const pidsByYear = await teamPidMap(yearOrNull);
+    const seasonRows = window.CHI114.seasonRowsForPids(pidsByYear);
+    const weekRows = window.CHI114.weekRowsForPids(pidsByYear);
+    const logoUrl = A.franchiseLogo(squad) || "";
+    renderChi114SeasonXfp(seasonRows, logoUrl);
+    renderChi114SeasonFpoe(seasonRows, logoUrl);
+    renderChi114WeekNfl(weekRows);
+  }
+
   function showTeam(on) {
     if (!on) {
       killLabCharts();
       if (actChart) { try { actChart.destroy(); } catch (e) {} actChart = null; }
     }
     $("franchise-grid").hidden = on;
-    ["team-hero", "team-kpis", "scorers-block", "ngs-block", "years-block", "games-block", "draft-block",
+    ["team-hero", "team-kpis", "tm-chi114", "scorers-block", "ngs-block", "years-block", "games-block", "draft-block",
       "spend-block", "trades-block", "activity-block", "roster-block", "season-roster-block", "roto-block", "lab-block"].forEach((id) => {
       const el = $(id);
       if (el) el.hidden = !on;
@@ -2418,7 +2512,7 @@
     if (!t || tid == null) {
       showTeam(true);
       $("team-hero").innerHTML = A.notice("This franchise has no team in " + year + ".");
-      ["team-kpis", "ngs-block", "years-block", "games-block", "draft-block", "spend-block", "trades-block", "activity-block", "roster-block", "season-roster-block", "roto-block", "lab-block"]
+      ["team-kpis", "tm-chi114", "ngs-block", "years-block", "games-block", "draft-block", "spend-block", "trades-block", "activity-block", "roster-block", "season-roster-block", "roto-block", "lab-block"]
         .forEach((id) => { $(id).hidden = true; $(id).innerHTML = ""; });
       renderScorers();
       return;
@@ -2447,6 +2541,7 @@
     }
     await renderRotoSeason(tid);
     await renderLab({ one: { y: year, yd: Object.assign({ year: year }, yd), tid: tid, t: t } });
+    await renderTeamChi114(year);
     mountTeamToc();
     const f = A.squadInfo(squad) || {};
     $("page-sub").textContent = (f.currentName || "") + " · " + year;
@@ -2528,6 +2623,7 @@
     renderRoster(players, year);
     await renderRotoCareer();
     await renderLab({ all: all });
+    await renderTeamChi114(null);
     mountTeamToc();
     const f = A.squadInfo(squad) || {};
     $("page-sub").textContent = (f.currentName || "") + " · career";

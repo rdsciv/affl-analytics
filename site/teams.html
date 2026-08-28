@@ -6,7 +6,7 @@
 <title>AFFL Teams</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
 <link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=38&scorers=1&sr=1&tcomp=1&act=1">
+<link rel="stylesheet" href="styles.css?v=39&scorers=1&sr=1&tcomp=1&act=1&chi114=1">
 <link rel="stylesheet" href="logo.css?v=2">
 <style>#year-row[hidden]{display:none!important}</style>
 </head>
@@ -56,6 +56,32 @@
 
   <section class="card" id="team-hero" hidden></section>
   <section class="kpi-row" id="team-kpis" hidden></section>
+  <section class="card chi114-block" id="tm-chi114" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Expected vs Weekly Box</h2>
+        <div class="card-sub">roster-filtered · three panes · season FP/XFP and FPOE never mixed with weekly yards · current franchise names · non-PPR</div>
+      </div>
+    </div>
+    <div class="chi114-pane" id="tm-chi114-season-pane">
+      <div class="card-sub">Season FP / XFP · rostered pids · one scale · hover a year to isolate · 2014–2025 · non-PPR</div>
+      <div class="week-picker chi114-year-chips" id="tm-chi114-season-years"></div>
+      <div class="chi114-marks" id="tm-chi114-season-marks"></div>
+      <div class="chart-wrap tall"><canvas id="tm-chi114-season"></canvas></div>
+    </div>
+    <div class="chi114-pane" id="tm-chi114-fpoe-pane">
+      <div class="card-sub">Season FPOE · mean of rostered skill players · 0 stays on the scale · hover a year to isolate · 2014–2025 · non-PPR</div>
+      <div class="week-picker chi114-year-chips" id="tm-chi114-fpoe-years"></div>
+      <div class="chi114-marks" id="tm-chi114-fpoe-marks"></div>
+      <div class="chart-wrap tall"><canvas id="tm-chi114-fpoe"></canvas></div>
+    </div>
+    <div class="chi114-pane" id="tm-chi114-week-pane">
+      <div class="card-sub">Weekly yards / TDs / volume · rostered players that season · hover week-to-week</div>
+      <div class="week-picker chi114-year-chips" id="tm-chi114-week-years"></div>
+      <div class="week-picker chi114-week-chips" id="tm-chi114-week-weeks"></div>
+      <div class="chart-wrap tall"><canvas id="tm-chi114-week"></canvas></div>
+    </div>
+  </section>
   <section class="card" id="scorers-block" hidden></section>
   <section class="card" id="games-block" hidden></section>
   <section class="card" id="activity-block" hidden></section>
@@ -78,6 +104,7 @@
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=28"></script>
 <script src="roto-math.js?v=2"></script>
-<script src="teams.js?v=20&scorers=1&sr=1&tcomp=1&ngstree=1&ngscheme=1&act=1"></script>
+<script src="chi114.js?v=5"></script>
+<script src="teams.js?v=21&scorers=1&sr=1&tcomp=1&ngstree=1&ngscheme=1&act=1&chi114=1"></script>
 </body>
 </html>
