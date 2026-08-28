@@ -2475,7 +2475,9 @@ img.avatar {
   display: block;
   border-radius: 7px;
 }
-.second-grid .chart-wrap.xtall { height: 440px; }
+.second-grid .chart-wrap.xtall { height: 640px; }
+#activity-rates-wrap { margin-top: 12px; }
+#activity-note { margin: 0 0 8px; }
 
 #elo-card .table-scroll { margin-top: 12px; }
 #elo-note, #ms-note { margin-top: 10px; }

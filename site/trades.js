@@ -9,7 +9,7 @@
   let year = A.years()[0];
   let scope = A.scopeFromURL();
   let squad = A.squadFromURL();
-  let YD = null, T = {}, chart = null, ALL = null;
+  let YD = null, T = {}, chart = null, ALL = null, ACT = null;
   const S = { q: '', type: 'ALL', limit: 40 };
 
   function tName(id) {
@@ -36,6 +36,22 @@
     return A.canon(tid);
   }
   const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
+
+  async function loadActivity() {
+    if (ACT) return ACT;
+    ACT = await fetch("activity.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
+    return ACT;
+  }
+  function fmtRate(num, den) {
+    if (!den) return "n/a";
+    return (100 * num / den).toFixed(0) + "%";
+  }
+  function activityBundle() {
+    if (!ACT) return { available: false, managers: {} };
+    if (scope === "cum") return ACT.cumulative || { available: true, managers: {} };
+    return (ACT.years || {})[String(year)] || { available: false, managers: {} };
+  }
+
 
   function ring(pct, color, label) {
     const r = 30, circ = 2 * Math.PI * r;
@@ -139,51 +155,113 @@
   }
 
   function renderActivity() {
-    const rows = Object.entries(YD.txByTeam || {}).map(([tid, v]) => ({ tid, ...v }))
+    const note = $("#activity-note");
+    const sub = $("#activity-sub");
+    const wrap = $("#activity-wrap");
+    if (note) note.innerHTML = "";
+    if (wrap) wrap.classList.remove("as-notice");
+
+    const bag = activityBundle();
+    const unavailable = scope === "season" && (year <= 2017 || bag.available === false);
+    if (sub) {
+      sub.textContent = unavailable
+        ? `${year} transaction log unavailable`
+        : scope === "cum"
+          ? "2018–2025 · waiver submitted vs won · FA adds · trades proposed vs accepted"
+          : `${year} · waiver submitted vs won · FA adds · trades proposed vs accepted`;
+    }
+    if (unavailable) {
+      if (chart) { chart.destroy(); chart = null; }
+      if (note) {
+        note.innerHTML = A.notice(
+          `ESPN does not retain transaction history for ${year}. Waiver, free-agent, and trade activity is available from 2018 on.`
+        );
+      }
+      const tb0 = document.querySelector("#activity-rates tbody");
+      if (tb0) tb0.innerHTML = "";
+      return;
+    }
+
+    const managers = bag.managers || {};
+    const rows = Object.entries(managers).map(([tid, v]) => ({ tid, ...v }))
       .filter((r) => {
         const n = tName(r.tid);
         return n && n !== "unavailable";
       })
-      .sort((a, b) => (b.waiver + b.fa + b.trades) - (a.waiver + a.fa + a.trades));
+      .sort((a, b) => (
+        ((b.waiverSubmitted || 0) + (b.waiverWon || 0) + (b.faAdds || 0) + (b.tradesProposed || 0) + (b.tradesAccepted || 0)) -
+        ((a.waiverSubmitted || 0) + (a.waiverWon || 0) + (a.faAdds || 0) + (a.tradesProposed || 0) + (a.tradesAccepted || 0))
+      ));
     if (chart) chart.destroy();
     const names = rows.map((r) => tName(r.tid));
-    chart = new Chart($('#activity-chart'), {
-      type: 'bar',
+    chart = new Chart($("#activity-chart"), {
+      type: "bar",
       data: {
         labels: names,
         datasets: [
-          { label: 'Waiver claims', data: rows.map((r) => r.waiver), backgroundColor: '#2f7bffcc', stack: 'a', maxBarThickness: 15 },
-          { label: 'Free agents', data: rows.map((r) => r.fa), backgroundColor: '#93d500cc', stack: 'a', maxBarThickness: 15 },
-          { label: 'Trades', data: rows.map((r) => r.trades), backgroundColor: '#ff2d1acc', stack: 'a', maxBarThickness: 15 },
+          { label: "Waiver submitted", data: rows.map((r) => r.waiverSubmitted || 0), backgroundColor: "#47a8ff99", maxBarThickness: 10 },
+          { label: "Waiver won", data: rows.map((r) => r.waiverWon || 0), backgroundColor: "#2f7bffcc", maxBarThickness: 10 },
+          { label: "FA adds", data: rows.map((r) => r.faAdds || 0), backgroundColor: "#93d500cc", maxBarThickness: 10 },
+          { label: "Trades proposed", data: rows.map((r) => r.tradesProposed || 0), backgroundColor: "#ff7a00cc", maxBarThickness: 10 },
+          { label: "Trades accepted", data: rows.map((r) => r.tradesAccepted || 0), backgroundColor: "#ff2d1acc", maxBarThickness: 10 },
         ],
       },
       options: {
-        indexAxis: 'y',
+        indexAxis: "y",
         maintainAspectRatio: false,
         layout: { padding: { left: 4, right: 8, top: 4, bottom: 4 } },
         plugins: {
-          legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle' } },
+          legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: "circle" } },
           tooltip: { callbacks: {
             title: (items) => names[items[0].dataIndex],
             afterBody: (items) => {
-            const r = rows[items[0].dataIndex];
-            const parts = [`${r.waiver + r.fa} wire moves`, `${r.drop} drops`, `${r.trades} trades`];
-            if (YD.usesFaab) parts.push(`$${r.spent} spent`);
-            return parts.join(' · ');
-          } } },
+              const r = rows[items[0].dataIndex];
+              const submitted = r.waiverSubmitted || 0;
+              const won = r.waiverWon || 0;
+              const accept = r.tradesAccepted || 0;
+              const decline = r.tradesDeclined || 0;
+              const veto = r.tradesVetoed || 0;
+              const den = accept + decline + veto;
+              return [
+                `Waiver win rate ${fmtRate(won, submitted)} (${won}/${submitted})`,
+                `Trade acceptance ${fmtRate(accept, den)} (${accept}/(${accept}+${decline}+${veto}))`,
+              ];
+            },
+          } },
         },
         scales: {
-          x: { stacked: true, grid: { color: C.grid }, border: { display: false } },
+          x: { stacked: false, grid: { color: C.grid }, border: { display: false } },
           y: {
-            stacked: true,
+            stacked: false,
             grid: { display: false },
             border: { display: false },
-            ticks: { display: true, autoSkip: false, color: C.ink, font: { size: 11, weight: '600' } },
+            ticks: { display: true, autoSkip: false, color: C.ink, font: { size: 11, weight: "600" } },
             afterFit(scale) { scale.width = Math.max(scale.width, 196); },
           },
         },
       },
     });
+
+    const tb = document.querySelector("#activity-rates tbody");
+    if (tb) {
+      tb.innerHTML = rows.map((r) => {
+        const submitted = r.waiverSubmitted || 0;
+        const won = r.waiverWon || 0;
+        const accept = r.tradesAccepted || 0;
+        const decline = r.tradesDeclined || 0;
+        const veto = r.tradesVetoed || 0;
+        return `<tr>
+          <td>${tName(r.tid)}</td>
+          <td class="tnum">${fmtRate(won, submitted)}</td>
+          <td class="tnum">${fmtRate(accept, accept + decline + veto)}</td>
+          <td class="tnum">${submitted}</td>
+          <td class="tnum">${won}</td>
+          <td class="tnum">${r.faAdds || 0}</td>
+          <td class="tnum">${r.tradesProposed || 0}</td>
+          <td class="tnum">${accept}</td>
+        </tr>`;
+      }).join("");
+    }
   }
 
   function renderTrades() {
@@ -414,6 +492,7 @@
         ? `${year} · ${YD.trades.length} trades · ${fmt((YD.moves || []).length)} wire moves`
         : `${year} · no transaction history stored`;
     }
+    ACT = ACT || await loadActivity();
     renderKPIs(); renderActivity(); renderTrades(); renderLog();
     await renderTradeGrid();
   }
