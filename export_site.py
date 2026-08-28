@@ -655,6 +655,15 @@ def export_year(con, year):
     else:
         bundle.pop('lineupIQPre2018', None)
     compute_eight.patch_year(con, bundle, year)
+    # CHI-114: attach bind objects when the warehouse has them. Empty tables
+    # return None — keep the keys already on disk so an export cannot wipe
+    # a shipped bind.
+    sx = player_season_xfp_payload(con, year)
+    if sx:
+        bundle['playerSeasonXfp'] = sx
+    wk = player_week_nfl_payload(con, year)
+    if wk:
+        bundle['playerWeekNfl'] = wk
     json.dump(bundle, open(path, 'w'))
     return {'year': year, 'steals': len(steals), 'power': len(power),
             'cap_teams': len(cap), 'baselines': len(baselines),
