@@ -752,8 +752,13 @@ window.AFFL = (function () {
   function goTeam(owner, year, extra) {
     const u = new URL("teams.html", location.href);
     if (owner) u.searchParams.set("squad", owner);
-    if (year) u.searchParams.set("year", String(year));
-    if (extra && extra.scope) u.searchParams.set("scope", extra.scope);
+    const scope = extra && extra.scope;
+    if (scope === "season") {
+      u.searchParams.set("scope", "season");
+      if (year) u.searchParams.set("year", String(year));
+    } else if (scope) {
+      u.searchParams.set("scope", scope);
+    }
     location.href = u.pathname.split("/").pop() + u.search + u.hash;
   }
 
