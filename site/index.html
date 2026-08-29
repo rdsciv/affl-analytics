@@ -6,7 +6,7 @@
 <title>AFFL Analytics</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
 <link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=40">
+<link rel="stylesheet" href="styles.css?v=41">
 <link rel="stylesheet" href="logo.css?v=2">
 </head>
 <body>
@@ -51,20 +51,23 @@
       </div>
       <div class="season-block">
         <p class="provenance">ESPN Fantasy API &middot; verified warehouse &middot; 2014–2025</p>
-        <div class="season-picker" id="season-picker">
-          <button class="season-chip on" data-y="all">All</button>
-          <button class="season-chip" data-y="2025">2025</button>
-          <button class="season-chip" data-y="2024">2024</button>
-          <button class="season-chip" data-y="2023">2023</button>
-          <button class="season-chip" data-y="2022">2022</button>
-          <button class="season-chip" data-y="2021">2021</button>
-          <button class="season-chip" data-y="2020">2020</button>
-          <button class="season-chip" data-y="2019">2019</button>
-          <button class="season-chip" data-y="2018">2018</button>
-          <button class="season-chip" data-y="2017">2017</button>
-          <button class="season-chip" data-y="2016">2016</button>
-          <button class="season-chip" data-y="2015">2015</button>
-          <button class="season-chip" data-y="2014">2014</button>
+        <div class="season-picker" id="year-row">
+          <div class="picker-label">Season</div>
+          <select class="team-select" id="season-picker" aria-label="Season">
+            <option value="all" selected>All</option>
+            <option value="2014">2014</option>
+            <option value="2015">2015</option>
+            <option value="2016">2016</option>
+            <option value="2017">2017</option>
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
         </div>
       </div>
     </div>
@@ -143,7 +146,7 @@
         <h2>Weekly Scoring</h2>
         <div class="card-sub">league high / average / low &middot; regular season</div>
       </div>
-      <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+      <select id="spotlight-team" class="team-select" aria-label="Spotlight team" hidden style="display:none"></select>
     </div>
     <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
   </section>
@@ -421,7 +424,7 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=29"></script>
-<script src="app.js?v=21"></script>
+<script src="common.js?v=33"></script>
+<script src="app.js?v=24"></script>
 </body>
 </html>

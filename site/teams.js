@@ -246,21 +246,38 @@
     });
   }
 
+  /* Season All: current 12 (visibleFranchises). A year: only franchises that
+     played that year (squadsForSeason / franchisePlayedSeason). 2014 = 10. */
+  function landingFranchises() {
+    const seasonYear = scope === "cum" ? null : year;
+    const raw = A.squadsForSeason(seasonYear);
+    if (seasonYear == null) return A.visibleFranchises(raw);
+    return raw.slice();
+  }
+
+  function cardYearsLine(f) {
+    const ys = f.years || [];
+    const historic = A.isHistoric(f.owner);
+    if (!ys.length) return "0 seasons · 2026 expansion";
+    const span = Math.min.apply(null, ys) + "–" + Math.max.apply(null, ys);
+    return ys.length + " season" + (ys.length === 1 ? "" : "s") + " · " + span + (historic ? " · historic" : "");
+  }
+
   function renderGrid() {
     showTeam(false);
     $("years-block").hidden = true;
-    const list = A.visibleFranchises(A.squads());
+    const seasonYear = scope === "cum" ? null : year;
+    const list = landingFranchises();
     $("franchise-grid").innerHTML = list.map((f) => {
       const face = faceFor(f.owner);
-      const ys = f.years || [];
-      const span = ys.length ? Math.min.apply(null, ys) + "–" + Math.max.apply(null, ys) : "";
       const historic = A.isHistoric(f.owner);
-      return `<button type="button" class="fr-card${historic ? " former" : ""}" data-owner="${esc(f.owner)}">
+      const former = historic && seasonYear == null;
+      return `<button type="button" class="fr-card${former ? " former" : ""}" data-owner="${esc(f.owner)}">
         ${A.logoHTML(face, "fr-logo")}
         <div class="fr-meta">
           <div class="fr-name">${esc(f.currentName)}</div>
           <div class="fr-own">${esc(f.ownerName || A.memberName(f.owner))}</div>
-          <div class="fr-yrs">${ys.length} season${ys.length === 1 ? "" : "s"}${span ? " · " + span : ""}${historic ? " · historic" : ""}</div>
+          <div class="fr-yrs">${esc(cardYearsLine(f))}</div>
         </div>
       </button>`;
     }).join("");
@@ -641,8 +658,8 @@
         const y = tr.year || year;
         const T = lookup(y);
         const short = (id) => {
-          const n = (T[id] || { name: "?" }).name;
-          return n.length > 17 ? n.slice(0, 16) + "…" : n;
+          const t = T[id] || {};
+          return A.franchiseName(t.owner || id) || t.name || "unavailable";
         };
         return `<div class="trade">
           <div class="trade-head"><span class="trade-wk">${y} · Week ${tr.wk}</span><span class="trade-date">${A.dateStr(tr.date)}</span></div>
@@ -2894,7 +2911,10 @@
     const years = A.years().slice().sort((a, b) => a - b);
     const bag = {};
     all.forEach((item) => { bag[item.year] = item.data; });
-    const fracs = A.squads().slice().sort((a, b) => {
+    const fracs = A.squads().filter((f) => {
+      const ys = (f.years && f.years.length) ? f.years : (A.franchiseYears(f.owner) || []);
+      return ys.length > 0;
+    }).slice().sort((a, b) => {
       if (!!a.active !== !!b.active) return a.active ? -1 : 1;
       return (a.currentName || "").localeCompare(b.currentName || "");
     });
@@ -2922,7 +2942,7 @@
         <div class="card-sub">franchise × year · starter count and top snapshot / week-1 scorer · current names · click a year</div>
       </div></div>
       <p class="tcomp-caption">${esc(TCOMP_CAPTION_PRE)}</p>
-      <div class="table-scroll"><table class="tbl tcomp-cum">
+      <div class="table-scroll tcomp-scroll"><table class="tbl tcomp-cum">
         <thead>${head}</thead>
         <tbody>${body}</tbody>
       </table></div>`;

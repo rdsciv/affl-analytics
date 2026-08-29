@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -91,8 +92,8 @@ def main() -> int:
     bust = re.search(r"players\.js\?v=(\d+)", players_html)
     if not bust:
         fail("players.html missing players.js cache bust")
-    elif int(bust.group(1)) < 40:
-        fail(f"players.js cache still v={bust.group(1)} (need v=40)")
+    elif int(bust.group(1)) < 43:
+        fail(f"players.js cache still v={bust.group(1)} (need v=43)")
     if "paintDbChips" not in players_js:
         fail("paintDbChips missing")
     sorts = re.search(r"const DB_SORTS = \[([\s\S]*?)\];", players_js)
@@ -174,8 +175,111 @@ def main() -> int:
     if 2026 in {int(y) for y in (data.get("seasons") or {})}:
         fail("AFFL 2026 season invented in data.json")
     bust = re.search(r"history\.js\?v=(\d+)", hist_html)
-    if not bust or int(bust.group(1)) < 23:
-        fail("history.js cache not bumped to v=23")
+    if not bust or int(bust.group(1)) < 24:
+        fail("history.js cache not bumped to v=24")
+
+
+    # --- CHI-147 Players: exclusive Expected/Weekly chips, no empty overview ---
+    chi_js = (SITE / "chi114.js").read_text()
+    chips_fn = re.search(r"function chips\(el, values, selected, onPick, allLabel\) \{([\s\S]*?)\n  \}", chi_js)
+    if not chips_fn:
+        fail("chi114.js missing chips()")
+    else:
+        body = chips_fn.group(1)
+        if 'sel.has(v) ? " on"' in body and "!allOn && sel.has(v)" not in body:
+            fail("Expected/Weekly chips still class-on every selected year under All")
+        if "!allOn && sel.has(v)" not in body:
+            fail("chi114 chips() does not keep year buttons off when All is on")
+        if "sel.size > 1" in body and "sel.delete" in body:
+            fail("chi114 chips() is still multi-select (All+year can both be on)")
+        if "sel.clear()" not in body:
+            fail("chi114 chips() click is not exclusive")
+    if "yearsAvail.length ? [yearsAvail[yearsAvail.length - 1]]" in chi_js:
+        fail("week grain still defaults to latest year instead of All")
+    if 'label: allOn ? "All"' not in chi_js:
+        fail("CHI-114 All grain still badges the latest year")
+    if "Number(r.y) === Number(latestY)" in players_js:
+        fail("Weekly Fantasy Production still fakes latest year under All")
+    if 'hide("#pl-overview", !profile)' in players_js:
+        fail("setPageMode still unhides empty #pl-overview")
+    if re.search(r'<section[^>]*id="pl-overview"', players_html):
+        fail("#pl-overview is still a stub in players.html")
+    if 'id="player-year-row"' in players_html:
+        fail("Players still has page-level #player-year-row chips")
+    if 'id="player-year-picker"' not in players_html:
+        fail("Weekly Fantasy Production missing chart-local #player-year-picker")
+    if "!allOn && y === logYear" not in players_js:
+        fail("Weekly Fantasy year chips are not exclusive of All")
+    if 'yrLabel = y === "all" ? "career"' not in players_js:
+        fail("hero badge is not career when All")
+    if "Player N" in players_js or "Player N" in players_html:
+        fail("Player N invented on Players")
+
+    # --- card franchise: full A.franchiseName, never chopped ---
+    if ".slice(0, 16)" in players_js:
+        fail("card franchise still slices to 16 chars")
+    if "function cardFranchise" not in players_js:
+        fail("cardFranchise helper missing")
+    if "function cardOwner" not in players_js:
+        fail("cardOwner helper missing")
+    cf = re.search(r"function cardFranchise\(p\) \{([\s\S]*?)\n  \}", players_js)
+    if not cf or "A.franchiseName" not in cf.group(1):
+        fail("cardFranchise does not use A.franchiseName")
+    if 'return name || "unavailable"' not in players_js:
+        fail("missing AFFL home is not unavailable")
+    rg = re.search(r"function renderGrid\(\) \{([\s\S]*?)\n  \}", players_js)
+    if not rg:
+        fail("renderGrid missing")
+    else:
+        body = rg.group(1)
+        if "cardFranchise(p)" not in body:
+            fail("renderGrid does not call cardFranchise")
+        if "pp-fran" not in body or "title=" not in body:
+            fail("card franchise missing title=full name")
+        if ".slice(0, 16)" in body or "tName(p.mainTeam, year)" in body:
+            fail("renderGrid still uses sliced tName")
+    styles = (SITE / "styles.css").read_text()
+    if "text-overflow: ellipsis" not in styles.split(".pp-sub")[1][:200]:
+        fail(".pp-sub is not CSS-ellipsis")
+    chopped = ["Grand Teeton Fee", "Tijuana Sanchito", "Westeros Warlord", "Poulsbo Pollywog", "Squaw Valley Ski"]
+    # visible franchise text = .pp-fran inner, not a raw HTML substring of the full name
+    for raw in re.findall(r'class="pp-fran"[^>]*>([^<]*)</span>', players_js):
+        if raw in chopped:
+            fail(f"players.js card template hardcodes chopped franchise {raw}")
+
+    if "chi114.js?v=6" not in players_html:
+        fail("players.html chi114.js cache not v=6")
+
+    app_js = (SITE / "app.js").read_text()
+    teams_js = (SITE / "teams.js").read_text()
+    for label, src in (("app.js", app_js), ("history.js", hist_js), ("teams.js", teams_js), ("trades.js", trades_js)):
+        if "slice(0, 16)" in src or "slice(0, 15)" in src or "slice(0, 17)" in src:
+            fail(f"{label} still prefix-chops franchise names")
+    index_html = (SITE / "index.html").read_text()
+    bust = re.search(r"app\.js\?v=(\d+)", index_html)
+    if not bust or int(bust.group(1)) < 24:
+        fail(f"app.js cache {bust.group(1) if bust else None} — need v=24")
+    bust = re.search(r"history\.js\?v=(\d+)", hist_html)
+    if not bust or int(bust.group(1)) < 25:
+        fail(f"history.js cache {bust.group(1) if bust else None} — need v=25")
+    bust = re.search(r"teams\.js\?v=(\d+)", (SITE / "teams.html").read_text())
+    if not bust or int(bust.group(1)) < 25:
+        fail(f"teams.js cache {bust.group(1) if bust else None} — need v=25")
+    bust = re.search(r"trades\.js\?v=(\d+)", trades_html)
+    if not bust or int(bust.group(1)) < 15:
+        fail(f"trades.js cache {bust.group(1) if bust else None} — need v=15")
+
+    import subprocess
+    sim = Path(__file__).resolve().parent / "chi147_chip_sim.mjs"
+    if not sim.is_file():
+        fail("missing evals/chi147_chip_sim.mjs")
+    else:
+        try:
+            out = subprocess.check_output(["node", str(sim)], timeout=10, text=True)
+            if "chip-sim-ok" not in out:
+                fail("exclusive chip sim did not confirm")
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+            fail(f"exclusive chip sim failed: {e}")
 
     # --- CHI-147 Age All is pick a season, not 2025 live ---
     fn = re.search(r"function ageScatterSeason\(\) \{([\s\S]*?)\n  \}", hist_js)
@@ -215,6 +319,73 @@ def main() -> int:
             fail("Youngest team / Oldest team chips missing")
         if "new Date(+scatterYear, 11, 31)" not in body and "new Date(+scatterYear, 11, 31)" not in hist_js:
             fail("year path does not bind asOf to Dec 31 of that season")
+
+
+    # --- CHI-147 All: Race matches Age stub; year-only cards collapse ---
+    if 'id="race-wrap"' not in hist_html:
+        fail("history.html missing #race-wrap")
+    if "function hideRaceCanvas" not in hist_js:
+        fail("history.js missing hideRaceCanvas")
+    if "function syncYearOnlyCards" not in hist_js:
+        fail("history.js missing syncYearOnlyCards")
+    rr = re.search(r"function renderRace\(\) \{([\s\S]*?)\n  let ngsKey", hist_js)
+    if not rr:
+        fail("renderRace missing")
+    else:
+        body = rr.group(1)
+        if "pickedYear == null" not in body:
+            fail("renderRace All path does not key off pickedYear == null")
+        if "All · pick a season" not in body:
+            fail("renderRace All subtitle is not All · pick a season")
+        if "hideRaceCanvas" not in body:
+            fail("renderRace All path does not hide/destroy THE RACE canvas")
+        if "showRaceCanvas" not in body:
+            fail("renderRace year path does not restore THE RACE canvas")
+        pick = body.find("pickedYear == null")
+        chart = body.find("new Chart")
+        if pick < 0 or (chart >= 0 and pick > chart):
+            fail("renderRace builds a Chart before the All early-return")
+    hide = re.search(r"function hideRaceCanvas\(\) \{([\s\S]*?)\n  \}", hist_js)
+    if not hide:
+        fail("cannot parse hideRaceCanvas")
+    else:
+        hb = hide.group(1)
+        if "wrap.hidden = true" not in hb and "hidden = true" not in hb:
+            fail("hideRaceCanvas does not set wrap hidden")
+        if 'display = "none"' not in hb and "display = 'none'" not in hb:
+            fail("hideRaceCanvas does not display:none the wrap/canvas")
+        if "raceChart.destroy" not in hb:
+            fail("hideRaceCanvas does not destroy the Race Chart")
+        if "height = \"0\"" not in hb and "height = '0'" not in hb:
+            fail("hideRaceCanvas does not collapse wrap/canvas height")
+    sync = re.search(r"function setYearOnlyOpen\(open\) \{([\s\S]*?)\n  \}", hist_js)
+    if not sync:
+        fail("setYearOnlyOpen missing")
+    else:
+        sb = sync.group(1)
+        if "el.hidden = !open" not in sb:
+            fail("setYearOnlyOpen does not hide year-only section cards")
+    blocks = re.search(r"const YEAR_ONLY_BLOCKS = \[([^\]]+)\]", hist_js)
+    if not blocks:
+        fail("YEAR_ONLY_BLOCKS missing")
+    else:
+        ids = blocks.group(1)
+        for need in ("custody-par-block", "txn-block", "tx-log-block", "waiver-value-block", "waiver-block"):
+            if need not in ids:
+                fail(f"YEAR_ONLY_BLOCKS missing {need}")
+        if "age-scatter-block" in ids:
+            fail("Age card must not collapse on All")
+        if "race-block" in ids:
+            fail("THE RACE card must stay as a compact stub on All")
+    if "syncYearOnlyCards();" not in hist_js:
+        fail("syncYearOnlyCards is never called")
+    if 'id="age-scatter-block"' not in hist_html:
+        fail("Age card missing")
+    age_fn = re.search(r"function renderAgeScatter\(\) \{([\s\S]*?)\n  function ", hist_js)
+    if age_fn and "el.style.display = open ? \"\" : \"none\"" in age_fn.group(1):
+        fail("Age render was restyled")
+    if "live roster age" in hist_js or "live roster age" in hist_html:
+        fail("live roster age leaked")
 
     if fails:
         print("FAIL")

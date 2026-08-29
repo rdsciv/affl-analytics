@@ -84,8 +84,9 @@
 
   /* ================= state ================= */
   const years = Object.keys(DATA.seasons).map(Number).sort((a, b) => a - b);
-  const qsYear = +new URLSearchParams(location.search).get('year');
-  let curYear = years.includes(qsYear) ? qsYear : null;
+  const A = window.AFFL;
+  const fromUrl = (A && A.seasonFromURL) ? A.seasonFromURL() : null;
+  let curYear = (fromUrl != null && years.includes(fromUrl)) ? fromUrl : null;
   let spotlightId = null;
   let NG = null;
 
@@ -158,23 +159,26 @@
     }
   }
 
+  function applyYear(y) {
+    curYear = (y == null || y === '' || y === 'all' || y === 'cum') ? null : +y;
+    if (curYear != null && !years.includes(curYear)) curYear = null;
+    spotlightId = null;
+    PP.q = ''; PP.pos = 'ALL'; PP.limit = 20;
+    const s = $('#pp-search'); if (s) s.value = '';
+    document.querySelectorAll('.pp-chip').forEach((x) =>
+      x.classList.toggle('on', x.dataset.pos === 'ALL'));
+    renderSeason();
+  }
+
   function renderPicker() {
-    const chips = [`<button class="season-chip${curYear == null ? ' on' : ''}" data-y="all">All</button>`]
-      .concat(years.slice().sort((a, b) => b - a).map((y) => `<button class="season-chip${y === curYear ? ' on' : ''}" data-y="${y}">${y}</button>`));
-    $('#season-picker').innerHTML = chips.join('');
-    document.querySelectorAll('.season-chip').forEach((b) =>
-      b.addEventListener('click', () => {
-        const raw = b.dataset.y;
-        curYear = (raw === '' || raw === 'cum' || raw === 'all' || raw == null) ? null : +raw;
-        if (curYear != null && !years.includes(curYear)) curYear = null;
-        history.replaceState(null, '', curYear == null ? 'index.html' : ('?year=' + curYear));
-        spotlightId = null;
-        PP.q = ''; PP.pos = 'ALL'; PP.limit = 20;
-        const s = $('#pp-search'); if (s) s.value = '';
-        document.querySelectorAll('.pp-chip').forEach((x) =>
-          x.classList.toggle('on', x.dataset.pos === 'ALL'));
-        renderSeason();
-      }));
+    const el = document.getElementById('season-picker');
+    if (A && A.seasonSelect) {
+      A.seasonSelect(el, curYear, applyYear, years);
+      return;
+    }
+    if (A && A.seasonPicker) {
+      A.seasonPicker(el, curYear, applyYear, years);
+    }
   }
 
   /* ================= KPI row ================= */
@@ -232,12 +236,28 @@
   }
 
   /* ================= area chart ================= */
+  function syncSpotlightTeam() {
+    const s = S();
+    const sel = $('#spotlight-team');
+    if (!sel) return null;
+    if (curYear == null || !(s.teams || []).length) {
+      sel.hidden = true;
+      sel.style.display = 'none';
+      sel.innerHTML = '';
+      return null;
+    }
+    sel.hidden = false;
+    sel.style.display = '';
+    return sel;
+  }
+
   function renderArea() {
     const s = S();
+    const sel = syncSpotlightTeam();
+    if (!sel) return;
     const spot = teamById(spotlightId) || teamById(s.champion) || s.teams[0];
     spotlightId = spot.id;
 
-    const sel = $('#spotlight-team');
     sel.innerHTML = [...s.teams].sort((a, b) => a.name.localeCompare(b.name))
       .map((t) => `<option value="${t.id}"${t.id === spot.id ? ' selected' : ''}>${t.name}</option>`).join('');
     sel.onchange = () => { spotlightId = +sel.value; renderArea(); };
@@ -375,7 +395,7 @@
       data: {
         labels: s.regWeeks.map((w) => 'W' + w),
         datasets: top4.map((t, i) => ({
-          label: t.name.length > 16 ? t.name.slice(0, 15) + '…' : t.name,
+          label: shortTeam(t.owner),
           data: t.cumWins, borderColor: colors[i], backgroundColor: colors[i],
           borderWidth: 2, pointRadius: 3, pointBorderColor: '#12142e', pointBorderWidth: 1.5,
           tension: 0.2,
@@ -411,7 +431,7 @@
       return `
       <tr>
         <td><span class="rank-pill ${pillCls(t.finalRank)}">${t.finalRank || '–'}</span></td>
-        <td><a class="team-link" href="team.html?year=${curYear}&tid=${t.id}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${t.id}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${franchiseName(t.owner) || t.name || "unavailable"}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
         <td><strong>${t.wins}-${t.losses}${t.ties ? '-' + t.ties : ''}</strong></td>
         <td>${fmt(t.pf, 2)}</td>
         <td>${fmt(t.pa, 2)}</td>
@@ -444,7 +464,7 @@
     mkChart('#luck-chart', {
       type: 'bar',
       data: {
-        labels: rows.map((r) => r.t.name.length > 18 ? r.t.name.slice(0, 17) + '…' : r.t.name),
+        labels: rows.map((r) => shortTeam(r.t.owner)),
         datasets: [{
           data: rows.map((r) => r.net),
           backgroundColor: rows.map((r) => r.net >= 0 ? '#c8ff00cc' : '#3a4a63cc'),
@@ -560,10 +580,15 @@
      NG and T25 are reassigned every time the season changes; every renderer
      below reads them, so all lower sections follow the picker. */
   let T25 = {};
-  const tName25 = (id) => (T25[id] || { name: '?' }).name;
+  const tName25 = (id) => {
+    const t = T25[id] || {};
+    return franchiseName(t.owner) || t.name || "unavailable";
+  };
   const shortName25 = (id) => {
     const n = tName25(id);
-    return n.length > 17 ? n.slice(0, 16) + '…' : n;
+    if (!n || n === "unavailable") return "unavailable";
+    const parts = String(n).split(/\s+/).filter(Boolean);
+    return parts.length ? parts[parts.length - 1] : n;
   };
   const yearCache = new Map();
   async function loadYearBundle(y) {
@@ -1005,7 +1030,7 @@
       ${hs}
       <div>
         <div class="pp-nm">${p.name}</div>
-        <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · ${shortName25(p.mainTeam)}</div>
+        <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ''} · ${tName25(p.mainTeam)}</div>
       </div>
       <div class="pp-pts"><b>${fmt(p.tot, 1)}</b><span>season pts</span></div>
     </div>`;
@@ -1246,6 +1271,7 @@
     renderPicker();
     setPanes();
     if (curYear == null) {
+      syncSpotlightTeam();
       renderCumHome();
       return;
     }

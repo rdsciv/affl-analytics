@@ -36,7 +36,8 @@
     }
     return A.canon(tid);
   }
-  const short = (id) => tName(id).length > 17 ? tName(id).slice(0, 16) + '…' : tName(id);
+  /* Names whole — blotter, log, and axes all paint tName() in full.
+     Never slice to 'Grand Teeton Fee…' / 'Squaw Valley Ski…'. */
   function matchesSquad(tid, y) {
     if (!squad) return true;
     const want = A.canon(squad);
@@ -57,6 +58,9 @@
     if (!ACT) return { available: false, managers: {} };
     if (scope === "cum") return ACT.cumulative || { available: true, managers: {} };
     return (ACT.years || {})[String(year)] || { available: false, managers: {} };
+  }
+  function txUnavailable() {
+    return scope === "season" && (year <= 2017 || !YD || YD.hasTx === false);
   }
 
 
@@ -108,6 +112,7 @@
   }
 
   function renderKPIs() {
+    const missing = txUnavailable();
     const byTeam = YD.txByTeam || {};
     const entries = Object.entries(byTeam).map(([tid, v]) => ({ tid, ...v }));
     const waivers = entries.reduce((a, e) => a + e.waiver, 0);
@@ -115,28 +120,43 @@
     const spend = entries.reduce((a, e) => a + e.spent, 0);
     const topTrader = [...entries].sort((a, b) => b.trades - a.trades)[0];
     const topWire = [...entries].sort((a, b) => (b.waiver + b.fa) - (a.waiver + a.fa))[0];
-    const accepted = YD.trades.length;
-    const swap = YD.biggestSwap;
-    const churn = (YD.mostTraded || [])[0];
+    const accepted = missing ? null : YD.trades.length;
+    const wire = missing ? null : (waivers + fas);
+    const swap = missing ? null : YD.biggestSwap;
+    const churn = missing ? null : (YD.mostTraded || [])[0];
 
     const cards = [
-      { n: '01 · TRADES', color: C.red, pct: Math.min(1, accepted / 40),
-        label: String(accepted), title: 'Completed Trades',
-        desc: topTrader && topTrader.trades
-          ? `<strong>${tName(topTrader.tid)}</strong> was busiest with ${topTrader.trades}`
-          : 'no trades this season' },
+      { n: '01 · TRADES', color: C.red,
+        pct: missing ? 0 : Math.min(1, (accepted || 0) / 40),
+        label: missing ? '—' : String(accepted),
+        title: 'Completed Trades',
+        desc: missing
+          ? `unavailable — ESPN does not retain a ${year} trade log`
+          : (topTrader && topTrader.trades
+            ? `<strong>${tName(topTrader.tid)}</strong> was busiest with ${topTrader.trades}`
+            : 'no trades this season') },
       { n: '02 · BLOCKBUSTER', color: C.orange,
         pct: swap ? Math.min(1, swap.n / 8) : 0,
         label: swap ? String(swap.n) : '—',
         title: 'Biggest Swap',
-        desc: swap
-          ? `<strong>${swap.n} players</strong> changed hands in one Week ${swap.wk} deal between ` +
-            swap.teams.map((t) => tName(t)).join(' and ')
-          : 'no trades this season' },
-      { n: '03 · THE WIRE', color: C.green, pct: Math.min(1, (waivers + fas) / 600),
-        label: fmt(waivers + fas), title: 'Wire Moves',
-        desc: topWire ? `<strong>${tName(topWire.tid)}</strong> made ${topWire.waiver + topWire.fa} of them` : '' },
-      YD.usesFaab
+        desc: missing
+          ? `unavailable — no ${year} blockbuster in the ESPN log`
+          : (swap
+            ? `<strong>${swap.n} players</strong> changed hands in one Week ${swap.wk} deal between ` +
+              swap.teams.map((t) => tName(t)).join(' and ')
+            : 'no trades this season') },
+      { n: '03 · THE WIRE', color: C.green,
+        pct: missing ? 0 : Math.min(1, (wire || 0) / 600),
+        label: missing ? '—' : fmt(wire),
+        title: 'Wire Moves',
+        desc: missing
+          ? `unavailable — waiver and FA adds start in 2018`
+          : (topWire
+            ? `<strong>${tName(topWire.tid)}</strong> made ${topWire.waiver + topWire.fa} of them`
+            : (scope === 'cum'
+              ? 'waiver claims and free-agent adds across every season'
+              : `waiver claims and free-agent adds in ${year}`)) },
+      YD.usesFaab && !missing
         ? { n: '04 · FAAB', color: C.gold, pct: Math.min(1, spend / 1000),
             label: '$' + fmt(spend), title: 'Waiver Spend',
             desc: `<strong>${fmt(waivers)} claims</strong> across the season` }
@@ -147,18 +167,29 @@
                 title: 'Most-Traded Player',
                 desc: `<strong>${A.playerLink(churn.pid, churn.name)}</strong> was traded ${churn.n} separate times` };
             }
-            const t = (YD.topAdds || [])[0];
+            const t = missing ? null : (YD.topAdds || [])[0];
             return { n: '04 · MOST CHASED', color: C.gold,
               pct: t ? Math.min(1, t.n / 12) : 0, label: t ? String(t.n) : '—',
               title: 'Most-Added Player',
-              desc: t ? `<strong>${A.playerLink(t.pid, t.name)}</strong> was picked up ${t.n} separate times`
-                      : 'no add data' };
+              desc: missing
+                ? `unavailable — no ${year} add log`
+                : (t ? `<strong>${A.playerLink(t.pid, t.name)}</strong> was picked up ${t.n} separate times`
+                    : 'no add data') };
           })(),
     ].filter(Boolean);
     $('#tx-kpis').innerHTML = cards.map((c) => `
       <div class="card kpi">${ring(c.pct, c.color, c.label)}
       <div><div class="kpi-num" style="color:${c.color}">${c.n}</div>
-      <div class="kpi-title">${c.title}</div><div class="kpi-desc">${c.desc}</div></div></div>`).join('');
+      <div class="kpi-title">${c.title}</div>${c.desc ? `<div class="kpi-desc">${c.desc}</div>` : ''}</div></div>`).join('');
+    window.__afflTradeKPIs = {
+      year: scope === "cum" ? null : year,
+      scope,
+      txAvailable: !missing,
+      completedTrades: accepted,
+      wireMoves: wire,
+      completedLabel: missing ? "—" : String(accepted),
+      wireLabel: missing ? "—" : String(wire),
+    };
   }
 
   function renderActivity() {
@@ -289,6 +320,12 @@
   }
 
   function renderTrades() {
+    if (txUnavailable()) {
+      $('#trade-sub').textContent = `${year} trade blotter unavailable`;
+      $('#trade-list').innerHTML = A.notice(
+        `ESPN does not retain transaction history for ${year}. Available from 2018 on.`);
+      return;
+    }
     const tradeRows = (YD.trades || []).filter((tr) =>
       !squad || (tr.sides || []).some((s) => matchesSquad(s.tid, tr.year || year)));
     $('#trade-sub').textContent = scope === 'cum'
@@ -306,7 +343,7 @@
         <div class="trade-body">
           ${tr.sides.map((s) => `
             <div class="trade-side">
-              <div class="trade-team">${A.logoHTML(T[s.tid], 'mini')}<span>${short(s.tid)}</span></div>
+              <div class="trade-team">${A.logoHTML(T[s.tid], 'mini')}<span title="${A.esc(tName(s.tid))}">${tName(s.tid)}</span></div>
               <div class="trade-got">${s.got.map((g) =>
                 `<span class="trade-pl"><span class="badge pos-${g.pos}">${g.pos}</span> ${A.playerLink(g.pid, g.name)}</span>`).join('')}</div>
             </div>`).join('<div class="trade-swap">⇄</div>')}
@@ -315,6 +352,15 @@
   }
 
   function renderLog() {
+    if (txUnavailable()) {
+      $('#log-sub').textContent = `${year} transaction log unavailable`;
+      const yth0 = document.getElementById('year-th');
+      if (yth0) yth0.hidden = true;
+      $('#bid-th').style.display = 'none';
+      $('#log-tbl tbody').innerHTML = `<tr><td colspan="7" class="own">ESPN does not retain transactions for ${year}.</td></tr>`;
+      $('#log-more').style.display = 'none';
+      return;
+    }
     const q = S.q.toLowerCase();
     const rows = (YD.moves || []).filter((m) => {
       if (S.type !== 'ALL' && m.type !== S.type) return false;
@@ -337,7 +383,7 @@
         ${scope === 'cum' ? `<td class="tnum">${m.year}</td>` : ''}
         <td><strong>W${m.wk}</strong></td>
         <td class="own">${A.dateStr(m.date)}</td>
-        <td><div class="team-cell">${A.logoHTML(T[m.tid], 'mini')}<span>${short(m.tid)}</span></div></td>
+        <td><div class="team-cell">${A.logoHTML(T[m.tid], 'mini')}<span title="${A.esc(tName(m.tid))}">${tName(m.tid)}</span></div></td>
         <td><span class="badge ${m.type === 'WAIVER' ? 'pos-QB' : 'pos-RB'}">${m.type === 'WAIVER' ? 'waiver' : 'free agent'}</span></td>
         ${YD.usesFaab ? `<td>${m.bid ? '$' + m.bid : '—'}</td>` : ''}
         <td>${plList(m.add, 'add')}</td>
@@ -482,17 +528,50 @@
 
   async function renderTradeGrid() {
     const sub = $("#trade-grid-sub");
+    const tbl = $("#trade-grid");
+    const note = $("#trade-grid-note");
+    const scroll = tbl && tbl.closest(".tg-scroll");
+    const missing = txUnavailable();
+    if (missing) {
+      GRID = null;
+      if (sub) sub.textContent = `${year} · trade grid unavailable · ESPN has no trade log before 2018`;
+      if (tbl) tbl.innerHTML = "";
+      if (scroll) scroll.hidden = true;
+      if (note) {
+        note.hidden = false;
+        note.innerHTML = A.notice(
+          `ESPN does not retain a trade log for ${year}. The completed-trade matrix starts in 2018.`
+        );
+      }
+      window.__afflTradeGrid = {
+        available: false,
+        year,
+        deals: null,
+        max: null,
+        names: [],
+        span: String(year),
+      };
+      return;
+    }
     ALL = ALL || await A.loadAllYears();
-    GRID = buildTradeGrid(ALL);
+    const src = scope === "cum" ? ALL : ALL.filter((b) => Number(b.year) === Number(year));
+    GRID = buildTradeGrid(src);
+    if (note) { note.hidden = true; note.innerHTML = ""; }
+    if (scroll) scroll.hidden = false;
     if (sub) {
-      sub.textContent = `${GRID.deals} completed trades among current franchises · 2018–2025 · ESPN has no trade log before 2018 · click a name to pin`;
+      sub.textContent = scope === "cum"
+        ? `${GRID.deals} completed trades among current franchises · 2018–2025 · ESPN has no trade log before 2018 · click a name to pin`
+        : `${GRID.deals} completed trades among current franchises · ${year} · click a name to pin`;
     }
     paintTradeGrid();
     wireTradeGrid();
     window.__afflTradeGrid = {
+      available: true,
+      year: scope === "cum" ? null : year,
       deals: GRID.deals,
       max: GRID.max,
       names: GRID.fr.map((f) => f.currentName),
+      span: scope === "cum" ? "2018–2025" : String(year),
     };
   }
 
