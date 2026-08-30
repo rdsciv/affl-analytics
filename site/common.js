@@ -1,9 +1,9 @@
 /* ============ shared across all AFFL pages ============ */
 window.AFFL = (function () {
   const C = {
-    blue: '#2f7bff', blue2: '#47a8ff', ice: '#9fd8ff', steel: '#3a4a63',
-    orange: '#ff7a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
-    green: '#93d500', red: '#ff2d1a',
+    blue: '#00a2ff', blue2: '#47d4ff', ice: '#9fd8ff', steel: '#3a4a63',
+    orange: '#ff6a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
+    green: '#c8ff00', red: '#ff2d1a',
     mut: '#7d8aa0', ink: '#eef4ff', grid: '#1b243366',
   };
 
@@ -477,7 +477,7 @@ window.AFFL = (function () {
     if (!ys.length) return null;
     const y = +year;
     if (ys.indexOf(year) >= 0 || ys.indexOf(y) >= 0) return Number.isFinite(y) ? y : year;
-    return ys[0];
+    return null;
   }
 
   /* Historic teams — Pillars former-teams toggle.

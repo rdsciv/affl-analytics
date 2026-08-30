@@ -13,16 +13,73 @@
   const fmt = A.fmt;
 
   const INDEX = await fetch("player_index.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.json());
+
+  // Per-player payloads are fetched on demand; only the compact all-players
+  // summary (nfl_index.json, ~8% of nfl_weeks.json) is loaded up front.
+  const NFL = {}, NGS = {}, YOFF = {}, COLLEGE = {}, OVERVIEW = {};
+  const NFLX = await fetch("nfl_index.json?v=" + Date.now(), { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : {}))
+    .catch(() => ({}));
+
+  const HYDRATED = new Set();
+  const HYDRATING = new Map();
+  const LAZY_SETS = { nfl: NFL, ngs: NGS, yoff: YOFF, college: COLLEGE, overview: OVERVIEW };
+  const FULL_FILES = {
+    nfl: "nfl_weeks.json", ngs: "ngs.json", yoff: "yoff.json",
+    college: "college_stats.json", overview: "player_overview.json",
+  };
+  let FULL_FALLBACK = null;
+  let API_OK = true;   // flipped off the first time /api is absent (static hosting)
+
+  // Static hosting (GitHub Pages) has no /api, so fall back to the whole-file
+  // download once and serve every later player out of it.
+  async function loadFullFallback() {
+    if (FULL_FALLBACK) return FULL_FALLBACK;
+    FULL_FALLBACK = (async () => {
+      const out = {};
+      await Promise.all(Object.keys(FULL_FILES).map(async (k) => {
+        out[k] = await fetch(FULL_FILES[k] + "?v=" + Date.now(), { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : {}))
+          .catch(() => ({}));
+      }));
+      return out;
+    })();
+    return FULL_FALLBACK;
+  }
+
+  async function hydrate(pid) {
+    const id = String(pid == null ? "" : pid);
+    if (!id || HYDRATED.has(id)) return;
+    if (HYDRATING.has(id)) return HYDRATING.get(id);
+    const job = (async () => {
+      let got = null;
+      if (API_OK) {
+        try {
+          // Relative so it resolves under a project subpath too.
+          const r = await fetch("api/player/" + encodeURIComponent(id));
+          if (r.ok) got = await r.json();
+          else API_OK = false;
+        } catch (e) { API_OK = false; got = null; }
+      }
+      if (!got) {
+        const all = await loadFullFallback();
+        got = {};
+        Object.keys(LAZY_SETS).forEach((k) => { got[k] = (all[k] || {})[id] || null; });
+      }
+      Object.keys(LAZY_SETS).forEach((k) => {
+        LAZY_SETS[k][id] = got[k] == null ? (k === "nfl" || k === "ngs" ? {} : null) : got[k];
+      });
+      HYDRATED.add(id);
+      HYDRATING.delete(id);
+    })();
+    HYDRATING.set(id, job);
+    return job;
+  }
+
+  const nflIdx = (pid) => NFLX[String(pid)] || {};
+  const nflIdxYear = (pid, y) => (nflIdx(pid).y || {})[String(y)] || null;
+  const isHydrated = (pid) => HYDRATED.has(String(pid));
   const PROJ = await fetch("proj.json?v=" + Date.now(), { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}));
-  const NFL = await fetch("nfl_weeks.json?v=" + Date.now(), { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}));
-  const NGS = await fetch("ngs.json?v=" + Date.now(), { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}));
-  const YOFF = await fetch("yoff.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : {}))
     .catch(() => ({}));
   const PRE2018 = await fetch("pre2018_rosters.json?v=" + Date.now(), { cache: "no-store" })
@@ -34,12 +91,6 @@
   const NGS_PROFILES = await fetch("ngs_profiles.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : { players: {} }))
     .catch(() => ({ players: {} }));
-  const COLLEGE = await fetch("college_stats.json?v=" + Date.now(), { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}));
-  const OVERVIEW = await fetch("player_overview.json?v=" + Date.now(), { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : {}))
-    .catch(() => ({}));
 
   function weekProj(year, pid, wk) {
     const rec = ((PROJ[String(year)] || {})[String(pid)]) || {};
@@ -66,6 +117,10 @@
   function isWeekKey(k) { return /^\d+$/.test(String(k)) && +k > 0; }
 
   function nflSeasonPts(pid, y) {
+    if (!isHydrated(pid)) {
+      const e = nflIdxYear(pid, y);
+      return e && e.p != null ? e.p : null;
+    }
     const rec = nflYearWeeks(pid, y);
     let s = 0, n = 0;
     Object.keys(rec).forEach((wk) => {
@@ -77,6 +132,12 @@
   }
 
   function nflCareerPts(pid) {
+    if (!isHydrated(pid)) {
+      const ys = nflIdx(pid).y || {};
+      let s = 0, n = 0;
+      Object.keys(ys).forEach((y) => { if (ys[y] && ys[y].p != null) { s += ys[y].p; n++; } });
+      return n ? s : null;
+    }
     const rec = nflBlock(pid);
     let s = 0, n = 0;
     Object.keys(rec).forEach((y) => {
@@ -88,6 +149,10 @@
   }
 
   function nflTeam(pid, y) {
+    if (y !== "all" && !isHydrated(pid)) {
+      const e = nflIdxYear(pid, y);
+      return (e && e.t) || "";
+    }
     const rec = y === "all" ? null : nflYearWeeks(pid, y);
     if (!rec) return "";
     const wks = Object.keys(rec).filter(isWeekKey).sort((a, b) => +a - +b);
@@ -97,9 +162,25 @@
     return "";
   }
 
+  function nflMeta(pid) {
+    return isHydrated(pid) ? (nflBlock(pid).meta || {}) : (nflIdx(pid).m || {});
+  }
+
+  function nflYearKeys(pid) {
+    return isHydrated(pid)
+      ? Object.keys(nflBlock(pid)).filter(isYearKey)
+      : Object.keys(nflIdx(pid).y || {});
+  }
+
+  function nflHasWeeks(pid, y) {
+    return isHydrated(pid)
+      ? Object.keys(nflYearWeeks(pid, y)).some(isWeekKey)
+      : !!nflIdxYear(pid, y);
+  }
+
   function stubPlayer(pid) {
     const m = meta(pid);
-    const md = nflBlock(pid).meta || {};
+    const md = nflMeta(pid);
     const bioY = logYear === "all" ? ((m.years || [])[0]) : logYear;
     const bio = (A.playerBio(pid, bioY, A.today()) || {});
     return {
@@ -181,8 +262,7 @@
 
   function playerYears(pid) {
     const affl = (meta(pid).years || []).slice();
-    const rec = nflBlock(pid);
-    const nfl = Object.keys(rec).filter(isYearKey).map(Number);
+    const nfl = nflYearKeys(pid).map(Number);
     const pre = [];
     Object.keys(PRE2018 || {}).forEach((y) => {
       if ((PRE2018[y] || {})[String(pid)]) pre.push(+y);
@@ -557,8 +637,10 @@
   }
 
   async function loadPlayer(pid, push) {
+    const want0 = pid == null || pid === "" ? null : Number(pid);
+    if (want0) await hydrate(want0);
     const pool = enrichedPool();
-    const want = pid == null || pid === "" ? null : Number(pid);
+    const want = want0;
     let p = want ? pool.find((x) => Number(x.pid) === want) : null;
     if (!p && want && INDEX[String(want)]) p = stubPlayer(want);
     if (!p && want && A.HYDRATE_PLAYERS) {
@@ -573,6 +655,7 @@
       return;
     }
     if (!p) p = pool[0];
+    if (p && p.pid != null) await hydrate(p.pid);
     if (!p) {
       $("#pl-hero").innerHTML = A.notice(`No player data stored for ${year}. ESPN retains weekly lineups from 2018 on.`);
       const col = $("#pl-college");
@@ -709,11 +792,10 @@
 
 
   function playerChi114Logo(pid) {
-    const rec = nflBlock(pid);
-    const md = (rec && rec.meta) || {};
+    const md = nflMeta(pid);
     let nfl = md.nfl || "";
     if (!nfl) {
-      const ys = Object.keys(rec || {}).filter(isYearKey).sort();
+      const ys = nflYearKeys(pid).sort();
       if (ys.length) nfl = nflTeam(pid, +ys[ys.length - 1]) || "";
     }
     if (!nfl && A.nflSlug) {
@@ -1453,7 +1535,8 @@
     return null;
   }
 
-  const FG_PALETTE = ["#2f7bff","#ff7a00","#ffc400","#93d500","#47a8ff","#ff2d1a","#c77dff","#2a9d8c","#ff6b9d","#9fd8ff","#e8a838","#7d8aa0"];
+  // Colorblind-validated (OKLCH, dark surface #0e1119, all-pairs CVD check) — see dataviz audit.
+  const FG_PALETTE = ["#576ae8","#ba369c","#cc4200","#b28700","#009562","#009ecf"];
   function ownerColor(oid) {
     const id = String(A.canon(oid) || oid || "");
     let h = 0;
@@ -1642,7 +1725,7 @@
       items.push({ k: "Clutch", t: fmt(c.w[1], 1) + " pts in a " + fmt(mu.margin, 1) + "-pt win", d: c.y + " W" + c.w[0] + " · " + tName(c.w[3], c.y) });
     }
     el.innerHTML = items.length ? items.map((x) => `
-      <li><div class="story-ico" style="background:#2f7bff18">★</div>
+      <li><div class="story-ico" style="background:#00a2ff18">★</div>
       <div class="story-txt"><div class="t">${A.esc(x.k)}</div><div class="d">${A.esc(x.t)} · ${A.esc(x.d)}</div></div></li>`).join("")
       : `<li>${A.notice("No achievement-sized weeks in this slice.")}</li>`;
   }
@@ -2039,7 +2122,7 @@
 
   function barStyle(r) {
     const state = r.state || (r.w[2] ? "started" : "benched");
-    if (state === "started") return { bg: "#2f7bffcc", bd: "#2f7bff", bw: 0 };
+    if (state === "started") return { bg: "#00a2ffcc", bd: "#00a2ff", bw: 0 };
     if (state === "benched") return { bg: "#3a4a6388", bd: "#3a4a63", bw: 0 };
     if (state === "snapshot") return { bg: "#d4a01788", bd: "#d4a017", bw: 1 };
     if (state === "unrecovered") return { bg: "#3a4a6333", bd: "#7d8aa0", bw: 1 };
@@ -2248,7 +2331,7 @@
       const years = playerYears(id);
       if (scope !== "cum") {
         const hasYear = years.indexOf(year) >= 0
-          || Object.keys(nflYearWeeks(id, year)).some(isWeekKey);
+          || nflHasWeeks(id, year);
         if (!hasYear) return;
       }
       if (!by[id]) by[id] = stubPlayer(id);
@@ -2314,16 +2397,21 @@
       if (r.xtd != null && Number.isFinite(Number(r.xtd))) { xtd += Number(r.xtd); nXtd += 1; }
     });
     let yds = 0, nYds = 0;
-    const rec = nflBlock(pid);
-    Object.keys(rec).forEach((y) => {
-      if (!isYearKey(y)) return;
-      const weeks = rec[y] || {};
-      Object.keys(weeks).forEach((wk) => {
-        if (!isWeekKey(wk)) return;
-        const w = weeks[wk];
-        if (w && w.yds != null && Number.isFinite(Number(w.yds))) { yds += Number(w.yds); nYds += 1; }
+    if (!isHydrated(pid)) {
+      const v = nflIdx(pid).yds;
+      if (v != null) { yds = v; nYds = 1; }
+    } else {
+      const rec = nflBlock(pid);
+      Object.keys(rec).forEach((y) => {
+        if (!isYearKey(y)) return;
+        const weeks = rec[y] || {};
+        Object.keys(weeks).forEach((wk) => {
+          if (!isWeekKey(wk)) return;
+          const w = weeks[wk];
+          if (w && w.yds != null && Number.isFinite(Number(w.yds))) { yds += Number(w.yds); nYds += 1; }
+        });
       });
-    });
+    }
     return { td: nTd ? td : null, xtd: nXtd ? xtd : null, yds: nYds ? yds : null };
   }
 
@@ -2473,9 +2561,13 @@
     const fromPl = woprFirstNum(player, ["games", "g", "gp"]);
     if (fromPl && fromPl > 0) return fromPl;
     if (pid != null && year != null) {
-      const rec = nflYearWeeks(pid, year);
       let n = 0;
-      Object.keys(rec).forEach((wk) => { if (isWeekKey(wk)) n++; });
+      if (!isHydrated(pid)) {
+        n = (nflIdxYear(pid, year) || {}).n || 0;
+      } else {
+        const rec = nflYearWeeks(pid, year);
+        Object.keys(rec).forEach((wk) => { if (isWeekKey(wk)) n++; });
+      }
       if (n > 0) return n;
     }
     return null;
@@ -2723,6 +2815,19 @@
   }
 
   function cmpNflSeason(pid, y) {
+    if (!isHydrated(pid)) {
+      const e = nflIdxYear(pid, y);
+      if (!e) return { pts: null, games: null, yds: null, td: null, tgt: null, epa: null, xtd: null };
+      return {
+        pts: e.g ? (e.cp == null ? null : e.cp) : null,
+        games: e.g || null,
+        yds: e.yds == null ? null : e.yds,
+        td: e.td == null ? null : e.td,
+        tgt: e.tgt == null ? null : e.tgt,
+        epa: e.epa == null ? null : e.epa,
+        xtd: e.xtd == null ? null : e.xtd,
+      };
+    }
     const rec = nflYearWeeks(pid, y);
     let pts = 0, games = 0, yds = 0, td = 0, tgt = 0, epa = 0, xtd = 0;
     let nYds = 0, nTd = 0, nTgt = 0, nEpa = 0, nXtd = 0;
@@ -2767,7 +2872,7 @@
       name: m.name || adv.name || yp.name || ("#" + pid),
       pos: (m.pos || adv.pos || yp.pos || "").toUpperCase(),
       nfl: adv.nfl || yp.nfl || nflTeam(pid, cmpYear) || "",
-      hs: (nflBlock(pid).meta || {}).hs || yp.hs || "",
+      hs: (nflMeta(pid) || {}).hs || yp.hs || "",
       owner: owner,
       franchise: owner ? (A.franchiseName(owner) || "—") : "—",
       logo: owner ? A.franchiseLogo(owner) : "",

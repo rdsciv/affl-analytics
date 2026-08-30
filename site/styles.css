@@ -2476,6 +2476,8 @@ img.avatar {
   border-radius: 7px;
 }
 .second-grid .chart-wrap.xtall { height: 640px; }
+.chart-wrap.spend-bars { height: 470px; }
+.chart-wrap.spend-rate { height: 150px; margin-top: 10px; }
 #activity-rates-wrap { margin-top: 12px; }
 #activity-note { margin: 0 0 8px; }
 

@@ -208,10 +208,10 @@
       data: {
         labels: names,
         datasets: [
-          { label: "Waiver submitted", data: rows.map((r) => r.waiverSubmitted || 0), backgroundColor: "#47a8ff99", maxBarThickness: 10, xAxisID: "x" },
-          { label: "Waiver won", data: rows.map((r) => r.waiverWon || 0), backgroundColor: "#2f7bffcc", maxBarThickness: 10, xAxisID: "x" },
-          { label: "FA adds", data: rows.map((r) => r.faAdds || 0), backgroundColor: "#93d500cc", maxBarThickness: 10, xAxisID: "x" },
-          { label: "Trades proposed", data: rows.map((r) => r.tradesProposed || 0), backgroundColor: "#ff7a00cc", maxBarThickness: 10, xAxisID: "xProposed" },
+          { label: "Waiver submitted", data: rows.map((r) => r.waiverSubmitted || 0), backgroundColor: "#47d4ff99", maxBarThickness: 10, xAxisID: "x" },
+          { label: "Waiver won", data: rows.map((r) => r.waiverWon || 0), backgroundColor: "#00a2ffcc", maxBarThickness: 10, xAxisID: "x" },
+          { label: "FA adds", data: rows.map((r) => r.faAdds || 0), backgroundColor: "#c8ff00cc", maxBarThickness: 10, xAxisID: "x" },
+          { label: "Trades proposed", data: rows.map((r) => r.tradesProposed || 0), backgroundColor: "#ff6a00cc", maxBarThickness: 10, xAxisID: "xProposed" },
           { label: "Trades accepted", data: rows.map((r) => r.tradesAccepted || 0), backgroundColor: "#ff2d1acc", maxBarThickness: 10, xAxisID: "x" },
         ],
       },

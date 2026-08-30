@@ -6,8 +6,8 @@
 (function () {
   const A = window.AFFL;
   const C = (A && A.C) || {
-    blue: "#2f7bff", blue2: "#47a8ff", ice: "#9fd8ff",
-    orange: "#ff7a00", gold: "#ffc400", green: "#93d500",
+    blue: "#00a2ff", blue2: "#47d4ff", ice: "#9fd8ff",
+    orange: "#ff6a00", gold: "#ffc400", green: "#c8ff00",
     red: "#ff2d1a", mut: "#7d8aa0", ink: "#eef4ff", grid: "#1b243366",
   };
 

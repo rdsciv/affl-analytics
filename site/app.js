@@ -256,7 +256,7 @@
           {
             label: 'League average', data: s.wkAvg, borderColor: C.blue, borderWidth: 2,
             pointRadius: 0, tension: 0.45, fill: 'origin', order: 2,
-            backgroundColor: (c) => c.chart.chartArea ? grad(c.chart.ctx, c.chart.chartArea, '#2f7bff80', '#2f7bff08') : '#2f7bff33',
+            backgroundColor: (c) => c.chart.chartArea ? grad(c.chart.ctx, c.chart.chartArea, '#00a2ff80', '#00a2ff08') : '#00a2ff33',
           },
           {
             label: 'League low', data: s.wkMin, borderColor: '#3a4a63', borderWidth: 1.5,
@@ -347,7 +347,7 @@
             if (!c.chart.chartArea) return C.orange;
             const isChamp = rows[c.dataIndex].id === s.champion;
             return grad(c.chart.ctx, c.chart.chartArea,
-              isChamp ? C.gold : C.blue, isChamp ? '#ffc40018' : '#2f7bff14');
+              isChamp ? C.gold : C.blue, isChamp ? '#ffc40018' : '#00a2ff14');
           },
         }],
       },
@@ -711,7 +711,7 @@
         labels: rows.map((r) => shortName25(r.teamId)),
         datasets: [{
           data: rows.map((r) => r.epa),
-          backgroundColor: rows.map((r) => r.epa >= 0 ? '#47a8ffcc' : '#ff2d1acc'),
+          backgroundColor: rows.map((r) => r.epa >= 0 ? '#47d4ffcc' : '#ff2d1acc'),
           borderRadius: 4, maxBarThickness: 16,
         }],
       },
@@ -1091,7 +1091,7 @@
         labels: weeks,
         datasets: [{
           data: p.wk.map((w) => w[1]),
-          backgroundColor: p.wk.map((w) => w[2] ? '#2f7bffcc' : '#3a4a6388'),
+          backgroundColor: p.wk.map((w) => w[2] ? '#00a2ffcc' : '#3a4a6388'),
           borderRadius: 3, maxBarThickness: 22,
         }],
       },
@@ -1219,7 +1219,7 @@
     }
     $('#waiver-list').innerHTML = NG.waiver.map((w, i) => `
       <li>
-        <div class="story-ico" style="background:#93d50018">${['🧙','🎩','✨','🪄','🔮','🃏','🎯','⭐'][i] || '⭐'}</div>
+        <div class="story-ico" style="background:#c8ff0018">${['🧙','🎩','✨','🪄','🔮','🃏','🎯','⭐'][i] || '⭐'}</div>
         <div class="story-txt">
           <div class="t">${w.name} <span class="badge pos-${w.pos}">${w.pos}</span></div>
           <div class="d">${w.nfl || ''} · scooped by ${shortName25(w.teamId)}</div>

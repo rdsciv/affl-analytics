@@ -1589,7 +1589,7 @@
         data: {
           labels: labels,
           datasets: [
-            { type: "bar", label: "Points for", data: pf, backgroundColor: "#2f7bff99", borderRadius: 5, maxBarThickness: 28, yAxisID: "y" },
+            { type: "bar", label: "Points for", data: pf, backgroundColor: "#00a2ff99", borderRadius: 5, maxBarThickness: 28, yAxisID: "y" },
             { type: "line", label: "PPG", data: ppg, borderColor: A.C.gold, backgroundColor: A.C.gold, borderWidth: 2, pointRadius: 3, yAxisID: "y1", tension: 0.25 },
           ],
         },
@@ -1730,7 +1730,7 @@
         type: "bar",
         data: {
           labels: ["Luck", "Sched luck", "Median W"],
-          datasets: [{ data: [s.luck, s.sched, s.medW], backgroundColor: [s.luck >= 0 ? "#c8ff00cc" : "#3a4a63cc", "#47a8ffcc", "#ffc400cc"], borderRadius: 5, maxBarThickness: 36 }],
+          datasets: [{ data: [s.luck, s.sched, s.medW], backgroundColor: [s.luck >= 0 ? "#c8ff00cc" : "#3a4a63cc", "#47d4ffcc", "#ffc400cc"], borderRadius: 5, maxBarThickness: 36 }],
         },
         options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: A.C.grid }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } },
       });
@@ -1784,7 +1784,7 @@
         data: {
           labels: ["This franchise"],
           datasets: [
-            { label: "Points started", data: [iq.actual], backgroundColor: "#2f7bffcc", stack: "s", borderRadius: 4, maxBarThickness: 28 },
+            { label: "Points started", data: [iq.actual], backgroundColor: "#00a2ffcc", stack: "s", borderRadius: 4, maxBarThickness: 28 },
             { label: "Left on bench", data: [iq.wasted], backgroundColor: "#ff2d1abb", stack: "s", borderRadius: 4, maxBarThickness: 28 },
           ],
         },
@@ -1807,7 +1807,7 @@
       data: {
         labels: series.map((s) => String(s.y)),
         datasets: [
-          { label: "Started", data: series.map((s) => s.iq ? s.iq.actual : null), backgroundColor: "#2f7bffcc", stack: "s", maxBarThickness: 22 },
+          { label: "Started", data: series.map((s) => s.iq ? s.iq.actual : null), backgroundColor: "#00a2ffcc", stack: "s", maxBarThickness: 22 },
           { label: "Wasted", data: series.map((s) => s.iq ? s.iq.wasted : null), backgroundColor: "#ff2d1abb", stack: "s", maxBarThickness: 22 },
           { type: "line", label: "Eff %", data: series.map((s) => s.iq ? s.iq.eff * 100 : null), borderColor: A.C.gold, backgroundColor: A.C.gold, borderWidth: 2, pointRadius: 3, yAxisID: "y1", spanGaps: true },
         ],
@@ -1915,7 +1915,7 @@
       if (!s || s.epa == null) return;
       mkLab("lab-epa-chart", {
         type: "bar",
-        data: { labels: ["This franchise"], datasets: [{ data: [s.epa], backgroundColor: s.epa >= 0 ? "#47a8ffcc" : "#ff2d1acc", borderRadius: 4, maxBarThickness: 36 }] },
+        data: { labels: ["This franchise"], datasets: [{ data: [s.epa], backgroundColor: s.epa >= 0 ? "#47d4ffcc" : "#ff2d1acc", borderRadius: 4, maxBarThickness: 36 }] },
         options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => A.fmt(c.parsed.x, 1) + " EPA" } } }, scales: { x: { grid: { color: A.C.grid }, border: { display: false } }, y: { grid: { display: false }, border: { display: false } } } },
       });
       return;
@@ -1929,7 +1929,7 @@
       type: "bar",
       data: {
         labels: series.map((s) => String(s.y)),
-        datasets: [{ label: "EPA", data: series.map((s) => s.epa), backgroundColor: series.map((s) => s.epa == null ? "#3a4a63" : (s.epa >= 0 ? "#47a8ffcc" : "#ff2d1acc")), borderRadius: 4, maxBarThickness: 22 }],
+        datasets: [{ label: "EPA", data: series.map((s) => s.epa), backgroundColor: series.map((s) => s.epa == null ? "#3a4a63" : (s.epa >= 0 ? "#47d4ffcc" : "#ff2d1acc")), borderRadius: 4, maxBarThickness: 22 }],
       },
       options: axisOpts("EPA"),
     });

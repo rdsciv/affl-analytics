@@ -2250,8 +2250,8 @@
   }
 
   const RB_POS_COLOR = {
-    QB: "#2f7bff", RB: "#93d500", WR: "#ff7a00",
-    TE: "#ffc400", K: "#9fd8ff", DST: "#9fb0cc",
+    QB: "#00a2ff", RB: "#c8ff00", WR: "#ff6a00",
+    TE: "#ffc400", K: "#9fd8ff", DST: "#3a4a63",
   };
 
   function computeHof() {

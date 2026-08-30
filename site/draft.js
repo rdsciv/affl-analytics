@@ -83,7 +83,7 @@
   if (year == null) year = A.years()[0];
   let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
-  let YD = null, T = {}, chart = null, dnaChart = null, labChart = null, ALL = null;
+  let YD = null, T = {}, chart = null, rateChart = null, dnaChart = null, labChart = null, ALL = null;
   let scatterChart = null, contChart = null;
   let HOLDOUT = { pooled: {}, bySeason: {}, scoredAuctionSeasons: [], claim: "", subtitle: "", keepers: { note: "" }, histogramNote: "", grain: "" };
   try {
@@ -840,34 +840,27 @@
     const anyPts = rows.some((r) => r.pts > 0);
     const nYears = (r) => Math.max(1, Object.keys(r.years || {}).length);
     const avg = auction && scope === "cum";
+    const labels = rows.map((r) => short(r.tid));
 
     $('#spend-sub').textContent = auction
       ? (avg
-          ? "average $200 allocation across auction years · line = career points per dollar"
-          : "how each team allocated their $200 across positions · line = points returned per dollar")
-      : "draft picks by position · line = points those picks returned";
+          ? "average $200 allocation across auction years · below: career points per dollar"
+          : "how each team allocated their $200 across positions · below: points returned per dollar")
+      : "draft picks by position · below: points those picks returned";
 
     if (chart) chart.destroy();
     chart = new Chart($('#spend-chart'), {
+      type: 'bar',
       data: {
-        labels: rows.map((r) => short(r.tid)),
-        datasets: [
-          ...Object.keys(POS_COLORS).map((pos) => ({
-            type: 'bar', label: pos, stack: 'spend', yAxisID: 'y',
-            data: rows.map((r) => {
-              const raw = r.byPos[pos] || 0;
-              return avg ? raw / nYears(r) : raw;
-            }),
-            backgroundColor: POS_COLORS[pos], maxBarThickness: 30, order: 2,
-          })),
-          ...(anyPts ? [{
-            type: 'line', label: auction ? 'Pts per $' : 'Total pts', yAxisID: 'y1',
-            data: rows.map((r) => auction ? +(r.pts / Math.max(1, r.spend)).toFixed(2) : r.pts),
-            borderColor: '#ffffff', backgroundColor: '#ffffff', borderWidth: 2,
-            pointRadius: 3, pointBackgroundColor: '#fff', pointBorderColor: '#05060b',
-            tension: 0.25, order: 1,
-          }] : []),
-        ],
+        labels,
+        datasets: Object.keys(POS_COLORS).map((pos) => ({
+          label: pos, stack: 'spend',
+          data: rows.map((r) => {
+            const raw = r.byPos[pos] || 0;
+            return avg ? raw / nYears(r) : raw;
+          }),
+          backgroundColor: POS_COLORS[pos], maxBarThickness: 30,
+        })),
       },
       options: {
         maintainAspectRatio: false,
@@ -884,10 +877,41 @@
         scales: {
           y: { stacked: true, beginAtZero: true, grid: { color: C.grid }, border: { display: false },
                title: { display: true, text: auction ? '$ spent' : 'picks' } },
-          y1: { position: 'right', beginAtZero: true, grid: { display: false },
-                border: { display: false }, display: anyPts,
-                title: { display: anyPts, text: auction ? 'pts / $' : 'pts' } },
           x: { stacked: true, grid: { display: false }, border: { display: false },
+               ticks: { maxRotation: 55, minRotation: 40 } },
+        },
+      },
+    });
+
+    if (rateChart) { rateChart.destroy(); rateChart = null; }
+    const rateWrap = $('#spend-rate-wrap');
+    if (!anyPts) {
+      if (rateWrap) rateWrap.style.display = 'none';
+      return;
+    }
+    if (rateWrap) rateWrap.style.display = '';
+    const rateLabel = auction ? 'Pts per $' : 'Total pts';
+    rateChart = new Chart($('#spend-rate-chart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: rateLabel,
+          data: rows.map((r) => auction ? +(r.pts / Math.max(1, r.spend)).toFixed(2) : r.pts),
+          backgroundColor: C.ink + 'cc', borderRadius: 3, maxBarThickness: 24,
+        }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c) => rateLabel + ': ' + fmt(c.parsed.y, auction ? 2 : 0) } },
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: C.grid }, border: { display: false },
+               title: { display: true, text: rateLabel } },
+          x: { grid: { display: false }, border: { display: false },
                ticks: { maxRotation: 55, minRotation: 40 } },
         },
       },
@@ -2070,7 +2094,7 @@
       const c = A.map((v, i) => Math.round(v + (B[i] - v) * u));
       return `rgb(${c[0]},${c[1]},${c[2]})`;
     };
-    return t >= 0 ? mix('#3a4a63', '#93d500', t) : mix('#3a4a63', '#ff2d1a', -t);
+    return t >= 0 ? mix('#3a4a63', '#c8ff00', t) : mix('#3a4a63', '#ff2d1a', -t);
   }
 
   function holdoutBlock() {
