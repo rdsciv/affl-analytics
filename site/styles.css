@@ -1749,12 +1749,30 @@ a.tm-link:hover { color: var(--blue2); }
 #fg-college[hidden], #fg-homers[hidden], #fg-cuffs[hidden],
 #fg-age-scatter[hidden] { display: none !important; }
 .nav-board-scroll { overflow-x: auto; padding-bottom: 8px; }
-.nav-board-block { margin: 0 0 18px; }
+/* CHI-166 — #nav-board stacks year blocks; do NOT grid the stack or years crush. */
+#nav-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.nav-board-block {
+  margin: 0;
+  min-width: 0;
+}
+.nav-board-block .card-sub { margin-bottom: 6px; }
+.nav-board-block-scroll {
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
 .nav-board {
   display: grid;
-  grid-template-columns: 88px repeat(var(--nav-rounds, 16), minmax(92px, 1fr));
-  gap: 4px;
-  min-width: 720px;
+  grid-template-columns: 100px repeat(var(--nav-rounds, 16), minmax(110px, 1fr));
+  gap: 5px;
+  min-width: max(720px, calc(100px + var(--nav-rounds, 16) * 115px));
+  width: max-content;
+  max-width: none;
 }
 .nav-board-h, .nav-board-r {
   font-size: 10px; font-weight: 800; letter-spacing: .08em;
@@ -1766,7 +1784,7 @@ a.tm-link:hover { color: var(--blue2); }
 .nav-cell {
   border: 1px solid var(--line); border-radius: 6px;
   padding: 5px 6px 6px; background: #0b0e16;
-  min-height: 58px; min-width: 0;
+  min-height: 58px; min-width: 110px;
   border-left-width: 3px;
 }
 .nav-cell.pos-QB { border-left-color: var(--blue2); background: #2f7bff18; }
