@@ -295,18 +295,23 @@
     const countEl = document.getElementById("nfl-injury-count");
     if (!card || !list) return;
     /* CHI-165 — injury cache is current season only. Never paint 2025 injuries on 2014. */
-    const injYear = (A.years && A.years()[0]) || 2025;
-    if (scope === "season" && year && +year !== +injYear) {
-      card.style.display = "";
-      if (countEl) countEl.textContent = "n/a";
-      list.innerHTML = `<div class="nfl-inj-empty">NFL injury report is for the current season (${injYear}) only — not available for ${year}.</div>`;
+    const ys = (A.years && A.years()) || [];
+    const injYear = ys.length ? Math.max.apply(null, ys.map(Number)) : 2025;
+    const caption = card.querySelector(".nfl-inj-caption");
+    const historic = (scope === "season" && year && +year !== +injYear) || scope === "cum";
+    if (historic) {
+      card.setAttribute("data-inj-scope", "historic");
+      if (countEl) countEl.textContent = "n/a · " + (scope === "cum" ? "current only" : String(year));
+      if (caption) {
+        caption.textContent = scope === "cum"
+          ? ("NFL injury report covers the current season (" + injYear + ") only — pick " + injYear + " to view.")
+          : ("NFL injury report covers " + injYear + " only — not available for " + year + ".");
+      }
+      list.innerHTML = '<div class="nfl-inj-empty">No historic injury cache — current-season injuries are hidden for this year.</div>';
       return;
     }
-    if (scope === "cum") {
-      if (countEl) countEl.textContent = "n/a";
-      list.innerHTML = `<div class="nfl-inj-empty">NFL injury report is for the current season (${injYear}) only — pick ${injYear} to view.</div>`;
-      return;
-    }
+    card.setAttribute("data-inj-scope", "current");
+    if (caption) caption.textContent = "NFL injury/depth from local cache — not AFFL roster status.";
     const teams = A.teams(injYear);
     const affl = {};
     (Y2025 && Y2025.players || []).forEach((p) => {
