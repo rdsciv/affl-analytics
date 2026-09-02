@@ -4,15 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL Front Office</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=40">
-<link rel="stylesheet" href="logo.css?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
+<link rel="apple-touch-icon" href="favicon.png?v=4">
+<link rel="stylesheet" href="styles.css?v=48">
+<link rel="stylesheet" href="logo.css?v=3">
 <style>
   #activity-rates-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   #activity-rates { width: max-content; min-width: 100%; table-layout: auto; }
   #activity-rates th, #activity-rates td { white-space: nowrap; overflow: visible; }
   #activity-rates th { letter-spacing: .06em; }
+  #trade-blotter-block { grid-column: 1 / -1; }
+  #trade-list .trade-team { align-items: flex-start; }
+  #trade-list .trade-team span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
+    min-width: 0;
+  }
 </style>
 </head>
 <body>
@@ -20,7 +29,7 @@
 
   <header class="topbar">
     <div class="brand">
-      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-banner.png" alt="AFFL"></a>
       <div>
         <h1>Front <span>Office</span></h1>
         <div class="sub" id="page-sub">trades &middot; waivers &middot; free agents</div>
@@ -76,6 +85,7 @@
         <div class="card-sub" id="trade-grid-sub">all-time completed trades between current franchises · 2018+ (ESPN has no trade log before that)</div>
       </div>
     </div>
+    <div id="trade-grid-note"></div>
     <div class="tg-scroll">
       <table class="tg" id="trade-grid"></table>
     </div>
@@ -104,7 +114,7 @@
         </table>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="trade-blotter-block">
       <div class="card-head">
         <div><h2>Trade Blotter</h2><div class="card-sub" id="trade-sub">every completed trade, both sides</div></div>
       </div>
@@ -135,7 +145,7 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=32"></script>
-<script src="trades.js?v=12"></script>
+<script src="common.js?v=37"></script>
+<script src="trades.js?v=16"></script>
 </body>
 </html>

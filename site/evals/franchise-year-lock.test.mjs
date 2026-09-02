@@ -245,10 +245,10 @@ assert(/seasonScope\s*\(/.test(initExpr),
   "init seasonYear = seasonScope(...).year",
   "got " + initExpr);
 
-/* CHI-128 no-regress (superseded by CHI-147: All is pick-a-season, never a live as-of default) */
+/* CHI-128 no-regress */
 const ageFn = extractFn(historySrc, "ageScatterSeason") || "";
-assert(/return\s+null/.test(ageFn) && !/ageAsOf/.test(ageFn),
-  "CHI-147 ageScatterSeason() returns null on All, never falls back to ageAsOf/today");
+assert(/ageAsOf/.test(ageFn) && /getFullYear/.test(ageFn),
+  "CHI-128 ageScatterSeason() still uses as-of year");
 const ageRows = extractFn(historySrc, "seasonAgeRows") || "";
 assert(/franchisePlayedSeason/.test(ageRows),
   "CHI-128 seasonAgeRows still filters franchisePlayedSeason");

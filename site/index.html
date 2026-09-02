@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store">
 <title>AFFL Analytics</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=40">
-<link rel="stylesheet" href="logo.css?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
+<link rel="apple-touch-icon" href="favicon.png?v=4">
+<link rel="stylesheet" href="styles.css?v=52">
+<link rel="stylesheet" href="logo.css?v=3">
 </head>
-<body>
+<body class="index-pack">
 <div class="frame">
 
   <!-- ============ HEADER ============ -->
   <header class="topbar">
     <div class="topbar-row">
       <div class="brand">
-        <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+        <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-banner.png" alt="AFFL"></a>
         <div>
           <h1>AFFL <span>Analytics</span></h1>
           <div class="sub" id="hdr-sub">12-team league &middot; est. 2014</div>
@@ -39,32 +40,24 @@
       </nav>
     </div>
     <div class="topbar-row topbar-meta">
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hs-value" id="hs-total">15,723</div>
-          <div class="hs-label">reg-season points</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hs-value accent" id="hs-games">84</div>
-          <div class="hs-label">reg-season games</div>
-        </div>
-      </div>
       <div class="season-block">
-        <p class="provenance">ESPN Fantasy API &middot; verified warehouse &middot; 2014–2025</p>
-        <div class="season-picker" id="season-picker">
-          <button class="season-chip on" data-y="all">All</button>
-          <button class="season-chip" data-y="2025">2025</button>
-          <button class="season-chip" data-y="2024">2024</button>
-          <button class="season-chip" data-y="2023">2023</button>
-          <button class="season-chip" data-y="2022">2022</button>
-          <button class="season-chip" data-y="2021">2021</button>
-          <button class="season-chip" data-y="2020">2020</button>
-          <button class="season-chip" data-y="2019">2019</button>
-          <button class="season-chip" data-y="2018">2018</button>
-          <button class="season-chip" data-y="2017">2017</button>
-          <button class="season-chip" data-y="2016">2016</button>
-          <button class="season-chip" data-y="2015">2015</button>
-          <button class="season-chip" data-y="2014">2014</button>
+        <div class="season-picker" id="year-row">
+          <div class="picker-label">Season</div>
+          <select class="team-select" id="season-picker" aria-label="Season">
+            <option value="all" selected>All</option>
+            <option value="2014">2014</option>
+            <option value="2015">2015</option>
+            <option value="2016">2016</option>
+            <option value="2017">2017</option>
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
         </div>
       </div>
     </div>
@@ -77,12 +70,12 @@
       <div class="kpi-desc">seasons</div>
     </div>
     <div class="card kpi kpi-static">
-      <div class="kpi-title">12</div>
-      <div class="kpi-desc">owners</div>
-    </div>
-    <div class="card kpi kpi-static">
       <div class="kpi-title">927</div>
       <div class="kpi-desc">matchups</div>
+    </div>
+    <div class="card kpi kpi-static">
+      <div class="kpi-title">15,723</div>
+      <div class="kpi-desc">regular-season points</div>
     </div>
     <div class="card kpi kpi-static">
       <div class="kpi-title">2014–25</div>
@@ -113,7 +106,7 @@
         </div>
       </div>
       <div class="champ-spot" id="champ-spot">
-        <img class="avatar" src="logos/4fd947dd128a.jpg" alt="">
+        <img class="avatar" src="logos/4fd947dd128a.jpg" alt="" width="40" height="40" style="max-width:40px;max-height:40px;width:40px;height:40px;object-fit:contain;background:transparent">
         <div>
           <div class="tag">League Champion</div>
           <div class="nm">San Diego Shadowcöcks</div>
@@ -143,7 +136,7 @@
         <h2>Weekly Scoring</h2>
         <div class="card-sub">league high / average / low &middot; regular season</div>
       </div>
-      <select id="spotlight-team" class="team-select" aria-label="Spotlight team"></select>
+      <select id="spotlight-team" class="team-select" aria-label="Spotlight team" hidden style="display:none"></select>
     </div>
     <div class="chart-wrap tall"><canvas id="area-chart"></canvas></div>
   </section>
@@ -338,35 +331,49 @@
   </div>
 
   <div id="cum-pane">
-  <!-- ============ ALL-TIME ============ -->
-  <div class="section-break"><h2>All-Time <span>2014 – 2025</span></h2></div>
+
+
+  <!-- ============ ALL-TIME CHAMPIONS (above Franchise Records) ============ -->
+  <div class="section-break" id="alltime-break"><h2>All-Time Champions <span>2014 – 2025</span></h2></div>
 
   <section class="timeline" id="timeline"></section>
 
-  <!-- CHI-89: Leagology-style manager milestones + Elo (verified matchups) -->
-  <section class="card" id="elo-card">
+<section class="card" id="franchise-card">
     <div class="card-head">
       <div>
-        <h2>League Rating</h2>
-        <div class="card-sub" id="elo-sub">Elo · 1500 average · every verified game · playoff boost · blowout weight</div>
-      </div>
-      <div class="elo-filters" id="elo-filters" role="tablist" aria-label="Elo filter">
-        <button type="button" class="chip on" data-elo-filter="active">Active</button>
-        <button type="button" class="chip" data-elo-filter="all">Everyone</button>
+        <h2>Franchise Records</h2>
+        <div class="card-sub">current name · career · Team · Yrs · W-L-T · Win% · Titles · PF · All-Play</div>
       </div>
     </div>
-    <div class="chart-wrap tall"><canvas id="elo-chart"></canvas></div>
     <div class="table-scroll">
-      <table class="tbl" id="elo-tbl">
+      <table class="tbl" id="franchise-tbl">
         <thead>
           <tr>
-            <th>#</th><th>Manager</th><th class="s">Rating</th><th class="s">Peak</th><th class="s">Low</th><th class="s">Games</th>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="seasons">Yrs</th>
+            <th class="s" data-k="wins">W-L-T</th>
+            <th class="s" data-k="winPct">Win%</th>
+            <th class="s" data-k="titles">Titles</th>
+            <th class="s" data-k="pf">PF</th>
+            <th class="s" data-k="allPlay">All-Play</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr data-owner="m11"><td>1</td><td>Squaw Valley Skinners</td><td>12</td><td>72-89</td><td>44.7%</td><td>3</td><td>14,500.1</td><td><strong>782-895</strong></td></tr>
+          <tr data-owner="m15"><td>2</td><td>Westeros Warlords</td><td>12</td><td>91-70</td><td>56.5%</td><td>1</td><td>15,030.6</td><td><strong>899-783</strong></td></tr>
+          <tr data-owner="m05"><td>3</td><td>San Diego Shadowcöcks</td><td>7</td><td>52-44</td><td>54.2%</td><td>1</td><td>9,191.7</td><td><strong>564-492</strong></td></tr>
+          <tr data-owner="m06"><td>4</td><td>Fairview Fat Cats</td><td>11</td><td>80-68</td><td>54.0%</td><td>1</td><td>13,827.5</td><td><strong>806-765</strong></td></tr>
+          <tr data-owner="m18"><td>5</td><td>Grand Teeton Feelers</td><td>12</td><td>86-75</td><td>53.4%</td><td>1</td><td>15,594.6</td><td><strong>954-727</strong></td></tr>
+          <tr data-owner="m08"><td>6</td><td>Goleta Gringos</td><td>12</td><td>83-78</td><td>51.5%</td><td>1</td><td>14,822.0</td><td><strong>845-839</strong></td></tr>
+          <tr data-owner="m13"><td>7</td><td>Honolulu Horndogs</td><td>11</td><td>72-76</td><td>48.6%</td><td>1</td><td>13,325.5</td><td><strong>749-812</strong></td></tr>
+          <tr data-owner="m07"><td>8</td><td>Chula Vista Chupacabras</td><td>8</td><td>48-59</td><td>44.9%</td><td>1</td><td>9,492.3</td><td><strong>534-611</strong></td></tr>
+          <tr data-owner="m17"><td>9</td><td>Tijuana Sanchitos</td><td>12</td><td>70-91</td><td>43.5%</td><td>1</td><td>14,412.3</td><td><strong>770-912</strong></td></tr>
+          <tr data-owner="m21"><td>10</td><td>Patagonia Pipers</td><td>2</td><td>16-12</td><td>57.1%</td><td>0</td><td>2,807.7</td><td><strong>201-107</strong></td></tr>
+          <tr data-owner="m02"><td>11</td><td>DC Mighty Cucks</td><td>12</td><td>86-75</td><td>53.4%</td><td>0</td><td>15,161.7</td><td><strong>865-822</strong></td></tr>
+        </tbody>
       </table>
     </div>
-    <p class="draft-note" id="elo-note"></p>
   </section>
 
   <section class="card" id="milestones-card">
@@ -385,24 +392,11 @@
     <p class="draft-note" id="ms-note"></p>
   </section>
 
-  <section class="second-grid">
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Franchise Records</h2><div class="card-sub">current name · career · full book on History</div></div>
-      </div>
-      <div class="table-scroll">
-        <table class="tbl" id="franchise-tbl">
-          <thead><tr><th></th><th>Team</th><th>Yrs</th><th>W-L</th><th>Win%</th><th>Titles</th><th>PF</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+  <section class="card">
+    <div class="card-head">
+      <div><h2>Points by Era</h2><div class="card-sub">season points-for &middot; active franchises</div></div>
     </div>
-    <div class="card">
-      <div class="card-head">
-        <div><h2>Points by Era</h2><div class="card-sub">season points-for &middot; active franchises</div></div>
-      </div>
-      <div class="chart-wrap era"><canvas id="era-chart"></canvas></div>
-    </div>
+    <div class="chart-wrap era"><canvas id="era-chart"></canvas></div>
   </section>
 
   <section class="card h2h-card">
@@ -421,7 +415,7 @@
 </div>
 
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=29"></script>
-<script src="app.js?v=21"></script>
+<script src="common.js?v=38"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>

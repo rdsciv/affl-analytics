@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AFFL History</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=40">
-<link rel="stylesheet" href="logo.css?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
+<link rel="apple-touch-icon" href="favicon.png?v=4">
+<link rel="stylesheet" href="styles.css?v=48">
+<link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
 <div class="frame">
   <header class="topbar">
     <div class="brand">
-      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-banner.png" alt="AFFL"></a>
       <div>
         <h1>AFFL <span>History</span></h1>
         <div class="sub" id="page-sub">franchise careers · 2014–2025</div>
@@ -62,24 +62,28 @@
   <section class="card">
     <div class="card-head">
       <div>
-        <h2>Season Standings</h2>
-        <div class="card-sub" id="season-sub">final rank · ESPN Moves · current franchise names</div>
+        <h2 id="season-h2">Career All-Play</h2>
+        <div class="card-sub" id="season-sub">All · career All-Play 2014–2025 · current franchise names</div>
       </div>
     </div>
     <div class="table-scroll">
-      <table class="tbl" id="season-tbl">
+      <table class="tbl fit-all" id="season-tbl">
         <thead>
           <tr>
             <th class="s" data-k="rank"></th>
             <th class="s" data-k="name">Team</th>
-            <th class="s" data-k="wins">W-L-T</th>
+            <th class="s" data-k="wins">RS W-L-T</th>
             <th class="s" data-k="pf">PF</th>
             <th class="s" data-k="pa">PA</th>
             <th class="s" data-k="allW">All-Play</th>
             <th class="s" data-k="moves">Moves</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr><td><span class="rank-pill gold">1</span></td><td><div class="team-cell"><div><a class="hist-name" href="teams.html?squad=m18">Grand Teeton Feelers</a></div></div></td><td>86-75</td><td>15594.6</td><td></td><td><strong>954-727</strong></td><td></td></tr>
+          <tr><td><span class="rank-pill slv">2</span></td><td><div class="team-cell"><div><a class="hist-name" href="teams.html?squad=m15">Westeros Warlords</a></div></div></td><td></td><td></td><td></td><td><strong>899-783</strong></td><td></td></tr>
+          <tr><td><span class="rank-pill brz">3</span></td><td><div class="team-cell"><div><a class="hist-name" href="teams.html?squad=m02">DC Mighty Cucks</a></div></div></td><td></td><td></td><td></td><td><strong>865-822</strong></td><td></td></tr>
+        </tbody>
       </table>
     </div>
   </section>
@@ -276,7 +280,7 @@
         <div class="card-sub" id="race-sub">cumulative wins · top four finishers</div>
       </div>
     </div>
-    <div class="chart-wrap tall"><canvas id="race-chart"></canvas></div>
+    <div class="chart-wrap tall" id="race-wrap"><canvas id="race-chart"></canvas></div>
   </section>
 
   <section class="card" id="ngs-block">
@@ -558,8 +562,8 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=32"></script>
-<script src="history.js?v=23"></script>
+<script src="common.js?v=37"></script>
+<script src="history.js?v=28"></script>
 <script src="score-trend.js?v=1"></script>
 </body>
 </html>

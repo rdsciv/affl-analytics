@@ -1,1 +1,2193 @@
-{"reg": {"scoredYears": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "missingYears": [], "evidence": "Verified", "rows": [{"ownerId": "m21", "manager": "Patrick O'Neill", "seasons": 2, "avgRank": 2.5, "bestRank": 2, "worstRank": 3, "avgPts": 84.5, "byYear": {"2024": {"rank": 3, "pts": 81, "nTeams": 12}, "2025": {"rank": 2, "pts": 88, "nTeams": 12}}}, {"ownerId": "m05", "manager": "John Newton", "seasons": 7, "avgRank": 4.0, "bestRank": 1, "worstRank": 8, "avgPts": 73.0, "byYear": {"2019": {"rank": 7, "pts": 65, "nTeams": 12}, "2020": {"rank": 6, "pts": 66, "nTeams": 12}, "2021": {"rank": 8, "pts": 59, "nTeams": 12}, "2022": {"rank": 1, "pts": 80, "nTeams": 12}, "2023": {"rank": 1, "pts": 83, "nTeams": 12}, "2024": {"rank": 4, "pts": 69, "nTeams": 12}, "2025": {"rank": 1, "pts": 89, "nTeams": 12}}}, {"ownerId": "m10", "manager": "Tanner Dunn", "seasons": 3, "avgRank": 4.0, "bestRank": 2, "worstRank": 7, "avgPts": 74.0, "byYear": {"2018": {"rank": 7, "pts": 63, "nTeams": 12}, "2019": {"rank": 2, "pts": 77, "nTeams": 12}, "2020": {"rank": 3, "pts": 82, "nTeams": 12}}}, {"ownerId": "m06", "manager": "Alex Renney", "seasons": 8, "avgRank": 5.0, "bestRank": 1, "worstRank": 9, "avgPts": 73.25, "byYear": {"2018": {"rank": 2, "pts": 93, "nTeams": 12}, "2019": {"rank": 6, "pts": 65, "nTeams": 12}, "2020": {"rank": 7, "pts": 61, "nTeams": 12}, "2021": {"rank": 9, "pts": 56, "nTeams": 12}, "2022": {"rank": 8, "pts": 65, "nTeams": 12}, "2023": {"rank": 4, "pts": 71, "nTeams": 12}, "2024": {"rank": 1, "pts": 90, "nTeams": 12}, "2025": {"rank": 3, "pts": 85, "nTeams": 12}}}, {"ownerId": "m12", "manager": "Garrett Jones", "seasons": 3, "avgRank": 5.333333333333333, "bestRank": 1, "worstRank": 12, "avgPts": 69.66666666666667, "byYear": {"2018": {"rank": 3, "pts": 91, "nTeams": 12}, "2019": {"rank": 1, "pts": 87, "nTeams": 12}, "2020": {"rank": 12, "pts": 31, "nTeams": 12}}}, {"ownerId": "m08", "manager": "Kevin Sliger", "seasons": 8, "avgRank": 5.5, "bestRank": 3, "worstRank": 9, "avgPts": 67.25, "byYear": {"2018": {"rank": 9, "pts": 55, "nTeams": 12}, "2019": {"rank": 3, "pts": 73, "nTeams": 12}, "2020": {"rank": 9, "pts": 59, "nTeams": 12}, "2021": {"rank": 3, "pts": 76, "nTeams": 12}, "2022": {"rank": 4, "pts": 69, "nTeams": 12}, "2023": {"rank": 3, "pts": 74, "nTeams": 12}, "2024": {"rank": 8, "pts": 57, "nTeams": 12}, "2025": {"rank": 5, "pts": 75, "nTeams": 12}}}, {"ownerId": "m14", "manager": "Steven Breitmayer", "seasons": 5, "avgRank": 5.6, "bestRank": 2, "worstRank": 12, "avgPts": 64.4, "byYear": {"2021": {"rank": 2, "pts": 79, "nTeams": 12}, "2022": {"rank": 12, "pts": 44, "nTeams": 12}, "2023": {"rank": 2, "pts": 76, "nTeams": 12}, "2024": {"rank": 5, "pts": 64, "nTeams": 12}, "2025": {"rank": 7, "pts": 59, "nTeams": 12}}}, {"ownerId": "m18", "manager": "Ryan Childress", "seasons": 8, "avgRank": 6.0, "bestRank": 4, "worstRank": 9, "avgPts": 69.625, "byYear": {"2018": {"rank": 6, "pts": 64, "nTeams": 12}, "2019": {"rank": 8, "pts": 65, "nTeams": 12}, "2020": {"rank": 4, "pts": 79, "nTeams": 12}, "2021": {"rank": 4, "pts": 76, "nTeams": 12}, "2022": {"rank": 7, "pts": 68, "nTeams": 12}, "2023": {"rank": 9, "pts": 62, "nTeams": 12}, "2024": {"rank": 6, "pts": 62, "nTeams": 12}, "2025": {"rank": 4, "pts": 81, "nTeams": 12}}}, {"ownerId": "m02", "manager": "Austin Williams", "seasons": 8, "avgRank": 6.125, "bestRank": 1, "worstRank": 11, "avgPts": 65.5, "byYear": {"2018": {"rank": 5, "pts": 70, "nTeams": 12}, "2019": {"rank": 4, "pts": 72, "nTeams": 12}, "2020": {"rank": 11, "pts": 46, "nTeams": 12}, "2021": {"rank": 1, "pts": 87, "nTeams": 12}, "2022": {"rank": 2, "pts": 79, "nTeams": 12}, "2023": {"rank": 6, "pts": 70, "nTeams": 12}, "2024": {"rank": 10, "pts": 54, "nTeams": 12}, "2025": {"rank": 10, "pts": 46, "nTeams": 12}}}, {"ownerId": "m13", "manager": "Alex Clausen", "seasons": 8, "avgRank": 7.0, "bestRank": 5, "worstRank": 9, "avgPts": 63.25, "byYear": {"2018": {"rank": 8, "pts": 57, "nTeams": 12}, "2019": {"rank": 5, "pts": 66, "nTeams": 12}, "2020": {"rank": 8, "pts": 60, "nTeams": 12}, "2021": {"rank": 6, "pts": 67, "nTeams": 12}, "2022": {"rank": 6, "pts": 69, "nTeams": 12}, "2023": {"rank": 8, "pts": 66, "nTeams": 12}, "2024": {"rank": 9, "pts": 57, "nTeams": 12}, "2025": {"rank": 6, "pts": 64, "nTeams": 12}}}, {"ownerId": "m15", "manager": "Levi Sanchez", "seasons": 8, "avgRank": 7.125, "bestRank": 1, "worstRank": 12, "avgPts": 65.625, "byYear": {"2018": {"rank": 1, "pts": 101, "nTeams": 12}, "2019": {"rank": 12, "pts": 46, "nTeams": 12}, "2020": {"rank": 1, "pts": 88, "nTeams": 12}, "2021": {"rank": 12, "pts": 46, "nTeams": 12}, "2022": {"rank": 9, "pts": 57, "nTeams": 12}, "2023": {"rank": 7, "pts": 69, "nTeams": 12}, "2024": {"rank": 7, "pts": 62, "nTeams": 12}, "2025": {"rank": 8, "pts": 56, "nTeams": 12}}}, {"ownerId": "m17", "manager": "Zack Blotz", "seasons": 8, "avgRank": 7.25, "bestRank": 2, "worstRank": 11, "avgPts": 64.25, "byYear": {"2018": {"rank": 10, "pts": 54, "nTeams": 12}, "2019": {"rank": 11, "pts": 52, "nTeams": 12}, "2020": {"rank": 5, "pts": 74, "nTeams": 12}, "2021": {"rank": 11, "pts": 49, "nTeams": 12}, "2022": {"rank": 5, "pts": 69, "nTeams": 12}, "2023": {"rank": 5, "pts": 71, "nTeams": 12}, "2024": {"rank": 2, "pts": 90, "nTeams": 12}, "2025": {"rank": 9, "pts": 55, "nTeams": 12}}}, {"ownerId": "m07", "manager": "Jason Kafka", "seasons": 6, "avgRank": 8.333333333333334, "bestRank": 2, "worstRank": 12, "avgPts": 55.5, "byYear": {"2018": {"rank": 11, "pts": 34, "nTeams": 12}, "2019": {"rank": 10, "pts": 53, "nTeams": 12}, "2020": {"rank": 2, "pts": 83, "nTeams": 12}, "2021": {"rank": 5, "pts": 70, "nTeams": 12}, "2022": {"rank": 10, "pts": 53, "nTeams": 12}, "2023": {"rank": 12, "pts": 40, "nTeams": 12}}}, {"ownerId": "m11", "manager": "Chris Zweifel", "seasons": 8, "avgRank": 9.25, "bestRank": 4, "worstRank": 12, "avgPts": 54.25, "byYear": {"2018": {"rank": 4, "pts": 71, "nTeams": 12}, "2019": {"rank": 9, "pts": 59, "nTeams": 12}, "2020": {"rank": 10, "pts": 51, "nTeams": 12}, "2021": {"rank": 7, "pts": 63, "nTeams": 12}, "2022": {"rank": 11, "pts": 51, "nTeams": 12}, "2023": {"rank": 10, "pts": 51, "nTeams": 12}, "2024": {"rank": 11, "pts": 52, "nTeams": 12}, "2025": {"rank": 12, "pts": 36, "nTeams": 12}}}, {"ownerId": "m19", "manager": "Tyler Sanchez", "seasons": 5, "avgRank": 9.4, "bestRank": 3, "worstRank": 12, "avgPts": 52.6, "byYear": {"2021": {"rank": 10, "pts": 52, "nTeams": 12}, "2022": {"rank": 3, "pts": 76, "nTeams": 12}, "2023": {"rank": 11, "pts": 47, "nTeams": 12}, "2024": {"rank": 12, "pts": 42, "nTeams": 12}, "2025": {"rank": 11, "pts": 46, "nTeams": 12}}}, {"ownerId": "m04", "manager": "Jake Hibbard", "seasons": 1, "avgRank": 12.0, "bestRank": 12, "worstRank": 12, "avgPts": 27.0, "byYear": {"2018": {"rank": 12, "pts": 27, "nTeams": 12}}}]}, "championship": {"scoredYears": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "missingYears": [], "evidence": "Verified", "rows": [{"ownerId": "m11", "manager": "Chris Zweifel", "seasons": 1, "avgRank": 1.0, "bestRank": 1, "worstRank": 1, "avgPts": 52.0, "byYear": {"2018": {"rank": 1, "pts": 52, "nTeams": 6}}}, {"ownerId": "m17", "manager": "Zack Blotz", "seasons": 1, "avgRank": 1.0, "bestRank": 1, "worstRank": 1, "avgPts": 49.0, "byYear": {"2024": {"rank": 1, "pts": 49, "nTeams": 6}}}, {"ownerId": "m07", "manager": "Jason Kafka", "seasons": 2, "avgRank": 1.5, "bestRank": 1, "worstRank": 2, "avgPts": 47.5, "byYear": {"2020": {"rank": 1, "pts": 53, "nTeams": 6}, "2021": {"rank": 2, "pts": 42, "nTeams": 6}}}, {"ownerId": "m12", "manager": "Garrett Jones", "seasons": 2, "avgRank": 2.5, "bestRank": 1, "worstRank": 4, "avgPts": 37.5, "byYear": {"2018": {"rank": 4, "pts": 26, "nTeams": 6}, "2019": {"rank": 1, "pts": 49, "nTeams": 6}}}, {"ownerId": "m06", "manager": "Alex Renney", "seasons": 5, "avgRank": 2.6, "bestRank": 1, "worstRank": 6, "avgPts": 40.0, "byYear": {"2018": {"rank": 2, "pts": 43, "nTeams": 6}, "2019": {"rank": 2, "pts": 44, "nTeams": 6}, "2020": {"rank": 6, "pts": 20, "nTeams": 6}, "2022": {"rank": 1, "pts": 48, "nTeams": 6}, "2024": {"rank": 2, "pts": 45, "nTeams": 6}}}, {"ownerId": "m18", "manager": "Ryan Childress", "seasons": 6, "avgRank": 2.6666666666666665, "bestRank": 1, "worstRank": 4, "avgPts": 40.0, "byYear": {"2019": {"rank": 4, "pts": 28, "nTeams": 6}, "2020": {"rank": 2, "pts": 52, "nTeams": 6}, "2021": {"rank": 3, "pts": 37, "nTeams": 6}, "2022": {"rank": 4, "pts": 33, "nTeams": 6}, "2023": {"rank": 2, "pts": 44, "nTeams": 6}, "2025": {"rank": 1, "pts": 46, "nTeams": 6}}}, {"ownerId": "m08", "manager": "Kevin Sliger", "seasons": 5, "avgRank": 3.0, "bestRank": 2, "worstRank": 5, "avgPts": 39.4, "byYear": {"2019": {"rank": 3, "pts": 44, "nTeams": 6}, "2022": {"rank": 2, "pts": 43, "nTeams": 6}, "2023": {"rank": 3, "pts": 43, "nTeams": 6}, "2024": {"rank": 5, "pts": 25, "nTeams": 6}, "2025": {"rank": 2, "pts": 42, "nTeams": 6}}}, {"ownerId": "m13", "manager": "Alex Clausen", "seasons": 3, "avgRank": 3.3333333333333335, "bestRank": 1, "worstRank": 5, "avgPts": 36.333333333333336, "byYear": {"2020": {"rank": 4, "pts": 28, "nTeams": 6}, "2021": {"rank": 1, "pts": 53, "nTeams": 6}, "2025": {"rank": 5, "pts": 28, "nTeams": 6}}}, {"ownerId": "m15", "manager": "Levi Sanchez", "seasons": 6, "avgRank": 3.6666666666666665, "bestRank": 1, "worstRank": 6, "avgPts": 32.833333333333336, "byYear": {"2018": {"rank": 5, "pts": 26, "nTeams": 6}, "2020": {"rank": 3, "pts": 35, "nTeams": 6}, "2022": {"rank": 3, "pts": 35, "nTeams": 6}, "2023": {"rank": 1, "pts": 55, "nTeams": 6}, "2024": {"rank": 6, "pts": 13, "nTeams": 6}, "2025": {"rank": 4, "pts": 33, "nTeams": 6}}}, {"ownerId": "m05", "manager": "John Newton", "seasons": 3, "avgRank": 4.0, "bestRank": 3, "worstRank": 6, "avgPts": 32.0, "byYear": {"2023": {"rank": 6, "pts": 16, "nTeams": 6}, "2024": {"rank": 3, "pts": 42, "nTeams": 6}, "2025": {"rank": 3, "pts": 38, "nTeams": 6}}}, {"ownerId": "m14", "manager": "Steven Breitmayer", "seasons": 2, "avgRank": 4.0, "bestRank": 4, "worstRank": 4, "avgPts": 32.0, "byYear": {"2021": {"rank": 4, "pts": 29, "nTeams": 6}, "2023": {"rank": 4, "pts": 35, "nTeams": 6}}}, {"ownerId": "m10", "manager": "Tanner Dunn", "seasons": 3, "avgRank": 4.666666666666667, "bestRank": 3, "worstRank": 6, "avgPts": 26.666666666666668, "byYear": {"2018": {"rank": 3, "pts": 40, "nTeams": 6}, "2019": {"rank": 6, "pts": 18, "nTeams": 6}, "2020": {"rank": 5, "pts": 22, "nTeams": 6}}}, {"ownerId": "m21", "manager": "Patrick O'Neill", "seasons": 2, "avgRank": 5.0, "bestRank": 4, "worstRank": 6, "avgPts": 29.5, "byYear": {"2024": {"rank": 4, "pts": 36, "nTeams": 6}, "2025": {"rank": 6, "pts": 23, "nTeams": 6}}}, {"ownerId": "m19", "manager": "Tyler Sanchez", "seasons": 2, "avgRank": 5.0, "bestRank": 5, "worstRank": 5, "avgPts": 26.5, "byYear": {"2021": {"rank": 5, "pts": 27, "nTeams": 6}, "2022": {"rank": 5, "pts": 26, "nTeams": 6}}}, {"ownerId": "m02", "manager": "Austin Williams", "seasons": 5, "avgRank": 5.6, "bestRank": 5, "worstRank": 6, "avgPts": 22.8, "byYear": {"2018": {"rank": 6, "pts": 23, "nTeams": 6}, "2019": {"rank": 5, "pts": 27, "nTeams": 6}, "2021": {"rank": 6, "pts": 22, "nTeams": 6}, "2022": {"rank": 6, "pts": 25, "nTeams": 6}, "2023": {"rank": 5, "pts": 17, "nTeams": 6}}}]}, "combined": {"scoredYears": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "missingYears": [], "evidence": "Verified", "rows": [{"ownerId": "m21", "manager": "Patrick O'Neill", "seasons": 2, "avgRank": 3.0, "bestRank": 3, "worstRank": 3, "avgPts": 85.5, "byYear": {"2024": {"rank": 3, "pts": 85, "nTeams": 12}, "2025": {"rank": 3, "pts": 86, "nTeams": 12}}}, {"ownerId": "m10", "manager": "Tanner Dunn", "seasons": 3, "avgRank": 4.333333333333333, "bestRank": 4, "worstRank": 5, "avgPts": 75.33333333333333, "byYear": {"2018": {"rank": 5, "pts": 76, "nTeams": 12}, "2019": {"rank": 4, "pts": 70, "nTeams": 12}, "2020": {"rank": 4, "pts": 80, "nTeams": 12}}}, {"ownerId": "m18", "manager": "Ryan Childress", "seasons": 8, "avgRank": 4.375, "bestRank": 1, "worstRank": 7, "avgPts": 75.0, "byYear": {"2018": {"rank": 7, "pts": 55, "nTeams": 12}, "2019": {"rank": 5, "pts": 69, "nTeams": 12}, "2020": {"rank": 1, "pts": 99, "nTeams": 12}, "2021": {"rank": 4, "pts": 78, "nTeams": 12}, "2022": {"rank": 5, "pts": 74, "nTeams": 12}, "2023": {"rank": 4, "pts": 80, "nTeams": 12}, "2024": {"rank": 7, "pts": 55, "nTeams": 12}, "2025": {"rank": 2, "pts": 90, "nTeams": 12}}}, {"ownerId": "m06", "manager": "Alex Renney", "seasons": 8, "avgRank": 4.625, "bestRank": 1, "worstRank": 10, "avgPts": 75.375, "byYear": {"2018": {"rank": 1, "pts": 100, "nTeams": 12}, "2019": {"rank": 3, "pts": 76, "nTeams": 12}, "2020": {"rank": 7, "pts": 60, "nTeams": 12}, "2021": {"rank": 10, "pts": 50, "nTeams": 12}, "2022": {"rank": 1, "pts": 85, "nTeams": 12}, "2023": {"rank": 8, "pts": 60, "nTeams": 12}, "2024": {"rank": 2, "pts": 99, "nTeams": 12}, "2025": {"rank": 5, "pts": 73, "nTeams": 12}}}, {"ownerId": "m08", "manager": "Kevin Sliger", "seasons": 8, "avgRank": 4.875, "bestRank": 1, "worstRank": 10, "avgPts": 72.0, "byYear": {"2018": {"rank": 10, "pts": 48, "nTeams": 12}, "2019": {"rank": 2, "pts": 86, "nTeams": 12}, "2020": {"rank": 9, "pts": 51, "nTeams": 12}, "2021": {"rank": 6, "pts": 65, "nTeams": 12}, "2022": {"rank": 2, "pts": 85, "nTeams": 12}, "2023": {"rank": 1, "pts": 90, "nTeams": 12}, "2024": {"rank": 5, "pts": 68, "nTeams": 12}, "2025": {"rank": 4, "pts": 83, "nTeams": 12}}}, {"ownerId": "m05", "manager": "John Newton", "seasons": 7, "avgRank": 5.571428571428571, "bestRank": 1, "worstRank": 9, "avgPts": 70.42857142857143, "byYear": {"2019": {"rank": 8, "pts": 60, "nTeams": 12}, "2020": {"rank": 8, "pts": 58, "nTeams": 12}, "2021": {"rank": 9, "pts": 51, "nTeams": 12}, "2022": {"rank": 6, "pts": 69, "nTeams": 12}, "2023": {"rank": 3, "pts": 84, "nTeams": 12}, "2024": {"rank": 4, "pts": 80, "nTeams": 12}, "2025": {"rank": 1, "pts": 91, "nTeams": 12}}}, {"ownerId": "m12", "manager": "Garrett Jones", "seasons": 3, "avgRank": 5.666666666666667, "bestRank": 1, "worstRank": 12, "avgPts": 71.66666666666667, "byYear": {"2018": {"rank": 4, "pts": 87, "nTeams": 12}, "2019": {"rank": 1, "pts": 98, "nTeams": 12}, "2020": {"rank": 12, "pts": 30, "nTeams": 12}}}, {"ownerId": "m15", "manager": "Levi Sanchez", "seasons": 8, "avgRank": 6.25, "bestRank": 2, "worstRank": 12, "avgPts": 68.125, "byYear": {"2018": {"rank": 2, "pts": 93, "nTeams": 12}, "2019": {"rank": 12, "pts": 41, "nTeams": 12}, "2020": {"rank": 3, "pts": 91, "nTeams": 12}, "2021": {"rank": 12, "pts": 42, "nTeams": 12}, "2022": {"rank": 7, "pts": 63, "nTeams": 12}, "2023": {"rank": 2, "pts": 89, "nTeams": 12}, "2024": {"rank": 6, "pts": 57, "nTeams": 12}, "2025": {"rank": 6, "pts": 69, "nTeams": 12}}}, {"ownerId": "m13", "manager": "Alex Clausen", "seasons": 8, "avgRank": 7.125, "bestRank": 2, "worstRank": 9, "avgPts": 61.375, "byYear": {"2018": {"rank": 9, "pts": 50, "nTeams": 12}, "2019": {"rank": 7, "pts": 62, "nTeams": 12}, "2020": {"rank": 6, "pts": 63, "nTeams": 12}, "2021": {"rank": 2, "pts": 87, "nTeams": 12}, "2022": {"rank": 9, "pts": 56, "nTeams": 12}, "2023": {"rank": 9, "pts": 54, "nTeams": 12}, "2024": {"rank": 8, "pts": 52, "nTeams": 12}, "2025": {"rank": 7, "pts": 67, "nTeams": 12}}}, {"ownerId": "m02", "manager": "Austin Williams", "seasons": 8, "avgRank": 7.125, "bestRank": 3, "worstRank": 11, "avgPts": 61.625, "byYear": {"2018": {"rank": 6, "pts": 68, "nTeams": 12}, "2019": {"rank": 6, "pts": 68, "nTeams": 12}, "2020": {"rank": 11, "pts": 40, "nTeams": 12}, "2021": {"rank": 3, "pts": 82, "nTeams": 12}, "2022": {"rank": 4, "pts": 76, "nTeams": 12}, "2023": {"rank": 6, "pts": 70, "nTeams": 12}, "2024": {"rank": 11, "pts": 47, "nTeams": 12}, "2025": {"rank": 10, "pts": 42, "nTeams": 12}}}, {"ownerId": "m17", "manager": "Zack Blotz", "seasons": 8, "avgRank": 7.5, "bestRank": 1, "worstRank": 11, "avgPts": 60.75, "byYear": {"2018": {"rank": 8, "pts": 51, "nTeams": 12}, "2019": {"rank": 11, "pts": 45, "nTeams": 12}, "2020": {"rank": 5, "pts": 67, "nTeams": 12}, "2021": {"rank": 11, "pts": 45, "nTeams": 12}, "2022": {"rank": 8, "pts": 63, "nTeams": 12}, "2023": {"rank": 7, "pts": 61, "nTeams": 12}, "2024": {"rank": 1, "pts": 102, "nTeams": 12}, "2025": {"rank": 9, "pts": 52, "nTeams": 12}}}, {"ownerId": "m07", "manager": "Jason Kafka", "seasons": 6, "avgRank": 7.666666666666667, "bestRank": 1, "worstRank": 12, "avgPts": 58.166666666666664, "byYear": {"2018": {"rank": 11, "pts": 32, "nTeams": 12}, "2019": {"rank": 10, "pts": 50, "nTeams": 12}, "2020": {"rank": 2, "pts": 96, "nTeams": 12}, "2021": {"rank": 1, "pts": 88, "nTeams": 12}, "2022": {"rank": 10, "pts": 51, "nTeams": 12}, "2023": {"rank": 12, "pts": 32, "nTeams": 12}}}, {"ownerId": "m14", "manager": "Steven Breitmayer", "seasons": 5, "avgRank": 7.8, "bestRank": 5, "worstRank": 12, "avgPts": 60.2, "byYear": {"2021": {"rank": 5, "pts": 76, "nTeams": 12}, "2022": {"rank": 12, "pts": 37, "nTeams": 12}, "2023": {"rank": 5, "pts": 77, "nTeams": 12}, "2024": {"rank": 9, "pts": 52, "nTeams": 12}, "2025": {"rank": 8, "pts": 59, "nTeams": 12}}}, {"ownerId": "m19", "manager": "Tyler Sanchez", "seasons": 5, "avgRank": 8.8, "bestRank": 3, "worstRank": 12, "avgPts": 50.6, "byYear": {"2021": {"rank": 7, "pts": 62, "nTeams": 12}, "2022": {"rank": 3, "pts": 78, "nTeams": 12}, "2023": {"rank": 11, "pts": 38, "nTeams": 12}, "2024": {"rank": 12, "pts": 36, "nTeams": 12}, "2025": {"rank": 11, "pts": 39, "nTeams": 12}}}, {"ownerId": "m11", "manager": "Chris Zweifel", "seasons": 8, "avgRank": 9.125, "bestRank": 3, "worstRank": 12, "avgPts": 51.25, "byYear": {"2018": {"rank": 3, "pts": 92, "nTeams": 12}, "2019": {"rank": 9, "pts": 55, "nTeams": 12}, "2020": {"rank": 10, "pts": 45, "nTeams": 12}, "2021": {"rank": 8, "pts": 54, "nTeams": 12}, "2022": {"rank": 11, "pts": 43, "nTeams": 12}, "2023": {"rank": 10, "pts": 45, "nTeams": 12}, "2024": {"rank": 10, "pts": 47, "nTeams": 12}, "2025": {"rank": 12, "pts": 29, "nTeams": 12}}}, {"ownerId": "m04", "manager": "Jake Hibbard", "seasons": 1, "avgRank": 12.0, "bestRank": 12, "worstRank": 12, "avgPts": 28.0, "byYear": {"2018": {"rank": 12, "pts": 28, "nTeams": 12}}}]}}
+{
+  "scoredYears": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "evidence": "Verified",
+  "averages": [
+    {
+      "ownerId": "m21",
+      "team": "Patagonia Pipers",
+      "nSeasons": 2,
+      "years": [
+        2024,
+        2025
+      ],
+      "games": 14,
+      "totalPts": 123,
+      "totalRank": 1,
+      "cats": {
+        "py": {
+          "value": 3495,
+          "rank": 7,
+          "pts": 10
+        },
+        "ptd": {
+          "value": 24.5,
+          "rank": 6,
+          "pts": 11
+        },
+        "compPct": {
+          "value": 63.99572649572649,
+          "rank": 14,
+          "pts": 3
+        },
+        "ry": {
+          "value": 2538.5,
+          "rank": 3,
+          "pts": 14
+        },
+        "rtd": {
+          "value": 21,
+          "rank": 6,
+          "pts": 11
+        },
+        "ypc": {
+          "value": 4.6749539594843466,
+          "rank": 4,
+          "pts": 13
+        },
+        "recy": {
+          "value": 4292,
+          "rank": 1,
+          "pts": 16
+        },
+        "retd": {
+          "value": 25,
+          "rank": 3,
+          "pts": 14
+        },
+        "rec": {
+          "value": 372,
+          "rank": 1,
+          "pts": 16
+        },
+        "ypr": {
+          "value": 11.53763440860215,
+          "rank": 2,
+          "pts": 15
+        }
+      }
+    },
+    {
+      "ownerId": "m06",
+      "team": "Fairview Fat Cats",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 106,
+      "totalRank": 2,
+      "cats": {
+        "py": {
+          "value": 3535.75,
+          "rank": 6,
+          "pts": 11
+        },
+        "ptd": {
+          "value": 23.25,
+          "rank": 12,
+          "pts": 5
+        },
+        "compPct": {
+          "value": 66.65759390310288,
+          "rank": 4,
+          "pts": 13
+        },
+        "ry": {
+          "value": 2595.375,
+          "rank": 2,
+          "pts": 15
+        },
+        "rtd": {
+          "value": 20.625,
+          "rank": 7,
+          "pts": 10
+        },
+        "ypc": {
+          "value": 4.736085766423358,
+          "rank": 1,
+          "pts": 16
+        },
+        "recy": {
+          "value": 3765.25,
+          "rank": 6,
+          "pts": 11
+        },
+        "retd": {
+          "value": 20.125,
+          "rank": 15,
+          "pts": 2
+        },
+        "rec": {
+          "value": 328.5,
+          "rank": 8,
+          "pts": 9
+        },
+        "ypr": {
+          "value": 11.461948249619482,
+          "rank": 3,
+          "pts": 14
+        }
+      }
+    },
+    {
+      "ownerId": "m05",
+      "team": "San Diego Shadowcöcks",
+      "nSeasons": 7,
+      "years": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.714285714285714,
+      "totalPts": 105,
+      "totalRank": 3,
+      "cats": {
+        "py": {
+          "value": 3682,
+          "rank": 1,
+          "pts": 16
+        },
+        "ptd": {
+          "value": 26.428571428571427,
+          "rank": 2,
+          "pts": 15
+        },
+        "compPct": {
+          "value": 68.44457687723481,
+          "rank": 1,
+          "pts": 16
+        },
+        "ry": {
+          "value": 2381.714285714286,
+          "rank": 8,
+          "pts": 9
+        },
+        "rtd": {
+          "value": 21.428571428571427,
+          "rank": 3,
+          "pts": 14
+        },
+        "ypc": {
+          "value": 4.254146465935188,
+          "rank": 13,
+          "pts": 4
+        },
+        "recy": {
+          "value": 3670.714285714286,
+          "rank": 8,
+          "pts": 9
+        },
+        "retd": {
+          "value": 22.571428571428573,
+          "rank": 9,
+          "pts": 8
+        },
+        "rec": {
+          "value": 331.85714285714283,
+          "rank": 7,
+          "pts": 10
+        },
+        "ypr": {
+          "value": 11.061127851915627,
+          "rank": 13,
+          "pts": 4
+        }
+      }
+    },
+    {
+      "ownerId": "m10",
+      "team": "Winston-Salem Wake Snakes",
+      "nSeasons": 3,
+      "years": [
+        2018,
+        2019,
+        2020
+      ],
+      "games": 13,
+      "totalPts": 105,
+      "totalRank": 4,
+      "cats": {
+        "py": {
+          "value": 3649.3333333333335,
+          "rank": 2,
+          "pts": 15
+        },
+        "ptd": {
+          "value": 27,
+          "rank": 1,
+          "pts": 16
+        },
+        "compPct": {
+          "value": 63.64251861882194,
+          "rank": 15,
+          "pts": 2
+        },
+        "ry": {
+          "value": 2252.6666666666665,
+          "rank": 11,
+          "pts": 6
+        },
+        "rtd": {
+          "value": 16,
+          "rank": 14,
+          "pts": 3
+        },
+        "ypc": {
+          "value": 4.689798750867453,
+          "rank": 3,
+          "pts": 14
+        },
+        "recy": {
+          "value": 3861.3333333333335,
+          "rank": 3,
+          "pts": 14
+        },
+        "retd": {
+          "value": 28.666666666666668,
+          "rank": 1,
+          "pts": 16
+        },
+        "rec": {
+          "value": 346.6666666666667,
+          "rank": 3,
+          "pts": 14
+        },
+        "ypr": {
+          "value": 11.138461538461538,
+          "rank": 12,
+          "pts": 5
+        }
+      }
+    },
+    {
+      "ownerId": "m18",
+      "team": "Grand Teeton Feelers",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 101,
+      "totalRank": 5,
+      "cats": {
+        "py": {
+          "value": 3537.375,
+          "rank": 5,
+          "pts": 12
+        },
+        "ptd": {
+          "value": 25.125,
+          "rank": 3,
+          "pts": 14
+        },
+        "compPct": {
+          "value": 65.2947424322889,
+          "rank": 11,
+          "pts": 6
+        },
+        "ry": {
+          "value": 2677,
+          "rank": 1,
+          "pts": 16
+        },
+        "rtd": {
+          "value": 20.25,
+          "rank": 8,
+          "pts": 9
+        },
+        "ypc": {
+          "value": 4.622490826678178,
+          "rank": 6,
+          "pts": 11
+        },
+        "recy": {
+          "value": 3507.875,
+          "rank": 10,
+          "pts": 7
+        },
+        "retd": {
+          "value": 24.25,
+          "rank": 4,
+          "pts": 13
+        },
+        "rec": {
+          "value": 312.5,
+          "rank": 13,
+          "pts": 4
+        },
+        "ypr": {
+          "value": 11.2252,
+          "rank": 8,
+          "pts": 9
+        }
+      }
+    },
+    {
+      "ownerId": "m14",
+      "team": "Poulsbo Pollywogs",
+      "nSeasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 14,
+      "totalPts": 98,
+      "totalRank": 6,
+      "cats": {
+        "py": {
+          "value": 3117.8,
+          "rank": 16,
+          "pts": 1
+        },
+        "ptd": {
+          "value": 20.6,
+          "rank": 16,
+          "pts": 1
+        },
+        "compPct": {
+          "value": 64.10614525139665,
+          "rank": 13,
+          "pts": 4
+        },
+        "ry": {
+          "value": 2513.4,
+          "rank": 5,
+          "pts": 12
+        },
+        "rtd": {
+          "value": 21.4,
+          "rank": 4,
+          "pts": 13
+        },
+        "ypc": {
+          "value": 4.697943925233645,
+          "rank": 2,
+          "pts": 15
+        },
+        "recy": {
+          "value": 3913.2,
+          "rank": 2,
+          "pts": 15
+        },
+        "retd": {
+          "value": 23.6,
+          "rank": 5,
+          "pts": 12
+        },
+        "rec": {
+          "value": 348.6,
+          "rank": 2,
+          "pts": 15
+        },
+        "ypr": {
+          "value": 11.225473321858864,
+          "rank": 7,
+          "pts": 10
+        }
+      }
+    },
+    {
+      "ownerId": "m08",
+      "team": "Goleta Gringos",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 95,
+      "totalRank": 7,
+      "cats": {
+        "py": {
+          "value": 3550.625,
+          "rank": 3,
+          "pts": 14
+        },
+        "ptd": {
+          "value": 24.25,
+          "rank": 7,
+          "pts": 10
+        },
+        "compPct": {
+          "value": 67.66619519094766,
+          "rank": 2,
+          "pts": 15
+        },
+        "ry": {
+          "value": 2413.25,
+          "rank": 7,
+          "pts": 10
+        },
+        "rtd": {
+          "value": 23,
+          "rank": 1,
+          "pts": 16
+        },
+        "ypc": {
+          "value": 4.358997516369383,
+          "rank": 11,
+          "pts": 6
+        },
+        "recy": {
+          "value": 3494.625,
+          "rank": 11,
+          "pts": 6
+        },
+        "retd": {
+          "value": 21.625,
+          "rank": 11,
+          "pts": 6
+        },
+        "rec": {
+          "value": 313.125,
+          "rank": 11,
+          "pts": 6
+        },
+        "ypr": {
+          "value": 11.160479041916167,
+          "rank": 11,
+          "pts": 6
+        }
+      }
+    },
+    {
+      "ownerId": "m17",
+      "team": "Tijuana Sanchitos",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 91,
+      "totalRank": 8,
+      "cats": {
+        "py": {
+          "value": 3474.25,
+          "rank": 10,
+          "pts": 7
+        },
+        "ptd": {
+          "value": 24.875,
+          "rank": 4,
+          "pts": 13
+        },
+        "compPct": {
+          "value": 66.32891660171472,
+          "rank": 5,
+          "pts": 12
+        },
+        "ry": {
+          "value": 2195.375,
+          "rank": 14,
+          "pts": 3
+        },
+        "rtd": {
+          "value": 18.875,
+          "rank": 10,
+          "pts": 7
+        },
+        "ypc": {
+          "value": 4.528880866425993,
+          "rank": 7,
+          "pts": 10
+        },
+        "recy": {
+          "value": 3668.75,
+          "rank": 9,
+          "pts": 8
+        },
+        "retd": {
+          "value": 23.125,
+          "rank": 6,
+          "pts": 11
+        },
+        "rec": {
+          "value": 321.375,
+          "rank": 9,
+          "pts": 8
+        },
+        "ypr": {
+          "value": 11.415791520809023,
+          "rank": 5,
+          "pts": 12
+        }
+      }
+    },
+    {
+      "ownerId": "m02",
+      "team": "DC Mighty Cucks",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 89,
+      "totalRank": 9,
+      "cats": {
+        "py": {
+          "value": 3342.75,
+          "rank": 13,
+          "pts": 4
+        },
+        "ptd": {
+          "value": 22.75,
+          "rank": 13,
+          "pts": 4
+        },
+        "compPct": {
+          "value": 64.58725463834364,
+          "rank": 12,
+          "pts": 5
+        },
+        "ry": {
+          "value": 2518.625,
+          "rank": 4,
+          "pts": 13
+        },
+        "rtd": {
+          "value": 21.75,
+          "rank": 2,
+          "pts": 15
+        },
+        "ypc": {
+          "value": 4.4234906695938525,
+          "rank": 9,
+          "pts": 8
+        },
+        "recy": {
+          "value": 3776.25,
+          "rank": 5,
+          "pts": 12
+        },
+        "retd": {
+          "value": 22.125,
+          "rank": 10,
+          "pts": 7
+        },
+        "rec": {
+          "value": 337.125,
+          "rank": 4,
+          "pts": 13
+        },
+        "ypr": {
+          "value": 11.201334816462737,
+          "rank": 9,
+          "pts": 8
+        }
+      }
+    },
+    {
+      "ownerId": "m12",
+      "team": "Muck City Mad Dawgs",
+      "nSeasons": 3,
+      "years": [
+        2018,
+        2019,
+        2020
+      ],
+      "games": 13,
+      "totalPts": 82,
+      "totalRank": 10,
+      "cats": {
+        "py": {
+          "value": 3186.6666666666665,
+          "rank": 15,
+          "pts": 2
+        },
+        "ptd": {
+          "value": 23.666666666666668,
+          "rank": 10,
+          "pts": 7
+        },
+        "compPct": {
+          "value": 67.19872306464485,
+          "rank": 3,
+          "pts": 14
+        },
+        "ry": {
+          "value": 2055.3333333333335,
+          "rank": 15,
+          "pts": 2
+        },
+        "rtd": {
+          "value": 18.666666666666668,
+          "rank": 12,
+          "pts": 5
+        },
+        "ypc": {
+          "value": 4.632607062359129,
+          "rank": 5,
+          "pts": 12
+        },
+        "recy": {
+          "value": 3831.3333333333335,
+          "rank": 4,
+          "pts": 13
+        },
+        "retd": {
+          "value": 20.333333333333332,
+          "rank": 14,
+          "pts": 3
+        },
+        "rec": {
+          "value": 335,
+          "rank": 6,
+          "pts": 11
+        },
+        "ypr": {
+          "value": 11.43681592039801,
+          "rank": 4,
+          "pts": 13
+        }
+      }
+    },
+    {
+      "ownerId": "m15",
+      "team": "Westeros Warlords",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 82,
+      "totalRank": 11,
+      "cats": {
+        "py": {
+          "value": 3467.625,
+          "rank": 11,
+          "pts": 6
+        },
+        "ptd": {
+          "value": 23.875,
+          "rank": 9,
+          "pts": 8
+        },
+        "compPct": {
+          "value": 65.67934782608695,
+          "rank": 8,
+          "pts": 9
+        },
+        "ry": {
+          "value": 2463.625,
+          "rank": 6,
+          "pts": 11
+        },
+        "rtd": {
+          "value": 21,
+          "rank": 5,
+          "pts": 12
+        },
+        "ypc": {
+          "value": 4.457033016734509,
+          "rank": 8,
+          "pts": 9
+        },
+        "recy": {
+          "value": 3418.25,
+          "rank": 15,
+          "pts": 2
+        },
+        "retd": {
+          "value": 26.5,
+          "rank": 2,
+          "pts": 15
+        },
+        "rec": {
+          "value": 305.25,
+          "rank": 14,
+          "pts": 3
+        },
+        "ypr": {
+          "value": 11.198198198198199,
+          "rank": 10,
+          "pts": 7
+        }
+      }
+    },
+    {
+      "ownerId": "m13",
+      "team": "Honolulu Horndogs",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 78,
+      "totalRank": 12,
+      "cats": {
+        "py": {
+          "value": 3543.25,
+          "rank": 4,
+          "pts": 13
+        },
+        "ptd": {
+          "value": 23.5,
+          "rank": 11,
+          "pts": 6
+        },
+        "compPct": {
+          "value": 65.48156009551606,
+          "rank": 10,
+          "pts": 7
+        },
+        "ry": {
+          "value": 2227.25,
+          "rank": 13,
+          "pts": 4
+        },
+        "rtd": {
+          "value": 19.375,
+          "rank": 9,
+          "pts": 8
+        },
+        "ypc": {
+          "value": 4.290392487358536,
+          "rank": 12,
+          "pts": 5
+        },
+        "recy": {
+          "value": 3707.125,
+          "rank": 7,
+          "pts": 10
+        },
+        "retd": {
+          "value": 22.75,
+          "rank": 7,
+          "pts": 10
+        },
+        "rec": {
+          "value": 335.25,
+          "rank": 5,
+          "pts": 12
+        },
+        "ypr": {
+          "value": 11.05779269202088,
+          "rank": 14,
+          "pts": 3
+        }
+      }
+    },
+    {
+      "ownerId": "m07",
+      "team": "Chula Vista Chupacabras",
+      "nSeasons": 6,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "games": 13.5,
+      "totalPts": 61,
+      "totalRank": 13,
+      "cats": {
+        "py": {
+          "value": 3421.8333333333335,
+          "rank": 12,
+          "pts": 5
+        },
+        "ptd": {
+          "value": 24.833333333333332,
+          "rank": 5,
+          "pts": 12
+        },
+        "compPct": {
+          "value": 65.66787003610108,
+          "rank": 9,
+          "pts": 8
+        },
+        "ry": {
+          "value": 2362.1666666666665,
+          "rank": 9,
+          "pts": 8
+        },
+        "rtd": {
+          "value": 14.666666666666666,
+          "rank": 15,
+          "pts": 2
+        },
+        "ypc": {
+          "value": 4.393366398016119,
+          "rank": 10,
+          "pts": 7
+        },
+        "recy": {
+          "value": 3382.3333333333335,
+          "rank": 16,
+          "pts": 1
+        },
+        "retd": {
+          "value": 21.5,
+          "rank": 12,
+          "pts": 5
+        },
+        "rec": {
+          "value": 301.1666666666667,
+          "rank": 15,
+          "pts": 2
+        },
+        "ypr": {
+          "value": 11.23076923076923,
+          "rank": 6,
+          "pts": 11
+        }
+      }
+    },
+    {
+      "ownerId": "m11",
+      "team": "Squaw Valley Skinners",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 13.625,
+      "totalPts": 57,
+      "totalRank": 14,
+      "cats": {
+        "py": {
+          "value": 3483.5,
+          "rank": 9,
+          "pts": 8
+        },
+        "ptd": {
+          "value": 21.5,
+          "rank": 14,
+          "pts": 3
+        },
+        "compPct": {
+          "value": 66.14597360624832,
+          "rank": 6,
+          "pts": 11
+        },
+        "ry": {
+          "value": 2241.25,
+          "rank": 12,
+          "pts": 5
+        },
+        "rtd": {
+          "value": 18.75,
+          "rank": 11,
+          "pts": 6
+        },
+        "ypc": {
+          "value": 4.170737380786229,
+          "rank": 15,
+          "pts": 2
+        },
+        "recy": {
+          "value": 3476.125,
+          "rank": 12,
+          "pts": 5
+        },
+        "retd": {
+          "value": 22.75,
+          "rank": 8,
+          "pts": 9
+        },
+        "rec": {
+          "value": 320.375,
+          "rank": 10,
+          "pts": 7
+        },
+        "ypr": {
+          "value": 10.850175575497463,
+          "rank": 16,
+          "pts": 1
+        }
+      }
+    },
+    {
+      "ownerId": "m19",
+      "team": "Pasco Pounders",
+      "nSeasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 14,
+      "totalPts": 56,
+      "totalRank": 15,
+      "cats": {
+        "py": {
+          "value": 3484.8,
+          "rank": 8,
+          "pts": 9
+        },
+        "ptd": {
+          "value": 24,
+          "rank": 8,
+          "pts": 9
+        },
+        "compPct": {
+          "value": 65.70702794242167,
+          "rank": 7,
+          "pts": 10
+        },
+        "ry": {
+          "value": 2284.4,
+          "rank": 10,
+          "pts": 7
+        },
+        "rtd": {
+          "value": 18.4,
+          "rank": 13,
+          "pts": 4
+        },
+        "ypc": {
+          "value": 4.222550831792976,
+          "rank": 14,
+          "pts": 3
+        },
+        "recy": {
+          "value": 3458.8,
+          "rank": 14,
+          "pts": 3
+        },
+        "retd": {
+          "value": 21.4,
+          "rank": 13,
+          "pts": 4
+        },
+        "rec": {
+          "value": 313,
+          "rank": 12,
+          "pts": 5
+        },
+        "ypr": {
+          "value": 11.050479233226836,
+          "rank": 15,
+          "pts": 2
+        }
+      }
+    },
+    {
+      "ownerId": "m04",
+      "team": "Charleston Chewbacca",
+      "nSeasons": 1,
+      "years": [
+        2018
+      ],
+      "games": 13,
+      "totalPts": 31,
+      "totalRank": 16,
+      "cats": {
+        "py": {
+          "value": 3289,
+          "rank": 14,
+          "pts": 3
+        },
+        "ptd": {
+          "value": 21,
+          "rank": 15,
+          "pts": 2
+        },
+        "compPct": {
+          "value": 62.20095693779905,
+          "rank": 16,
+          "pts": 1
+        },
+        "ry": {
+          "value": 1301,
+          "rank": 16,
+          "pts": 1
+        },
+        "rtd": {
+          "value": 8,
+          "rank": 16,
+          "pts": 1
+        },
+        "ypc": {
+          "value": 4.156549520766773,
+          "rank": 16,
+          "pts": 1
+        },
+        "recy": {
+          "value": 3476,
+          "rank": 13,
+          "pts": 4
+        },
+        "retd": {
+          "value": 18,
+          "rank": 16,
+          "pts": 1
+        },
+        "rec": {
+          "value": 293,
+          "rank": 16,
+          "pts": 1
+        },
+        "ypr": {
+          "value": 11.863481228668942,
+          "rank": 1,
+          "pts": 16
+        }
+      }
+    }
+  ],
+  "totals": [
+    {
+      "ownerId": "m06",
+      "team": "Fairview Fat Cats",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 133,
+      "totalRank": 1,
+      "cats": {
+        "py": {
+          "value": 28286,
+          "rank": 4,
+          "pts": 13
+        },
+        "ptd": {
+          "value": 186,
+          "rank": 6,
+          "pts": 11
+        },
+        "compPct": {
+          "value": 66.65759390310288,
+          "rank": 4,
+          "pts": 13
+        },
+        "ry": {
+          "value": 20763,
+          "rank": 2,
+          "pts": 15
+        },
+        "rtd": {
+          "value": 165,
+          "rank": 4,
+          "pts": 13
+        },
+        "ypc": {
+          "value": 4.736085766423358,
+          "rank": 1,
+          "pts": 16
+        },
+        "recy": {
+          "value": 30122,
+          "rank": 2,
+          "pts": 15
+        },
+        "retd": {
+          "value": 161,
+          "rank": 8,
+          "pts": 9
+        },
+        "rec": {
+          "value": 2628,
+          "rank": 3,
+          "pts": 14
+        },
+        "ypr": {
+          "value": 11.461948249619482,
+          "rank": 3,
+          "pts": 14
+        }
+      }
+    },
+    {
+      "ownerId": "m18",
+      "team": "Grand Teeton Feelers",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 121,
+      "totalRank": 2,
+      "cats": {
+        "py": {
+          "value": 28299,
+          "rank": 3,
+          "pts": 14
+        },
+        "ptd": {
+          "value": 201,
+          "rank": 1,
+          "pts": 16
+        },
+        "compPct": {
+          "value": 65.2947424322889,
+          "rank": 11,
+          "pts": 6
+        },
+        "ry": {
+          "value": 21416,
+          "rank": 1,
+          "pts": 16
+        },
+        "rtd": {
+          "value": 162,
+          "rank": 5,
+          "pts": 12
+        },
+        "ypc": {
+          "value": 4.622490826678178,
+          "rank": 6,
+          "pts": 11
+        },
+        "recy": {
+          "value": 28063,
+          "rank": 5,
+          "pts": 12
+        },
+        "retd": {
+          "value": 194,
+          "rank": 2,
+          "pts": 15
+        },
+        "rec": {
+          "value": 2500,
+          "rank": 7,
+          "pts": 10
+        },
+        "ypr": {
+          "value": 11.2252,
+          "rank": 8,
+          "pts": 9
+        }
+      }
+    },
+    {
+      "ownerId": "m17",
+      "team": "Tijuana Sanchitos",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 119,
+      "totalRank": 3,
+      "cats": {
+        "py": {
+          "value": 27794,
+          "rank": 6,
+          "pts": 11
+        },
+        "ptd": {
+          "value": 199,
+          "rank": 2,
+          "pts": 15
+        },
+        "compPct": {
+          "value": 66.32891660171472,
+          "rank": 5,
+          "pts": 12
+        },
+        "ry": {
+          "value": 17563,
+          "rank": 8,
+          "pts": 9
+        },
+        "rtd": {
+          "value": 151,
+          "rank": 7,
+          "pts": 10
+        },
+        "ypc": {
+          "value": 4.528880866425993,
+          "rank": 7,
+          "pts": 10
+        },
+        "recy": {
+          "value": 29350,
+          "rank": 4,
+          "pts": 13
+        },
+        "retd": {
+          "value": 185,
+          "rank": 3,
+          "pts": 14
+        },
+        "rec": {
+          "value": 2571,
+          "rank": 4,
+          "pts": 13
+        },
+        "ypr": {
+          "value": 11.415791520809023,
+          "rank": 5,
+          "pts": 12
+        }
+      }
+    },
+    {
+      "ownerId": "m08",
+      "team": "Goleta Gringos",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 117,
+      "totalRank": 4,
+      "cats": {
+        "py": {
+          "value": 28405,
+          "rank": 1,
+          "pts": 16
+        },
+        "ptd": {
+          "value": 194,
+          "rank": 3,
+          "pts": 14
+        },
+        "compPct": {
+          "value": 67.66619519094766,
+          "rank": 2,
+          "pts": 15
+        },
+        "ry": {
+          "value": 19306,
+          "rank": 5,
+          "pts": 12
+        },
+        "rtd": {
+          "value": 184,
+          "rank": 1,
+          "pts": 16
+        },
+        "ypc": {
+          "value": 4.358997516369383,
+          "rank": 11,
+          "pts": 6
+        },
+        "recy": {
+          "value": 27957,
+          "rank": 6,
+          "pts": 11
+        },
+        "retd": {
+          "value": 173,
+          "rank": 7,
+          "pts": 10
+        },
+        "rec": {
+          "value": 2505,
+          "rank": 6,
+          "pts": 11
+        },
+        "ypr": {
+          "value": 11.160479041916167,
+          "rank": 11,
+          "pts": 6
+        }
+      }
+    },
+    {
+      "ownerId": "m02",
+      "team": "DC Mighty Cucks",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 111,
+      "totalRank": 5,
+      "cats": {
+        "py": {
+          "value": 26742,
+          "rank": 8,
+          "pts": 9
+        },
+        "ptd": {
+          "value": 182,
+          "rank": 8,
+          "pts": 9
+        },
+        "compPct": {
+          "value": 64.58725463834364,
+          "rank": 12,
+          "pts": 5
+        },
+        "ry": {
+          "value": 20149,
+          "rank": 3,
+          "pts": 14
+        },
+        "rtd": {
+          "value": 174,
+          "rank": 2,
+          "pts": 15
+        },
+        "ypc": {
+          "value": 4.4234906695938525,
+          "rank": 9,
+          "pts": 8
+        },
+        "recy": {
+          "value": 30210,
+          "rank": 1,
+          "pts": 16
+        },
+        "retd": {
+          "value": 177,
+          "rank": 6,
+          "pts": 11
+        },
+        "rec": {
+          "value": 2697,
+          "rank": 1,
+          "pts": 16
+        },
+        "ypr": {
+          "value": 11.201334816462737,
+          "rank": 9,
+          "pts": 8
+        }
+      }
+    },
+    {
+      "ownerId": "m15",
+      "team": "Westeros Warlords",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 109,
+      "totalRank": 6,
+      "cats": {
+        "py": {
+          "value": 27741,
+          "rank": 7,
+          "pts": 10
+        },
+        "ptd": {
+          "value": 191,
+          "rank": 4,
+          "pts": 13
+        },
+        "compPct": {
+          "value": 65.67934782608695,
+          "rank": 8,
+          "pts": 9
+        },
+        "ry": {
+          "value": 19709,
+          "rank": 4,
+          "pts": 13
+        },
+        "rtd": {
+          "value": 168,
+          "rank": 3,
+          "pts": 14
+        },
+        "ypc": {
+          "value": 4.457033016734509,
+          "rank": 8,
+          "pts": 9
+        },
+        "recy": {
+          "value": 27346,
+          "rank": 8,
+          "pts": 9
+        },
+        "retd": {
+          "value": 212,
+          "rank": 1,
+          "pts": 16
+        },
+        "rec": {
+          "value": 2442,
+          "rank": 8,
+          "pts": 9
+        },
+        "ypr": {
+          "value": 11.198198198198199,
+          "rank": 10,
+          "pts": 7
+        }
+      }
+    },
+    {
+      "ownerId": "m13",
+      "team": "Honolulu Horndogs",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 105,
+      "totalRank": 7,
+      "cats": {
+        "py": {
+          "value": 28346,
+          "rank": 2,
+          "pts": 15
+        },
+        "ptd": {
+          "value": 188,
+          "rank": 5,
+          "pts": 12
+        },
+        "compPct": {
+          "value": 65.48156009551606,
+          "rank": 10,
+          "pts": 7
+        },
+        "ry": {
+          "value": 17818,
+          "rank": 7,
+          "pts": 10
+        },
+        "rtd": {
+          "value": 155,
+          "rank": 6,
+          "pts": 11
+        },
+        "ypc": {
+          "value": 4.290392487358536,
+          "rank": 12,
+          "pts": 5
+        },
+        "recy": {
+          "value": 29657,
+          "rank": 3,
+          "pts": 14
+        },
+        "retd": {
+          "value": 182,
+          "rank": 4,
+          "pts": 13
+        },
+        "rec": {
+          "value": 2682,
+          "rank": 2,
+          "pts": 15
+        },
+        "ypr": {
+          "value": 11.05779269202088,
+          "rank": 14,
+          "pts": 3
+        }
+      }
+    },
+    {
+      "ownerId": "m11",
+      "team": "Squaw Valley Skinners",
+      "nSeasons": 8,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 109,
+      "totalPts": 88,
+      "totalRank": 8,
+      "cats": {
+        "py": {
+          "value": 27868,
+          "rank": 5,
+          "pts": 12
+        },
+        "ptd": {
+          "value": 172,
+          "rank": 9,
+          "pts": 8
+        },
+        "compPct": {
+          "value": 66.14597360624832,
+          "rank": 6,
+          "pts": 11
+        },
+        "ry": {
+          "value": 17930,
+          "rank": 6,
+          "pts": 11
+        },
+        "rtd": {
+          "value": 150,
+          "rank": 8,
+          "pts": 9
+        },
+        "ypc": {
+          "value": 4.170737380786229,
+          "rank": 15,
+          "pts": 2
+        },
+        "recy": {
+          "value": 27809,
+          "rank": 7,
+          "pts": 10
+        },
+        "retd": {
+          "value": 182,
+          "rank": 5,
+          "pts": 12
+        },
+        "rec": {
+          "value": 2563,
+          "rank": 5,
+          "pts": 12
+        },
+        "ypr": {
+          "value": 10.850175575497463,
+          "rank": 16,
+          "pts": 1
+        }
+      }
+    },
+    {
+      "ownerId": "m05",
+      "team": "San Diego Shadowcöcks",
+      "nSeasons": 7,
+      "years": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 96,
+      "totalPts": 82,
+      "totalRank": 9,
+      "cats": {
+        "py": {
+          "value": 25774,
+          "rank": 9,
+          "pts": 8
+        },
+        "ptd": {
+          "value": 185,
+          "rank": 7,
+          "pts": 10
+        },
+        "compPct": {
+          "value": 68.44457687723481,
+          "rank": 1,
+          "pts": 16
+        },
+        "ry": {
+          "value": 16672,
+          "rank": 9,
+          "pts": 8
+        },
+        "rtd": {
+          "value": 150,
+          "rank": 9,
+          "pts": 8
+        },
+        "ypc": {
+          "value": 4.254146465935188,
+          "rank": 13,
+          "pts": 4
+        },
+        "recy": {
+          "value": 25695,
+          "rank": 9,
+          "pts": 8
+        },
+        "retd": {
+          "value": 158,
+          "rank": 9,
+          "pts": 8
+        },
+        "rec": {
+          "value": 2323,
+          "rank": 9,
+          "pts": 8
+        },
+        "ypr": {
+          "value": 11.061127851915627,
+          "rank": 13,
+          "pts": 4
+        }
+      }
+    },
+    {
+      "ownerId": "m07",
+      "team": "Chula Vista Chupacabras",
+      "nSeasons": 6,
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "games": 81,
+      "totalPts": 73,
+      "totalRank": 10,
+      "cats": {
+        "py": {
+          "value": 20531,
+          "rank": 10,
+          "pts": 7
+        },
+        "ptd": {
+          "value": 149,
+          "rank": 10,
+          "pts": 7
+        },
+        "compPct": {
+          "value": 65.66787003610108,
+          "rank": 9,
+          "pts": 8
+        },
+        "ry": {
+          "value": 14173,
+          "rank": 10,
+          "pts": 7
+        },
+        "rtd": {
+          "value": 88,
+          "rank": 12,
+          "pts": 5
+        },
+        "ypc": {
+          "value": 4.393366398016119,
+          "rank": 10,
+          "pts": 7
+        },
+        "recy": {
+          "value": 20294,
+          "rank": 10,
+          "pts": 7
+        },
+        "retd": {
+          "value": 129,
+          "rank": 10,
+          "pts": 7
+        },
+        "rec": {
+          "value": 1807,
+          "rank": 10,
+          "pts": 7
+        },
+        "ypr": {
+          "value": 11.23076923076923,
+          "rank": 6,
+          "pts": 11
+        }
+      }
+    },
+    {
+      "ownerId": "m14",
+      "team": "Poulsbo Pollywogs",
+      "nSeasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 70,
+      "totalPts": 70,
+      "totalRank": 11,
+      "cats": {
+        "py": {
+          "value": 15589,
+          "rank": 12,
+          "pts": 5
+        },
+        "ptd": {
+          "value": 103,
+          "rank": 12,
+          "pts": 5
+        },
+        "compPct": {
+          "value": 64.10614525139665,
+          "rank": 13,
+          "pts": 4
+        },
+        "ry": {
+          "value": 12567,
+          "rank": 11,
+          "pts": 6
+        },
+        "rtd": {
+          "value": 107,
+          "rank": 10,
+          "pts": 7
+        },
+        "ypc": {
+          "value": 4.697943925233645,
+          "rank": 2,
+          "pts": 15
+        },
+        "recy": {
+          "value": 19566,
+          "rank": 11,
+          "pts": 6
+        },
+        "retd": {
+          "value": 118,
+          "rank": 11,
+          "pts": 6
+        },
+        "rec": {
+          "value": 1743,
+          "rank": 11,
+          "pts": 6
+        },
+        "ypr": {
+          "value": 11.225473321858864,
+          "rank": 7,
+          "pts": 10
+        }
+      }
+    },
+    {
+      "ownerId": "m12",
+      "team": "Muck City Mad Dawgs",
+      "nSeasons": 3,
+      "years": [
+        2018,
+        2019,
+        2020
+      ],
+      "games": 39,
+      "totalPts": 61,
+      "totalRank": 12,
+      "cats": {
+        "py": {
+          "value": 9560,
+          "rank": 14,
+          "pts": 3
+        },
+        "ptd": {
+          "value": 71,
+          "rank": 14,
+          "pts": 3
+        },
+        "compPct": {
+          "value": 67.19872306464485,
+          "rank": 3,
+          "pts": 14
+        },
+        "ry": {
+          "value": 6166,
+          "rank": 14,
+          "pts": 3
+        },
+        "rtd": {
+          "value": 56,
+          "rank": 13,
+          "pts": 4
+        },
+        "ypc": {
+          "value": 4.632607062359129,
+          "rank": 5,
+          "pts": 12
+        },
+        "recy": {
+          "value": 11494,
+          "rank": 14,
+          "pts": 3
+        },
+        "retd": {
+          "value": 61,
+          "rank": 14,
+          "pts": 3
+        },
+        "rec": {
+          "value": 1005,
+          "rank": 14,
+          "pts": 3
+        },
+        "ypr": {
+          "value": 11.43681592039801,
+          "rank": 4,
+          "pts": 13
+        }
+      }
+    },
+    {
+      "ownerId": "m19",
+      "team": "Pasco Pounders",
+      "nSeasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "games": 70,
+      "totalPts": 53,
+      "totalRank": 13,
+      "cats": {
+        "py": {
+          "value": 17424,
+          "rank": 11,
+          "pts": 6
+        },
+        "ptd": {
+          "value": 120,
+          "rank": 11,
+          "pts": 6
+        },
+        "compPct": {
+          "value": 65.70702794242167,
+          "rank": 7,
+          "pts": 10
+        },
+        "ry": {
+          "value": 11422,
+          "rank": 12,
+          "pts": 5
+        },
+        "rtd": {
+          "value": 92,
+          "rank": 11,
+          "pts": 6
+        },
+        "ypc": {
+          "value": 4.222550831792976,
+          "rank": 14,
+          "pts": 3
+        },
+        "recy": {
+          "value": 17294,
+          "rank": 12,
+          "pts": 5
+        },
+        "retd": {
+          "value": 107,
+          "rank": 12,
+          "pts": 5
+        },
+        "rec": {
+          "value": 1565,
+          "rank": 12,
+          "pts": 5
+        },
+        "ypr": {
+          "value": 11.050479233226836,
+          "rank": 15,
+          "pts": 2
+        }
+      }
+    },
+    {
+      "ownerId": "m10",
+      "team": "Winston-Salem Wake Snakes",
+      "nSeasons": 3,
+      "years": [
+        2018,
+        2019,
+        2020
+      ],
+      "games": 39,
+      "totalPts": 48,
+      "totalRank": 14,
+      "cats": {
+        "py": {
+          "value": 10948,
+          "rank": 13,
+          "pts": 4
+        },
+        "ptd": {
+          "value": 81,
+          "rank": 13,
+          "pts": 4
+        },
+        "compPct": {
+          "value": 63.64251861882194,
+          "rank": 15,
+          "pts": 2
+        },
+        "ry": {
+          "value": 6758,
+          "rank": 13,
+          "pts": 4
+        },
+        "rtd": {
+          "value": 48,
+          "rank": 14,
+          "pts": 3
+        },
+        "ypc": {
+          "value": 4.689798750867453,
+          "rank": 3,
+          "pts": 14
+        },
+        "recy": {
+          "value": 11584,
+          "rank": 13,
+          "pts": 4
+        },
+        "retd": {
+          "value": 86,
+          "rank": 13,
+          "pts": 4
+        },
+        "rec": {
+          "value": 1040,
+          "rank": 13,
+          "pts": 4
+        },
+        "ypr": {
+          "value": 11.138461538461538,
+          "rank": 12,
+          "pts": 5
+        }
+      }
+    },
+    {
+      "ownerId": "m21",
+      "team": "Patagonia Pipers",
+      "nSeasons": 2,
+      "years": [
+        2024,
+        2025
+      ],
+      "games": 28,
+      "totalPts": 45,
+      "totalRank": 15,
+      "cats": {
+        "py": {
+          "value": 6990,
+          "rank": 15,
+          "pts": 2
+        },
+        "ptd": {
+          "value": 49,
+          "rank": 15,
+          "pts": 2
+        },
+        "compPct": {
+          "value": 63.99572649572649,
+          "rank": 14,
+          "pts": 3
+        },
+        "ry": {
+          "value": 5077,
+          "rank": 15,
+          "pts": 2
+        },
+        "rtd": {
+          "value": 42,
+          "rank": 15,
+          "pts": 2
+        },
+        "ypc": {
+          "value": 4.6749539594843466,
+          "rank": 4,
+          "pts": 13
+        },
+        "recy": {
+          "value": 8584,
+          "rank": 15,
+          "pts": 2
+        },
+        "retd": {
+          "value": 50,
+          "rank": 15,
+          "pts": 2
+        },
+        "rec": {
+          "value": 744,
+          "rank": 15,
+          "pts": 2
+        },
+        "ypr": {
+          "value": 11.53763440860215,
+          "rank": 2,
+          "pts": 15
+        }
+      }
+    },
+    {
+      "ownerId": "m04",
+      "team": "Charleston Chewbacca",
+      "nSeasons": 1,
+      "years": [
+        2018
+      ],
+      "games": 13,
+      "totalPts": 25,
+      "totalRank": 16,
+      "cats": {
+        "py": {
+          "value": 3289,
+          "rank": 16,
+          "pts": 1
+        },
+        "ptd": {
+          "value": 21,
+          "rank": 16,
+          "pts": 1
+        },
+        "compPct": {
+          "value": 62.20095693779905,
+          "rank": 16,
+          "pts": 1
+        },
+        "ry": {
+          "value": 1301,
+          "rank": 16,
+          "pts": 1
+        },
+        "rtd": {
+          "value": 8,
+          "rank": 16,
+          "pts": 1
+        },
+        "ypc": {
+          "value": 4.156549520766773,
+          "rank": 16,
+          "pts": 1
+        },
+        "recy": {
+          "value": 3476,
+          "rank": 16,
+          "pts": 1
+        },
+        "retd": {
+          "value": 18,
+          "rank": 16,
+          "pts": 1
+        },
+        "rec": {
+          "value": 293,
+          "rank": 16,
+          "pts": 1
+        },
+        "ypr": {
+          "value": 11.863481228668942,
+          "rank": 1,
+          "pts": 16
+        }
+      }
+    }
+  ]
+}

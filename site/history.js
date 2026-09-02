@@ -653,6 +653,11 @@
         allL: t.allplayL || 0,
         moves: movesCount(y, t.id),
       };
+    }).sort((a, b) => {
+      const ra = a.rank == null ? 99 : a.rank;
+      const rb = b.rank == null ? 99 : b.rank;
+      if (ra !== rb) return ra - rb;
+      return (b.wins - a.wins) || (b.pf - a.pf);
     });
   }
 
@@ -698,17 +703,30 @@
       if (d) return d;
       return (a.rank || 99) - (b.rank || 99);
     });
+    const allMode = pickedYear == null;
+    const h2 = $("season-h2");
+    if (h2) h2.textContent = allMode ? "Career All-Play" : "Season Standings";
+    const tbl = document.getElementById("season-tbl");
+    if (tbl) {
+      tbl.classList.toggle("fit-all", allMode);
+      tbl.classList.add("ready");
+    }
+    const wlTh = document.querySelector('#season-tbl thead th[data-k="wins"]');
+    if (wlTh) wlTh.textContent = allMode ? "RS W-L-T" : "W-L-T";
     tb.innerHTML = rows.map((r) => {
       const rec = (r.wins || 0) + "-" + (r.losses || 0) + (r.ties ? "-" + r.ties : "");
+      const ap = (r.allW || 0) + "-" + (r.allL || 0);
       const mv = r.moves == null ? "—" : r.moves;
       const pillCls = r.rank === 1 ? "gold" : r.rank === 2 ? "slv" : r.rank === 3 ? "brz" : "";
+      const recCell = allMode ? rec : `<strong>${rec}</strong>`;
+      const apCell = allMode ? `<strong>${ap}</strong>` : ap;
       return `<tr>
         <td>${r.rank ? `<span class="rank-pill ${pillCls}">${r.rank}</span>` : "—"}</td>
         <td>${teamCell(r)}</td>
-        <td><strong>${rec}</strong></td>
+        <td>${recCell}</td>
         <td>${A.fmt(r.pf, 1)}</td>
         <td>${A.fmt(r.pa, 1)}</td>
-        <td>${r.allW}-${r.allL}</td>
+        <td>${apCell}</td>
         <td>${mv}</td>
       </tr>`;
     }).join("");
@@ -1947,6 +1965,7 @@
     seasonYear = A.seasonScope(y).year;
     stampSeasonYear(y);
     bindYearSelect();
+    syncYearOnlyCards();
     renderSeasonStandings();
     renderTxnAndWeeks();
     renderWaiverReport();
@@ -1976,6 +1995,7 @@
         else applySeasonYear(pickedYear);
       } else {
         bindYearSelect();
+        syncYearOnlyCards();
         renderSeasonStandings();
         renderTxnAndWeeks();
         renderWaiverReport();
@@ -1989,16 +2009,59 @@
   }
   bindYearSelect();
 
+  const YEAR_ONLY_BLOCKS = ["custody-par-block", "txn-block", "tx-log-block", "waiver-value-block", "waiver-block"];
+  function setYearOnlyOpen(open) {
+    YEAR_ONLY_BLOCKS.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.hidden = !open;
+      el.style.display = open ? "" : "none";
+    });
+  }
+  function syncYearOnlyCards() {
+    setYearOnlyOpen(pickedYear != null);
+  }
+
   let raceChart = null;
+  function hideRaceCanvas() {
+    const canvas = $("race-chart");
+    const wrap = $("race-wrap") || (canvas && canvas.closest(".chart-wrap"));
+    if (wrap) {
+      wrap.hidden = true;
+      wrap.style.display = "none";
+      wrap.style.height = "0";
+    }
+    if (canvas) {
+      canvas.hidden = true;
+      canvas.style.display = "none";
+      canvas.style.height = "0";
+    }
+    if (raceChart) { raceChart.destroy(); raceChart = null; }
+  }
+  function showRaceCanvas() {
+    const canvas = $("race-chart");
+    const wrap = $("race-wrap") || (canvas && canvas.closest(".chart-wrap"));
+    if (wrap) {
+      wrap.hidden = false;
+      wrap.style.display = "";
+      wrap.style.height = "";
+    }
+    if (canvas) {
+      canvas.hidden = false;
+      canvas.style.display = "";
+      canvas.style.height = "";
+    }
+  }
   function renderRace() {
     const canvas = $("race-chart");
     const sub = $("race-sub");
     if (!canvas) return;
-    if (seasonYear == null) {
+    if (pickedYear == null) {
       if (sub) sub.textContent = "All · pick a season";
-      if (raceChart) { raceChart.destroy(); raceChart = null; }
+      hideRaceCanvas();
       return;
     }
+    showRaceCanvas();
     const y = seasonYear;
     const s = DATA.seasons[String(y)] || { teams: [], regWeeks: [] };
     const top4 = (s.teams || []).filter((t) => franchisePlayedSeason(canon(t.owner), y)).slice().sort((a, b) => (a.finalRank || 99) - (b.finalRank || 99)).slice(0, 4);
@@ -2020,7 +2083,7 @@
           const oid = canon(t.owner);
           const name = A.franchiseName(oid) || t.name || "—";
           return {
-            label: name.length > 16 ? name.slice(0, 15) + "…" : name,
+            label: A.shortTeam(oid) || name,
             data: t.cumWins || [],
             borderColor: colors[i],
             backgroundColor: colors[i],
@@ -2250,8 +2313,8 @@
   }
 
   const RB_POS_COLOR = {
-    QB: "#00a2ff", RB: "#c8ff00", WR: "#ff6a00",
-    TE: "#ffc400", K: "#9fd8ff", DST: "#3a4a63",
+    QB: "#2f7bff", RB: "#93d500", WR: "#ff7a00",
+    TE: "#ffc400", K: "#9fd8ff", DST: "#9fb0cc",
   };
 
   function computeHof() {
@@ -2481,6 +2544,7 @@
   bindSort("#custody-par-tbl", () => parKey, (k) => { parKey = k; }, () => parDir, (d) => { parDir = d; }, renderCustodyPar);
   bindSort("#ngs-tbl", () => ngsKey, (k) => { ngsKey = k; }, () => ngsDir, (d) => { ngsDir = d; }, renderNgs);
 
+  syncYearOnlyCards();
   renderSeasonStandings();
   renderTxnAndWeeks();
   renderWaiverReport();

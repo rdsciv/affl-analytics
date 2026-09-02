@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store">
 <title>AFFL Roto Standings</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=40">
-<link rel="stylesheet" href="logo.css?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
+<link rel="apple-touch-icon" href="favicon.png?v=4">
+<link rel="stylesheet" href="styles.css?v=48">
+<link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
 <div class="frame">
   <header class="topbar">
     <div class="brand">
-      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-banner.png" alt="AFFL"></a>
       <div>
         <h1>AFFL <span>Roto</span></h1>
         <div class="sub">category analytics · skill radar · from starter NFL stats</div>
@@ -38,55 +39,56 @@
 
   <p class="lede" id="lede"></p>
 
-  <div class="picker-row">
-    <div class="picker-label">View</div>
-    <div class="week-picker" id="scope-picker"></div>
+  <div class="picker-row" id="year-row">
+    <div class="picker-label">Season</div>
+    <select class="team-select" id="year-picker" aria-label="Season">
+      <option value="all" selected>All</option>
+      <option value="2014">2014</option>
+      <option value="2015">2015</option>
+      <option value="2016">2016</option>
+      <option value="2017">2017</option>
+      <option value="2018">2018</option>
+      <option value="2019">2019</option>
+      <option value="2020">2020</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+      <option value="2023">2023</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+    </select>
   </div>
-
   <div class="picker-row">
-    <div class="picker-label">Squad</div>
+    <div class="picker-label">Team</div>
     <div class="week-picker" id="squad-picker"></div>
   </div>
-
   <div class="picker-row">
     <div class="picker-label">Phase</div>
     <div class="week-picker" id="phase-picker"></div>
   </div>
+  <div class="picker-row" id="grain-row">
+    <div class="picker-label">Grain</div>
+    <div class="week-picker" id="grain-picker"></div>
+  </div>
   <p class="card-sub" id="phase-note"></p>
 
-  <section class="card" id="career-block" style="margin-bottom:16px">
+  <section class="card" id="season-block" style="margin-bottom:16px">
     <div class="card-head">
       <div>
-        <h2>Average Roto Finish</h2>
-        <div class="card-sub" id="career-sub"></div>
+        <h2 id="stand-h2">Roto Standings</h2>
+        <div class="card-sub" id="season-sub"></div>
       </div>
     </div>
-    <div id="career-table"></div>
+    <div id="season-table"></div>
   </section>
 
   <section class="card" id="career-graph-block" style="margin-bottom:16px">
     <div class="card-head">
       <div>
         <h2>Finish Over Time</h2>
-        <div class="card-sub">lower is better · click a manager in the table to highlight</div>
+        <div class="card-sub">lower is better · scored seasons 2018–2025 · click a team in the table to highlight</div>
       </div>
     </div>
     <div class="chart-wrap tall"><canvas id="career-chart"></canvas></div>
-  </section>
-
-  <div class="picker-row" id="year-row">
-    <div class="picker-label">Season</div>
-    <div class="week-picker" id="year-picker"></div>
-  </div>
-
-  <section class="card" id="season-block" style="margin-bottom:16px">
-    <div class="card-head">
-      <div>
-        <h2>Roto Standings</h2>
-        <div class="card-sub" id="season-sub"></div>
-      </div>
-    </div>
-    <div id="season-table"></div>
   </section>
 
   <section class="second-grid" id="graphs-block">
@@ -117,8 +119,8 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=28"></script>
-<script src="roto-math.js?v=2"></script>
-<script src="roto.js?v=3"></script>
+<script src="common.js?v=37"></script>
+<script src="roto-math.js?v=4"></script>
+<script src="roto.js?v=6"></script>
 </body>
 </html>

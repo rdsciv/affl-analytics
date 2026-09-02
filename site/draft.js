@@ -83,7 +83,7 @@
   if (year == null) year = A.years()[0];
   let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
-  let YD = null, T = {}, chart = null, rateChart = null, dnaChart = null, labChart = null, ALL = null;
+  let YD = null, T = {}, chart = null, dnaChart = null, labChart = null, ALL = null;
   let scatterChart = null, contChart = null;
   let HOLDOUT = { pooled: {}, bySeason: {}, scoredAuctionSeasons: [], claim: "", subtitle: "", keepers: { note: "" }, histogramNote: "", grain: "" };
   try {
@@ -840,27 +840,34 @@
     const anyPts = rows.some((r) => r.pts > 0);
     const nYears = (r) => Math.max(1, Object.keys(r.years || {}).length);
     const avg = auction && scope === "cum";
-    const labels = rows.map((r) => short(r.tid));
 
     $('#spend-sub').textContent = auction
       ? (avg
-          ? "average $200 allocation across auction years · below: career points per dollar"
-          : "how each team allocated their $200 across positions · below: points returned per dollar")
-      : "draft picks by position · below: points those picks returned";
+          ? "average $200 allocation across auction years · line = career points per dollar"
+          : "how each team allocated their $200 across positions · line = points returned per dollar")
+      : "draft picks by position · line = points those picks returned";
 
     if (chart) chart.destroy();
     chart = new Chart($('#spend-chart'), {
-      type: 'bar',
       data: {
-        labels,
-        datasets: Object.keys(POS_COLORS).map((pos) => ({
-          label: pos, stack: 'spend',
-          data: rows.map((r) => {
-            const raw = r.byPos[pos] || 0;
-            return avg ? raw / nYears(r) : raw;
-          }),
-          backgroundColor: POS_COLORS[pos], maxBarThickness: 30,
-        })),
+        labels: rows.map((r) => short(r.tid)),
+        datasets: [
+          ...Object.keys(POS_COLORS).map((pos) => ({
+            type: 'bar', label: pos, stack: 'spend', yAxisID: 'y',
+            data: rows.map((r) => {
+              const raw = r.byPos[pos] || 0;
+              return avg ? raw / nYears(r) : raw;
+            }),
+            backgroundColor: POS_COLORS[pos], maxBarThickness: 30, order: 2,
+          })),
+          ...(anyPts ? [{
+            type: 'line', label: auction ? 'Pts per $' : 'Total pts', yAxisID: 'y1',
+            data: rows.map((r) => auction ? +(r.pts / Math.max(1, r.spend)).toFixed(2) : r.pts),
+            borderColor: '#ffffff', backgroundColor: '#ffffff', borderWidth: 2,
+            pointRadius: 3, pointBackgroundColor: '#fff', pointBorderColor: '#05060b',
+            tension: 0.25, order: 1,
+          }] : []),
+        ],
       },
       options: {
         maintainAspectRatio: false,
@@ -877,41 +884,10 @@
         scales: {
           y: { stacked: true, beginAtZero: true, grid: { color: C.grid }, border: { display: false },
                title: { display: true, text: auction ? '$ spent' : 'picks' } },
+          y1: { position: 'right', beginAtZero: true, grid: { display: false },
+                border: { display: false }, display: anyPts,
+                title: { display: anyPts, text: auction ? 'pts / $' : 'pts' } },
           x: { stacked: true, grid: { display: false }, border: { display: false },
-               ticks: { maxRotation: 55, minRotation: 40 } },
-        },
-      },
-    });
-
-    if (rateChart) { rateChart.destroy(); rateChart = null; }
-    const rateWrap = $('#spend-rate-wrap');
-    if (!anyPts) {
-      if (rateWrap) rateWrap.style.display = 'none';
-      return;
-    }
-    if (rateWrap) rateWrap.style.display = '';
-    const rateLabel = auction ? 'Pts per $' : 'Total pts';
-    rateChart = new Chart($('#spend-rate-chart'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: rateLabel,
-          data: rows.map((r) => auction ? +(r.pts / Math.max(1, r.spend)).toFixed(2) : r.pts),
-          backgroundColor: C.ink + 'cc', borderRadius: 3, maxBarThickness: 24,
-        }],
-      },
-      options: {
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: (c) => rateLabel + ': ' + fmt(c.parsed.y, auction ? 2 : 0) } },
-        },
-        scales: {
-          y: { beginAtZero: true, grid: { color: C.grid }, border: { display: false },
-               title: { display: true, text: rateLabel } },
-          x: { grid: { display: false }, border: { display: false },
                ticks: { maxRotation: 55, minRotation: 40 } },
         },
       },
@@ -2094,7 +2070,7 @@
       const c = A.map((v, i) => Math.round(v + (B[i] - v) * u));
       return `rgb(${c[0]},${c[1]},${c[2]})`;
     };
-    return t >= 0 ? mix('#3a4a63', '#c8ff00', t) : mix('#3a4a63', '#ff2d1a', -t);
+    return t >= 0 ? mix('#3a4a63', '#93d500', t) : mix('#3a4a63', '#ff2d1a', -t);
   }
 
   function holdoutBlock() {
@@ -2103,6 +2079,86 @@
       return HOLDOUT.bySeason[String(year)];
     }
     return HOLDOUT.pooled;
+  }
+
+  function holdoutHasPar(block) {
+    if (!block) return false;
+    const mekko = block.mekko || [];
+    const scatter = block.scatter || [];
+    return mekko.length > 0 || scatter.length > 0;
+  }
+
+  function holdoutEmptyMessage() {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) {
+      return year + " is a snake draft (no auction bids)";
+    }
+    return "No auction PAR in this slice.";
+  }
+
+  function holdoutSliceEmpty(block) {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) return true;
+    if (scope === "season" && !(HOLDOUT.scoredAuctionSeasons || []).includes(year)) return true;
+    return !holdoutHasPar(block);
+  }
+
+  function hideHoldoutWrap(el, hide) {
+    if (!el) return;
+    el.hidden = !!hide;
+    if (hide) {
+      el.style.display = "none";
+      el.style.height = "0";
+      el.style.minHeight = "0";
+      el.style.overflow = "hidden";
+    } else {
+      el.style.display = "";
+      el.style.height = "";
+      el.style.minHeight = "";
+      el.style.overflow = "";
+    }
+  }
+
+  function destroyHoldoutCharts() {
+    if (scatterChart) { scatterChart.destroy(); scatterChart = null; }
+    if (contChart) { contChart.destroy(); contChart = null; }
+  }
+
+  function setHoldoutEmpty(empty, msg) {
+    destroyHoldoutCharts();
+    const emptyEl = $("#holdout-empty");
+    if (emptyEl) {
+      if (empty) {
+        emptyEl.hidden = false;
+        emptyEl.style.display = "";
+        emptyEl.style.height = "";
+        emptyEl.style.minHeight = "";
+        emptyEl.innerHTML = A.notice(msg || holdoutEmptyMessage());
+      } else {
+        emptyEl.hidden = true;
+        emptyEl.innerHTML = "";
+        emptyEl.style.display = "none";
+        emptyEl.style.height = "0";
+        emptyEl.style.minHeight = "0";
+      }
+    }
+    hideHoldoutWrap($("#holdout-viz"), empty);
+    hideHoldoutWrap($("#holdout-mekko-col"), empty);
+    hideHoldoutWrap($("#holdout-early-col"), empty);
+    hideHoldoutWrap($("#mekko"), empty);
+    hideHoldoutWrap($("#holdout-scatter-wrap"), empty);
+    hideHoldoutWrap(document.querySelector(".holdout-continuous"), empty);
+    const canvas = $("#holdout-scatter");
+    if (canvas) {
+      canvas.hidden = !!empty;
+      if (empty) {
+        canvas.style.display = "none";
+        canvas.style.height = "0";
+        canvas.style.minHeight = "0";
+      } else {
+        canvas.style.display = "";
+        canvas.style.height = "";
+        canvas.style.minHeight = "";
+      }
+    }
   }
 
   function signed(n) {
@@ -2144,7 +2200,7 @@
     const el = $('#mekko');
     const buckets = block.mekko || [];
     if (!buckets.length) {
-      el.innerHTML = A.notice('No auction PAR in this slice.');
+      el.innerHTML = "";
       return;
     }
     const W = el.clientWidth || 560, H = el.clientHeight || 340;
@@ -2205,12 +2261,9 @@
 
   function renderScatter(block) {
     const rows = block.scatter || [];
-    if (scatterChart) scatterChart.destroy();
+    if (scatterChart) { scatterChart.destroy(); scatterChart = null; }
     const canvas = $('#holdout-scatter');
-    if (!rows.length) {
-      scatterChart = null;
-      return;
-    }
+    if (!canvas || canvas.hidden || !rows.length) return;
     scatterChart = new Chart(canvas, {
       type: 'scatter',
       data: {
@@ -2268,7 +2321,7 @@
     const rows = block.continuous || [];
     if (contChart) { contChart.destroy(); contChart = null; }
     const canvas = $('#holdout-continuous');
-    if (!canvas || !rows.length) return;
+    if (!canvas || canvas.hidden || !rows.length) return;
     contChart = new Chart(canvas, {
       type: 'scatter',
       data: {
@@ -2315,34 +2368,46 @@
     ].filter(Boolean).map(([id, lab]) =>
       `<button class="filter-chip${S.holdoutScope === id ? ' on' : ''}" data-scope="${id}">${lab}</button>`
     ).join('');
-    $('#holdout-stack').innerHTML = [
+    const block = holdoutBlock();
+    const showStack = !holdoutSliceEmpty(block);
+    $('#holdout-stack').innerHTML = showStack ? [
       ['half', 'Stack: early / late'],
       ['pos', 'Stack: position'],
     ].map(([id, lab]) =>
       `<button class="filter-chip${S.mekkoStack === id ? ' on' : ''}" data-stack="${id}">${lab}</button>`
-    ).join('');
+    ).join('') : '';
 
-    const block = holdoutBlock();
     const claim = S.holdoutScope === 'pooled'
       ? HOLDOUT.claim
       : (block.claim ? `${block.claim} (${year} auction, non-keepers).` : HOLDOUT.claim);
     $('#holdout-title').textContent = (claim || '').split(':')[0] || 'Auction holdouts';
-    $('#holdout-claim').textContent = claim || '';
+    const claimEl = $('#holdout-claim');
+    if (claimEl) {
+      claimEl.textContent = claim || '';
+      hideHoldoutWrap(claimEl, !claim);
+    }
     $('#holdout-sub').textContent = S.holdoutScope === 'pooled'
       ? HOLDOUT.subtitle
       : `${year} auction player-seasons · width = share of that draft's spend · stacks = ${S.mekkoStack === 'pos' ? 'position' : 'early/late nomination half'} · color = mean PAR`;
 
     const notes = [];
-    if (!YD.draft.auction) {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) {
       notes.push(`${year} is a snake draft (no auction bids). Charts stay on 2018–2025 auction seasons.`);
-    } else if (!scored) {
+    } else if (scope === "season" && !scored) {
       notes.push(`${year} is auction but ESPN stored no weekly scoring, so PAR is blank. Charts stay on scored auction years.`);
     }
-    notes.push(HOLDOUT.keepers.note);
-    notes.push(HOLDOUT.histogramNote);
-    notes.push('Grain: ' + HOLDOUT.grain + '. Metric is PAR from v_draft_value — not WARP.');
-    $('#holdout-note').innerHTML = notes.join(' ');
+    if (HOLDOUT.keepers && HOLDOUT.keepers.note) notes.push(HOLDOUT.keepers.note);
+    if (HOLDOUT.histogramNote) notes.push(HOLDOUT.histogramNote);
+    const grain = String(HOLDOUT.grain || "").trim();
+    if (grain) notes.push("Grain: " + grain + ".");
+    notes.push("Metric is PAR from v_draft_value — not WARP.");
+    $('#holdout-note').innerHTML = notes.filter(Boolean).join(" ");
 
+    if (holdoutSliceEmpty(block)) {
+      setHoldoutEmpty(true, holdoutEmptyMessage());
+      return;
+    }
+    setHoldoutEmpty(false);
     renderMekko(block);
     renderScatter(block);
     renderContinuous(block);
@@ -3272,10 +3337,16 @@
     S.mekkoStack = b.dataset.stack;
     renderHoldout();
   });
-  window.addEventListener('resize', () => { if (YD) renderMekko(holdoutBlock()); });
+  window.addEventListener('resize', () => {
+    if (!YD) return;
+    const block = holdoutBlock();
+    if (!holdoutSliceEmpty(block)) renderMekko(block);
+  });
   const holdoutCont = document.querySelector('.holdout-continuous');
   if (holdoutCont) holdoutCont.addEventListener('toggle', (e) => {
-    if (e.target.open && YD) renderContinuous(holdoutBlock());
+    if (!e.target.open || !YD) return;
+    const block = holdoutBlock();
+    if (!holdoutSliceEmpty(block)) renderContinuous(block);
   });
 
   bindAllDraftSorts();

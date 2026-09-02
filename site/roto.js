@@ -1,25 +1,25 @@
-/* Roto page: load Pillars boxscores + league.json, compute at runtime. */
+/* Roto page — CHI-149 All grain, CHI-150 click-to-sort standings. Season All | year (default All). All = career over scored seasons 2018–2025. */
 (async function () {
   const A = window.AFFL;
   await A.boot();
   const R = window.AFFLRoto;
   const root = "pillars/";
-  const phaseNote = {
+
+  const phaseNoteSeason = {
     reg: "Regular season only — every team plays the same number of games, so category totals are directly comparable.",
     post: "Winners-bracket games only. Teams play unequal numbers of playoff games (byes, 2- vs 3-game paths), so totals are not directly comparable — the games column shows each team’s sample.",
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
+  const phaseNoteAll = {
+    reg: "Career roto over scored seasons 2018–2025 (2014–2017 have no player boxscores). Counting categories are per-season averages by default, or career sums on Totals. Rate categories are pooled career rates (cmp/att, yards/carry, yards/reception) — never the average of yearly rates. Ranks and TOTAL PTS are of the displayed numbers.",
+    post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
+    combined: "Career combined (regular + winners bracket) over scored seasons 2018–2025. Playoff teams add extra games; counting totals favor deeper runs.",
+  };
 
   const league = await fetch(root + "league.json").then((r) => r.json());
-  const ownerName = (id) => (league.ownerNames && league.ownerNames[id]) || id;
-  const seasons = league.seasons || [];
-  const expectedYears = (league.meta && league.meta.seasons) || seasons.map((s) => s.year);
-  const lastSeason = (league.meta && league.meta.lastSeason) || expectedYears[expectedYears.length - 1];
-
-  // Attempt every season in league.json. Years without a boxscore file stay out of
-  // the career rollup (same as Pillars hasBoxscores), not folded in as sit-outs.
-  const attempted = await Promise.all(expectedYears.map(async (year) => {
-    const season = seasons.find((s) => s.year === year);
+  const scoredYears = R.SCORED_YEARS.slice();
+  const attempted = await Promise.all(scoredYears.map(async (year) => {
+    const season = (league.seasons || []).find((s) => s.year === year);
     try {
       const res = await fetch(root + "boxscores/" + year + ".json");
       if (!res.ok) return { year, season, box: null };
@@ -29,179 +29,283 @@
     }
   }));
   const loads = attempted.filter((l) => l.box && l.season);
-  const boxYears = loads.map((l) => l.year);
-  let scope = A.scopeFromURL();
-  let squad = A.squadFromURL();
+
+  let year = A.seasonFromURL();
+  let squad = A.squadFromURL() || "";
   let phase = "reg";
-  let year = boxYears.indexOf(lastSeason) >= 0 ? lastSeason : (boxYears.length ? boxYears[boxYears.length - 1] : null);
-  let teamId = null;
-  let ownerId = null;
+  let grain = "averages";
+  let focusOwner = squad || "";
   let radarChart = null;
   let careerChart = null;
+  let sortKey = "totalPts";
+  let sortDir = -1;
+  let lastTable = { teams: [], selected: null, allMode: false };
 
   const $ = (id) => document.getElementById(id);
-
-  function pillarsOwner(sq) {
-    if (!sq) return null;
-    for (const y of A.squadYears(sq)) {
-      const tid = A.teamIdFor(y, sq);
-      const load = loads.find((l) => l.year === y);
-      if (!load || !tid || !load.season) continue;
-      const t = (load.season.teams || []).find((x) => x.teamId === tid);
-      if (t && t.ownerId) return t.ownerId;
-    }
-    return null;
+  const MERGE = A.MERGE || { m01: "m07", m03: "m08", m20: "m10" };
+  function canon(id) {
+    if (A.canon) return A.canon(id);
+    if (id == null || id === "") return id;
+    return MERGE[String(id)] || String(id);
   }
-
-  function visibleYears() {
-    return boxYears.slice();
+  function ownerOf(y, teamId) {
+    const oid = A.ownerId(y, teamId);
+    return oid ? canon(oid) : "";
   }
-
-
-  function render() {
-    const scopeEl = $("scope-picker");
-    if (scopeEl) {
-      scopeEl.innerHTML = [["season","Season"],["cum","Cumulative"]].map(([v,l]) =>
-        `<button class="season-chip${v===scope?" on":""}" data-s="${v}">${l}</button>`).join("");
-      scopeEl.querySelectorAll("button").forEach((b) => {
-        b.onclick = () => { scope = b.dataset.s; render(); };
+  function decorateSeason(teams, y) {
+    return (teams || []).map((t) => {
+      const oid = ownerOf(y, t.teamId);
+      const ft = oid ? A.franchiseTeam(oid) : { owner: "", name: t.teamName, logo: "" };
+      return Object.assign({}, t, {
+        ownerId: oid,
+        teamName: ft.name || t.teamName,
+        logo: ft.logo || "",
       });
-    }
-    A.squadPicker($("squad-picker"), squad, (s) => {
-      if (s) { A.goTeam(s, year, { scope }); return; }
-      squad = ""; A.stampNav(squad); render();
     });
-    A.stampNav(squad);
-    const careerBlock = $("career-block");
-    const seasonBlock = $("season-block");
-    const yearRow = $("year-row");
-    const graphs = $("graphs-block");
-    const careerGraph = $("career-graph-block");
-    if (careerBlock) careerBlock.hidden = scope !== "cum";
-    if (careerGraph) careerGraph.hidden = scope !== "cum";
-    if (seasonBlock) seasonBlock.hidden = scope !== "season";
-    if (yearRow) yearRow.hidden = scope !== "season";
-    if (graphs) graphs.hidden = false;
-
-    $("phase-note").textContent = phaseNote[phase];
-    $("phase-picker").innerHTML = ["reg", "post", "combined"].map((p) =>
-      `<button class="season-chip${p === phase ? " on" : ""}" data-phase="${p}">${R.PHASE_LABEL[p]}</button>`
-    ).join("");
-    $("phase-picker").querySelectorAll("button").forEach((b) => {
-      b.onclick = () => { phase = b.dataset.phase; teamId = null; render(); };
+  }
+  function decorateAll(teams) {
+    return (teams || []).map((t) => {
+      const oid = canon(t.ownerId);
+      const ft = oid ? A.franchiseTeam(oid) : { owner: oid, name: t.teamName, logo: "" };
+      return Object.assign({}, t, {
+        ownerId: oid,
+        teamName: ft.name || t.teamName,
+        logo: ft.logo || "",
+      });
     });
+  }
 
-    const career = R.buildRotoCareer(loads, phase, false);
-    renderCareer(career);
-    if (scope === "cum") {
-      renderCareerChart(career);
-      renderCareerRadar(career);
-      return;
+  function applyYear(y) {
+    year = (y == null || y === "" || y === "all") ? null : +y;
+    if (year != null && squad && !A.franchisePlayedSeason(squad, year)) {
+      squad = "";
+      focusOwner = "";
+      A.rememberSquad("");
     }
+    render();
+  }
 
-    const yearsShown = visibleYears();
-    if (yearsShown.length && yearsShown.indexOf(year) < 0) year = yearsShown[yearsShown.length - 1];
-    $("year-picker").innerHTML = yearsShown.map((y) =>
-      `<button class="season-chip${y === year ? " on" : ""}" data-y="${y}">${y}</button>`
-    ).join("");
-    $("year-picker").querySelectorAll("button").forEach((b) => {
-      b.onclick = () => { year = +b.dataset.y; teamId = null; render(); };
+  function paintUnavailable(y) {
+    $("stand-h2").textContent = "Roto Standings";
+    $("season-sub").textContent = y + " · categories unavailable";
+    $("season-table").innerHTML =
+      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Player-level boxscores begin in 2018 (ESPN history cutoff). This year is not scored as zeros.</div>`;
+    $("breakdown").innerHTML = "";
+    $("radar-sub").textContent = "";
+    $("radar-meta").innerHTML = "";
+    $("break-sub").textContent = "";
+    if (radarChart) { radarChart.destroy(); radarChart = null; }
+    if (careerChart) { careerChart.destroy(); careerChart = null; }
+    $("career-graph-block").hidden = true;
+    $("graphs-block").hidden = true;
+  }
+
+  function teamCell(t) {
+    const ft = { owner: t.ownerId, name: t.teamName, logo: t.logo };
+    const href = t.ownerId ? ("teams.html?squad=" + encodeURIComponent(t.ownerId)) : "#";
+    return `<div class="team-cell">${A.logoHTML(ft, "mini")}<div><a class="hist-name" href="${href}">${esc(t.teamName)}</a></div></div>`;
+  }
+
+  function missingSortVal(v) {
+    return v == null || v === "" || v === "—" || (typeof v === "number" && Number.isNaN(v));
+  }
+
+  function sortValue(t, key) {
+    if (key === "team") return t.teamName || "";
+    if (key === "g") return t.games;
+    if (key === "totalPts") return t.totalPts;
+    const c = (t.categories || []).find((x) => x.key === key);
+    return c ? c.value : null;
+  }
+
+  function firstDirFor(key) {
+    return key === "team" ? 1 : -1;
+  }
+
+  function columnExists(key, cols) {
+    if (key === "team" || key === "g" || key === "totalPts") return true;
+    return (cols || []).some((c) => c.key === key);
+  }
+
+  function ensureSortKey(cols) {
+    if (!columnExists(sortKey, cols)) {
+      sortKey = "totalPts";
+      sortDir = -1;
+    }
+  }
+
+  function sortTeams(teams, key, dir) {
+    return (teams || []).slice().sort((a, b) => {
+      const av = sortValue(a, key);
+      const bv = sortValue(b, key);
+      const aMiss = key === "team" ? (av == null || av === "") : missingSortVal(av);
+      const bMiss = key === "team" ? (bv == null || bv === "") : missingSortVal(bv);
+      if (aMiss && bMiss) {
+        return String(a.teamName || "").localeCompare(String(b.teamName || ""), undefined, { sensitivity: "base" });
+      }
+      if (aMiss) return 1;
+      if (bMiss) return -1;
+      let d;
+      if (key === "team" || typeof av === "string" || typeof bv === "string") {
+        d = String(av).localeCompare(String(bv), undefined, { sensitivity: "base" });
+      } else {
+        d = Number(av) - Number(bv);
+      }
+      d *= dir;
+      if (d) return d;
+      return String(a.teamName || "").localeCompare(String(b.teamName || ""), undefined, { sensitivity: "base" });
     });
+  }
 
-    const load = loads.find((l) => l.year === year);
-    if (!load || !load.box || !load.season) {
-      $("season-table").innerHTML = `<div class="empty">No boxscore for ${year}.</div>`;
-      $("breakdown").innerHTML = "";
-      return;
-    }
-    const teams = R.computeCategoryStats(load.box, load.season, phase, false);
-    if (!teams.length) {
-      $("season-table").innerHTML = `<div class="empty">No ${R.PHASE_LABEL[phase].toLowerCase()} games scored for ${year}.</div>`;
-      $("breakdown").innerHTML = "";
-      return;
-    }
-    const selected = teams.find((t) => A.sameId(t.teamId, teamId)) || teams[0];
-    teamId = selected.teamId;
-    const n = teams.length;
-    const displayTeams = teams;
-    const cols = selected.categories;
-    $("season-sub").textContent =
-      `Cells colored by category rank (green = best, red = worst) · Pts is category rank · ${year} · ${R.PHASE_LABEL[phase]}`;
+  function thClass(key) {
+    const on = sortKey === key;
+    return "s" + (on ? " on" : "") + (on && sortDir > 0 ? " asc" : "");
+  }
+
+  function renderTable(teams, selected, allMode) {
+    lastTable = { teams: teams || [], selected: selected, allMode: !!allMode };
+    const n = (teams || []).length;
+    const cols = (selected && selected.categories) || (teams[0] && teams[0].categories) || [];
+    ensureSortKey(cols);
+    const ranked = sortTeams(teams, sortKey, sortDir);
     $("season-table").innerHTML = `
       <div class="table-scroll">
         <table class="tbl roto-tbl">
           <thead><tr>
-            <th class="left">Team</th>
-            <th title="Eligible games in this phase">G</th>
-            ${cols.map((c) => `<th title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
-            <th>Total Pts</th>
+            <th class="left ${thClass("team")}" data-k="team">Team</th>
+            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored year" : "Sum of regular-season games across scored years") : "Eligible games in this phase"}">G</th>
+            ${cols.map((c) => `<th class="${thClass(c.key)}" data-k="${c.key}" title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
+            <th class="${thClass("totalPts")}" data-k="totalPts">Total Pts</th>
           </tr></thead>
           <tbody>
-            ${displayTeams.map((t) => `
-              <tr data-tid="${t.teamId}" class="${t.teamId === selected.teamId ? "on" : ""}">
-                <td class="left">${esc(t.teamName)}</td>
-                <td class="tnum mut">${t.games}</td>
-                ${t.categories.map((c) =>
-                  `<td class="tnum" style="background:${R.rankCellBg(c.rank, n)}" title="${c.label}: ${R.formatCatValue(c)} · rank #${c.rank}/${n}">${R.formatCatValue(c)}</td>`
-                ).join("")}
+            ${ranked.map((t) => `
+              <tr data-oid="${esc(t.ownerId || "")}" class="${t.ownerId && t.ownerId === (selected && selected.ownerId) ? "on" : ""}">
+                <td class="left">${teamCell(t)}</td>
+                <td class="tnum mut">${R.formatGames(t.games, grain, allMode)}</td>
+                ${t.categories.map((c) => {
+                  const miss = c.value == null || Number.isNaN(Number(c.value));
+                  const bg = miss ? "transparent" : R.rankCellBg(c.rank, n);
+                  const tip = miss ? (c.label + ": unavailable") : (c.label + ": " + R.formatCatValue(c) + " · rank #" + c.rank + "/" + n);
+                  return `<td class="tnum" style="background:${bg}" title="${tip}">${R.formatCatValue(c)}</td>`;
+                }).join("")}
                 <td class="tnum gold">${t.totalPts}</td>
               </tr>`).join("")}
           </tbody>
         </table>
       </div>`;
-    $("season-table").querySelectorAll("tr[data-tid]").forEach((tr) => {
-      tr.onclick = () => { teamId = +tr.dataset.tid; render(); };
+    $("season-table").querySelectorAll("thead th.s").forEach((th) => {
+      th.onclick = (e) => {
+        e.preventDefault();
+        const k = th.dataset.k;
+        if (!k) return;
+        if (sortKey === k) sortDir = -sortDir;
+        else {
+          sortKey = k;
+          sortDir = firstDirFor(k);
+        }
+        renderTable(lastTable.teams, lastTable.selected, lastTable.allMode);
+      };
     });
-    renderBreakdown(selected, n);
+    $("season-table").querySelectorAll("tr[data-oid]").forEach((tr) => {
+      tr.onclick = () => {
+        focusOwner = tr.dataset.oid || "";
+        render();
+      };
+    });
+  }
+
+  function render() {
+    A.seasonSelect($("year-picker"), year, applyYear, A.years());
+    A.stampSeason(year);
+    const liveSquad = A.remountTeamSelect($("squad-picker"), squad, (s) => {
+      squad = s || "";
+      focusOwner = squad || focusOwner;
+      A.stampNav(squad);
+      if (squad && year != null && !A.franchisePlayedSeason(squad, year)) {
+        applyYear(null);
+        return;
+      }
+      render();
+    }, year);
+    if (liveSquad !== undefined) squad = liveSquad || "";
+    A.stampNav(squad);
+    if (squad) focusOwner = canon(squad);
+
+    const allMode = year == null;
+    const grainRow = $("grain-row");
+    if (grainRow) grainRow.hidden = !allMode;
+    $("grain-picker").innerHTML = [["averages", "Averages"], ["totals", "Totals"]].map(([v, l]) =>
+      `<button class="season-chip${v === grain ? " on" : ""}" data-g="${v}">${l}</button>`
+    ).join("");
+    $("grain-picker").querySelectorAll("button").forEach((b) => {
+      b.onclick = () => { grain = b.dataset.g; render(); };
+    });
+
+    $("phase-picker").innerHTML = ["reg", "post", "combined"].map((p) =>
+      `<button class="season-chip${p === phase ? " on" : ""}" data-phase="${p}">${R.PHASE_LABEL[p]}</button>`
+    ).join("");
+    $("phase-picker").querySelectorAll("button").forEach((b) => {
+      b.onclick = () => { phase = b.dataset.phase; render(); };
+    });
+
+    $("phase-note").textContent = allMode ? phaseNoteAll[phase] : phaseNoteSeason[phase];
+
+    if (!allMode && R.isUnavailableYear(year)) {
+      paintUnavailable(year);
+      return;
+    }
+
+    $("graphs-block").hidden = false;
+    $("career-graph-block").hidden = !allMode;
+    $("stand-h2").textContent = allMode ? "Career Roto" : "Roto Standings";
+
+    if (allMode) {
+      const built = R.buildAllRoto(loads, phase, grain, { ownerOf, skipOwners: { m22: true } });
+      const teams = decorateAll(built.teams);
+      if (!teams.length) {
+        $("season-table").innerHTML = `<div class="empty">Career roto is unavailable — no scored seasons could be loaded.</div>`;
+        $("graphs-block").hidden = true;
+        $("career-graph-block").hidden = true;
+        return;
+      }
+      const selected = teams.find((t) => t.ownerId && t.ownerId === canon(focusOwner)) || teams[0];
+      focusOwner = selected.ownerId;
+      const grainLabel = grain === "totals" ? "career totals" : "per-season averages";
+      $("season-sub").textContent =
+        `All · ${grainLabel} · scored seasons ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
+      renderTable(teams, selected, true);
+      renderBreakdown(selected, teams.length, allMode);
+      renderRadar(selected, teams);
+      renderCareerChart(teams);
+      return;
+    }
+
+    const load = loads.find((l) => l.year === year);
+    if (!load || !load.box || !load.season) {
+      paintUnavailable(year);
+      return;
+    }
+    const rawTeams = R.computeCategoryStats(load.box, load.season, phase, false);
+    const teams = decorateSeason(rawTeams, year);
+    if (!teams.length) {
+      $("season-table").innerHTML = `<div class="empty">No ${R.PHASE_LABEL[phase].toLowerCase()} games scored for ${year}.</div>`;
+      $("breakdown").innerHTML = "";
+      $("graphs-block").hidden = true;
+      return;
+    }
+    const selected = teams.find((t) => t.ownerId && t.ownerId === canon(focusOwner)) || teams[0];
+    focusOwner = selected.ownerId;
+    $("season-sub").textContent =
+      `Cells colored by category rank (green = best, red = worst) · Pts is category rank · ${year} · ${R.PHASE_LABEL[phase]} · current franchise names`;
+    renderTable(teams, selected, false);
+    renderBreakdown(selected, teams.length, false);
     renderRadar(selected, teams);
   }
 
-  function renderCareer(career) {
-    const el = $("career-table");
-    $("career-sub").textContent = career.scoredYears.length
-      ? `Mean roto placement across ${career.scoredYears.length} scored season${career.scoredYears.length === 1 ? "" : "s"} (${career.scoredYears[0]}–${career.scoredYears[career.scoredYears.length - 1]}) · lower is better`
-      : "Career rollup";
-    if (career.evidence === "Unavailable") {
-      el.innerHTML = `<div class="empty">Career roto is unavailable — no season boxscores could be loaded.</div>`;
-      return;
-    }
-    const gap = career.evidence === "Partial"
-      ? `<p class="gap-note">${career.missingYears.join(", ")} could not be loaded and ${career.missingYears.length === 1 ? "is" : "are"} excluded from every average. Data gaps, not sit-outs.</p>`
-      : "";
-    el.innerHTML = gap + `
-      <div class="table-scroll">
-        <table class="tbl roto-tbl">
-          <thead><tr>
-            <th class="left">Manager</th><th>Seasons</th><th>Avg finish</th><th>Best</th><th>Worst</th><th>Avg pts</th>
-            ${career.scoredYears.map((y) => `<th>${String(y).slice(2)}</th>`).join("")}
-            ${career.missingYears.map((y) => `<th class="mut" title="${y} data unavailable">${String(y).slice(2)}</th>`).join("")}
-          </tr></thead>
-          <tbody>
-            ${career.rows.map((c) => `
-              <tr data-oid="${c.ownerId}" class="${c.ownerId === ownerId ? "on" : ""}">
-                <td class="left">${esc(ownerName(c.ownerId))}</td>
-                <td class="tnum">${c.seasons}</td>
-                <td class="tnum gold">${c.avgRank.toFixed(2)}</td>
-                <td class="tnum">${R.ordinal(c.bestRank)}</td>
-                <td class="tnum">${R.ordinal(c.worstRank)}</td>
-                <td class="tnum">${c.avgPts.toFixed(1)}</td>
-                ${career.scoredYears.map((y) => {
-                  const cell = c.byYear.get(y);
-                  if (!cell) return `<td class="tnum mut" title="Did not play">—</td>`;
-                  return `<td class="tnum" style="background:${R.rankCellBg(cell.rank, cell.nTeams)}">${cell.rank}</td>`;
-                }).join("")}
-                ${career.missingYears.map((y) => `<td class="tnum mut" title="${y} unavailable">?</td>`).join("")}
-              </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-    el.querySelectorAll("tr[data-oid]").forEach((tr) => {
-      tr.onclick = () => { ownerId = tr.dataset.oid; render(); };
-    });
-  }
-
-  function renderBreakdown(team, n) {
-    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${team.games} games`;
+  function renderBreakdown(team, n, allMode) {
+    const gLabel = R.formatGames(team.games, grain, allMode);
+    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${gLabel} G` +
+      (allMode && team.nSeasons ? ` · ${team.nSeasons} scored season${team.nSeasons === 1 ? "" : "s"}` : "");
     let last = "";
     $("breakdown").innerHTML = `
       <div class="table-scroll">
@@ -250,10 +354,11 @@
     if (radarChart) radarChart.destroy();
     const ctx = $("roto-radar");
     if (!ctx || typeof Chart === "undefined") return;
+    const labels = team.categories.map((c) => c.label);
     radarChart = new Chart(ctx, {
       type: "radar",
       data: {
-        labels: team.categories.map((c) => c.label),
+        labels,
         datasets: [
           {
             label: team.teamName,
@@ -281,7 +386,7 @@
         scales: {
           r: {
             min: 0, max: 1,
-            ticks: { display: false },
+            ticks: { display: false, count: 5 },
             grid: { color: "#1c2536" },
             angleLines: { color: "#1c2536" },
             pointLabels: { color: "#9fd8ff", font: { size: 11 } },
@@ -291,22 +396,31 @@
     });
   }
 
-  function renderCareerChart(career) {
+  function renderCareerChart(allTeams) {
     if (careerChart) careerChart.destroy();
     const ctx = $("career-chart");
-    if (!ctx || typeof Chart === "undefined" || !career.scoredYears.length) return;
-    const years = career.scoredYears;
-    const focus = ownerId || (career.rows[0] && career.rows[0].ownerId);
-    ownerId = focus;
-    const rows = career.rows;
-    const datasets = rows.map((c) => {
-      const on = c.ownerId === focus;
+    const years = R.SCORED_YEARS.slice();
+    if (!ctx || typeof Chart === "undefined" || !years.length) return;
+    const byOwner = {};
+    for (const load of loads) {
+      const teams = decorateSeason(R.computeCategoryStats(load.box, load.season, phase, false), load.year);
+      for (const t of teams) {
+        if (!t.ownerId) continue;
+        if (!byOwner[t.ownerId]) {
+          const ft = A.franchiseTeam(t.ownerId);
+          byOwner[t.ownerId] = { ownerId: t.ownerId, name: ft.name || t.teamName, byYear: {} };
+        }
+        byOwner[t.ownerId].byYear[load.year] = t.totalRank;
+      }
+    }
+    const focus = canon(focusOwner) || (allTeams[0] && allTeams[0].ownerId);
+    const names = Object.keys(byOwner).map((oid) => byOwner[oid].name).filter(Boolean);
+    const datasets = Object.keys(byOwner).map((oid) => {
+      const c = byOwner[oid];
+      const on = oid === focus;
       return {
-        label: ownerName(c.ownerId),
-        data: years.map((y) => {
-          const cell = c.byYear.get(y);
-          return cell ? cell.rank : null;
-        }),
+        label: c.name,
+        data: years.map((y) => (c.byYear[y] != null ? c.byYear[y] : null)),
         borderColor: on ? "#00a2ff" : "#3a4a6388",
         backgroundColor: "transparent",
         borderWidth: on ? 2.5 : 1,
@@ -315,127 +429,39 @@
         tension: 0.2,
       };
     });
+    const maxFinish = Math.max(12, ...datasets.flatMap((d) => d.data.filter((v) => v != null)));
     careerChart = new Chart(ctx, {
       type: "line",
-      data: { labels: years, datasets },
+      data: { labels: years.map(String), datasets },
       options: {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
           y: {
-            reverse: true, min: 1,
+            reverse: true,
+            min: 1,
+            max: maxFinish,
             title: { display: true, text: "finish", color: "#7d8aa0" },
             grid: { color: "#1c253644" },
             ticks: { color: "#7d8aa0", stepSize: 1 },
           },
-          x: { grid: { display: false }, ticks: { color: "#7d8aa0" } },
-        },
-      },
-    });
-  }
-
-  function renderCareerRadar(career) {
-    const focus = ownerId || (career.rows[0] && career.rows[0].ownerId);
-    if (!focus) return;
-    const acc = {};
-    let n = 0;
-    const leagueAcc = {};
-    let leagueN = 0;
-    for (const load of loads) {
-      const teams = R.computeCategoryStats(load.box, load.season, phase, false);
-      if (!teams.length) continue;
-      const avg = R.leagueAverageNorm(teams);
-      leagueN += 1;
-      R.CATS.forEach((cat) => { leagueAcc[cat.key] = (leagueAcc[cat.key] || 0) + (avg[cat.key] || 0); });
-      const t = teams.find((x) => x.ownerId === focus);
-      if (!t) continue;
-      n += 1;
-      t.categories.forEach((c) => { acc[c.key] = (acc[c.key] || 0) + c.norm; });
-    }
-    if (!n) return;
-    const fake = {
-      teamName: ownerName(focus),
-      totalRank: (career.rows.find((r) => r.ownerId === focus) || {}).avgRank || 0,
-      totalPts: 0,
-      games: n,
-      categories: R.CATS.map((cat) => ({
-        key: cat.key, label: cat.label, group: cat.group,
-        norm: acc[cat.key] / n,
-        rank: 0, pts: 0, value: 0,
-      })),
-    };
-    const dummyTeams = [fake];
-    // reuse radar with career-average norms vs mean league-avg
-    const avg = {};
-    R.CATS.forEach((cat) => { avg[cat.key] = leagueN ? leagueAcc[cat.key] / leagueN : 0; });
-    $("radar-sub").textContent = `${fake.teamName} · mean category shape across ${n} scored seasons · outline = league average`;
-    const ranked = [...fake.categories].sort((a, b) => b.norm - a.norm);
-    $("radar-meta").innerHTML = `
-      <div class="radar-chip good"><b>Strength</b><span>${ranked[0].label}</span></div>
-      <div class="radar-chip bad"><b>Weakness</b><span>${ranked[ranked.length - 1].label}</span></div>`;
-    $("break-sub").textContent = `career-average norm · ${n} seasons`;
-    $("breakdown").innerHTML = `
-      <div class="table-scroll">
-        <table class="tbl roto-tbl">
-          <thead><tr><th class="left">Category</th><th>Mean strength</th></tr></thead>
-          <tbody>
-            ${fake.categories.map((c) => `<tr>
-              <td class="left">${c.label}</td>
-              <td class="tnum">${(c.norm * 100).toFixed(0)}</td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-    if (radarChart) radarChart.destroy();
-    const ctx = $("roto-radar");
-    if (!ctx || typeof Chart === "undefined") return;
-    radarChart = new Chart(ctx, {
-      type: "radar",
-      data: {
-        labels: fake.categories.map((c) => c.label),
-        datasets: [
-          {
-            label: fake.teamName,
-            data: fake.categories.map((c) => c.norm),
-            backgroundColor: "rgba(0,162,255,0.28)",
-            borderColor: "#00a2ff",
-            borderWidth: 2,
-            pointBackgroundColor: "#00a2ff",
-            pointRadius: 3,
-          },
-          {
-            label: "League avg",
-            data: fake.categories.map((c) => avg[c.key] || 0),
-            backgroundColor: "rgba(125,138,160,0.08)",
-            borderColor: "#7d8aa0",
-            borderWidth: 1.5,
-            borderDash: [4, 3],
-            pointRadius: 0,
-          },
-        ],
-      },
-      options: {
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { boxWidth: 10, usePointStyle: true, pointStyle: "circle", color: "#7d8aa0" } } },
-        scales: {
-          r: {
-            min: 0, max: 1,
-            ticks: { display: false },
-            grid: { color: "#1c2536" },
-            angleLines: { color: "#1c2536" },
-            pointLabels: { color: "#9fd8ff", font: { size: 11 } },
+          x: {
+            title: { display: true, text: "season", color: "#7d8aa0" },
+            grid: { display: false },
+            ticks: { color: "#7d8aa0" },
           },
         },
       },
     });
+    void names;
   }
 
   function esc(s) {
-    return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   }
 
   $("lede").textContent =
-    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Player-level boxscores begin in 2018 (ESPN history cutoff). Years without a boxscore file are not scored.";
+    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Player-level boxscores begin in 2018. All is career roto over those scored seasons, defaulting to per-season averages so a 12-year franchise does not win by existing.";
 
   render();
 })();

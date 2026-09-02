@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stars, Scrubs, &amp; Duds — AFFL</title>
-<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
-<link rel="apple-touch-icon" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=39&chi114=1">
-<link rel="stylesheet" href="logo.css?v=2">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
+<link rel="apple-touch-icon" href="favicon.png?v=4">
+<link rel="stylesheet" href="styles.css?v=48&chi114=1">
+<link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
 <div class="frame">
 
   <header class="topbar">
     <div class="brand">
-      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-chrome.jpg" alt="AFFL"></a>
+      <a href="index.html" class="brand-home"><img class="brand-logo" src="logos/affl-banner.png" alt="AFFL"></a>
       <div>
         <h1>Stars, Scrubs, <span>&amp; Duds</span></h1>
         <div class="sub">nfl game logs &middot; spotrac &middot; epa &middot; xtd</div>
@@ -103,9 +103,6 @@
   <section class="card pl-hero" id="pl-hero" hidden></section>
   <p class="pl-back" id="pl-back" hidden><a href="players.html">All players</a></p>
 
-  <section class="card" id="pl-overview" hidden></section>
-
-
   <section class="card chi114-block" id="pl-chi114" hidden>
     <div class="card-head">
       <div>
@@ -133,15 +130,11 @@
     </div>
   </section>
 
-  <div class="picker-row" id="player-year-row" hidden>
-    <div class="picker-label">Player years</div>
-    <div class="week-picker" id="player-year-picker"></div>
-  </div>
-
   <section class="second-grid pl-detail" hidden>
     <div class="card">
       <div class="card-head">
         <div><h2>Weekly Fantasy Production</h2><div class="card-sub">blue = started in an AFFL lineup (2018+ weekly and 2014–2017 recovered starters) &middot; gray = benched &middot; teal outline = NFL week not on an AFFL roster (2018+) &middot; gold = on AFFL roster (weekly lineup not recovered, 2014–2017 snapshot) &middot; amber line = ESPN weekly projection</div></div>
+        <div class="week-picker chi114-year-chips" id="player-year-picker"></div>
       </div>
       <div class="chart-wrap"><canvas id="pl-chart"></canvas></div>
       <div class="pl-ngs" id="pl-ngs" hidden>
@@ -259,8 +252,8 @@
   </footer>
 </div>
 <script src="chart.umd.min.js?v=1"></script>
-<script src="common.js?v=32"></script>
-<script src="chi114.js?v=5"></script>
-<script src="players.js?v=41"></script>
+<script src="common.js?v=37"></script>
+<script src="chi114.js?v=6"></script>
+<script src="players.js?v=43"></script>
 </body>
 </html>

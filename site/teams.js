@@ -246,21 +246,38 @@
     });
   }
 
+  /* Season All: current 12 (visibleFranchises). A year: only franchises that
+     played that year (squadsForSeason / franchisePlayedSeason). 2014 = 10. */
+  function landingFranchises() {
+    const seasonYear = scope === "cum" ? null : year;
+    const raw = A.squadsForSeason(seasonYear);
+    if (seasonYear == null) return A.visibleFranchises(raw);
+    return raw.slice();
+  }
+
+  function cardYearsLine(f) {
+    const ys = f.years || [];
+    const historic = A.isHistoric(f.owner);
+    if (!ys.length) return "0 seasons · 2026 expansion";
+    const span = Math.min.apply(null, ys) + "–" + Math.max.apply(null, ys);
+    return ys.length + " season" + (ys.length === 1 ? "" : "s") + " · " + span + (historic ? " · historic" : "");
+  }
+
   function renderGrid() {
     showTeam(false);
     $("years-block").hidden = true;
-    const list = A.visibleFranchises(A.squads());
+    const seasonYear = scope === "cum" ? null : year;
+    const list = landingFranchises();
     $("franchise-grid").innerHTML = list.map((f) => {
       const face = faceFor(f.owner);
-      const ys = f.years || [];
-      const span = ys.length ? Math.min.apply(null, ys) + "–" + Math.max.apply(null, ys) : "";
       const historic = A.isHistoric(f.owner);
-      return `<button type="button" class="fr-card${historic ? " former" : ""}" data-owner="${esc(f.owner)}">
+      const former = historic && seasonYear == null;
+      return `<button type="button" class="fr-card${former ? " former" : ""}" data-owner="${esc(f.owner)}">
         ${A.logoHTML(face, "fr-logo")}
         <div class="fr-meta">
           <div class="fr-name">${esc(f.currentName)}</div>
           <div class="fr-own">${esc(f.ownerName || A.memberName(f.owner))}</div>
-          <div class="fr-yrs">${ys.length} season${ys.length === 1 ? "" : "s"}${span ? " · " + span : ""}${historic ? " · historic" : ""}</div>
+          <div class="fr-yrs">${esc(cardYearsLine(f))}</div>
         </div>
       </button>`;
     }).join("");
@@ -641,8 +658,8 @@
         const y = tr.year || year;
         const T = lookup(y);
         const short = (id) => {
-          const n = (T[id] || { name: "?" }).name;
-          return n.length > 17 ? n.slice(0, 16) + "…" : n;
+          const t = T[id] || {};
+          return A.franchiseName(t.owner || id) || t.name || "unavailable";
         };
         return `<div class="trade">
           <div class="trade-head"><span class="trade-wk">${y} · Week ${tr.wk}</span><span class="trade-date">${A.dateStr(tr.date)}</span></div>
@@ -1589,7 +1606,7 @@
         data: {
           labels: labels,
           datasets: [
-            { type: "bar", label: "Points for", data: pf, backgroundColor: "#00a2ff99", borderRadius: 5, maxBarThickness: 28, yAxisID: "y" },
+            { type: "bar", label: "Points for", data: pf, backgroundColor: "#2f7bff99", borderRadius: 5, maxBarThickness: 28, yAxisID: "y" },
             { type: "line", label: "PPG", data: ppg, borderColor: A.C.gold, backgroundColor: A.C.gold, borderWidth: 2, pointRadius: 3, yAxisID: "y1", tension: 0.25 },
           ],
         },
@@ -1730,7 +1747,7 @@
         type: "bar",
         data: {
           labels: ["Luck", "Sched luck", "Median W"],
-          datasets: [{ data: [s.luck, s.sched, s.medW], backgroundColor: [s.luck >= 0 ? "#c8ff00cc" : "#3a4a63cc", "#47d4ffcc", "#ffc400cc"], borderRadius: 5, maxBarThickness: 36 }],
+          datasets: [{ data: [s.luck, s.sched, s.medW], backgroundColor: [s.luck >= 0 ? "#c8ff00cc" : "#3a4a63cc", "#47a8ffcc", "#ffc400cc"], borderRadius: 5, maxBarThickness: 36 }],
         },
         options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: A.C.grid }, border: { display: false } }, x: { grid: { display: false }, border: { display: false } } } },
       });
@@ -1784,7 +1801,7 @@
         data: {
           labels: ["This franchise"],
           datasets: [
-            { label: "Points started", data: [iq.actual], backgroundColor: "#00a2ffcc", stack: "s", borderRadius: 4, maxBarThickness: 28 },
+            { label: "Points started", data: [iq.actual], backgroundColor: "#2f7bffcc", stack: "s", borderRadius: 4, maxBarThickness: 28 },
             { label: "Left on bench", data: [iq.wasted], backgroundColor: "#ff2d1abb", stack: "s", borderRadius: 4, maxBarThickness: 28 },
           ],
         },
@@ -1807,7 +1824,7 @@
       data: {
         labels: series.map((s) => String(s.y)),
         datasets: [
-          { label: "Started", data: series.map((s) => s.iq ? s.iq.actual : null), backgroundColor: "#00a2ffcc", stack: "s", maxBarThickness: 22 },
+          { label: "Started", data: series.map((s) => s.iq ? s.iq.actual : null), backgroundColor: "#2f7bffcc", stack: "s", maxBarThickness: 22 },
           { label: "Wasted", data: series.map((s) => s.iq ? s.iq.wasted : null), backgroundColor: "#ff2d1abb", stack: "s", maxBarThickness: 22 },
           { type: "line", label: "Eff %", data: series.map((s) => s.iq ? s.iq.eff * 100 : null), borderColor: A.C.gold, backgroundColor: A.C.gold, borderWidth: 2, pointRadius: 3, yAxisID: "y1", spanGaps: true },
         ],
@@ -1915,7 +1932,7 @@
       if (!s || s.epa == null) return;
       mkLab("lab-epa-chart", {
         type: "bar",
-        data: { labels: ["This franchise"], datasets: [{ data: [s.epa], backgroundColor: s.epa >= 0 ? "#47d4ffcc" : "#ff2d1acc", borderRadius: 4, maxBarThickness: 36 }] },
+        data: { labels: ["This franchise"], datasets: [{ data: [s.epa], backgroundColor: s.epa >= 0 ? "#47a8ffcc" : "#ff2d1acc", borderRadius: 4, maxBarThickness: 36 }] },
         options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => A.fmt(c.parsed.x, 1) + " EPA" } } }, scales: { x: { grid: { color: A.C.grid }, border: { display: false } }, y: { grid: { display: false }, border: { display: false } } } },
       });
       return;
@@ -1929,7 +1946,7 @@
       type: "bar",
       data: {
         labels: series.map((s) => String(s.y)),
-        datasets: [{ label: "EPA", data: series.map((s) => s.epa), backgroundColor: series.map((s) => s.epa == null ? "#3a4a63" : (s.epa >= 0 ? "#47d4ffcc" : "#ff2d1acc")), borderRadius: 4, maxBarThickness: 22 }],
+        datasets: [{ label: "EPA", data: series.map((s) => s.epa), backgroundColor: series.map((s) => s.epa == null ? "#3a4a63" : (s.epa >= 0 ? "#47a8ffcc" : "#ff2d1acc")), borderRadius: 4, maxBarThickness: 22 }],
       },
       options: axisOpts("EPA"),
     });
@@ -2894,7 +2911,10 @@
     const years = A.years().slice().sort((a, b) => a - b);
     const bag = {};
     all.forEach((item) => { bag[item.year] = item.data; });
-    const fracs = A.squads().slice().sort((a, b) => {
+    const fracs = A.squads().filter((f) => {
+      const ys = (f.years && f.years.length) ? f.years : (A.franchiseYears(f.owner) || []);
+      return ys.length > 0;
+    }).slice().sort((a, b) => {
       if (!!a.active !== !!b.active) return a.active ? -1 : 1;
       return (a.currentName || "").localeCompare(b.currentName || "");
     });
@@ -2922,7 +2942,7 @@
         <div class="card-sub">franchise × year · starter count and top snapshot / week-1 scorer · current names · click a year</div>
       </div></div>
       <p class="tcomp-caption">${esc(TCOMP_CAPTION_PRE)}</p>
-      <div class="table-scroll"><table class="tbl tcomp-cum">
+      <div class="table-scroll tcomp-scroll"><table class="tbl tcomp-cum">
         <thead>${head}</thead>
         <tbody>${body}</tbody>
       </table></div>`;

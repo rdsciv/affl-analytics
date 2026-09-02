@@ -111,11 +111,11 @@
     if (window.AFFL && window.AFFL.chartDefaults) window.AFFL.chartDefaults(Chart);
 
     const C = (window.AFFL && window.AFFL.C) || {
-      blue: "#00a2ff", green: "#c8ff00", red: "#ff2d1a",
+      blue: "#2f7bff", green: "#c8ff00", red: "#ff2d1a",
       mut: "#7d8aa0", ink: "#eef4ff", grid: "#1b243366",
     };
     const green = "#c8ff00";
-    const blue = C.blue || "#00a2ff";
+    const blue = C.blue || "#2f7bff";
     const red = C.red || "#ff2d1a";
 
     const labels = rows.map((r) => String(r.year));

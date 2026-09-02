@@ -9,3 +9,15 @@
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 }
+
+/* CHI-111 — side/chrome mark stay contained; never blow layout */
+.side-mark img,
+.brand-mark {
+  max-width: 64px !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+}
+img.brand-logo,
+.foot-banner {
+  object-fit: contain !important;
+}

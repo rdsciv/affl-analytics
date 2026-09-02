@@ -1,9 +1,9 @@
 /* ============ shared across all AFFL pages ============ */
 window.AFFL = (function () {
   const C = {
-    blue: '#00a2ff', blue2: '#47d4ff', ice: '#9fd8ff', steel: '#3a4a63',
-    orange: '#ff6a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
-    green: '#c8ff00', red: '#ff2d1a',
+    blue: '#2f7bff', blue2: '#47a8ff', ice: '#9fd8ff', steel: '#3a4a63',
+    orange: '#ff7a00', fire: '#ff5a1e', gold: '#ffc400', gold2: '#ffcc33',
+    green: '#93d500', red: '#ff2d1a',
     mut: '#7d8aa0', ink: '#eef4ff', grid: '#1b243366',
   };
 
@@ -21,7 +21,7 @@ window.AFFL = (function () {
     return { DATA, MANIFEST };
   }
 
-  /* CHI-121 — ESPN athlete ids that resolved. Never invent more. */
+  /* CHI-121/CHI-124 — ESPN athlete ids that resolved. Never invent more. */
   const HYDRATE_PLAYERS = {
     11289: { name: "Ray Rice", pos: "RB", nfl: "BAL" },
     15358: { name: "Jarrett Boykin", pos: "WR", nfl: "BUF" },
@@ -67,12 +67,17 @@ window.AFFL = (function () {
     const board = d && d.draft && d.draft.board;
     if (Array.isArray(board)) board.forEach(hydratePlayer);
     hydrateTree(d);
+    hydratePmeta(d);
     yearCache.set(year, d);
     return d;
   }
 
-  const years = () => MANIFEST.years.map((y) => y.year).sort((a, b) => b - a);
-  const yearInfo = (y) => MANIFEST.years.find((m) => m.year === y) || {};
+  const years = () => {
+    const listed = (MANIFEST && Array.isArray(MANIFEST.years)) ? MANIFEST.years : [];
+    if (listed.length) return listed.map((y) => y.year).filter((y) => y != null).sort((a, b) => b - a);
+    return Object.keys((DATA && DATA.seasons) || {}).map(Number).filter((y) => y >= 2014 && y <= 2025).sort((a, b) => b - a);
+  };
+  const yearInfo = (y) => ((MANIFEST && MANIFEST.years) || []).find((m) => m.year === y) || {};
 
   function teams(year) {
     const out = {};
@@ -103,14 +108,14 @@ window.AFFL = (function () {
     m02: "logos/cucks.png",
     m14: "logos/pollywogs.png",
     m22: "logos/gabagooners.png",
-    m10: "logos/wake-snakes.png",
+    m10: "logos/8392c16acb8e.jpg",
   };
 
   function franchiseLogo(id) {
     const c = canon(id);
     if (FRANCHISE_MARKS[c]) return FRANCHISE_MARKS[c];
     if (FRANCHISE_MARKS[String(id)]) return FRANCHISE_MARKS[String(id)];
-    const ys = years();
+    const ys = years() || [];
     for (let i = 0; i < ys.length; i++) {
       const ts = ((DATA.seasons[String(ys[i])] || {}).teams) || [];
       for (let j = 0; j < ts.length; j++) {
@@ -120,7 +125,11 @@ window.AFFL = (function () {
     return "";
   }
   function franchiseTeam(id) {
-    return { owner: canon(id), name: franchiseName(id) || "—", logo: franchiseLogo(id) };
+    try {
+      return { owner: canon(id), name: franchiseName(id) || "—", logo: franchiseLogo(id) || "" };
+    } catch (e) {
+      return { owner: canon(id), name: franchiseName(id) || "—", logo: "" };
+    }
   }
   function shortTeam(id) {
     const n = franchiseName(id);
@@ -136,13 +145,25 @@ window.AFFL = (function () {
     return (name || '?').split(' ').filter(Boolean).map((x) => x[0]).join('').slice(0, 2).toUpperCase();
   }
 
+  function logoMarkSize(cls) {
+    const c = String(cls || "");
+    if (/\bth-logo\b/.test(c)) return 64;
+    if (/\bfr-logo\b/.test(c) || /\bavatar\b/.test(c)) return 40;
+    if (/\btcomp-logo\b/.test(c)) return 36;
+    if (/\bsb-logo\b/.test(c)) return 30;
+    if (/\bgm-logo\b/.test(c) || /\bchi114-logo\b/.test(c)) return 28;
+    if (/\bmini\b/.test(c)) return 32;
+    return 36;
+  }
   function logoHTML(t, cls) {
     cls = cls || 'sb-logo';
     const ini = initials((t && t.name) || '?');
     const oid = t && (t.owner != null && t.owner !== "" ? t.owner : t.oid);
     const src = (oid ? franchiseLogo(oid) : "") || (t && t.logo) || "";
+    const sz = logoMarkSize(cls);
     if (src && /^(https?:|logos\/)/.test(src)) {
-      return `<img class="${cls}" src="${src}" alt="" loading="lazy"
+      return `<img class="${cls}" src="${src}" alt="" width="${sz}" height="${sz}" loading="lazy"
+        style="max-width:${sz}px;max-height:${sz}px;width:${sz}px;height:${sz}px;object-fit:contain;background:transparent"
         onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
     }
     return `<div class="${cls} fb">${ini}</div>`;
@@ -477,7 +498,7 @@ window.AFFL = (function () {
     if (!ys.length) return null;
     const y = +year;
     if (ys.indexOf(year) >= 0 || ys.indexOf(y) >= 0) return Number.isFinite(y) ? y : year;
-    return null;
+    return ys[0];
   }
 
   /* Historic teams — Pillars former-teams toggle.
@@ -616,26 +637,50 @@ window.AFFL = (function () {
     { owner: "m07", name: "Chula Vista Chupacabras", logo: "logos/1f345cc38124.jpg" },
   ];
 
-  function mountBrandStrip() {
-    if (document.getElementById("brand-strip")) return;
-    const rail = ensureHeaderRail();
-    if (!rail) return;
+  const HISTORIC_STRIP = [
+    { owner: "m19", name: "Pasco Pounders", logo: "logos/pounders.png" },
+    { owner: "m14", name: "Poulsbo Pollywogs", logo: "logos/pollywogs.png" },
+    { owner: "m10", name: "Winston-Salem Wake Snakes", logo: "logos/8392c16acb8e.jpg" },
+    { owner: "m04", name: "Charleston Chewbacca", logo: "" },
+    { owner: "m16", name: "L.O.B. Thunder", logo: "logos/33f819dd7168.jpg" },
+    { owner: "m09", name: "Pawtucket Patriots", logo: "logos/99752fbc7928.gif" },
+    { owner: "m12", name: "Muck City Mad Dawgs", logo: "logos/9f4a09db5abc.jpg" },
+  ];
+  function stripTeams() {
+    const cur = CURRENT_2026.slice();
+    if (!showFormer()) return cur;
+    const seen = {};
+    cur.forEach((t) => { seen[t.owner] = true; });
+    HISTORIC_STRIP.forEach((t) => { if (!seen[t.owner]) cur.push(t); });
+    return cur;
+  }
+  function paintBrandStrip() {
+    const strip = document.getElementById("brand-strip");
+    if (!strip) return;
     const qs = new URLSearchParams(location.search);
     const active = qs.get("team") || qs.get("squad") || "";
-    const strip = document.createElement("nav");
-    strip.id = "brand-strip";
-    strip.className = "brand-strip";
-    strip.setAttribute("aria-label", "2026 teams");
-    strip.innerHTML = CURRENT_2026.map((t) => {
+    strip.innerHTML = stripTeams().map((t) => {
       const href = "teams.html?squad=" + encodeURIComponent(t.owner);
       const alt = esc(t.name);
       const on = active && active === t.owner;
-      const inner = t.logo
-        ? `<img src="${t.logo}" alt="${alt}" loading="lazy">`
+      const src = t.logo || franchiseLogo(t.owner) || "";
+      const inner = src
+        ? `<img src="${src}" alt="${alt}" width="52" height="52" loading="lazy" style="max-width:52px;max-height:52px;width:52px;height:52px;object-fit:contain;background:#07080c">`
         : `<span class="brand-team-fb">${initials(t.name)}</span>`;
       return `<a class="brand-team${on ? " is-active" : ""}" href="${href}" title="${alt}" data-name="${alt}" data-owner="${t.owner}">${inner}</a>`;
     }).join("");
+  }
+  function mountBrandStrip() {
+    if (document.getElementById("brand-strip")) { paintBrandStrip(); return; }
+    const rail = ensureHeaderRail();
+    if (!rail) return;
+    const strip = document.createElement("nav");
+    strip.id = "brand-strip";
+    strip.className = "brand-strip";
+    strip.setAttribute("aria-label", "Teams");
     rail.appendChild(strip);
+    paintBrandStrip();
+    document.addEventListener("affl:show-former", paintBrandStrip);
   }
 
   /* Excel-style sheet menu: left rail, rounded items, hyperlinks between pages.
@@ -652,13 +697,19 @@ window.AFFL = (function () {
   aside.id = "side-menu";
   aside.className = "side-menu";
   aside.setAttribute("aria-label", "Sheets");
+  const mark = document.createElement("a");
+  mark.className = "side-mark";
+  mark.href = "index.html";
+  mark.setAttribute("aria-label", "AFFL Dashboard");
+  mark.innerHTML = '<img src="logos/affl-mark.png" alt="AFFL" width="64" height="64" style="max-width:64px;max-height:64px;width:64px;height:64px;object-fit:contain">';
+  aside.appendChild(mark);
   const navRow = nav.closest(".topbar-nav-row");
   aside.appendChild(nav);
   if (navRow && !navRow.children.length) navRow.remove();
   nav.querySelectorAll("a").forEach((a) => {
     const label = (a.textContent || "").trim();
     a.setAttribute("data-sheet", label.toLowerCase());
-    if (!a.getAttribute("data-ico")) a.setAttribute("data-ico", (label[0] || "").toUpperCase());
+    a.removeAttribute("data-ico");
   });
   const main = document.createElement("div");
   main.className = "sheet-main";
@@ -736,12 +787,39 @@ window.AFFL = (function () {
     return "players.html" + u.search;
   }
 
-  /** CHI-121 — never paint `Player {espnId}`. Missing hydrate is unavailable. */
+  /** CHI-121/CHI-124 — never paint `Player {espnId}`, `#espnId`, or a bare id. */
   function unresolvedPlayerName(name) {
-    return name == null || name === "" || /^Player \d+$/.test(String(name).trim());
+    const s = String(name == null ? "" : name).trim();
+    return !s || /^Player \d+$/.test(s) || /^#\d+$/.test(s) || /^\d{4,}$/.test(s);
   }
   function displayPlayerName(name) {
     return unresolvedPlayerName(name) ? "unavailable" : name;
+  }
+  function resolvePlayerName(pid, name) {
+    if (!unresolvedPlayerName(name)) return String(name).trim();
+    const rec = HYDRATE_PLAYERS[pid] || HYDRATE_PLAYERS[String(pid)];
+    if (rec && rec.name) return rec.name;
+    return "unavailable";
+  }
+  function hydratePmeta(d) {
+    if (!d) return;
+    const bag = d.pmeta || (d.pmeta = {});
+    Object.keys(HYDRATE_PLAYERS).forEach((pid) => {
+      const rec = HYDRATE_PLAYERS[pid];
+      const cur = bag[pid] || bag[String(pid)];
+      const curName = Array.isArray(cur) ? cur[0] : "";
+      if (!cur || unresolvedPlayerName(curName)) {
+        bag[String(pid)] = [
+          rec.name,
+          rec.pos || "",
+          rec.nfl || (Array.isArray(cur) && cur[2]) || "",
+          (Array.isArray(cur) && cur[3]) || "",
+        ];
+      } else if (Array.isArray(cur) && (!cur[1] || cur[1] === "?") && rec.pos) {
+        cur[1] = rec.pos;
+        bag[String(pid)] = cur;
+      }
+    });
   }
   function playerLink(pid, name, extra) {
     extra = extra || {};
@@ -889,8 +967,8 @@ window.AFFL = (function () {
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,
            goTeam, weekLog, posBaseline, afterStart,
-           fmt, initials, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
-           playerHref, playerLink, unresolvedPlayerName, displayPlayerName, HYDRATE_PLAYERS,
+           fmt, initials, logoMarkSize, logoHTML, headshotHTML, nflLogoHTML, nflSlug, esc, collegeSlug, collegeLogoHTML,
+           playerHref, playerLink, unresolvedPlayerName, displayPlayerName, resolvePlayerName, hydratePmeta, HYDRATE_PLAYERS,
            loadBios, playerBio, ageOn, today, onNextMidnight, yearPicker, seasonSelect, seasonPicker, seasonFromURL, stampSeason, scopePicker, scopeFromURL, showYearRow,
            chartDefaults, dateStr, notice, teamHref, loadJSON,
            get data() { return DATA; } };
