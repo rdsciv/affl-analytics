@@ -11,7 +11,7 @@
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
   const phaseNoteAll = {
-    reg: "Career roto over scored seasons 2018–2025 (2014–2017 have no player boxscores). Counting categories are per-season averages by default, or career sums on Totals. Rate categories are pooled career rates (cmp/att, yards/carry, yards/reception) — never the average of yearly rates. Ranks and TOTAL PTS are of the displayed numbers.",
+    reg: "Career roto covers 2018–2025, the years with full player category boxscores (pass / rush / rec). 2014–2017 still show on Scoreboard (starters + fantasy points + team scores), but those years have no category lines for roto, so they stay out. Counting stats default to per-season averages, or career sums on Totals. Rates are pooled career rates (cmp/att, yards/carry, yards/reception) — never an average of yearly rates. Ranks and TOTAL PTS use what’s on screen.",
     post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
     combined: "Career combined (regular + winners bracket) over scored seasons 2018–2025. Playoff teams add extra games; counting totals favor deeper runs.",
   };
@@ -89,7 +89,7 @@
     $("stand-h2").textContent = "Roto Standings";
     $("season-sub").textContent = y + " · categories unavailable";
     $("season-table").innerHTML =
-      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Player-level boxscores begin in 2018 (ESPN history cutoff). This year is not scored as zeros.</div>`;
+      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Full player category boxscores (pass / rush / rec) start in 2018 — 2014–2017 still show on Scoreboard, but have no category lines for roto. This year is not scored as zeros.</div>`;
     $("breakdown").innerHTML = "";
     $("radar-sub").textContent = "";
     $("radar-meta").innerHTML = "";
@@ -461,7 +461,7 @@
   }
 
   $("lede").textContent =
-    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Player-level boxscores begin in 2018. All is career roto over those scored seasons, defaulting to per-season averages so a 12-year franchise does not win by existing.";
+    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career roto covers 2018–2025 (full player category boxscores). 2014–2017 still show on Scoreboard but stay out of roto. All defaults to per-season averages so a long-running franchise does not win by existing.";
 
   render();
 })();
