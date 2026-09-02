@@ -173,7 +173,7 @@
         <table class="tbl roto-tbl">
           <thead><tr>
             <th class="left ${thClass("team")}" data-k="team">Team</th>
-            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored year" : "Sum of regular-season games across scored years") : "Eligible games in this phase"}">G</th>
+            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored roto year (2018–2025). Not career H2H games." : "Sum of regular-season games in scored roto years only (2018–2025). Not career H2H — e.g. Fat Cats H2H is 148 from 2015–2025.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Scored G") : "G"}</th>
             ${cols.map((c) => `<th class="${thClass(c.key)}" data-k="${c.key}" title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
             <th class="${thClass("totalPts")}" data-k="totalPts">Total Pts</th>
           </tr></thead>
@@ -304,7 +304,7 @@
 
   function renderBreakdown(team, n, allMode) {
     const gLabel = R.formatGames(team.games, grain, allMode);
-    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${gLabel} G` +
+    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${gLabel} ${allMode ? (grain === "averages" ? "G/yr" : "scored G") : "G"}` +
       (allMode && team.nSeasons ? ` · ${team.nSeasons} scored season${team.nSeasons === 1 ? "" : "s"}` : "");
     let last = "";
     $("breakdown").innerHTML = `
