@@ -17,6 +17,7 @@
   let YD = null, T = {}, ALL = null;
   let PRE_STARTS = {}, PRE_ROSTERS = {}, PINDEX = {};
   let INJ = {}, DEPTH = {}, Y2025 = null;
+  let dropNotice = ""; // CHI-165 persistent season/squad mismatch notice
 
   await Promise.all([
     fetch("pre2018_starts.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
@@ -117,13 +118,17 @@
   }
 
   function ensureSquadForYear() {
-    if (!squad) return false;
-    if (scope === "cum") return false;
-    if (A.franchisePlayedSeason && A.franchisePlayedSeason(squad, year)) return false;
+    if (scope === "cum") { dropNotice = ""; return false; }
+    if (!squad) return !!dropNotice;
+    if (A.franchisePlayedSeason && A.franchisePlayedSeason(squad, year)) {
+      dropNotice = "";
+      return false;
+    }
     const name = A.franchiseName(squad) || squad;
     const who = (year === 2014 && A.canon(squad) === "m06")
       ? "Fairview Fat Cats did not play in 2014 — that seat was L.O.B. Thunder."
       : (name + " did not play in " + year + ".");
+    dropNotice = who;
     squad = "";
     A.rememberSquad("");
     const u = new URL(location.href);
@@ -289,7 +294,20 @@
     const list = document.getElementById("nfl-injury-list");
     const countEl = document.getElementById("nfl-injury-count");
     if (!card || !list) return;
-    const teams = A.teams(2025);
+    /* CHI-165 — injury cache is current season only. Never paint 2025 injuries on 2014. */
+    const injYear = (A.years && A.years()[0]) || 2025;
+    if (scope === "season" && year && +year !== +injYear) {
+      card.style.display = "";
+      if (countEl) countEl.textContent = "n/a";
+      list.innerHTML = `<div class="nfl-inj-empty">NFL injury report is for the current season (${injYear}) only — not available for ${year}.</div>`;
+      return;
+    }
+    if (scope === "cum") {
+      if (countEl) countEl.textContent = "n/a";
+      list.innerHTML = `<div class="nfl-inj-empty">NFL injury report is for the current season (${injYear}) only — pick ${injYear} to view.</div>`;
+      return;
+    }
+    const teams = A.teams(injYear);
     const affl = {};
     (Y2025 && Y2025.players || []).forEach((p) => {
       if (p && p.pid != null) affl[String(p.pid)] = p;
@@ -318,10 +336,8 @@
     });
     if (squad) {
       const c = A.canon(squad);
-      const yForTid = (scope === "season" && year) ? year : 2025;
-      const tid = squadTidFor(yForTid, squad);
-      /* No tid in this season ⇒ squad did not play — show empty, never borrow another year. */
-      if (tid == null && scope === "season") rows = [];
+      const tid = squadTidFor(injYear, squad);
+      if (tid == null) rows = [];
       else rows = rows.filter((r) =>
         (tid != null && A.sameId(r.tid, tid)) || (r.owner && A.canon(r.owner) === c));
     }
@@ -359,7 +375,7 @@
     const fr = r.franchise ? `<span class="nfl-inj-fr">${A.esc(r.franchise)}</span>` : "";
     return `<div class="nfl-inj-row">
       <span class="nfl-inj-st ${cls}">${A.esc(st || "—")}</span>
-      ${A.playerLink(r.pid, r.name, { cls: "nfl-inj-name link", year: 2025, squad: squad })}
+      ${A.playerLink(r.pid, r.name, { cls: "nfl-inj-name link", year: (A.years && A.years()[0]) || 2025, squad: squad })}
       <span class="nfl-inj-meta">${A.esc(r.team || "")}${depth}${fr}</span>
     </div>`;
   }
@@ -382,10 +398,11 @@
     if (scope === "cum") { renderCum(); return; }
     const dropped = ensureSquadForYear();
     if (dropped) drawSquadFilter();
+    const dropMsg = dropNotice || "";
     const weeks = Object.keys(YD.weeks || {}).map(Number).sort((a, b) => a - b);
     if (!weeks.length) {
       $("#week-picker").innerHTML = "";
-      $("#sb-grid").innerHTML = A.notice(
+      $("#sb-grid").innerHTML = (dropMsg ? A.notice(dropMsg) : "") + A.notice(
         `ESPN has no matchup data stored for ${year}.`);
       setSubtitle();
       return;
@@ -410,7 +427,7 @@
     const note = weekViewSubtitle(year, week);
     const noteHTML = note ? `<div class="sb-week-note">${A.esc(note)}</div>` : "";
 
-    const dropNote = dropped ? A.notice(dropped) : "";
+    const dropNote = dropMsg ? A.notice(dropMsg) : "";
     const cards = games.length
       ? games.map((g) => gameCard(g, year, T, YD, week)).join("")
       : A.notice(squad ? "No matchup for this squad this week." : "No games stored.");
@@ -453,6 +470,7 @@
   }
 
   async function pick(y) {
+    if (+y !== +year) dropNotice = "";
     year = y;
     week = week;
     $("#sb-grid").innerHTML = '<div class="loading">Loading…</div>';
@@ -486,6 +504,7 @@
     el.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => {
         squad = b.dataset.squad || "";
+        dropNotice = "";
         A.rememberSquad(squad);
         const u = new URL(location.href);
         if (squad) u.searchParams.set("squad", squad);
