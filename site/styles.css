@@ -1748,23 +1748,30 @@ a.tm-link:hover { color: var(--blue2); }
 #fg-awards[hidden], #fg-heatmap[hidden], #fg-stacks[hidden],
 #fg-college[hidden], #fg-homers[hidden], #fg-cuffs[hidden],
 #fg-age-scatter[hidden] { display: none !important; }
-.nav-board-scroll { overflow-x: auto; padding-bottom: 8px; }
-/* CHI-166 — #nav-board stacks year blocks; do NOT grid the stack or years crush. */
+.nav-board-scroll { overflow-x: auto; padding-bottom: 8px; max-width: 100%; }
+/* CHI-166/167 — #nav-board stacks year blocks; each year scrolls, never crush. */
 #nav-board {
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 .nav-board-block {
   margin: 0;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 .nav-board-block .card-sub { margin-bottom: 6px; }
 .nav-board-block-scroll {
   overflow-x: auto;
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .nav-board {
   display: grid;
@@ -1773,6 +1780,16 @@ a.tm-link:hover { color: var(--blue2); }
   min-width: max(720px, calc(100px + var(--nav-rounds, 16) * 115px));
   width: max-content;
   max-width: none;
+}
+/* Keep NFL logos capped inside board cells — unconstrained logos hard-fail. */
+.nav-cell .nfl-logo,
+.nav-cell .nfl-logo.sm {
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  object-fit: contain;
+  flex: 0 0 16px;
 }
 .nav-board-h, .nav-board-r {
   font-size: 10px; font-weight: 800; letter-spacing: .08em;

@@ -1066,15 +1066,21 @@
   function navNormPos(pos) {
     return pos === "D/ST" ? "DST" : (pos || "");
   }
-  function navRoundOf(p) {
-    const auction = !!(YD && YD.draft && YD.draft.auction) || !!p.auction;
+  function pickIsAuction(p) {
+    if (p && p.auction != null) return !!p.auction;
+    return !!(YD && YD.draft && YD.draft.auction);
+  }
+  function navRoundOf(p, nTeams) {
+    /* Per-pick auction flag — never inherit ALL-years auction onto snake seasons. */
+    const auction = pickIsAuction(p);
+    const slot = Math.max(1, Number(nTeams) || 12);
     if (auction) {
       const ov = Number(p.overall) || 0;
-      if (ov) return Math.ceil(ov / 12);
+      if (ov) return Math.ceil(ov / slot);
     }
     if (p.round != null && p.round !== "") return Number(p.round);
     const ov = Number(p.overall) || 0;
-    return ov ? Math.ceil(ov / 12) : 1;
+    return ov ? Math.ceil(ov / slot) : 1;
   }
   function navParOf(p) {
     const idx = parIndex();
@@ -1231,7 +1237,11 @@
   };
 
   function buildNavGrid(picks, yearLabel) {
-    const auction = !!(YD && YD.draft && YD.draft.auction);
+    /* Year-local auction bit — ALL view must not label 2014–15 snake as auction. */
+    let auction;
+    if (picks.some((p) => p.auction === false)) auction = false;
+    else if (picks.some((p) => p.auction === true)) auction = true;
+    else auction = !!(YD && YD.draft && YD.draft.auction);
     const first = {};
     picks.forEach((p) => {
       const tid = p.oid || ownerKey(p.tid);
@@ -1239,15 +1249,17 @@
       if (first[tid] == null || ov < first[tid]) first[tid] = ov;
     });
     const teams = Object.keys(first).sort((a, b) => first[a] - first[b] || tName(a).localeCompare(tName(b)));
+    const nTeams = Math.max(1, teams.length || 12);
     let maxR = 0;
-    picks.forEach((p) => { if ((p.rnd || 0) > maxR) maxR = p.rnd; });
-    if (!maxR) maxR = 1;
     const by = {};
     picks.forEach((p) => {
       const tid = p.oid || ownerKey(p.tid);
-      const k = tid + ":" + p.rnd;
+      const rnd = navRoundOf(p, nTeams);
+      if (rnd > maxR) maxR = rnd;
+      const k = tid + ":" + rnd;
       (by[k] = by[k] || []).push(p);
     });
+    if (!maxR) maxR = 1;
     const head = [`<div class="nav-board-r">${yearLabel != null ? yearLabel : ""}</div>`];
     for (let r = 1; r <= maxR; r++) head.push(`<div class="nav-board-h">R${r}</div>`);
     const cells = head.slice();
@@ -1272,7 +1284,9 @@
       }
     });
     const style = `--nav-rounds:${maxR}`;
-    const sub = (auction ? "auction · nomination order · rounds of 12" : "snake · franchise × round")
+    const sub = (auction
+      ? ("auction · nomination order · rounds of " + nTeams)
+      : "snake · franchise × round")
       + (yearLabel != null ? " · " + yearLabel : "");
     return `<div class="nav-board-block">
       <div class="card-sub">${sub} · ${teams.length} franchises · ${picks.length} picks</div>
@@ -1299,9 +1313,10 @@
     } else {
       grid.innerHTML = buildNavGrid(all, year);
       if (sub) {
-        const auction = !!(YD && YD.draft && YD.draft.auction);
+        const auction = all.length ? pickIsAuction(all[0]) : !!(YD && YD.draft && YD.draft.auction);
+        const nTeams = new Set(all.map((p) => p.oid || ownerKey(p.tid))).size || 12;
         sub.textContent = auction
-          ? year + " · franchise × nomination round (overall into rounds of 12) · color by position"
+          ? year + " · franchise × nomination round (overall into rounds of " + nTeams + ") · color by position"
           : year + " · franchise × round · color by position";
       }
     }
