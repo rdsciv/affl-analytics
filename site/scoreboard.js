@@ -1,5 +1,6 @@
 /* ============ AFFL Scoreboard — all seasons ============ */
 (async function () {
+  // CHI-165 sticky v11
   // goTeam: squad deep-links live on Teams; scoreboard filters in place.
 
   const A = window.AFFL;
@@ -544,7 +545,17 @@
     el.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => {
         squad = b.dataset.squad || "";
-        dropNotice = "";
+        /* CHI-165 — clicking All must NOT wipe sticky notice when URL opened with
+           an invalid franchise for this year (urlDropSquad still mismatches). */
+        if (squad && A.franchisePlayedSeason && A.franchisePlayedSeason(squad, year)) {
+          dropNotice = "";
+        } else if (squad) {
+          dropNotice = dropMessageFor(squad, year);
+        } else if (urlDropSquad && !(A.franchisePlayedSeason && A.franchisePlayedSeason(urlDropSquad, year))) {
+          dropNotice = dropMessageFor(urlDropSquad, year);
+        } else {
+          dropNotice = "";
+        }
         paintDropNotice();
         A.rememberSquad(squad);
         const u = new URL(location.href);
