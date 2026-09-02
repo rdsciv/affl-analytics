@@ -1749,14 +1749,24 @@ a.tm-link:hover { color: var(--blue2); }
 #fg-college[hidden], #fg-homers[hidden], #fg-cuffs[hidden],
 #fg-age-scatter[hidden] { display: none !important; }
 .nav-board-scroll { overflow-x: auto; padding-bottom: 8px; max-width: 100%; }
-/* CHI-166/167 — #nav-board stacks year blocks; each year scrolls, never crush. */
-#nav-board {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+/* CHI-166 — outer stack must NEVER share .nav-board grid (that crushed years into columns). */
+#nav-board,
+#nav-board.nav-board-stack,
+.nav-board-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 16px;
   min-width: 0;
   width: 100%;
   max-width: 100%;
+  grid-template-columns: none !important;
+  grid-auto-flow: row !important;
+}
+#nav-board.nav-board {
+  display: flex !important;
+  grid-template-columns: none !important;
 }
 .nav-board-block {
   margin: 0;

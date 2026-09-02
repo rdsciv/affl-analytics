@@ -1298,27 +1298,31 @@
     const grid = document.getElementById("nav-board");
     const sub = document.getElementById("nav-board-sub");
     if (!grid) return;
+    grid.classList.add("nav-board-stack");
+    grid.classList.remove("nav-board");
     if (!all.length) {
       grid.innerHTML = `<div class="draft-empty">No picks to grid.</div>`;
       return;
     }
-    if (scope === "cum") {
-      const years = [...new Set(all.map((p) => p.year).filter((y) => y != null))].sort((a, b) => b - a);
-      if (!years.length) {
-        grid.innerHTML = buildNavGrid(all, null);
-      } else {
-        grid.innerHTML = years.map((y) => buildNavGrid(all.filter((p) => p.year === y), y)).join("");
-      }
-      if (sub) sub.textContent = "franchise × round · stacked by year · color by position";
-    } else {
-      grid.innerHTML = buildNavGrid(all, year);
-      if (sub) {
-        const auction = all.length ? pickIsAuction(all[0]) : !!(YD && YD.draft && YD.draft.auction);
-        const nTeams = new Set(all.map((p) => p.oid || ownerKey(p.tid))).size || 12;
-        sub.textContent = auction
-          ? year + " · franchise × nomination round (overall into rounds of " + nTeams + ") · color by position"
-          : year + " · franchise × round · color by position";
-      }
+    const years = [...new Set(all.map((p) => p.year).filter((y) => y != null).map(Number))]
+      .filter((y) => Number.isFinite(y))
+      .sort((a, b) => b - a);
+    const multiYear = scope === "cum" || years.length > 1;
+    if (multiYear && years.length) {
+      grid.innerHTML = years.map((y) =>
+        buildNavGrid(all.filter((p) => Number(p.year) === Number(y)), y)
+      ).join("");
+      if (sub) sub.textContent = "franchise × round · stacked by year · color by position · " + years.length + " seasons";
+      return;
+    }
+    grid.innerHTML = buildNavGrid(all, scope === "cum" ? null : year);
+    if (sub) {
+      const auction = all.length ? (typeof pickIsAuction === "function" ? pickIsAuction(all[0]) : !!(YD && YD.draft && YD.draft.auction)) : !!(YD && YD.draft && YD.draft.auction);
+      const nTeams = new Set(all.map((p) => p.oid || ownerKey(p.tid))).size || 12;
+      const yLabel = scope === "cum" ? "All" : year;
+      sub.textContent = auction
+        ? yLabel + " · franchise × nomination round (overall into rounds of " + nTeams + ") · color by position"
+        : yLabel + " · franchise × round · color by position";
     }
   }
 
