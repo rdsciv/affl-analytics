@@ -76,12 +76,12 @@
 
   function playerName(pid) {
     const m = (YD && YD.pmeta || {})[String(pid)];
-    if (m && m[0]) return m[0];
+    if (m && m[0] && !A.unresolvedPlayerName(m[0])) return m[0];
     const idx = PINDEX[String(pid)];
-    if (idx && idx.name) return idx.name;
+    if (idx && idx.name && !A.unresolvedPlayerName(idx.name)) return idx.name;
     const snap = ((PRE_ROSTERS[String(year)] || {})[String(pid)]) || {};
-    if (snap.name) return snap.name;
-    return "—";
+    if (snap.name && !A.unresolvedPlayerName(snap.name)) return snap.name;
+    return A.resolvePlayerName(pid, "");
   }
 
   function playerNfl(pid) {
@@ -103,7 +103,33 @@
   }
 
   function currentSquads() {
-    return A.squads().filter((f) => f.active);
+    /* CHI-154/162 — only franchises that actually played this season.
+       Fat Cats (m06) must not appear on 2014; Thunder (m16) owns that year. */
+    if (scope === "cum") {
+      return A.squads().filter((f) => f.active || A.showFormer());
+    }
+    const list = (A.squadsForSeason && A.squadsForSeason(year)) || A.squads();
+    return list.filter((f) => {
+      if (A.franchisePlayedSeason && !A.franchisePlayedSeason(f.owner, year)) return false;
+      if (f.active) return true;
+      return !!(A.showFormer && A.showFormer());
+    });
+  }
+
+  function ensureSquadForYear() {
+    if (!squad) return false;
+    if (scope === "cum") return false;
+    if (A.franchisePlayedSeason && A.franchisePlayedSeason(squad, year)) return false;
+    const name = A.franchiseName(squad) || squad;
+    const who = (year === 2014 && A.canon(squad) === "m06")
+      ? "Fairview Fat Cats did not play in 2014 — that seat was L.O.B. Thunder."
+      : (name + " did not play in " + year + ".");
+    squad = "";
+    A.rememberSquad("");
+    const u = new URL(location.href);
+    u.searchParams.delete("squad");
+    history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
+    return who;
   }
 
   function squadTidFor(y, owner) {
@@ -292,8 +318,11 @@
     });
     if (squad) {
       const c = A.canon(squad);
-      const tid = squadTidFor(2025, squad);
-      rows = rows.filter((r) =>
+      const yForTid = (scope === "season" && year) ? year : 2025;
+      const tid = squadTidFor(yForTid, squad);
+      /* No tid in this season ⇒ squad did not play — show empty, never borrow another year. */
+      if (tid == null && scope === "season") rows = [];
+      else rows = rows.filter((r) =>
         (tid != null && A.sameId(r.tid, tid)) || (r.owner && A.canon(r.owner) === c));
     }
     rows.sort((a, b) => injStatusRank(a.status) - injStatusRank(b.status)
@@ -351,6 +380,8 @@
 
   function render() {
     if (scope === "cum") { renderCum(); return; }
+    const dropped = ensureSquadForYear();
+    if (dropped) drawSquadFilter();
     const weeks = Object.keys(YD.weeks || {}).map(Number).sort((a, b) => a - b);
     if (!weeks.length) {
       $("#week-picker").innerHTML = "";
@@ -379,10 +410,11 @@
     const note = weekViewSubtitle(year, week);
     const noteHTML = note ? `<div class="sb-week-note">${A.esc(note)}</div>` : "";
 
+    const dropNote = dropped ? A.notice(dropped) : "";
     const cards = games.length
       ? games.map((g) => gameCard(g, year, T, YD, week)).join("")
       : A.notice(squad ? "No matchup for this squad this week." : "No games stored.");
-    $("#sb-grid").innerHTML = banner + noteHTML + cards;
+    $("#sb-grid").innerHTML = dropNote + banner + noteHTML + cards;
     setSubtitle();
   }
 
@@ -432,6 +464,7 @@
       YD = await A.loadYear(y);
       T = A.teams(y);
     }
+    ensureSquadForYear();
     draw();
     render();
     renderNflInjuries();
