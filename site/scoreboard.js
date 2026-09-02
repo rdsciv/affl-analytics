@@ -18,6 +18,7 @@
   let PRE_STARTS = {}, PRE_ROSTERS = {}, PINDEX = {};
   let INJ = {}, DEPTH = {}, Y2025 = null;
   let dropNotice = ""; // CHI-165 persistent season/squad mismatch notice
+  const urlDropSquad = (new URLSearchParams(location.search).get("squad") || "");
 
   await Promise.all([
     fetch("pre2018_starts.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
@@ -117,24 +118,56 @@
     });
   }
 
-  function ensureSquadForYear() {
-    if (scope === "cum") { dropNotice = ""; return false; }
-    if (!squad) return !!dropNotice;
-    if (A.franchisePlayedSeason && A.franchisePlayedSeason(squad, year)) {
-      dropNotice = "";
-      return false;
+
+  function paintDropNotice() {
+    const el = document.getElementById("sb-drop-notice");
+    if (!el) return;
+    if (!dropNotice) {
+      el.hidden = true;
+      el.innerHTML = "";
+      return;
     }
-    const name = A.franchiseName(squad) || squad;
-    const who = (year === 2014 && A.canon(squad) === "m06")
-      ? "Fairview Fat Cats did not play in 2014 — that seat was L.O.B. Thunder."
-      : (name + " did not play in " + year + ".");
-    dropNotice = who;
-    squad = "";
-    A.rememberSquad("");
-    const u = new URL(location.href);
-    u.searchParams.delete("squad");
-    history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
-    return who;
+    el.hidden = false;
+    el.innerHTML = A.notice(dropNotice);
+  }
+
+  function dropMessageFor(owner, y) {
+    if (!owner) return "";
+    const name = A.franchiseName(owner) || owner;
+    if (+y === 2014 && A.canon(owner) === "m06") {
+      return "Fairview Fat Cats did not play in 2014 — that seat was L.O.B. Thunder.";
+    }
+    return name + " did not play in " + y + ".";
+  }
+
+  function ensureSquadForYear() {
+    if (scope === "cum") { dropNotice = ""; paintDropNotice(); return false; }
+    const candidate = squad || "";
+    if (candidate) {
+      if (A.franchisePlayedSeason && A.franchisePlayedSeason(candidate, year)) {
+        /* Valid for this year — clear any stale drop notice. */
+        dropNotice = "";
+        paintDropNotice();
+        return false;
+      }
+      dropNotice = dropMessageFor(candidate, year);
+      squad = "";
+      A.rememberSquad("");
+      const u = new URL(location.href);
+      u.searchParams.delete("squad");
+      history.replaceState(null, "", u.pathname.split("/").pop() + u.search + u.hash);
+      paintDropNotice();
+      return dropNotice;
+    }
+    /* Squad already cleared to All — keep sticky notice for this year if URL opened with an invalid franchise. */
+    if (dropNotice) { paintDropNotice(); return dropNotice; }
+    if (urlDropSquad && !(A.franchisePlayedSeason && A.franchisePlayedSeason(urlDropSquad, year))) {
+      dropNotice = dropMessageFor(urlDropSquad, year);
+      paintDropNotice();
+      return dropNotice;
+    }
+    paintDropNotice();
+    return false;
   }
 
   function squadTidFor(y, owner) {
@@ -407,7 +440,8 @@
     const weeks = Object.keys(YD.weeks || {}).map(Number).sort((a, b) => a - b);
     if (!weeks.length) {
       $("#week-picker").innerHTML = "";
-      $("#sb-grid").innerHTML = (dropMsg ? A.notice(dropMsg) : "") + A.notice(
+      paintDropNotice();
+      $("#sb-grid").innerHTML = A.notice(
         `ESPN has no matchup data stored for ${year}.`);
       setSubtitle();
       return;
@@ -432,11 +466,11 @@
     const note = weekViewSubtitle(year, week);
     const noteHTML = note ? `<div class="sb-week-note">${A.esc(note)}</div>` : "";
 
-    const dropNote = dropMsg ? A.notice(dropMsg) : "";
+    paintDropNotice();
     const cards = games.length
       ? games.map((g) => gameCard(g, year, T, YD, week)).join("")
       : A.notice(squad ? "No matchup for this squad this week." : "No games stored.");
-    $("#sb-grid").innerHTML = dropNote + banner + noteHTML + cards;
+    $("#sb-grid").innerHTML = banner + noteHTML + cards;
     setSubtitle();
   }
 
@@ -490,6 +524,7 @@
     ensureSquadForYear();
     draw();
     render();
+    paintDropNotice();
     renderNflInjuries();
   }
 
@@ -510,6 +545,7 @@
       b.addEventListener("click", () => {
         squad = b.dataset.squad || "";
         dropNotice = "";
+        paintDropNotice();
         A.rememberSquad(squad);
         const u = new URL(location.href);
         if (squad) u.searchParams.set("squad", squad);

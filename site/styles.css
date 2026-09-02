@@ -3320,3 +3320,7 @@ body.index-pack #franchise-tbl .team-cell {
   gap: 8px;
   align-items: center;
 }
+
+/* CHI-165 sticky franchise/year mismatch */
+.sb-drop-notice { margin: 0 0 8px; }
+.sb-drop-notice[hidden] { display: none !important; }
