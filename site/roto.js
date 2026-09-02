@@ -1,4 +1,4 @@
-/* Roto page — CHI-149 All grain, CHI-150 click-to-sort standings. Season All | year (default All). All = career over scored seasons 2018–2025. */
+/* Roto page — CHI-149 All grain, CHI-150 click-to-sort standings. Season All | year (default All). Cats: 2018–2025 boxscores. All G: AFFL games 2014–2025. */
 (async function () {
   const A = window.AFFL;
   await A.boot();
@@ -11,9 +11,9 @@
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
   const phaseNoteAll = {
-    reg: "Career roto covers 2018–2025, the years with full player category boxscores (pass / rush / rec). 2014–2017 still show on Scoreboard (starters + fantasy points + team scores), but those years have no category lines for roto, so they stay out. Counting stats default to per-season averages, or career sums on Totals. Rates are pooled career rates (cmp/att, yards/carry, yards/reception) — never an average of yearly rates. Ranks and TOTAL PTS use what’s on screen.",
+    reg: "All Totals G is every AFFL regular-season game 2014–2025 for that franchise (Fat Cats → 148 from 2015). Category lines (pass / rush / rec) still come from 2018–2025 — the years with full starter category boxscores. 2014–2017 are on Scoreboard with starters + fantasy points + team scores; season-agg ESPN weekly cats are not in the warehouse yet, so those years do not invent category zeros. Counting stats default to per-season averages of scored years, or scored-year sums on Totals. Rates are pooled from scored years (cmp/att, yards/carry, yards/reception). Ranks and TOTAL PTS use what’s on screen.",
     post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
-    combined: "Career combined (regular + winners bracket) over scored seasons 2018–2025. Playoff teams add extra games; counting totals favor deeper runs.",
+    combined: "Combined (regular + winners bracket) category lines over 2018–2025 scored seasons. Playoff teams add extra games; counting totals favor deeper runs. Regular-season Career G on the All grain still uses 2014–2025 AFFL games.",
   };
 
   const league = await fetch(root + "league.json").then((r) => r.json());
@@ -89,7 +89,7 @@
     $("stand-h2").textContent = "Roto Standings";
     $("season-sub").textContent = y + " · categories unavailable";
     $("season-table").innerHTML =
-      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Full player category boxscores (pass / rush / rec) start in 2018 — 2014–2017 still show on Scoreboard, but have no category lines for roto. This year is not scored as zeros.</div>`;
+      `<div class="empty roto-unavailable">Roto category lines are unavailable for ${y}. Pass / rush / rec starter category boxscores for ranking start in 2018. ${y} still shows on Scoreboard (starters + fantasy points + team scores). This year is not scored as category zeros.</div>`;
     $("breakdown").innerHTML = "";
     $("radar-sub").textContent = "";
     $("radar-meta").innerHTML = "";
@@ -173,7 +173,7 @@
         <table class="tbl roto-tbl">
           <thead><tr>
             <th class="left ${thClass("team")}" data-k="team">Team</th>
-            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored roto year (2018–2025). Not career H2H games." : "Sum of regular-season games in scored roto years only (2018–2025). Not career H2H — e.g. Fat Cats H2H is 148 from 2015–2025.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Scored G") : "G"}</th>
+            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean AFFL regular-season games per franchise season 2014–2025 (schedule length). Category lines still use 2018–2025 only." : "Sum of AFFL regular-season games 2014–2025 for this franchise (e.g. Fat Cats = 148 from 2015–2025). Category lines still use 2018–2025 boxscores only.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Career G") : "G"}</th>
             ${cols.map((c) => `<th class="${thClass(c.key)}" data-k="${c.key}" title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
             <th class="${thClass("totalPts")}" data-k="totalPts">Total Pts</th>
           </tr></thead>
@@ -260,7 +260,11 @@
     $("stand-h2").textContent = allMode ? "Career Roto" : "Roto Standings";
 
     if (allMode) {
-      const built = R.buildAllRoto(loads, phase, grain, { ownerOf, skipOwners: { m22: true } });
+      const built = R.buildAllRoto(loads, phase, grain, {
+        ownerOf,
+        skipOwners: { m22: true },
+        franchiseYears: (oid) => (A.franchiseYears ? A.franchiseYears(oid) : []),
+      });
       const teams = decorateAll(built.teams);
       if (!teams.length) {
         $("season-table").innerHTML = `<div class="empty">Career roto is unavailable — no scored seasons could be loaded.</div>`;
@@ -272,7 +276,7 @@
       focusOwner = selected.ownerId;
       const grainLabel = grain === "totals" ? "career totals" : "per-season averages";
       $("season-sub").textContent =
-        `All · ${grainLabel} · scored seasons ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
+        `All · ${grainLabel} · category lines ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · Career G 2014–2025 · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
       renderTable(teams, selected, true);
       renderBreakdown(selected, teams.length, allMode);
       renderRadar(selected, teams);
@@ -304,8 +308,9 @@
 
   function renderBreakdown(team, n, allMode) {
     const gLabel = R.formatGames(team.games, grain, allMode);
-    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${gLabel} ${allMode ? (grain === "averages" ? "G/yr" : "scored G") : "G"}` +
-      (allMode && team.nSeasons ? ` · ${team.nSeasons} scored season${team.nSeasons === 1 ? "" : "s"}` : "");
+    $("break-sub").textContent = `#${team.totalRank} · ${team.totalPts} pts · ${gLabel} ${allMode ? (grain === "averages" ? "G/yr" : "career G") : "G"}` +
+      (allMode && team.nSeasons ? ` · ${team.nSeasons} scored season${team.nSeasons === 1 ? "" : "s"}` : "") +
+      (allMode && team.nCareerSeasons && team.nCareerSeasons !== team.nSeasons ? ` · ${team.nCareerSeasons} career season${team.nCareerSeasons === 1 ? "" : "s"}` : "");
     let last = "";
     $("breakdown").innerHTML = `
       <div class="table-scroll">
@@ -461,7 +466,7 @@
   }
 
   $("lede").textContent =
-    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career roto covers 2018–2025 (full player category boxscores). 2014–2017 still show on Scoreboard but stay out of roto. All defaults to per-season averages so a long-running franchise does not win by existing.";
+    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. All Totals Career G uses every AFFL regular-season game 2014–2025. Category lines use 2018–2025 starter boxscores (2014–2017 stay on Scoreboard; no invented cats). All defaults to per-season averages so a long-running franchise does not win by existing.";
 
   render();
 })();

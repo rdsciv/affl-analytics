@@ -1,0 +1,1829 @@
+{
+  "grain": "AFFL regular-season H2H games per franchise, seasons 2014\u20132025 inclusive. games = wins+losses+ties from site/data.json season standings. Not roto category-scored weeks; not playoff-only.",
+  "catsWindow": "2018\u20132025 only \u2014 this file does not add pass/rush/rec lines for 2014\u20132017.",
+  "merge": {
+    "m01": "m07",
+    "m03": "m08",
+    "m20": "m10"
+  },
+  "notMerged": {
+    "m06": "Fairview Fat Cats \u2014 2015\u20132025 only (11 seasons, 148 games). No 2014.",
+    "m16": "L.O.B. Thunder \u2014 2014 only (13 games). Never fold into Cats."
+  },
+  "excluded": {
+    "m22": "Central Oregon Gabagooners \u2014 2026-only; off 2014\u20132025 career book."
+  },
+  "window": {
+    "from": 2014,
+    "to": 2025
+  },
+  "source": "site/data.json seasons[*].teams after MERGE",
+  "locks": {
+    "m06": {
+      "games": 148,
+      "record": "80-68-0",
+      "seasons": 11
+    },
+    "m16": {
+      "games": 13,
+      "record": "4-9-0",
+      "seasons": 1
+    },
+    "m18": {
+      "games": 161,
+      "record": "86-75-0",
+      "seasons": 12,
+      "pf": 15594.6
+    }
+  },
+  "franchises": [
+    {
+      "memberId": "m02",
+      "ownerName": "Austin Williams",
+      "currentName": "DC Mighty Cucks",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 86,
+      "l": 75,
+      "t": 0,
+      "games": 161,
+      "pf": 15161.7,
+      "byYear": {
+        "2014": {
+          "teamName": "Kansas City Missourians",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1174.0
+        },
+        "2015": {
+          "teamName": "The Dalles Cowboys",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1119.0
+        },
+        "2016": {
+          "teamName": "Cincinnati Sinners",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1126.0
+        },
+        "2017": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1122.0
+        },
+        "2018": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1275.0
+        },
+        "2019": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 10,
+          "l": 3,
+          "t": 0,
+          "games": 13,
+          "pf": 1346.66
+        },
+        "2020": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1194.4
+        },
+        "2021": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 10,
+          "l": 4,
+          "t": 0,
+          "games": 14,
+          "pf": 1613.94
+        },
+        "2022": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1430.86
+        },
+        "2023": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1267.5
+        },
+        "2024": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1210.1
+        },
+        "2025": {
+          "teamName": "DC Mighty Cucks",
+          "espnTid": 6,
+          "sourceOwner": "m02",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1282.2
+        }
+      }
+    },
+    {
+      "memberId": "m08",
+      "ownerName": "Kevin Sliger",
+      "currentName": "Goleta Gringos",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 83,
+      "l": 78,
+      "t": 0,
+      "games": 161,
+      "pf": 14822.0,
+      "byYear": {
+        "2014": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1246.0
+        },
+        "2015": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1195.0
+        },
+        "2016": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 10,
+          "l": 3,
+          "t": 0,
+          "games": 13,
+          "pf": 1350.0
+        },
+        "2017": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 991.0
+        },
+        "2018": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 2,
+          "l": 11,
+          "t": 0,
+          "games": 13,
+          "pf": 1067.0
+        },
+        "2019": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1264.98
+        },
+        "2020": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1148.38
+        },
+        "2021": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 3,
+          "l": 11,
+          "t": 0,
+          "games": 14,
+          "pf": 1303.18
+        },
+        "2022": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1242.46
+        },
+        "2023": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1280.68
+        },
+        "2024": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1362.48
+        },
+        "2025": {
+          "teamName": "Goleta Gringos",
+          "espnTid": 3,
+          "sourceOwner": "m08",
+          "w": 10,
+          "l": 4,
+          "t": 0,
+          "games": 14,
+          "pf": 1370.88
+        }
+      }
+    },
+    {
+      "memberId": "m11",
+      "ownerName": "Chris Zweifel",
+      "currentName": "Squaw Valley Skinners",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 72,
+      "l": 89,
+      "t": 0,
+      "games": 161,
+      "pf": 14500.1,
+      "byYear": {
+        "2014": {
+          "teamName": "Atlantic City Aquasharks",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1069.0
+        },
+        "2015": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 10,
+          "l": 3,
+          "t": 0,
+          "games": 13,
+          "pf": 1202.0
+        },
+        "2016": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1328.0
+        },
+        "2017": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1126.0
+        },
+        "2018": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1277.0
+        },
+        "2019": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1197.02
+        },
+        "2020": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 2,
+          "l": 11,
+          "t": 0,
+          "games": 13,
+          "pf": 1117.86
+        },
+        "2021": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 4,
+          "l": 10,
+          "t": 0,
+          "games": 14,
+          "pf": 1226.28
+        },
+        "2022": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 4,
+          "l": 10,
+          "t": 0,
+          "games": 14,
+          "pf": 1236.52
+        },
+        "2023": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1302.44
+        },
+        "2024": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1217.16
+        },
+        "2025": {
+          "teamName": "Squaw Valley Skinners",
+          "espnTid": 1,
+          "sourceOwner": "m11",
+          "w": 4,
+          "l": 10,
+          "t": 0,
+          "games": 14,
+          "pf": 1200.78
+        }
+      }
+    },
+    {
+      "memberId": "m15",
+      "ownerName": "Levi Sanchez",
+      "currentName": "Westeros Warlords",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 91,
+      "l": 70,
+      "t": 0,
+      "games": 161,
+      "pf": 15030.6,
+      "byYear": {
+        "2014": {
+          "teamName": "Warlords of Westeros",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1063.0
+        },
+        "2015": {
+          "teamName": "Warlords of Westeros",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1220.0
+        },
+        "2016": {
+          "teamName": "Warlords of Westeros",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1100.0
+        },
+        "2017": {
+          "teamName": "Warlords of Westeros",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1214.0
+        },
+        "2018": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 11,
+          "l": 2,
+          "t": 0,
+          "games": 13,
+          "pf": 1353.0
+        },
+        "2019": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1146.2
+        },
+        "2020": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 11,
+          "l": 2,
+          "t": 0,
+          "games": 13,
+          "pf": 1453.1
+        },
+        "2021": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1200.3
+        },
+        "2022": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1249.1
+        },
+        "2023": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 10,
+          "l": 4,
+          "t": 0,
+          "games": 14,
+          "pf": 1405.8
+        },
+        "2024": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1296.26
+        },
+        "2025": {
+          "teamName": "Westeros Warlords",
+          "espnTid": 8,
+          "sourceOwner": "m15",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1329.84
+        }
+      }
+    },
+    {
+      "memberId": "m17",
+      "ownerName": "Zack Blotz",
+      "currentName": "Tijuana Sanchitos",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 70,
+      "l": 91,
+      "t": 0,
+      "games": 161,
+      "pf": 14412.3,
+      "byYear": {
+        "2014": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1054.0
+        },
+        "2015": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1275.0
+        },
+        "2016": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1078.0
+        },
+        "2017": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 990.0
+        },
+        "2018": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1186.0
+        },
+        "2019": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1132.58
+        },
+        "2020": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1201.52
+        },
+        "2021": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1258.28
+        },
+        "2022": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1255.02
+        },
+        "2023": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1274.86
+        },
+        "2024": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1479.3
+        },
+        "2025": {
+          "teamName": "Tijuana Sanchitos",
+          "espnTid": 9,
+          "sourceOwner": "m17",
+          "w": 4,
+          "l": 10,
+          "t": 0,
+          "games": 14,
+          "pf": 1227.72
+        }
+      }
+    },
+    {
+      "memberId": "m18",
+      "ownerName": "Ryan Childress",
+      "currentName": "Grand Teeton Feelers",
+      "seasons": 12,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 86,
+      "l": 75,
+      "t": 0,
+      "games": 161,
+      "pf": 15594.6,
+      "byYear": {
+        "2014": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1304.0
+        },
+        "2015": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1184.0
+        },
+        "2016": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1316.0
+        },
+        "2017": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1187.0
+        },
+        "2018": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1233.0
+        },
+        "2019": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1247.42
+        },
+        "2020": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1400.0
+        },
+        "2021": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1360.92
+        },
+        "2022": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1430.12
+        },
+        "2023": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1294.06
+        },
+        "2024": {
+          "teamName": "Tittsburgh Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 2,
+          "l": 12,
+          "t": 0,
+          "games": 14,
+          "pf": 1230.62
+        },
+        "2025": {
+          "teamName": "Grand Teeton Feelers",
+          "espnTid": 7,
+          "sourceOwner": "m18",
+          "w": 10,
+          "l": 4,
+          "t": 0,
+          "games": 14,
+          "pf": 1407.48
+        }
+      }
+    },
+    {
+      "memberId": "m06",
+      "ownerName": "Alex Renney",
+      "currentName": "Fairview Fat Cats",
+      "seasons": 11,
+      "years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 80,
+      "l": 68,
+      "t": 0,
+      "games": 148,
+      "pf": 13827.5,
+      "byYear": {
+        "2015": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1307.0
+        },
+        "2016": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1304.0
+        },
+        "2017": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 980.0
+        },
+        "2018": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1365.0
+        },
+        "2019": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1205.34
+        },
+        "2020": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1195.14
+        },
+        "2021": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 4,
+          "l": 10,
+          "t": 0,
+          "games": 14,
+          "pf": 1199.54
+        },
+        "2022": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 10,
+          "l": 4,
+          "t": 0,
+          "games": 14,
+          "pf": 1354.08
+        },
+        "2023": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 3,
+          "l": 11,
+          "t": 0,
+          "games": 14,
+          "pf": 1172.1
+        },
+        "2024": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1434.76
+        },
+        "2025": {
+          "teamName": "Fairview Fat Cats",
+          "espnTid": 2,
+          "sourceOwner": "m06",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1310.58
+        }
+      }
+    },
+    {
+      "memberId": "m13",
+      "ownerName": "Alex Clausen",
+      "currentName": "Honolulu Horndogs",
+      "seasons": 11,
+      "years": [
+        2014,
+        2015,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 72,
+      "l": 76,
+      "t": 0,
+      "games": 148,
+      "pf": 13325.5,
+      "byYear": {
+        "2014": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 10,
+          "sourceOwner": "m13",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1129.0
+        },
+        "2015": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 10,
+          "sourceOwner": "m13",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1014.0
+        },
+        "2017": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1072.0
+        },
+        "2018": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1193.0
+        },
+        "2019": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1179.12
+        },
+        "2020": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1220.54
+        },
+        "2021": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1353.14
+        },
+        "2022": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1266.58
+        },
+        "2023": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1294.66
+        },
+        "2024": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1270.06
+        },
+        "2025": {
+          "teamName": "Honolulu Horndogs",
+          "espnTid": 11,
+          "sourceOwner": "m13",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1333.36
+        }
+      }
+    },
+    {
+      "memberId": "m07",
+      "ownerName": "Jason Kafka",
+      "currentName": "Chula Vista Chupacabras",
+      "seasons": 8,
+      "years": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023
+      ],
+      "w": 48,
+      "l": 59,
+      "t": 0,
+      "games": 107,
+      "pf": 9492.3,
+      "byYear": {
+        "2016": {
+          "teamName": "Green Bay Glory Holes",
+          "espnTid": 10,
+          "sourceOwner": "m07",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1108.0
+        },
+        "2017": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1204.0
+        },
+        "2018": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 2,
+          "l": 11,
+          "t": 0,
+          "games": 13,
+          "pf": 1045.0
+        },
+        "2019": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1121.4
+        },
+        "2020": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1282.5
+        },
+        "2021": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1348.88
+        },
+        "2022": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1240.06
+        },
+        "2023": {
+          "teamName": "Chula Vista Chupacabras",
+          "espnTid": 10,
+          "sourceOwner": "m01",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1142.46
+        }
+      }
+    },
+    {
+      "memberId": "m05",
+      "ownerName": "John Newton",
+      "currentName": "San Diego Shadowc\u00f6cks",
+      "seasons": 7,
+      "years": [
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 52,
+      "l": 44,
+      "t": 0,
+      "games": 96,
+      "pf": 9191.7,
+      "byYear": {
+        "2019": {
+          "teamName": "San Diego Shadowcocks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 5,
+          "l": 8,
+          "t": 0,
+          "games": 13,
+          "pf": 1134.88
+        },
+        "2020": {
+          "teamName": "San Diego Shadowcocks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1192.16
+        },
+        "2021": {
+          "teamName": "San Diego Shadowcocks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1247.46
+        },
+        "2022": {
+          "teamName": "San Diego Shadowc\u00f6cks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1357.34
+        },
+        "2023": {
+          "teamName": "San Diego Shadowc\u00f6cks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1399.72
+        },
+        "2024": {
+          "teamName": "San Diego Shadowc\u00f6cks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1317.08
+        },
+        "2025": {
+          "teamName": "San Diego Shadowc\u00f6cks",
+          "espnTid": 4,
+          "sourceOwner": "m05",
+          "w": 11,
+          "l": 3,
+          "t": 0,
+          "games": 14,
+          "pf": 1543.02
+        }
+      }
+    },
+    {
+      "memberId": "m12",
+      "ownerName": "Garrett Jones",
+      "currentName": "Muck City Mad Dawgs",
+      "seasons": 7,
+      "years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020
+      ],
+      "w": 48,
+      "l": 43,
+      "t": 0,
+      "games": 91,
+      "pf": 8244.1,
+      "byYear": {
+        "2014": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 11,
+          "l": 2,
+          "t": 0,
+          "games": 13,
+          "pf": 1482.0
+        },
+        "2015": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1081.0
+        },
+        "2016": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 956.0
+        },
+        "2017": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1139.0
+        },
+        "2018": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 8,
+          "l": 5,
+          "t": 0,
+          "games": 13,
+          "pf": 1335.0
+        },
+        "2019": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1281.02
+        },
+        "2020": {
+          "teamName": "Muck City Mad Dawgs",
+          "espnTid": 5,
+          "sourceOwner": "m12",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 970.06
+        }
+      }
+    },
+    {
+      "memberId": "m14",
+      "ownerName": "Steven Breitmayer",
+      "currentName": "Poulsbo Pollywogs",
+      "seasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 30,
+      "l": 40,
+      "t": 0,
+      "games": 70,
+      "pf": 6472.9,
+      "byYear": {
+        "2021": {
+          "teamName": "Poulsbo Polliwogs",
+          "espnTid": 14,
+          "sourceOwner": "m14",
+          "w": 11,
+          "l": 3,
+          "t": 0,
+          "games": 14,
+          "pf": 1472.36
+        },
+        "2022": {
+          "teamName": "Poulsbo Polliwogs",
+          "espnTid": 14,
+          "sourceOwner": "m14",
+          "w": 2,
+          "l": 12,
+          "t": 0,
+          "games": 14,
+          "pf": 1116.14
+        },
+        "2023": {
+          "teamName": "Poulsbo Polliwogs",
+          "espnTid": 14,
+          "sourceOwner": "m14",
+          "w": 7,
+          "l": 7,
+          "t": 0,
+          "games": 14,
+          "pf": 1329.92
+        },
+        "2024": {
+          "teamName": "Poulsbo Polliwogs",
+          "espnTid": 14,
+          "sourceOwner": "m14",
+          "w": 5,
+          "l": 9,
+          "t": 0,
+          "games": 14,
+          "pf": 1361.56
+        },
+        "2025": {
+          "teamName": "Poulsbo Pollywogs",
+          "espnTid": 14,
+          "sourceOwner": "m14",
+          "w": 5,
+          "l": 9,
+          "t": 0,
+          "games": 14,
+          "pf": 1192.88
+        }
+      }
+    },
+    {
+      "memberId": "m19",
+      "ownerName": "Tyler Sanchez",
+      "currentName": "Pasco Pounders",
+      "seasons": 5,
+      "years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "w": 32,
+      "l": 38,
+      "t": 0,
+      "games": 70,
+      "pf": 6263.6,
+      "byYear": {
+        "2021": {
+          "teamName": "Pasco Pounders",
+          "espnTid": 13,
+          "sourceOwner": "m19",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1353.28
+        },
+        "2022": {
+          "teamName": "Pasco Pounders",
+          "espnTid": 13,
+          "sourceOwner": "m19",
+          "w": 9,
+          "l": 5,
+          "t": 0,
+          "games": 14,
+          "pf": 1364.5
+        },
+        "2023": {
+          "teamName": "Pasco Pounders",
+          "espnTid": 13,
+          "sourceOwner": "m19",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1208.02
+        },
+        "2024": {
+          "teamName": "Pasco Pounders",
+          "espnTid": 13,
+          "sourceOwner": "m19",
+          "w": 6,
+          "l": 8,
+          "t": 0,
+          "games": 14,
+          "pf": 1247.74
+        },
+        "2025": {
+          "teamName": "Pasco Pounders",
+          "espnTid": 13,
+          "sourceOwner": "m19",
+          "w": 2,
+          "l": 12,
+          "t": 0,
+          "games": 14,
+          "pf": 1090.02
+        }
+      }
+    },
+    {
+      "memberId": "m04",
+      "ownerName": "Jake Hibbard",
+      "currentName": "Charleston Chewbacca",
+      "seasons": 4,
+      "years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "w": 20,
+      "l": 32,
+      "t": 0,
+      "games": 52,
+      "pf": 4274.0,
+      "byYear": {
+        "2015": {
+          "teamName": "Charleston Chewbacca",
+          "espnTid": 4,
+          "sourceOwner": "m04",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1037.0
+        },
+        "2016": {
+          "teamName": "Charleston Chewbacca",
+          "espnTid": 4,
+          "sourceOwner": "m04",
+          "w": 6,
+          "l": 7,
+          "t": 0,
+          "games": 13,
+          "pf": 1233.0
+        },
+        "2017": {
+          "teamName": "Charleston Chewbacca",
+          "espnTid": 4,
+          "sourceOwner": "m04",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1080.0
+        },
+        "2018": {
+          "teamName": "Charleston Chewbacca",
+          "espnTid": 4,
+          "sourceOwner": "m04",
+          "w": 3,
+          "l": 10,
+          "t": 0,
+          "games": 13,
+          "pf": 924.0
+        }
+      }
+    },
+    {
+      "memberId": "m10",
+      "ownerName": "Tanner Dunn",
+      "currentName": "Winston-Salem Wake Snakes",
+      "seasons": 4,
+      "years": [
+        2017,
+        2018,
+        2019,
+        2020
+      ],
+      "w": 28,
+      "l": 24,
+      "t": 0,
+      "games": 52,
+      "pf": 5168.2,
+      "byYear": {
+        "2017": {
+          "teamName": "Winston-Salem Wake Snakes",
+          "espnTid": 12,
+          "sourceOwner": "m10",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1102.0
+        },
+        "2018": {
+          "teamName": "Winston-Salem Wake Snakes",
+          "espnTid": 12,
+          "sourceOwner": "m10",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1248.0
+        },
+        "2019": {
+          "teamName": "Winston-Salem Wake Snakes",
+          "espnTid": 12,
+          "sourceOwner": "m10",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1392.98
+        },
+        "2020": {
+          "teamName": "Winston-Salem Wake Snakes",
+          "espnTid": 12,
+          "sourceOwner": "m10",
+          "w": 7,
+          "l": 6,
+          "t": 0,
+          "games": 13,
+          "pf": 1425.26
+        }
+      }
+    },
+    {
+      "memberId": "m21",
+      "ownerName": "Patrick O'Neill",
+      "currentName": "Patagonia Pipers",
+      "seasons": 2,
+      "years": [
+        2024,
+        2025
+      ],
+      "w": 16,
+      "l": 12,
+      "t": 0,
+      "games": 28,
+      "pf": 2807.7,
+      "byYear": {
+        "2024": {
+          "teamName": "Patagonia Pipers",
+          "espnTid": 10,
+          "sourceOwner": "m21",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1374.0
+        },
+        "2025": {
+          "teamName": "Patagonia Pipers",
+          "espnTid": 10,
+          "sourceOwner": "m21",
+          "w": 8,
+          "l": 6,
+          "t": 0,
+          "games": 14,
+          "pf": 1433.7
+        }
+      }
+    },
+    {
+      "memberId": "m09",
+      "ownerName": "Scott Ace",
+      "currentName": "Pawtucket Patriots",
+      "seasons": 1,
+      "years": [
+        2014
+      ],
+      "w": 9,
+      "l": 4,
+      "t": 0,
+      "games": 13,
+      "pf": 1094.0,
+      "byYear": {
+        "2014": {
+          "teamName": "Pawtucket Patriots",
+          "espnTid": 2,
+          "sourceOwner": "m09",
+          "w": 9,
+          "l": 4,
+          "t": 0,
+          "games": 13,
+          "pf": 1094.0
+        }
+      }
+    },
+    {
+      "memberId": "m16",
+      "ownerName": "david allardyce",
+      "currentName": "L.O.B. Thunder",
+      "seasons": 1,
+      "years": [
+        2014
+      ],
+      "w": 4,
+      "l": 9,
+      "t": 0,
+      "games": 13,
+      "pf": 1147.0,
+      "byYear": {
+        "2014": {
+          "teamName": "L.O.B. Thunder",
+          "espnTid": 4,
+          "sourceOwner": "m16",
+          "w": 4,
+          "l": 9,
+          "t": 0,
+          "games": 13,
+          "pf": 1147.0
+        }
+      }
+    }
+  ]
+}

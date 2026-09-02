@@ -1,5 +1,6 @@
 /* Port of AFFL_Pillars category stats + CHI-149 All-grain career roto.
- * Season tables: one year, equal G. All: scored seasons 2018–2025 only.
+ * Season tables: one year, equal G. Category lines: scored seasons 2018–2025.
+ * All Totals/Averages G: real AFFL regular-season games 2014–2025 (franchiseYears).
  * Rate cats on All are pooled (cmp/att, ry/car, recy/rec), never mean of yearly rates.
  */
 (function (global) {
@@ -54,8 +55,18 @@
   function scheduleG(year) {
     const y = +year;
     if (y >= 2021 && y <= 2025) return 14;
-    if (y >= 2018 && y <= 2020) return 13;
+    if (y >= 2014 && y <= 2020) return 13;
     return 0;
+  }
+
+  /** Sum of real AFFL regular-season games for franchise years in 2014–2025. */
+  function careerRegGames(years) {
+    let g = 0;
+    for (const y of years || []) {
+      const n = scheduleG(y);
+      if (n) g += n;
+    }
+    return g;
   }
 
   function isScoredYear(year) {
@@ -161,7 +172,9 @@
         totalRank: 0,
         games: d.games,
         nSeasons: d.nSeasons || 1,
+        nCareerSeasons: d.nCareerSeasons || d.nSeasons || 1,
         years: d.years || [],
+        careerYears: d.careerYears || d.years || [],
         raw: d.raw,
       };
     });
@@ -200,7 +213,8 @@
    * Counting cats: total / nScoredYears (averages) or career sum (totals).
    * Rate cats: always pooled from raw cmp/att, ry/car, recy/rec.
    * TOTAL PTS: ranks of the DISPLAYED numbers, not mean of yearly TOTAL PTS.
-   * G (reg): (13*n13 + 14*n14) / n  or the sum. Post/combined: mean/sum of actual games.
+   * G (reg): career AFFL games 2014–2025 via opts.franchiseYears (13/14 by era). Cats stay scored years only.
+   * Post/combined G: mean/sum of actual boxscore games in scored years.
    */
   function buildAllRoto(loads, phase, grain, opts) {
     phase = phase || "reg";
@@ -262,10 +276,25 @@
         ypc: pooled.ypc,
         ypr: pooled.ypr,
       };
+      // Career G (reg): real AFFL games 2014–2025 via franchiseYears when provided.
+      // Category lines stay on scored boxscore years only (2018–2025) — no invented cats.
+      const careerYearsFn = opts.franchiseYears;
+      let careerYears = b.years.slice();
+      if (typeof careerYearsFn === "function") {
+        const fy = (careerYearsFn(b.ownerId) || []).map(Number).filter((y) => y >= 2014 && y <= 2025);
+        if (fy.length) careerYears = fy;
+      }
+      careerYears = careerYears.slice().sort((a, c) => a - c);
+      const nCareer = careerYears.length;
+      let nC13 = 0, nC14 = 0;
+      for (const y of careerYears) {
+        if (y >= 2014 && y <= 2020) nC13 += 1;
+        if (y >= 2021 && y <= 2025) nC14 += 1;
+      }
       let games;
       if (phase === "reg") {
-        const gSum = 13 * b.n13 + 14 * b.n14;
-        games = grain === "totals" ? gSum : (n ? gSum / n : 0);
+        const gSum = 13 * nC13 + 14 * nC14;
+        games = grain === "totals" ? gSum : (nCareer ? gSum / nCareer : 0);
       } else {
         games = grain === "totals" ? b.boxGames : (n ? b.boxGames / n : 0);
       }
@@ -278,9 +307,13 @@
         values,
         raw,
         nSeasons: n,
+        nCareerSeasons: nCareer,
         years: b.years.slice().sort((a, c) => a - c),
+        careerYears,
         n13: b.n13,
         n14: b.n14,
+        nCareer13: nC13,
+        nCareer14: nC14,
       };
     });
 
@@ -381,7 +414,7 @@
 
   const api = {
     CATS, COUNTING_KEYS, RATE_KEYS, SCORED_YEARS, UNAVAILABLE_YEARS, PHASE_LABEL,
-    tierInPhase, emptyTotals, addRaw, scheduleG, isScoredYear, isUnavailableYear,
+    tierInPhase, emptyTotals, addRaw, scheduleG, careerRegGames, isScoredYear, isUnavailableYear,
     valuesFromRaw, accumulateRaw, computeCategoryStats, buildAllRoto, buildRotoCareer,
     leagueAverageNorm, formatCatValue, formatGames, rankCellBg, ordinal, yearlyRatesMean,
   };
