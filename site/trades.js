@@ -288,7 +288,17 @@
             stacked: false,
             grid: { display: false },
             border: { display: false },
-            ticks: { display: true, autoSkip: false, color: C.ink, font: { size: 11, weight: "600" } },
+            /* CHI-112 — Activity Y-axis = current franchise / team names (never blank dashes) */
+            ticks: {
+              display: true,
+              autoSkip: false,
+              color: C.ink,
+              font: { size: 11, weight: "600" },
+              callback(value, index) {
+                const label = names[index] || (typeof this.getLabelForValue === "function" ? this.getLabelForValue(value) : value);
+                return label && label !== "—" && label !== "-" ? label : "unavailable";
+              },
+            },
             afterFit(scale) { scale.width = Math.max(scale.width, 196); },
           },
         },

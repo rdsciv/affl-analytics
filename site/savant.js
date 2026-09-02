@@ -687,20 +687,45 @@
 
   /* ------------------------------------------------------------------ table */
 
-  const TCOLS = [
-    ["name", "Player"], ["pos", "Pos"], ["team", "Team"], ["g", "G"],
-    ["opp", "Opp"], ["tgt", "Tgt"], ["car", "Car"], ["att", "Att"],
-    ["fpts", "FPts"], ["fppg", "FP/G"], ["epa", "EPA"],
-    ["starts", "AFFL starts"], ["fr", "Franchise"], ["bid", "Auction $"],
-  ];
+  /* Table must not hang career starts on one franchise.
+   * Team selected: starts are THAT franchise (Wilson / Warlords = 11).
+   * Team=All career: label "Career starts" and do not name a franchise
+   * beside career 92. Season rows keep season starts + that year's club. */
+  function tableCols() {
+    const careerBook = isAll() && !state.franchise;
+    return [
+      ["name", "Player"], ["pos", "Pos"], ["team", "Team"], ["g", "G"],
+      ["opp", "Opp"], ["tgt", "Tgt"], ["car", "Car"], ["att", "Att"],
+      ["fpts", "FPts"], ["fppg", "FP/G"], ["epa", "EPA"],
+      ["starts", careerBook ? "Career starts" : "AFFL starts"],
+      ["fr", "Franchise"], ["bid", "Auction $"],
+    ];
+  }
+
+  function tableStarts(r) {
+    if (isAll() && state.franchise) {
+      if (r.frStarts == null || r.frStarts === "") return null;
+      return +r.frStarts;
+    }
+    if (r.starts == null || r.starts === "") return null;
+    return +r.starts;
+  }
+
+  function tableFranchise(r) {
+    if (isAll() && !state.franchise) return "";
+    return r.fr || "";
+  }
 
   function cell(r, key) {
     if (key === "opp") return r.opp != null ? +r.opp : n(r.tgt) + n(r.car) + n(r.att);
     if (key === "bid") return r.bid == null ? null : +r.bid;
+    if (key === "starts") return tableStarts(r);
+    if (key === "fr") return tableFranchise(r);
     return r[key];
   }
 
   function renderTable(rows) {
+    const TCOLS = tableCols();
     $("sv-head").innerHTML = TCOLS.map(([k, l]) =>
       `<th data-k="${k}" class="${state.sort.key === k ? "on" : ""}">${l}${state.sort.key === k ? (state.sort.dir < 0 ? " ▾" : " ▴") : ""}</th>`
     ).join("");
@@ -738,8 +763,8 @@
       <td>${fmt(r.fpts, { nd: 1 })}</td>
       <td>${fmt(r.fppg, { nd: 2 })}</td>
       <td>${fmt(r.epa, { nd: 1 })}</td>
-      <td>${r.starts || "—"}</td>
-      <td class="sv-fr">${esc(r.fr || "—")}</td>
+      <td>${tableStarts(r) || "—"}</td>
+      <td class="sv-fr">${esc(tableFranchise(r) || "—")}</td>
       <td>${r.bid == null ? "—" : fmtBid(r.bid)}</td>
     </tr>`).join("");
   }

@@ -653,6 +653,11 @@
         allL: t.allplayL || 0,
         moves: movesCount(y, t.id),
       };
+    }).sort((a, b) => {
+      const ra = a.rank == null ? 99 : a.rank;
+      const rb = b.rank == null ? 99 : b.rank;
+      if (ra !== rb) return ra - rb;
+      return (b.wins - a.wins) || (b.pf - a.pf);
     });
   }
 
@@ -698,17 +703,30 @@
       if (d) return d;
       return (a.rank || 99) - (b.rank || 99);
     });
+    const allMode = pickedYear == null;
+    const h2 = $("season-h2");
+    if (h2) h2.textContent = allMode ? "Career All-Play" : "Season Standings";
+    const tbl = document.getElementById("season-tbl");
+    if (tbl) {
+      tbl.classList.toggle("fit-all", allMode);
+      tbl.classList.add("ready");
+    }
+    const wlTh = document.querySelector('#season-tbl thead th[data-k="wins"]');
+    if (wlTh) wlTh.textContent = allMode ? "RS W-L-T" : "W-L-T";
     tb.innerHTML = rows.map((r) => {
       const rec = (r.wins || 0) + "-" + (r.losses || 0) + (r.ties ? "-" + r.ties : "");
+      const ap = (r.allW || 0) + "-" + (r.allL || 0);
       const mv = r.moves == null ? "—" : r.moves;
       const pillCls = r.rank === 1 ? "gold" : r.rank === 2 ? "slv" : r.rank === 3 ? "brz" : "";
+      const recCell = allMode ? rec : `<strong>${rec}</strong>`;
+      const apCell = allMode ? `<strong>${ap}</strong>` : ap;
       return `<tr>
         <td>${r.rank ? `<span class="rank-pill ${pillCls}">${r.rank}</span>` : "—"}</td>
         <td>${teamCell(r)}</td>
-        <td><strong>${rec}</strong></td>
+        <td>${recCell}</td>
         <td>${A.fmt(r.pf, 1)}</td>
         <td>${A.fmt(r.pa, 1)}</td>
-        <td>${r.allW}-${r.allL}</td>
+        <td>${apCell}</td>
         <td>${mv}</td>
       </tr>`;
     }).join("");

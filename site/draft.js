@@ -2081,6 +2081,86 @@
     return HOLDOUT.pooled;
   }
 
+  function holdoutHasPar(block) {
+    if (!block) return false;
+    const mekko = block.mekko || [];
+    const scatter = block.scatter || [];
+    return mekko.length > 0 || scatter.length > 0;
+  }
+
+  function holdoutEmptyMessage() {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) {
+      return year + " is a snake draft (no auction bids)";
+    }
+    return "No auction PAR in this slice.";
+  }
+
+  function holdoutSliceEmpty(block) {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) return true;
+    if (scope === "season" && !(HOLDOUT.scoredAuctionSeasons || []).includes(year)) return true;
+    return !holdoutHasPar(block);
+  }
+
+  function hideHoldoutWrap(el, hide) {
+    if (!el) return;
+    el.hidden = !!hide;
+    if (hide) {
+      el.style.display = "none";
+      el.style.height = "0";
+      el.style.minHeight = "0";
+      el.style.overflow = "hidden";
+    } else {
+      el.style.display = "";
+      el.style.height = "";
+      el.style.minHeight = "";
+      el.style.overflow = "";
+    }
+  }
+
+  function destroyHoldoutCharts() {
+    if (scatterChart) { scatterChart.destroy(); scatterChart = null; }
+    if (contChart) { contChart.destroy(); contChart = null; }
+  }
+
+  function setHoldoutEmpty(empty, msg) {
+    destroyHoldoutCharts();
+    const emptyEl = $("#holdout-empty");
+    if (emptyEl) {
+      if (empty) {
+        emptyEl.hidden = false;
+        emptyEl.style.display = "";
+        emptyEl.style.height = "";
+        emptyEl.style.minHeight = "";
+        emptyEl.innerHTML = A.notice(msg || holdoutEmptyMessage());
+      } else {
+        emptyEl.hidden = true;
+        emptyEl.innerHTML = "";
+        emptyEl.style.display = "none";
+        emptyEl.style.height = "0";
+        emptyEl.style.minHeight = "0";
+      }
+    }
+    hideHoldoutWrap($("#holdout-viz"), empty);
+    hideHoldoutWrap($("#holdout-mekko-col"), empty);
+    hideHoldoutWrap($("#holdout-early-col"), empty);
+    hideHoldoutWrap($("#mekko"), empty);
+    hideHoldoutWrap($("#holdout-scatter-wrap"), empty);
+    hideHoldoutWrap(document.querySelector(".holdout-continuous"), empty);
+    const canvas = $("#holdout-scatter");
+    if (canvas) {
+      canvas.hidden = !!empty;
+      if (empty) {
+        canvas.style.display = "none";
+        canvas.style.height = "0";
+        canvas.style.minHeight = "0";
+      } else {
+        canvas.style.display = "";
+        canvas.style.height = "";
+        canvas.style.minHeight = "";
+      }
+    }
+  }
+
   function signed(n) {
     if (n == null) return '—';
     return (n > 0 ? '+' : '') + fmt(n, 1);
@@ -2120,7 +2200,7 @@
     const el = $('#mekko');
     const buckets = block.mekko || [];
     if (!buckets.length) {
-      el.innerHTML = A.notice('No auction PAR in this slice.');
+      el.innerHTML = "";
       return;
     }
     const W = el.clientWidth || 560, H = el.clientHeight || 340;
@@ -2181,12 +2261,9 @@
 
   function renderScatter(block) {
     const rows = block.scatter || [];
-    if (scatterChart) scatterChart.destroy();
+    if (scatterChart) { scatterChart.destroy(); scatterChart = null; }
     const canvas = $('#holdout-scatter');
-    if (!rows.length) {
-      scatterChart = null;
-      return;
-    }
+    if (!canvas || canvas.hidden || !rows.length) return;
     scatterChart = new Chart(canvas, {
       type: 'scatter',
       data: {
@@ -2244,7 +2321,7 @@
     const rows = block.continuous || [];
     if (contChart) { contChart.destroy(); contChart = null; }
     const canvas = $('#holdout-continuous');
-    if (!canvas || !rows.length) return;
+    if (!canvas || canvas.hidden || !rows.length) return;
     contChart = new Chart(canvas, {
       type: 'scatter',
       data: {
@@ -2291,34 +2368,46 @@
     ].filter(Boolean).map(([id, lab]) =>
       `<button class="filter-chip${S.holdoutScope === id ? ' on' : ''}" data-scope="${id}">${lab}</button>`
     ).join('');
-    $('#holdout-stack').innerHTML = [
+    const block = holdoutBlock();
+    const showStack = !holdoutSliceEmpty(block);
+    $('#holdout-stack').innerHTML = showStack ? [
       ['half', 'Stack: early / late'],
       ['pos', 'Stack: position'],
     ].map(([id, lab]) =>
       `<button class="filter-chip${S.mekkoStack === id ? ' on' : ''}" data-stack="${id}">${lab}</button>`
-    ).join('');
+    ).join('') : '';
 
-    const block = holdoutBlock();
     const claim = S.holdoutScope === 'pooled'
       ? HOLDOUT.claim
       : (block.claim ? `${block.claim} (${year} auction, non-keepers).` : HOLDOUT.claim);
     $('#holdout-title').textContent = (claim || '').split(':')[0] || 'Auction holdouts';
-    $('#holdout-claim').textContent = claim || '';
+    const claimEl = $('#holdout-claim');
+    if (claimEl) {
+      claimEl.textContent = claim || '';
+      hideHoldoutWrap(claimEl, !claim);
+    }
     $('#holdout-sub').textContent = S.holdoutScope === 'pooled'
       ? HOLDOUT.subtitle
       : `${year} auction player-seasons · width = share of that draft's spend · stacks = ${S.mekkoStack === 'pos' ? 'position' : 'early/late nomination half'} · color = mean PAR`;
 
     const notes = [];
-    if (!YD.draft.auction) {
+    if (scope === "season" && YD && YD.draft && !YD.draft.auction) {
       notes.push(`${year} is a snake draft (no auction bids). Charts stay on 2018–2025 auction seasons.`);
-    } else if (!scored) {
+    } else if (scope === "season" && !scored) {
       notes.push(`${year} is auction but ESPN stored no weekly scoring, so PAR is blank. Charts stay on scored auction years.`);
     }
-    notes.push(HOLDOUT.keepers.note);
-    notes.push(HOLDOUT.histogramNote);
-    notes.push('Grain: ' + HOLDOUT.grain + '. Metric is PAR from v_draft_value — not WARP.');
-    $('#holdout-note').innerHTML = notes.join(' ');
+    if (HOLDOUT.keepers && HOLDOUT.keepers.note) notes.push(HOLDOUT.keepers.note);
+    if (HOLDOUT.histogramNote) notes.push(HOLDOUT.histogramNote);
+    const grain = String(HOLDOUT.grain || "").trim();
+    if (grain) notes.push("Grain: " + grain + ".");
+    notes.push("Metric is PAR from v_draft_value — not WARP.");
+    $('#holdout-note').innerHTML = notes.filter(Boolean).join(" ");
 
+    if (holdoutSliceEmpty(block)) {
+      setHoldoutEmpty(true, holdoutEmptyMessage());
+      return;
+    }
+    setHoldoutEmpty(false);
     renderMekko(block);
     renderScatter(block);
     renderContinuous(block);
@@ -3248,10 +3337,16 @@
     S.mekkoStack = b.dataset.stack;
     renderHoldout();
   });
-  window.addEventListener('resize', () => { if (YD) renderMekko(holdoutBlock()); });
+  window.addEventListener('resize', () => {
+    if (!YD) return;
+    const block = holdoutBlock();
+    if (!holdoutSliceEmpty(block)) renderMekko(block);
+  });
   const holdoutCont = document.querySelector('.holdout-continuous');
   if (holdoutCont) holdoutCont.addEventListener('toggle', (e) => {
-    if (e.target.open && YD) renderContinuous(holdoutBlock());
+    if (!e.target.open || !YD) return;
+    const block = holdoutBlock();
+    if (!holdoutSliceEmpty(block)) renderContinuous(block);
   });
 
   bindAllDraftSorts();

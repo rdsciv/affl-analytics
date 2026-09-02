@@ -18,7 +18,7 @@
   --steel: #3a4a63;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { color-scheme: dark; }
+html { color-scheme: dark; overflow-x: hidden; }
 body {
   background:
     radial-gradient(1100px 520px at 85% -12%, #10306633, transparent 60%),
@@ -27,8 +27,10 @@ body {
   color: var(--ink);
   font-family: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
 }
-.frame { max-width: 1560px; margin: 0 auto; padding: 18px 22px 48px; }
+.frame { max-width: min(1560px, 100%); margin: 0 auto; padding: 18px 22px 48px; overflow-x: hidden; }
 
 /* chrome lettering, straight out of the logo */
 .chrome {
@@ -402,7 +404,17 @@ section.card, .chart-card { margin-bottom: 16px; }
 }
 .tl-card:hover { transform: translateY(-3px); border-color: var(--orange); box-shadow: 0 0 16px #ff7a0044; }
 .tl-year { font-size: 12px; font-weight: 800; color: var(--yellow); letter-spacing: .1em; font-style: italic; }
-.tl-team { font-size: 12.5px; font-weight: 700; margin: 5px 0 2px; line-height: 1.3; }
+.tl-team {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; margin: 5px 0 2px; line-height: 1.3;
+}
+.tl-team img,
+.tl-team img.mini,
+.tl-team .mini {
+  width: 28px; height: 28px; max-width: 28px; max-height: 28px;
+  object-fit: contain; background: transparent; flex: 0 0 28px; border-radius: 6px;
+}
+.tl-name { min-width: 0; overflow-wrap: anywhere; }
 .tl-own { font-size: 11px; color: var(--mut); }
 
 /* ---------- next gen lab ---------- */
@@ -473,13 +485,16 @@ section.card, .chart-card { margin-bottom: 16px; }
   background: linear-gradient(180deg, #131826, #0d1019);
   border: 1px solid var(--line); border-radius: 11px; cursor: pointer;
   transition: transform .12s, border-color .12s, box-shadow .12s;
+  min-width: 0;
 }
 .pp-card:hover { transform: translateY(-2px); border-color: var(--blue); box-shadow: 0 0 14px #2f7bff33; }
 .pp-hs { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #1a2233; flex: 0 0 44px; }
 .pp-hs.fb { display: grid; place-items: center; font-weight: 800; font-size: 15px; color: #dff0ff; background: linear-gradient(135deg, #1a2c4a, var(--steel)); }
+.pp-meta { min-width: 0; flex: 1; overflow: hidden; }
 .pp-nm { font-size: 12.5px; font-weight: 800; line-height: 1.25; }
-.pp-sub { font-size: 11px; color: var(--mut); margin-top: 2px; }
-.pp-pts { margin-left: auto; text-align: right; }
+.pp-sub { font-size: 11px; color: var(--mut); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-pts { margin-left: auto; text-align: right; flex: 0 0 auto; }
 .pp-pts b { font-size: 14px; font-style: italic; color: var(--yellow); }
 .pp-pts span { display: block; font-size: 10px; color: var(--mut); letter-spacing: .08em; }
 .pp-more {
@@ -665,8 +680,9 @@ a.sb-name.link:hover { color: var(--blue2); text-decoration: underline; text-und
 .trade-date { font-size: 10.5px; color: var(--mut); }
 .trade-body { display: flex; align-items: stretch; gap: 8px; }
 .trade-side { flex: 1; min-width: 0; }
-.trade-team { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; margin-bottom: 5px; }
+.trade-team { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; font-weight: 800; margin-bottom: 5px; }
 .trade-team .mini { width: 20px; height: 20px; flex: 0 0 20px; }
+.trade-team span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; min-width: 0; }
 .trade-got { display: flex; flex-direction: column; gap: 3px; }
 .trade-pl { font-size: 11.5px; color: var(--ink); display: flex; align-items: center; gap: 5px; }
 .trade-swap { display: grid; place-items: center; color: var(--steel); font-size: 15px; font-weight: 900; flex: 0 0 20px; }
@@ -837,6 +853,7 @@ html.show-former .fr-card.former { display: flex; opacity: .72; }
 #franchise-tbl td:nth-child(2) { text-align: left; }
 #franchise-tbl th.s { cursor: pointer; user-select: none; }
 #franchise-tbl th.s:hover { color: var(--ink); }
+#franchise-tbl th.s.on,
 #franchise-tbl th.on { color: var(--blue); }
 .hist-name { color: inherit; text-decoration: none; font-weight: 700; }
 .hist-name:hover { color: var(--blue); }
@@ -1164,6 +1181,22 @@ button.award-count.on { color: var(--blue); }
 @media (max-width: 720px) { .scorers-grid { grid-template-columns: 1fr 1fr; } }
 
 /* ---------- ESPN Moves (history season standings) ---------- */
+
+#season-tbl { table-layout: fixed; width: 100%; }
+#season-tbl th, #season-tbl td { white-space: normal; }
+#season-tbl .team-cell { white-space: normal; align-items: flex-start; min-width: 0; }
+#season-tbl .team-cell > div { min-width: 0; }
+#season-tbl .hist-name { white-space: normal; overflow-wrap: anywhere; }
+.card:has(#season-tbl) .table-scroll { overflow-x: hidden; max-width: 100%; }
+#season-tbl.fit-all th[data-k="wins"],
+#season-tbl.fit-all td:nth-child(3),
+#season-tbl.fit-all th[data-k="pa"],
+#season-tbl.fit-all td:nth-child(5),
+#season-tbl.fit-all th[data-k="moves"],
+#season-tbl.fit-all td:nth-child(7) { display: none; }
+#season-tbl.fit-all th:nth-child(4), #season-tbl.fit-all td:nth-child(4) { width: 5.5rem; }
+#season-tbl.fit-all th:nth-child(6), #season-tbl.fit-all td:nth-child(6) { width: 7rem; }
+#season-tbl:not(.ready) tbody { min-height: 8rem; }
 #season-tbl th:nth-child(1), #season-tbl td:nth-child(1) { text-align: center; width: 36px; }
 #season-tbl th:nth-child(2), #season-tbl td:nth-child(2) { text-align: left; }
 #season-tbl th.s { cursor: pointer; user-select: none; }
@@ -2134,6 +2167,20 @@ body.guide-lock { overflow: hidden; }
   max-width: 88px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .tcomp-cum tr.tcomp-on th, .tcomp-cum tr.tcomp-on td { background: #101828; }
+#tcomp-block {
+  overflow-x: auto;
+  max-width: 100%;
+}
+#tcomp-block .table-scroll,
+#tcomp-block .tcomp-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+#tcomp-block .tcomp-cum {
+  width: max-content;
+  min-width: 100%;
+}
 @media (max-width: 720px) {
   .tcomp-grid { grid-template-columns: 1fr; }
 }
@@ -2582,8 +2629,19 @@ img.avatar {
   font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
   color: var(--mut); font-style: italic; margin-bottom: 8px;
 }
-.mekko-wrap { overflow: hidden; }
-.mekko-wrap svg { width: 100%; height: 100%; display: block; }
+.mekko-wrap { overflow: visible; display: flex; flex-direction: column; height: auto; }
+.second-grid .chart-wrap.xtall.mekko-wrap { height: auto; min-height: 640px; }
+.mekko-wrap svg { width: 100%; height: 580px; display: block; overflow: visible; }
+.mekko-legend {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  padding: 10px 2px 4px; font-size: 14px; font-weight: 800;
+  color: var(--ink); line-height: 1.3;
+}
+.mekko-legend-item { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.mekko-legend-swatch {
+  width: 11px; height: 11px; border-radius: 2px; flex: 0 0 11px;
+  box-shadow: 0 0 0 1px #05060b;
+}
 .mekko-tip, .viz-tip {
   position: fixed; z-index: 40; pointer-events: none;
   background: #05060bf2; border: 1px solid #1c2536; border-radius: 8px;
@@ -2667,3 +2725,598 @@ img.chi114-logo {
 #pl-chi114 .chart-wrap.tall,
 #tm-chi114 .chart-wrap.tall { height: 360px; }
 #tm-chi114[hidden] { display: none !important; }
+#pl-chi114[hidden] { display: none !important; }
+#pl-overview:empty { display: none !important; }
+
+/* CHI-148 dashboard chrome — caps, type, rail, index franchise */
+body { font-size: 16px; }
+.tbl { font-size: 14px; }
+.tbl th { font-size: 11.5px; }
+.brand-logo {
+  height: 64px;
+  width: auto;
+  max-width: 240px;
+  max-height: 64px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.hero-stats { display: none !important; }
+.side-mark {
+  display: flex;
+  justify-content: center;
+  margin: 2px 4px 12px;
+  line-height: 0;
+  text-decoration: none;
+}
+.side-mark img {
+  width: 64px;
+  height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  object-fit: contain;
+  display: block;
+}
+.side-menu .site-nav a::before {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  flex: 0 0 0 !important;
+}
+.brand-strip {
+  flex-wrap: wrap;
+  overflow-x: hidden;
+}
+.brand-team {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+}
+.brand-team img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #07080c;
+}
+.foot-banner {
+  max-height: 160px;
+  width: 100%;
+  object-fit: contain;
+}
+/* CHI-155 — Franchise Records TEAM: soft wrap at spaces, not letter-stack */
+#cum-pane #franchise-tbl,
+body.index-pack #franchise-tbl { table-layout: fixed; width: 100%; }
+#cum-pane #franchise-tbl th:nth-child(1),
+#cum-pane #franchise-tbl td:nth-child(1),
+body.index-pack #franchise-tbl th:nth-child(1),
+body.index-pack #franchise-tbl td:nth-child(1) { width: 36px; }
+#cum-pane #franchise-tbl th:nth-child(2),
+#cum-pane #franchise-tbl td:nth-child(2),
+body.index-pack #franchise-tbl th:nth-child(2),
+body.index-pack #franchise-tbl td:nth-child(2) {
+  text-align: left;
+  min-width: 12rem;
+  width: 12rem;
+}
+#cum-pane #franchise-tbl th:nth-child(n+3),
+#cum-pane #franchise-tbl td:nth-child(n+3),
+body.index-pack #franchise-tbl th:nth-child(n+3),
+body.index-pack #franchise-tbl td:nth-child(n+3) {
+  white-space: nowrap;
+}
+#cum-pane #franchise-tbl .team-cell,
+body.index-pack #franchise-tbl .team-cell {
+  white-space: normal;
+  align-items: flex-start;
+  min-width: 0;
+}
+#cum-pane #franchise-tbl .team-cell > div,
+body.index-pack #franchise-tbl .team-cell > div,
+#cum-pane #franchise-tbl .hist-name,
+body.index-pack #franchise-tbl .hist-name {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+#cum-pane .card:has(#franchise-tbl) .table-scroll,
+body.index-pack .card:has(#franchise-tbl) .table-scroll {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+.timeline { gap: 8px; margin-bottom: 12px; }
+.tl-card { padding: 8px 10px; }
+.tl-team { overflow-wrap: anywhere; }
+select[hidden] { display: none !important; height: 0; }
+
+/* CHI-148/CHI-153 first viewport: banner + KPIs + champions + Franchise Records. No empty sea. */
+body.index-pack .frame { padding: 6px 12px 28px; }
+body.index-pack .topbar { padding: 0; gap: 4px 10px; }
+body.index-pack .topbar-meta { padding-top: 0; margin: 0; }
+body.index-pack .provenance { display: none; }
+body.index-pack .brand-logo {
+  height: 56px; width: auto; max-width: min(460px, 62vw);
+  object-fit: contain; object-position: left center;
+}
+body.index-pack .brand h1 { display: none; }
+body.index-pack .brand .sub { display: none; }
+body.index-pack .header-rail { padding: 0 0 4px; margin-bottom: 0; }
+body.index-pack .brand-strip { flex-wrap: nowrap; overflow-x: auto; }
+body.index-pack .brand-team { width: 40px; height: 40px; flex: 0 0 40px; }
+body.index-pack .brand-team img,
+body.index-pack .brand-team .brand-team-fb { width: 40px; height: 40px; }
+body.index-pack .kpi-row { gap: 8px; margin: 6px 0 8px; }
+body.index-pack .kpi-static { padding: 8px 10px; }
+body.index-pack .kpi-static .kpi-title { font-size: 20px; }
+body.index-pack #season-pane[hidden] { display: none !important; height: 0; margin: 0; padding: 0; }
+body.index-pack #franchise-card { margin: 0 0 8px; padding: 8px 10px; }
+body.index-pack #franchise-card .card-head { margin-bottom: 4px; }
+body.index-pack #franchise-card .card-sub { display: none; }
+body.index-pack #franchise-tbl { font-size: 14px; }
+body.index-pack #franchise-tbl td { height: 36px; padding: 0 8px; }
+body.index-pack #franchise-tbl th { height: 30px; padding: 0 8px; }
+body.index-pack #franchise-tbl .team-cell img,
+body.index-pack #franchise-tbl .team-cell .mini { width: 36px; height: 36px; flex-basis: 36px; }
+body.index-pack .section-break { margin: 10px 2px 8px; }
+body.index-pack .timeline { gap: 6px; margin: 0 0 8px; }
+body.index-pack .tl-card { padding: 8px 8px; }
+body.index-pack .tl-team img,
+body.index-pack .tl-team img.mini,
+body.index-pack .tl-team .mini {
+  width: 28px; height: 28px; max-width: 28px; max-height: 28px;
+  object-fit: contain; flex: 0 0 28px;
+}
+body.index-pack .side-menu { padding: 8px 8px; border-radius: 14px; }
+body.index-pack .side-menu .site-nav { gap: 3px; }
+body.index-pack .side-menu .site-nav a { padding: 6px 10px; }
+
+body.index-pack #milestones-card:not(.ready) { display: none !important; }
+body.index-pack #timeline:empty { display: none !important; height: 0; margin: 0; padding: 0; }
+body.index-pack #alltime-break { margin: 4px 2px 6px; }
+body.index-pack .chart-wrap.era { height: 260px; }
+
+/* CHI-149 — Roto All grain, capped logos, unavailable empty */
+#grain-row[hidden],
+#career-graph-block[hidden],
+#graphs-block[hidden] { display: none !important; }
+.roto-tbl .team-cell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.roto-tbl .team-cell img,
+.roto-tbl .team-cell .mini,
+.roto-tbl img.mini,
+.roto-tbl img.sb-logo {
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--line);
+  flex: 0 0 24px;
+}
+.roto-tbl td.left { white-space: nowrap; }
+.roto-unavailable { max-width: 62ch; line-height: 1.5; }
+
+/* CHI-111-HARD — final franchise mark caps (do not soften) */
+/* Chase next-win bar: ~32px, contain, no white blowout layout */
+#ms-chase .story-ico {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+}
+#ms-chase .story-ico img,
+#ms-chase .story-ico img.mini,
+#ms-chase .story-ico .mini,
+.story-list .story-ico img,
+.story-list .story-ico img.mini {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  display: block !important;
+  border-radius: 8px !important;
+  flex: 0 0 32px !important;
+}
+
+/* Global franchise marks in cards / bars / lists — hard cap ~36–40px */
+img.mini,
+.mini:not(div):not(span),
+.tbl .team-cell img,
+.tbl .team-cell img.mini,
+.hist-bar img,
+.hist-bar img.mini,
+.book-card .team-cell img,
+.book-card .team-cell img.mini,
+.trade-team img,
+.trade-team img.mini,
+.team-index img.mini,
+.ms-who img,
+.ms-who img.mini,
+.champ-spot img.avatar,
+.trophy-slot img.avatar,
+img.sb-logo,
+img.fr-logo,
+img.gm-logo,
+img.tcomp-logo,
+img.chi114-logo,
+.roto-tbl .team-cell img,
+.roto-tbl img.mini {
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* Tight defaults by class (still under the 40px hard ceiling) */
+img.mini {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  flex: 0 0 32px !important;
+}
+img.avatar {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  flex: 0 0 40px !important;
+}
+img.sb-logo { width: 30px !important; height: 30px !important; max-width: 30px !important; max-height: 30px !important; flex: 0 0 30px !important; }
+img.fr-logo { width: 40px !important; height: 40px !important; max-width: 40px !important; max-height: 40px !important; flex: 0 0 40px !important; }
+img.gm-logo { width: 22px !important; height: 22px !important; max-width: 22px !important; max-height: 22px !important; flex: 0 0 22px !important; }
+img.tcomp-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; flex: 0 0 36px !important; }
+img.chi114-logo { width: 28px !important; height: 28px !important; max-width: 28px !important; max-height: 28px !important; flex: 0 0 28px !important; }
+
+.tbl .team-cell img,
+.tbl .team-cell img.mini {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  flex: 0 0 28px !important;
+  border-radius: 50%;
+}
+.team-index img.mini {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex: 0 0 40px !important;
+}
+.ms-who img,
+.ms-who img.mini {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  flex: 0 0 32px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+.champ-spot img.avatar,
+.trophy-slot img.avatar {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* Brand strip franchise marks — capped circular, contain (no white cover crop) */
+.brand-team {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  background: #07080c !important;
+}
+.brand-team img {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  background: #07080c !important;
+  display: block !important;
+}
+.brand-team-fb {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* Side rail mark — keep ~64px contained */
+.side-mark img {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+  display: block !important;
+  background: transparent !important;
+}
+
+/* Team page hero can be larger; still contained */
+.team-hero .logo,
+img.th-logo {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  flex: 0 0 64px !important;
+}
+
+/* Wide AFFL banner stays a banner — NOT shrunk to a mark */
+img.brand-logo,
+.brand-logo {
+  height: 56px !important;
+  width: auto !important;
+  max-width: min(460px, 62vw) !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+}
+img.foot-banner,
+.foot-banner {
+  width: 100% !important;
+  max-height: 160px !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+/* Index franchise table marks */
+body.index-pack #franchise-tbl .team-cell img,
+body.index-pack #franchise-tbl .team-cell .mini,
+body.index-pack #franchise-tbl .team-cell img.mini {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  flex: 0 0 36px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* CHI-156 — pack wasted space, bump logos (still capped) */
+body.index-pack .frame {
+  max-width: min(1680px, 100%);
+  padding: 4px 8px 24px;
+}
+body.index-pack .sheet {
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 8px;
+}
+body.index-pack .side-menu { padding: 6px 6px; border-radius: 12px; }
+body.index-pack .side-menu .site-nav { gap: 2px; }
+body.index-pack .side-menu .site-nav a { padding: 5px 8px; font-size: 13px; }
+body.index-pack .header-rail {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+  padding: 0 0 2px;
+  margin: 0;
+}
+body.index-pack .brand-strip {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  justify-content: flex-start;
+}
+body.index-pack .topbar-meta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 2px 0 0;
+}
+body.index-pack .season-block { flex: 0 0 auto; min-width: 0; }
+body.index-pack .kpi-row { gap: 6px; margin: 4px 0 6px; }
+body.index-pack .kpi-static { padding: 6px 8px; }
+body.index-pack #alltime-break { margin: 2px 2px 4px; }
+body.index-pack .timeline { gap: 6px; margin: 0 0 6px; }
+body.index-pack .tl-card { padding: 6px 8px; }
+body.index-pack #franchise-card { margin: 0 0 6px; padding: 6px 8px; }
+body.index-pack #franchise-tbl { font-size: 14.5px; }
+body.index-pack #franchise-tbl td { height: 44px; padding: 0 8px; }
+body.index-pack #franchise-tbl th { height: 32px; padding: 0 8px; }
+body.index-pack #franchise-tbl .hist-name { font-size: 15px; font-weight: 700; line-height: 1.25; }
+body.index-pack #franchise-tbl th:nth-child(2),
+body.index-pack #franchise-tbl td:nth-child(2) {
+  min-width: 14rem;
+  width: 14rem;
+}
+
+/* Strip logos 52px (max 56) — beats CHI-111 40px hard cap on index */
+body.index-pack .brand-team {
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  background: #07080c !important;
+}
+body.index-pack .brand-team img,
+body.index-pack .brand-team .brand-team-fb {
+  width: 52px !important;
+  height: 52px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  object-fit: contain !important;
+  background: #07080c !important;
+  display: block !important;
+}
+
+/* Champion year-card marks 40px (max 44) */
+body.index-pack .tl-team img,
+body.index-pack .tl-team img.mini,
+body.index-pack .tl-team .mini {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  flex: 0 0 40px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+}
+body.index-pack .tl-name {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
+/* Franchise Records TEAM marks 40px */
+body.index-pack #franchise-tbl .team-cell img,
+body.index-pack #franchise-tbl .team-cell .mini,
+body.index-pack #franchise-tbl .team-cell img.mini {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex: 0 0 40px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  border-radius: 50% !important;
+}
+
+/* THE CHASE ≤36 */
+body.index-pack #ms-chase .story-ico,
+body.index-pack #ms-chase .story-ico img,
+body.index-pack #ms-chase .story-ico img.mini,
+body.index-pack #ms-chase .story-ico .mini {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  flex: 0 0 36px !important;
+  object-fit: contain !important;
+}
+
+/* CHI-156b — denser first viewport (still capped) */
+body.index-pack .frame {
+  max-width: min(1760px, 100%);
+  padding: 2px 6px 20px;
+}
+body.index-pack .sheet {
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 6px;
+}
+body.index-pack .brand {
+  gap: 10px;
+  margin-right: 8px;
+}
+body.index-pack .brand-logo {
+  height: 52px !important;
+  max-width: min(420px, 48vw) !important;
+  max-height: 56px !important;
+}
+body.index-pack .header-rail {
+  gap: 6px 10px;
+  flex-wrap: nowrap;
+}
+body.index-pack .former-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 12px;
+}
+body.index-pack .brand-strip {
+  flex: 1 1 auto;
+  gap: 5px;
+}
+body.index-pack .topbar {
+  gap: 2px 8px;
+}
+body.index-pack .topbar-meta {
+  padding: 0;
+  border-top: none;
+  margin: 0 0 2px;
+}
+body.index-pack .kpi-row {
+  gap: 5px;
+  margin: 2px 0 4px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+body.index-pack .kpi-static {
+  padding: 5px 8px;
+  border-radius: 10px;
+}
+body.index-pack .kpi-static .kpi-title {
+  font-size: 22px;
+  line-height: 1.1;
+}
+body.index-pack .kpi-static .kpi-label {
+  font-size: 10px;
+  letter-spacing: .06em;
+}
+body.index-pack #alltime-break {
+  margin: 2px 0 2px;
+  gap: 8px;
+}
+body.index-pack #alltime-break h2 {
+  font-size: 15px;
+}
+body.index-pack .timeline {
+  gap: 5px;
+  margin: 0 0 4px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+body.index-pack .tl-card {
+  padding: 5px 6px;
+  border-radius: 10px;
+}
+body.index-pack .tl-year { font-size: 11px; margin: 0; }
+body.index-pack .tl-team {
+  gap: 5px;
+  font-size: 12px;
+  margin: 3px 0 1px;
+}
+body.index-pack .tl-own { font-size: 10px; }
+body.index-pack #franchise-card {
+  margin: 0 0 4px;
+  padding: 5px 8px;
+  border-radius: 12px;
+}
+body.index-pack #franchise-card .card-head {
+  margin-bottom: 2px;
+}
+body.index-pack #franchise-card h2 {
+  font-size: 16px;
+}
+body.index-pack #franchise-tbl {
+  font-size: 15px;
+}
+body.index-pack #franchise-tbl td {
+  height: 46px;
+  padding: 0 7px;
+}
+body.index-pack #franchise-tbl th {
+  height: 28px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+body.index-pack #franchise-tbl .hist-name {
+  font-size: 15.5px;
+  line-height: 1.2;
+}
+body.index-pack #franchise-tbl .team-cell {
+  gap: 8px;
+  align-items: center;
+}

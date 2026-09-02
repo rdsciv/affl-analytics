@@ -165,6 +165,31 @@
     return A.franchiseName(t.owner) || t.name || "—";
   }
 
+  /* Card line: current A.franchiseName only. Never slice / singularise. */
+  function cardOwner(p) {
+    if (!p) return null;
+    if (scope === "cum" && p.tids) {
+      const ys = Object.keys(p.tids).map(Number).filter(Number.isFinite).sort((a, b) => b - a);
+      for (let i = 0; i < ys.length; i++) {
+        const y = ys[i];
+        const tid = p.tids[y];
+        const owner = A.ownerId(y, tid) || ((A.teams(y)[tid] || {}).owner);
+        if (owner) return A.canon(owner);
+      }
+    }
+    if (p.mainTeam != null && scope !== "cum") {
+      const owner = A.ownerId(year, p.mainTeam) || ((A.teams(year)[p.mainTeam] || {}).owner);
+      if (owner) return A.canon(owner);
+    }
+    return null;
+  }
+
+  function cardFranchise(p) {
+    const owner = cardOwner(p);
+    const name = owner ? A.franchiseName(owner) : "";
+    return name || "unavailable";
+  }
+
   function money(n) {
     if (n == null || Number.isNaN(Number(n))) return "—";
     const v = Number(n);
@@ -635,9 +660,8 @@
     const rows = (logYear === "all")
       ? careerRows
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
-    const latestY = playerYears(p.pid)[0];
     const chartRows = (logYear === "all")
-      ? careerRows.filter((r) => Number(r.y) === Number(latestY))
+      ? careerRows
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
     let focus = logYear === "all" ? p : ((rows[0] && rows[0].p) || p);
     if (isPre2018(logYear)) {
@@ -670,13 +694,16 @@
 
   function renderYearChips(pid) {
     const years = playerYears(pid);
+    const el = $("#player-year-picker");
     const row = $("#player-year-row");
-    if (!years.length) { row.hidden = true; return; }
-    row.hidden = false;
-    const chips = [`<button class="season-chip${logYear === "all" ? " on" : ""}" data-y="all">All</button>`]
-      .concat(years.map((y) => `<button class="season-chip${y === logYear ? " on" : ""}" data-y="${y}">${y}</button>`));
-    $("#player-year-picker").innerHTML = chips.join("");
-    $("#player-year-picker").querySelectorAll("button").forEach((b) => {
+    if (row) row.hidden = true;
+    if (!el) return;
+    if (!years.length) { el.innerHTML = ""; return; }
+    const allOn = logYear === "all";
+    const chips = [`<button type="button" class="season-chip${allOn ? " on" : ""}" data-y="all">All</button>`]
+      .concat(years.map((y) => `<button type="button" class="season-chip${!allOn && y === logYear ? " on" : ""}" data-y="${y}">${y}</button>`));
+    el.innerHTML = chips.join("");
+    el.querySelectorAll("button").forEach((b) => {
       b.onclick = () => {
         logYear = b.dataset.y === "all" ? "all" : +b.dataset.y;
         loadPlayer(pid, true);
@@ -785,7 +812,11 @@
     hide("#pl-hero", !profile);
     hide(".pl-detail", !profile);
     hide("#pl-college", !profile);
-    hide("#pl-overview", !profile);
+    if (!profile) {
+      hide("#pl-overview", true);
+      const ov = $("#pl-overview");
+      if (ov) ov.innerHTML = "";
+    }
     hide("#pl-log-card", !profile);
     hide("#pl-money", !profile);
     hide("#pl-back", !profile);
@@ -906,15 +937,23 @@
   }
 
   function renderOverview(p) {
-    const el = $("#pl-overview");
-    if (!el) return;
+    let el = $("#pl-overview");
     const rec = overviewRec(p && p.pid);
     const news = (rec && rec.news) || [];
     const note = (rec && rec.rotowire) || "";
     if (!rec || (!news.length && !note)) {
-      el.hidden = true;
-      el.innerHTML = "";
+      if (el) { el.hidden = true; el.innerHTML = ""; el.remove(); }
       return;
+    }
+    if (!el) {
+      el = document.createElement("section");
+      el.id = "pl-overview";
+      el.className = "card";
+      const chi = $("#pl-chi114");
+      const hero = $("#pl-hero");
+      const parent = (chi && chi.parentNode) || (hero && hero.parentNode);
+      if (!parent) return;
+      parent.insertBefore(el, chi || (hero && hero.nextSibling) || null);
     }
     const items = news.map((n) => {
       const when = fmtNewsPublished(n.published);
@@ -2377,12 +2416,13 @@
     $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => {
       const v = dbMetric(p, PP.sort);
       const shown = v == null ? "unavailable" : fmt(v, sortDef.digits);
+      const fran = cardFranchise(p);
       return `
       <div class="pp-card${cur && p.pid === cur.pid ? " cur" : ""}" data-pid="${p.pid}">
         ${A.headshotHTML(p, "pp-hs")}
-        <div>
+        <div class="pp-meta">
           <div class="pp-nm">${A.playerLink(p.pid, p.name, { log: "all" })}</div>
-          <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${p.nfl || ""} · ${(tName(p.mainTeam, year) || "—").slice(0, 16)}</div>
+          <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${A.esc(p.nfl || "")} · <span class="pp-fran" title="${A.esc(fran)}">${A.esc(fran)}</span></div>
         </div>
         <div class="pp-pts"><b>${shown}</b><span>${sortDef.short}</span></div>
       </div>`;

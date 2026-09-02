@@ -251,27 +251,22 @@
   function chips(el, values, selected, onPick, allLabel) {
     if (!el) return;
     const sel = selected instanceof Set ? selected : new Set(selected || values);
+    const allOn = values.length > 0 && values.every(function (v) { return sel.has(v); });
     const bits = [];
     if (allLabel) {
-      const allOn = values.every(function (v) { return sel.has(v); });
       bits.push('<button type="button" class="season-chip' + (allOn ? " on" : "") + '" data-all="1">' + allLabel + "</button>");
     }
     values.forEach(function (v) {
-      bits.push('<button type="button" class="season-chip' + (sel.has(v) ? " on" : "") + '" data-v="' + v + '">' + v + "</button>");
+      bits.push('<button type="button" class="season-chip' + (!allOn && sel.has(v) ? " on" : "") + '" data-v="' + v + '">' + v + "</button>");
     });
     el.innerHTML = bits.join("");
     el.querySelectorAll("button").forEach(function (b) {
       b.addEventListener("click", function () {
+        sel.clear();
         if (b.dataset.all) {
-          const allOn = values.every(function (v) { return sel.has(v); });
-          sel.clear();
-          if (!allOn) values.forEach(function (v) { sel.add(v); });
-          if (!sel.size) values.forEach(function (v) { sel.add(v); });
+          values.forEach(function (v) { sel.add(v); });
         } else {
-          const v = +b.dataset.v;
-          if (sel.has(v)) {
-            if (sel.size > 1) sel.delete(v);
-          } else sel.add(v);
+          sel.add(+b.dataset.v);
         }
         onPick(sel);
       });
@@ -366,8 +361,9 @@
 
     const latest = rows[rows.length - 1];
     const marks = [];
+    const allOn = yearsAvail.length > 0 && yearsAvail.every(function (y) { return state.years.has(y); });
     if (opts.logoUrl && latest) {
-      marks.push({ logo: opts.logoUrl, label: String(latest.season), on: true });
+      marks.push({ logo: opts.logoUrl, label: allOn ? "All" : String(latest.season), on: true });
     }
     renderMarks(opts.marks, marks);
 
@@ -385,7 +381,7 @@
           applyIsolate(chart, idx, labels.length);
           if (opts.logoUrl) {
             const hit = idx != null ? rows[idx] : latest;
-            renderMarks(opts.marks, hit ? [{ logo: opts.logoUrl, label: String(hit.season), on: true }] : []);
+            renderMarks(opts.marks, hit ? [{ logo: opts.logoUrl, label: (allOn && idx == null ? "All" : String(hit.season)), on: true }] : []);
           }
         },
         plugins: {
@@ -473,8 +469,9 @@
 
     const latest = rows[rows.length - 1];
     const marks = [];
+    const allOn = yearsAvail.length > 0 && yearsAvail.every(function (y) { return state.years.has(y); });
     if (opts.logoUrl && latest) {
-      marks.push({ logo: opts.logoUrl, label: String(latest.season), on: true });
+      marks.push({ logo: opts.logoUrl, label: allOn ? "All" : String(latest.season), on: true });
     }
     renderMarks(opts.marks, marks);
 
@@ -496,7 +493,7 @@
           applyIsolate(chart, idx, labels.length);
           if (opts.logoUrl) {
             const hit = idx != null ? rows[idx] : latest;
-            renderMarks(opts.marks, hit ? [{ logo: opts.logoUrl, label: String(hit.season), on: true }] : []);
+            renderMarks(opts.marks, hit ? [{ logo: opts.logoUrl, label: (allOn && idx == null ? "All" : String(hit.season)), on: true }] : []);
           }
         },
         plugins: {
@@ -566,7 +563,7 @@
     weeksAvail.sort(function (a, b) { return a - b; });
 
     const state = canvas._chi114w || {
-      years: new Set(yearsAvail.length ? [yearsAvail[yearsAvail.length - 1]] : []),
+      years: new Set(yearsAvail),
       weeks: new Set(weeksAvail),
       iso: null,
     };

@@ -1,6 +1,9 @@
 /* ============ AFFL Analytics ============ */
 (async function () {
   const DATA = await (await fetch('data.json?v=' + Date.now(), {cache: 'no-store'})).json();
+  if (window.AFFL && window.AFFL.boot) {
+    window.AFFL.boot().catch(() => {});
+  }
   const $ = (s) => document.querySelector(s);
 
   const C = {
@@ -57,13 +60,37 @@
     const parts = String(franchiseName(id) || "").split(/\s+/).filter(Boolean);
     return parts.length ? parts[parts.length - 1] : franchiseName(id);
   };
-  const franchiseTeam = (id) => ({ name: franchiseName(id), logo: FRANCHISE_LOGO[canon(id)] || "" });
+  const dummyName = (n) => !n || n === "—" || n === "-" || n === "?" || n === "unavailable";
+  const franchiseTeam = (id) => {
+    const oid = canon(id);
+    const name = franchiseName(oid);
+    let logo = FRANCHISE_LOGO[oid] || "";
+    try {
+      const marks = window.AFFL && window.AFFL.FRANCHISE_MARKS;
+      if (marks && marks[oid]) logo = marks[oid];
+      else if (window.AFFL && window.AFFL.franchiseLogo) {
+        const l = window.AFFL.franchiseLogo(oid);
+        if (l) logo = l;
+      }
+    } catch (e) {}
+    return { owner: oid, name: dummyName(name) ? "unavailable" : name, logo: logo || "" };
+  };
+  const liveName = (t) => (t && (franchiseName(t.owner) || t.name)) || "unavailable";
 
   function avatarHTML(team, size) {
     const initial = (team.name || '?').replace(/[^A-Za-z0-9]/g, '').charAt(0).toUpperCase() || '?';
     const cls = size === 'mini' ? 'mini' : 'avatar';
-    if (team.logo && /^(https?:|logos\/)/.test(team.logo)) {
-      return `<img class="${cls}" src="${team.logo}" alt="" loading="lazy"
+    const sz = size === 'mini' ? 32 : 40;
+    let logo = team && team.logo;
+    try {
+      const oid = team && (team.owner != null && team.owner !== '' ? team.owner : team.oid);
+      if ((!logo || !/^(https?:|logos\/)/.test(logo)) && oid && window.AFFL && window.AFFL.franchiseLogo) {
+        logo = window.AFFL.franchiseLogo(oid) || logo;
+      }
+    } catch (e) {}
+    if (logo && /^(https?:|logos\/)/.test(logo)) {
+      return `<img class="${cls}" src="${logo}" alt="" width="${sz}" height="${sz}" loading="lazy"
+        style="max-width:${sz}px;max-height:${sz}px;width:${sz}px;height:${sz}px;object-fit:contain;background:transparent"
         onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} ${size === 'mini' ? '' : 'fallback'}&quot;>${initial}</div>'">`;
     }
     return `<div class="${cls} ${size === 'mini' ? '' : 'fallback'}">${initial}</div>`;
@@ -141,20 +168,15 @@
     const tot = leagueTotals();
     const latest = DATA.seasons[String(DATA.latest)] || {};
     const nTeams = (latest.teams || []).length || (DATA.activeOwners || []).length;
-    const nOwners = (DATA.activeOwners || []).length;
     const lo = years[0], hi = years[years.length - 1];
     const hdr = document.getElementById('hdr-sub');
     if (hdr) hdr.textContent = nTeams + '-team league · all-time · est. 2014';
-    const hsT = document.getElementById('hs-total');
-    const hsG = document.getElementById('hs-games');
-    if (hsT) hsT.textContent = fmt(tot.pts, 1);
-    if (hsG) hsG.textContent = fmt(tot.games);
     const kpi = document.getElementById('kpi-row');
     if (kpi) {
       kpi.innerHTML = `
         <div class="card kpi kpi-static"><div class="kpi-title">${years.length}</div><div class="kpi-desc">seasons</div></div>
-        <div class="card kpi kpi-static"><div class="kpi-title">${nOwners}</div><div class="kpi-desc">active owners</div></div>
         <div class="card kpi kpi-static"><div class="kpi-title">${fmt(tot.games)}</div><div class="kpi-desc">matchups</div></div>
+        <div class="card kpi kpi-static"><div class="kpi-title">${fmt(tot.pts, 1)}</div><div class="kpi-desc">regular-season points</div></div>
         <div class="card kpi kpi-static"><div class="kpi-title">${lo}–${hi}</div><div class="kpi-desc">range</div></div>`;
     }
   }
@@ -203,18 +225,18 @@
         n: '01 · CROWN', color: C.gold, title: 'The Champion',
         pct: champ.wins / Math.max(1, champ.wins + champ.losses),
         label: Math.round((champ.wins / Math.max(1, champ.wins + champ.losses)) * 100) + '%',
-        desc: `<strong>${champ.name}</strong> · ${champ.wins}-${champ.losses} · ${firstName(champ.owner)} · ${fmt(champ.pf, 2)} PF`,
+        desc: `<strong>${liveName(champ)}</strong> · ${champ.wins}-${champ.losses} · ${firstName(champ.owner)} · ${fmt(champ.pf, 2)} PF`,
       },
       {
         n: '02 · POINTS', color: C.blue, title: 'Points Leader',
         pct: apPct(ptsLeader), label: fmt(ptsLeader.pf, 0),
-        desc: `<strong>${ptsLeader.name}</strong> · ${fmt(ptsLeader.pf, 2)} PF · ${fmt(ptsLeader.avgPts, 1)} / week`,
+        desc: `<strong>${liveName(ptsLeader)}</strong> · ${fmt(ptsLeader.pf, 2)} PF · ${fmt(ptsLeader.avgPts, 1)} / week`,
       },
       powerTeam && {
         n: '03 · POWER', color: C.blue, title: 'All-Play',
         pct: powerTop.w / Math.max(1, powerTop.w + powerTop.l),
         label: (powerTop.pwrPct != null ? Number(powerTop.pwrPct).toFixed(1) : (apPct(powerTeam) * 100).toFixed(1)) + '%',
-        desc: `<strong>${powerTeam.name}</strong> · ${powerTop.w}–${powerTop.l} raw all-play`,
+        desc: `<strong>${liveName(powerTeam)}</strong> · ${powerTop.w}–${powerTop.l} raw all-play`,
       },
       luckTeam && {
         n: '04 · LUCK', color: luckTop.net >= 0 ? C.green : C.mut, title: 'Luck Index',
@@ -259,7 +281,7 @@
     spotlightId = spot.id;
 
     sel.innerHTML = [...s.teams].sort((a, b) => a.name.localeCompare(b.name))
-      .map((t) => `<option value="${t.id}"${t.id === spot.id ? ' selected' : ''}>${t.name}</option>`).join('');
+      .map((t) => `<option value="${t.id}"${t.id === spot.id ? ' selected' : ''}>${liveName(t)}</option>`).join('');
     sel.onchange = () => { spotlightId = +sel.value; renderArea(); };
 
     const labels = s.regWeeks.map((w) => 'W' + w);
@@ -284,7 +306,7 @@
             backgroundColor: (c) => c.chart.chartArea ? grad(c.chart.ctx, c.chart.chartArea, '#12182699', '#12182620') : '#12182666',
           },
           {
-            label: spot.name, data: spot.weekly, borderColor: C.gold, borderWidth: 2.5,
+            label: liveName(spot), data: spot.weekly, borderColor: C.gold, borderWidth: 2.5,
             pointRadius: 3.5, pointBackgroundColor: C.gold, pointBorderColor: '#05060b',
             pointBorderWidth: 1.5, tension: 0.35, fill: false, order: 0,
           },
@@ -319,7 +341,7 @@
       ${avatarHTML(champ)}
       <div>
         <div class="tag">League Champion</div>
-        <div class="nm">${champ.name}</div>
+        <div class="nm">${liveName(champ)}</div>
         <div class="rec">${memberName(champ.owner)} · ${how.join(' · ')}</div>
       </div>` : '<div class="rec">Season in progress</div>';
 
@@ -493,36 +515,169 @@
 
   /* ================= all-time (static) ================= */
   function renderTimeline() {
-    $('#timeline').innerHTML = DATA.timeline.map((t) => `
+    $('#timeline').innerHTML = DATA.timeline.map((t) => {
+      const season = DATA.seasons[String(t.year)] || {};
+      const champ = (season.teams || []).find((x) => x.id === season.champion);
+      const oid = champ && champ.owner;
+      const ft = oid ? franchiseTeam(oid) : null;
+      const name = (ft && ft.name && ft.name !== "unavailable")
+        ? ft.name
+        : ((champ && franchiseName(champ.owner)) || "unavailable");
+      let mark = "";
+      if (ft) {
+        try {
+          if (window.AFFL && window.AFFL.logoHTML) mark = window.AFFL.logoHTML(ft, "mini");
+          else mark = avatarHTML(ft, "mini");
+        } catch (e) { mark = avatarHTML(ft, "mini"); }
+      }
+      return `
       <div class="tl-card">
         <div class="tl-year">${t.year}</div>
-        <div class="tl-team">🏆 ${t.team}</div>
+        <div class="tl-team">${mark}<span class="tl-name">🏆 ${name}</span></div>
         <div class="tl-own">${t.record}</div>
-      </div>`).join('');
-  }
-
-  function renderFranchises() {
-    const src = (window.AFFL && window.AFFL.visibleFranchises)
-      ? window.AFFL.visibleFranchises(DATA.franchises || [])
-      : (DATA.franchises || []);
-    const rows = src.slice().sort((a, b) => (b.titles - a.titles) || (b.winPct - a.winPct) || (b.pf - a.pf));
-    $('#franchise-tbl tbody').innerHTML = rows.map((f, i) => {
-      const rank = i + 1;
-      const pill = rank === 1 ? "gold" : rank === 2 ? "slv" : rank === 3 ? "brz" : "";
-      const t = franchiseTeam(f.owner);
-      const href = "teams.html?squad=" + encodeURIComponent(f.owner);
-      return `
-      <tr>
-        <td><span class="rank-pill ${pill}">${rank}</span></td>
-        <td><div class="team-cell">${avatarHTML(t, "mini")}<div><a class="hist-name" href="${href}">${t.name}</a></div></div></td>
-        <td>${f.seasons}</td>
-        <td>${f.wins}-${f.losses}${f.ties ? '-' + f.ties : ''}</td>
-        <td class="${f.winPct >= 0.5 ? 'pos' : 'neg'}"><strong>${(f.winPct * 100).toFixed(1)}%</strong></td>
-        <td>${f.titles || 0}</td>
-        <td>${fmt(f.pf)}</td>
-      </tr>`;
+      </div>`;
     }).join('');
   }
+
+  function careerAllPlayByOwner() {
+    const by = {};
+    years.forEach((y) => {
+      if (y < 2014 || y > 2025) return;
+      ((DATA.seasons[String(y)] || {}).teams || []).forEach((tm) => {
+        const oid = canon(tm.owner);
+        if (!oid || oid === "m22") return;
+        if (!by[oid]) by[oid] = { allW: 0, allL: 0 };
+        by[oid].allW += tm.allplayW || 0;
+        by[oid].allL += tm.allplayL || 0;
+      });
+    });
+    return by;
+  }
+
+  const HISTORIC_IDS = ["m19", "m14", "m10", "m04", "m16", "m09", "m12"];
+  /* CHI-153 — Franchise Records sort (CHI-150 pattern). Default All-Play desc. */
+  let frSort = { k: "allPlay", dir: -1 };
+  let frSortWired = false;
+  const FR_KEYS = {
+    name: (r) => String(r._name || "").toLowerCase(),
+    seasons: (r) => r.seasons,
+    wins: (r) => r.wins,
+    winPct: (r) => r.winPct,
+    titles: (r) => r.titles,
+    pf: (r) => r.pf,
+    allPlay: (r) => r._allW,
+  };
+  function frNullish(v) {
+    return v == null || v === "" || (typeof v === "number" && Number.isNaN(v));
+  }
+  function cmpFr(a, b, key, dir) {
+    const fn = FR_KEYS[key];
+    const av = fn ? fn(a) : null;
+    const bv = fn ? fn(b) : null;
+    const aN = frNullish(av);
+    const bN = frNullish(bv);
+    if (aN && bN) { /* fall through to tiebreak */ }
+    else if (aN) return 1;
+    else if (bN) return -1;
+    else if (typeof av === "string") {
+      const d = av.localeCompare(bv) * dir;
+      if (d) return d;
+    } else {
+      const d = (Number(av) - Number(bv)) * dir;
+      if (d) return d;
+      if (key === "allPlay") {
+        const aL = frNullish(a._allL) ? null : a._allL;
+        const bL = frNullish(b._allL) ? null : b._allL;
+        if (!frNullish(aL) && !frNullish(bL)) {
+          /* Fewer losses wins the All-Play tie when sorting by wins. */
+          const dL = (Number(aL) - Number(bL)) * (dir < 0 ? 1 : -1);
+          if (dL) return dL;
+        }
+      }
+    }
+    return (b.titles - a.titles) || (b.winPct - a.winPct) || (b.pf - a.pf);
+  }
+  function wireFrSort() {
+    if (frSortWired) return;
+    frSortWired = true;
+    const tbl = document.getElementById("franchise-tbl");
+    if (!tbl) return;
+    tbl.querySelectorAll("thead th.s").forEach((th) => {
+      th.addEventListener("click", () => {
+        const k = th.dataset.k;
+        if (!k) return;
+        if (frSort.k === k) frSort.dir *= -1;
+        else {
+          frSort.k = k;
+          frSort.dir = (k === "name") ? 1 : -1;
+        }
+        renderFranchises();
+      });
+    });
+  }
+  function renderFranchises() {
+    const tbl = document.querySelector("#franchise-tbl tbody");
+    if (!tbl) return;
+    const show = !!(window.AFFL && window.AFFL.showFormer && window.AFFL.showFormer());
+    const ap = careerAllPlayByOwner();
+    const headKeys = Array.from(document.querySelectorAll("#franchise-tbl thead th.s[data-k]"))
+      .map((th) => th.dataset.k);
+    if (!headKeys.includes(frSort.k)) {
+      frSort = { k: "allPlay", dir: -1 };
+    }
+    const rows = (DATA.franchises || []).filter((f) => {
+      const oid = String(canon(f.owner) || f.owner || "");
+      if (!oid || oid === "m22") return false;
+      if ((f.seasons || 0) <= 0) return false;
+      const hist = HISTORIC_IDS.indexOf(oid) >= 0;
+      if (hist && !show) return false;
+      return true;
+    }).map((f) => {
+      const bag = ap[canon(f.owner)];
+      const _name = f.currentName || franchiseName(f.owner) || "unavailable";
+      return Object.assign({}, f, {
+        _name,
+        _allW: bag ? bag.allW : null,
+        _allL: bag ? bag.allL : null,
+      });
+    }).slice().sort((a, b) => cmpFr(a, b, frSort.k, frSort.dir));
+    if (!rows.length) return;
+    const html = rows.map((f, i) => {
+      const rank = i + 1;
+      const pill = rank === 1 ? "gold" : rank === 2 ? "slv" : rank === 3 ? "brz" : "";
+      const name = f._name;
+      let t;
+      try { t = franchiseTeam(f.owner); } catch (e) { t = { owner: f.owner, name: name, logo: FRANCHISE_LOGO[canon(f.owner)] || "" }; }
+      t = t || {};
+      t.name = name;
+      if (!t.logo) t.logo = FRANCHISE_LOGO[canon(f.owner)] || "";
+      const href = "teams.html?squad=" + encodeURIComponent(f.owner);
+      const rec = (f.wins || 0) + "-" + (f.losses || 0) + (f.ties ? "-" + f.ties : "");
+      const apRec = (f._allW == null) ? "—" : (f._allW + "-" + (f._allL == null ? "—" : f._allL));
+      const pct = (Number(f.winPct) || 0) * 100;
+      const pf = (f.pf == null) ? "—" : Number(f.pf).toLocaleString("en-US", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+      return `<tr data-owner="${oidSafe(f.owner)}">
+        <td><span class="rank-pill ${pill}">${rank}</span></td>
+        <td><div class="team-cell">${avatarHTML(t, "mini")}<div><a class="hist-name" href="${href}" title="${name}">${name}</a></div></div></td>
+        <td>${f.seasons}</td>
+        <td>${rec}</td>
+        <td class="${pct >= 50 ? "pos" : "neg"}"><strong>${pct.toFixed(1)}%</strong></td>
+        <td>${f.titles || 0}</td>
+        <td>${pf}</td>
+        <td><strong>${apRec}</strong></td>
+      </tr>`;
+    }).join("");
+    if (html) tbl.innerHTML = html;
+    const head = document.getElementById("franchise-tbl");
+    if (head) {
+      head.querySelectorAll("thead th.s").forEach((th) => {
+        th.classList.toggle("on", th.dataset.k === frSort.k);
+        th.classList.toggle("asc", th.dataset.k === frSort.k && frSort.dir > 0);
+      });
+    }
+    wireFrSort();
+  }
+  function oidSafe(id) { try { return String(canon(id) || id || ""); } catch (e) { return String(id || ""); } }
 
   function renderEra() {
     const active = DATA.franchises.filter((f) => f.active);
@@ -554,7 +709,13 @@
   }
 
   function renderH2H() {
-    const owners = DATA.activeOwners
+    const owners = (DATA.activeOwners || [])
+      .filter((o) => {
+        const oid = String(canon(o) || o);
+        if (!oid || oid === "m22") return false;
+        const f = (DATA.franchises || []).find((x) => String(canon(x.owner)) === oid);
+        return !!(f && (f.seasons || 0) > 0);
+      })
       .slice()
       .sort((a, b) => DATA.franchises.findIndex((f) => f.owner === a) - DATA.franchises.findIndex((f) => f.owner === b));
     const rec = {};
@@ -649,7 +810,7 @@
         ${avatarHTML(top.t)}
         <div>
           <div class="maxpot-kicker">Gifted Kid Maximum Potential Award</div>
-          <div class="maxpot-name">${top.t.name}</div>
+          <div class="maxpot-name">${liveName(top.t)}</div>
         </div>
         <div class="maxpot-score">
           <div class="maxpot-opt">${fmt(top.opt, 0)}</div>
@@ -662,7 +823,7 @@
       const leftW = Math.max(0, (r.left / max) * 100);
       return `<div class="maxpot-row">
         ${avatarHTML(r.t, "mini")}
-        <div class="maxpot-team">${r.t.name}</div>
+        <div class="maxpot-team">${liveName(r.t)}</div>
         <div class="maxpot-track">
           <div class="maxpot-act" style="width:${actW.toFixed(2)}%"><span>${fmt(r.act, 0)}</span></div>
           <div class="maxpot-left" style="width:${leftW.toFixed(2)}%"><span>${fmt(r.left, 0)}</span></div>
@@ -1205,7 +1366,7 @@
     $('#report-tbl tbody').innerHTML = NG.report.map((r, i) => {
       const t = T25[r.teamId];
       return `<tr>
-        <td><a class="team-link" href="team.html?year=${curYear}&tid=${r.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${r.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${liveName(t)}<div class="own">${memberName(t.owner)}</div></div></div></a></td>
         <td>${gradeChip(r.gDraft)}</td>
         <td>${gradeChip(r.gLineup)}</td>
         <td>${gradeChip(r.gWaiver)}</td>
@@ -1229,7 +1390,7 @@
         : '<span class="fate-even">—</span>';
       return `<tr>
         <td><span class="rank-pill${w.optRank === 1 ? ' gold' : ''}">${w.optRank}</span></td>
-        <td><a class="team-link" href="team.html?year=${curYear}&tid=${w.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${t.name}</div></div></a></td>
+        <td><a class="team-link" href="team.html?year=${curYear}&tid=${w.teamId}"><div class="team-cell">${avatarHTML(t, 'mini')}<div>${liveName(t)}</div></div></a></td>
         <td><strong>${w.optW}-${w.optL}</strong></td>
         <td class="own">${w.actW}-${w.actL}</td>
         <td>${fate}</td>
@@ -1299,11 +1460,15 @@
     renderWaiver();
   }
 
+  try { renderFranchises(); } catch (e) { console.warn("franchises", e); }
+  document.addEventListener("affl:show-former", function () {
+    try { renderFranchises(); } catch (e) { console.warn(e); }
+  });
   await renderSeason();
-  renderTimeline();
-  renderFranchises();
-  renderEra();
-  renderH2H();
+  try { renderTimeline(); } catch (e) { console.warn(e); }
+  try { renderFranchises(); } catch (e) { console.warn(e); }
+  try { renderEra(); } catch (e) { console.warn(e); }
+  try { renderH2H(); } catch (e) { console.warn(e); }
   document.addEventListener("affl:show-former", renderFranchises);
   /* ================= CHI-89 Elo + Milestones (all-time / cum pane) ================= */
   let ELO = null;
@@ -1397,7 +1562,11 @@
   function renderMsBoard() {
     const boardEl = $('#ms-board');
     const tabs = $('#ms-board-tabs');
-    if (!boardEl || !tabs || !MS) return;
+    if (!boardEl || !tabs || !MS) {
+      const card = document.getElementById("milestones-card");
+      if (card) card.classList.remove("ready");
+      return;
+    }
     const boards = MS.boards || [];
     if (!msBoardId && boards[0]) msBoardId = boards[0].id;
     tabs.innerHTML = boards.map((b) =>
@@ -1473,18 +1642,23 @@
       const s1 = (MS.seasons || []).slice(-1)[0];
       msSub.textContent = `Fewest career games to each bar · ${s0}–${s1} · verified matchups`;
     }
-    document.querySelectorAll('#elo-filters [data-elo-filter]').forEach((btn) => {
-      btn.onclick = () => {
-        eloFilter = btn.getAttribute('data-elo-filter') || 'active';
-        document.querySelectorAll('#elo-filters .chip').forEach((b) => b.classList.toggle('on', b === btn));
-        renderEloTable();
-        renderEloChart();
-      };
-    });
-    renderEloTable();
-    renderEloChart();
+    if ($('#elo-card')) {
+      document.querySelectorAll('#elo-filters [data-elo-filter]').forEach((btn) => {
+        btn.onclick = () => {
+          eloFilter = btn.getAttribute('data-elo-filter') || 'active';
+          document.querySelectorAll('#elo-filters .chip').forEach((b) => b.classList.toggle('on', b === btn));
+          renderEloTable();
+          renderEloChart();
+        };
+      });
+      renderEloTable();
+      renderEloChart();
+    }
     renderMsBoard();
     renderMsChase();
+    const msCard = document.getElementById("milestones-card");
+    const board = document.getElementById("ms-board");
+    if (msCard) msCard.classList.toggle("ready", !!(board && board.children.length));
   }
   try { await renderEloAndMilestones(); } catch (e) { console.warn("elo/milestones", e); }
 })();
