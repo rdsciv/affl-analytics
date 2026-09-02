@@ -1276,7 +1276,7 @@
       + (yearLabel != null ? " · " + yearLabel : "");
     return `<div class="nav-board-block">
       <div class="card-sub">${sub} · ${teams.length} franchises · ${picks.length} picks</div>
-      <div class="nav-board" style="${style}">${cells.join("")}</div>
+      <div class="nav-board-block-scroll"><div class="nav-board" style="${style}">${cells.join("")}</div></div>
     </div>`;
   }
 
@@ -2074,11 +2074,14 @@
   }
 
   function holdoutBlock() {
-    const scored = (HOLDOUT.scoredAuctionSeasons || []).includes(year);
-    if (S.holdoutScope === 'season' && scored && HOLDOUT.bySeason[String(year)]) {
-      return HOLDOUT.bySeason[String(year)];
+    if (scope === "season") {
+      const scored = (HOLDOUT.scoredAuctionSeasons || []).includes(year);
+      if (scored && HOLDOUT.bySeason[String(year)]) {
+        return HOLDOUT.bySeason[String(year)];
+      }
+      return { mekko: [], scatter: [], continuous: [] };
     }
-    return HOLDOUT.pooled;
+    return HOLDOUT.pooled || { mekko: [], scatter: [], continuous: [] };
   }
 
   function holdoutHasPar(block) {
@@ -2162,8 +2165,38 @@
   }
 
   function signed(n) {
-    if (n == null) return '—';
-    return (n > 0 ? '+' : '') + fmt(n, 1);
+    return mekkoParLabel(n);
+  }
+
+  /* CHI-144 — bucket + readable PAR. Missing is unavailable, never blank / dash / 0. */
+  function mekkoParLabel(n) {
+    if (n == null || n === "" || Number.isNaN(Number(n))) return "unavailable";
+    const v = Number(n);
+    const body = fmt(Math.abs(v), 1);
+    if (!body || body === "—" || body === "–" || body === "-" || body === "−") return "unavailable";
+    if (v > 0) return "+" + body;
+    if (v < 0) return "\u2212" + body;
+    return body;
+  }
+  function mekkoBucketId(id) {
+    const s = id == null ? "" : String(id).trim();
+    if (!s || s === "—" || s === "–" || s === "-" || s === "−") return "unavailable";
+    return s;
+  }
+  function mekkoMark(id, par) {
+    const bucket = mekkoBucketId(id);
+    const value = mekkoParLabel(par);
+    return { bucket, value, text: bucket + " \u00b7 " + value };
+  }
+  function mekkoHaloText(x, y, text, opts) {
+    opts = opts || {};
+    const fs = opts.size || 14;
+    const anchor = opts.anchor || "middle";
+    const weight = opts.weight || 800;
+    const fill = opts.fill || C.ink;
+    const extra = opts.extra || "";
+    const sw = opts.strokeWidth == null ? 3.4 : opts.strokeWidth;
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${fill}" stroke="#05060b" stroke-width="${sw}" paint-order="stroke fill" stroke-linejoin="round" font-size="${fs}" font-weight="${weight}" ${extra}>${A.esc(text)}</text>`;
   }
 
   function showTip(html, ev) {
@@ -2198,19 +2231,25 @@
 
   function renderMekko(block) {
     const el = $('#mekko');
-    const buckets = block.mekko || [];
+    const buckets = (block && block.mekko) || [];
+    if (!el) return;
     if (!buckets.length) {
       el.innerHTML = "";
       return;
     }
-    const W = el.clientWidth || 560, H = el.clientHeight || 340;
-    const pad = { t: 10, r: 8, b: 28, l: 32 };
+    /* CHI-144 v24: labels live on the axis below columns (rotate 90° below if skinny).
+       Y is player-seasons (n). No right-side "mean PAR" title — that was a lying label. */
+    const W = Math.max(el.clientWidth || 0, 560);
+    const H = 580;
+    const pad = { t: 22, r: 48, b: 138, l: 64 };
     const innerW = W - pad.l - pad.r, innerH = H - pad.t - pad.b;
-    const gap = 5;
-    const totalShare = buckets.reduce((a, b) => a + (b.spendShare || 0), 0) || 1;
+    const axisY = pad.t + innerH;
+    const gap = 6;
+    const totalShare = buckets.reduce((a, b) => a + (typeof b.spendShare === "number" ? b.spendShare : 0), 0) || 1;
     let x = pad.l;
     const cols = buckets.map((b) => {
-      const w = Math.max(18, (b.spendShare / totalShare) * (innerW - gap * (buckets.length - 1)));
+      const share = typeof b.spendShare === "number" ? b.spendShare : 0;
+      const w = Math.max(22, (share / totalShare) * (innerW - gap * (buckets.length - 1)));
       const col = { ...b, x, w };
       x += w + gap;
       return col;
@@ -2218,46 +2257,88 @@
 
     const stacks = S.mekkoStack === 'pos'
       ? cols.map((b) => (b.byPos || []).map((s) => ({ key: s.pos, ...s })))
-      : cols.map((b) => ['early', 'late'].map((k) => ({ key: k, ...(b.slices[k] || { n: 0, spend: 0, meanPar: null }) })));
+      : cols.map((b) => ['early', 'late'].map((k) => ({ key: k, ...((b.slices && b.slices[k]) || { n: 0, spend: 0, meanPar: null }) })));
 
     const maxN = Math.max(1, ...stacks.map((st) => st.reduce((a, s) => a + (s.n || 0), 0)));
     const rects = [];
+    const colGeom = [];
     cols.forEach((b, i) => {
       const st = stacks[i].filter((s) => s.n > 0);
       const tot = st.reduce((a, s) => a + s.n, 0) || 1;
-      let y = pad.t + innerH * (1 - tot / maxN);
+      const barH = innerH * (tot / maxN);
+      const barTop = pad.t + innerH - barH;
+      let y = barTop;
       st.forEach((s) => {
         const h = innerH * (s.n / maxN);
         rects.push({ ...s, bucket: b.id, x: b.x, w: b.w, y, h, spendShare: b.spendShare });
         y += h;
       });
+      colGeom.push({ ...b, barTop, barH, tot });
     });
 
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Marimekko of auction cost buckets">
+    const axisLabels = colGeom.map((b) => {
+      const mark = mekkoMark(b.id, b.meanPar);
+      const cx = b.x + b.w / 2;
+      const gOpen = `<g class="mekko-mark" data-axis="below" data-bucket="${A.esc(mark.bucket)}" data-value="${A.esc(mark.value)}" data-label="${A.esc(mark.text)}">`;
+      const wide = b.w >= 50;
+      let body;
+      if (wide) {
+        body = mekkoHaloText(cx, axisY + 22, mark.bucket, { size: 14, weight: 800 })
+          + mekkoHaloText(cx, axisY + 42, mark.value, { size: 13, weight: 700 });
+      } else {
+        /* rotate 90° BELOW the axis — never through bar fill, never above the sliver */
+        const ty = axisY + 10;
+        body = mekkoHaloText(cx, ty, mark.text, {
+          size: 13,
+          weight: 800,
+          anchor: "end",
+          extra: `transform="rotate(-90 ${cx} ${ty})" dominant-baseline="middle"`
+        });
+      }
+      return gOpen + body + `</g>`;
+    }).join("");
+
+    const sliceLabels = rects.map((r) => {
+      /* CHI-144/141: slice PAR only on wide columns. Skinny bars: one axis label, no per-slice jumble. */
+      if (r.w < 80 || r.h < 36) return "";
+      const mark = mekkoMark(r.bucket, r.meanPar);
+      const cx = r.x + r.w / 2;
+      const cy = r.y + Math.min(r.h / 2 + 5, r.h - 8);
+      return `<g class="mekko-slice-mark" data-bucket="${A.esc(mark.bucket)}" data-value="${A.esc(mark.value)}">${mekkoHaloText(cx, cy, mark.value, { size: 12, weight: 700, strokeWidth: 3.2 })}</g>`;
+    }).join("");
+
+    const legend = colGeom.map((b) => {
+      const mark = mekkoMark(b.id, b.meanPar);
+      const fill = parColor(b.meanPar);
+      return `<div class="mekko-legend-item mekko-mark" data-bucket="${A.esc(mark.bucket)}" data-value="${A.esc(mark.value)}" data-label="${A.esc(mark.text)}"><span class="mekko-legend-swatch" style="background:${fill}"></span>${A.esc(mark.text)}</div>`;
+    }).join("");
+
+    const yTitleX = 16;
+    const yTitleY = pad.t + innerH / 2;
+    const yTitle = `<text class="mekko-y-title" x="${yTitleX}" y="${yTitleY}" text-anchor="middle" fill="${C.mut}" font-size="12" font-weight="700" transform="rotate(-90 ${yTitleX} ${yTitleY})">player-seasons</text>`;
+
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Marimekko of auction cost buckets">
+      ${yTitle}
       ${[0, 0.5, 1].map((t) => {
         const y = pad.t + innerH * (1 - t);
         const val = Math.round(maxN * t);
         return `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}" stroke="${C.grid}"/>
-          <text x="${pad.l - 6}" y="${y + 3}" text-anchor="end" fill="${C.mut}" font-size="9">${val}</text>`;
+          <text x="${pad.l - 8}" y="${y + 4}" text-anchor="end" fill="${C.mut}" font-size="12" font-weight="700">${val}</text>`;
       }).join('')}
       ${rects.map((r, i) => `<rect data-i="${i}" x="${r.x}" y="${r.y}" width="${r.w}" height="${Math.max(1, r.h)}"
         fill="${S.mekkoStack === 'pos' ? (POS_FILL[r.key] || C.steel) : parColor(r.meanPar)}"
         stroke="#05060b" stroke-width="1" opacity="0.92"/>`).join('')}
-      ${cols.map((b) => {
-        const cx = b.x + b.w / 2;
-        const id = `<text x="${cx}" y="${H - 8}" text-anchor="middle" fill="${C.ink}" font-size="10" font-weight="700">${b.id}</text>`;
-        const pct = b.w >= 52
-          ? `<text x="${cx}" y="${H - 20}" text-anchor="middle" fill="${C.mut}" font-size="9">${fmt((b.spendShare || 0) * 100, 0)}%</text>`
-          : "";
-        return pct + id;
-      }).join('')}
-    </svg>`;
+      ${sliceLabels}
+      ${axisLabels}
+    </svg>
+    <div class="mekko-legend">${legend}</div>`;
     el.querySelectorAll('rect[data-i]').forEach((node) => {
       const r = rects[+node.dataset.i];
       node.addEventListener('mousemove', (ev) => showTip(sliceTip(r.bucket, r.key, r), ev));
       node.addEventListener('mouseleave', hideTip);
     });
   }
+
 
   function renderScatter(block) {
     const rows = block.scatter || [];
@@ -2358,16 +2439,11 @@
 
   function renderHoldout() {
     if (!$('#holdout-title') || !HOLDOUT) return;
+    /* CHI-144 / CHI-142: Season picker is the only All|year control. All = pooled holdout. */
     const scored = (HOLDOUT.scoredAuctionSeasons || []).includes(year);
-    const canSeason = scored && HOLDOUT.bySeason[String(year)];
-    if (!canSeason) S.holdoutScope = 'pooled';
-
-    $('#holdout-scope').innerHTML = [
-      ['pooled', 'All scored auction years'],
-      canSeason ? ['season', String(year)] : null,
-    ].filter(Boolean).map(([id, lab]) =>
-      `<button class="filter-chip${S.holdoutScope === id ? ' on' : ''}" data-scope="${id}">${lab}</button>`
-    ).join('');
+    S.holdoutScope = scope === "season" ? "season" : "pooled";
+    const scopeEl = $('#holdout-scope');
+    if (scopeEl) scopeEl.innerHTML = "";
     const block = holdoutBlock();
     const showStack = !holdoutSliceEmpty(block);
     $('#holdout-stack').innerHTML = showStack ? [
@@ -2377,7 +2453,7 @@
       `<button class="filter-chip${S.mekkoStack === id ? ' on' : ''}" data-stack="${id}">${lab}</button>`
     ).join('') : '';
 
-    const claim = S.holdoutScope === 'pooled'
+    const claim = scope !== "season"
       ? HOLDOUT.claim
       : (block.claim ? `${block.claim} (${year} auction, non-keepers).` : HOLDOUT.claim);
     $('#holdout-title').textContent = (claim || '').split(':')[0] || 'Auction holdouts';
@@ -2386,15 +2462,15 @@
       claimEl.textContent = claim || '';
       hideHoldoutWrap(claimEl, !claim);
     }
-    $('#holdout-sub').textContent = S.holdoutScope === 'pooled'
+    $('#holdout-sub').textContent = scope !== "season"
       ? HOLDOUT.subtitle
       : `${year} auction player-seasons · width = share of that draft's spend · stacks = ${S.mekkoStack === 'pos' ? 'position' : 'early/late nomination half'} · color = mean PAR`;
 
     const notes = [];
     if (scope === "season" && YD && YD.draft && !YD.draft.auction) {
-      notes.push(`${year} is a snake draft (no auction bids). Charts stay on 2018–2025 auction seasons.`);
+      notes.push(`${year} is a snake draft (no auction bids). Auction PAR is unavailable.`);
     } else if (scope === "season" && !scored) {
-      notes.push(`${year} is auction but ESPN stored no weekly scoring, so PAR is blank. Charts stay on scored auction years.`);
+      notes.push(`${year} is auction but ESPN stored no weekly scoring, so PAR is unavailable.`);
     }
     if (HOLDOUT.keepers && HOLDOUT.keepers.note) notes.push(HOLDOUT.keepers.note);
     if (HOLDOUT.histogramNote) notes.push(HOLDOUT.histogramNote);
