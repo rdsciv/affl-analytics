@@ -15,11 +15,9 @@ function canon(id) {
 }
 
 function careerGFor(franchises, oid) {
-  const id = canon(oid);
-  if (!id) return null;
-  const f = (franchises || []).find((x) => canon(x.owner) === id);
-  if (!f) return null;
-  return (Number(f.wins) || 0) + (Number(f.losses) || 0) + (Number(f.ties) || 0);
+  const f = (franchises || []).find((x) => canon(x.owner) === canon(oid));
+  if (!f) return 0;
+  return (f.wins || 0) + (f.losses || 0) + (f.ties || 0);
 }
 
 const dataPath = path.join(SITE, "data.json");
@@ -80,7 +78,12 @@ if (!html.includes("roto.js?v=9")) fail("roto.html does not load roto.js?v=9");
 if (/roto\.js\?v=[0-8]["']/.test(html)) fail("roto.html still loads an older roto.js cache");
 
 const js = fs.readFileSync(path.join(SITE, "roto.js"), "utf8");
+if (!js.includes("Career G")) fail("roto.js missing Career G");
+if (!js.includes("careerGFor")) fail("roto.js missing careerGFor");
 if (!js.includes("function careerGFor(")) fail("roto.js missing careerGFor");
+if (!js.includes("(f.wins || 0) + (f.losses || 0) + (f.ties || 0)")) {
+  fail("careerGFor is not wins+losses+ties from franchise records");
+}
 if (!js.includes("A.data.franchises") && !js.includes("A.data && A.data.franchises")) {
   fail("careerGFor does not read A.data.franchises");
 }
@@ -88,7 +91,9 @@ if (!js.includes("careerG: careerGFor(oid)")) fail("decorateAll does not set car
 if (!js.includes(">Career G</th>")) fail("roto.js All table missing Career G header");
 if (!js.includes('data-k="careerG"')) fail("roto.js missing careerG sort key");
 if (!js.includes("if (key === \"careerG\")")) fail("sortValue/columnExists missing careerG");
-if (!js.includes("Career H2H games = franchise W+L+T")) fail("Career G tooltip missing W+L+T copy");
+if (!js.includes("Career H2H games = franchise wins + losses + ties (same source as Franchise Records)")) {
+  fail("Career G tooltip missing wins + losses + ties / Franchise Records source");
+}
 if (!js.includes("Fat Cats 148 from 2015–2025; Feelers 161")) {
   fail("Career G tooltip missing Cats 148 / Feelers 161 lock");
 }
