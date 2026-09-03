@@ -11,7 +11,7 @@
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
   const phaseNoteAll = {
-    reg: "Career roto covers 2018–2025, the years with full player category boxscores (pass / rush / rec). 2014–2017 still show on Scoreboard (starters + fantasy points + team scores), but those years have no category lines for roto, so they stay out. Counting stats default to per-season averages, or career sums on Totals. Rates are pooled career rates (cmp/att, yards/carry, yards/reception) — never an average of yearly rates. Ranks and TOTAL PTS use what’s on screen.",
+    reg: "Career roto covers 2018–2025, the years with full player category boxscores (pass / rush / rec). Career G is franchise H2H tenure (W+L+T, same as Franchise Records). Scored G is the roto sample 2018–2025. 2014–2017 still show on Scoreboard (starters + fantasy points + team scores), but those years have no category lines for roto, so they stay out. Counting stats default to per-season averages, or career sums on Totals. Rates are pooled career rates (cmp/att, yards/carry, yards/reception) — never an average of yearly rates. Ranks and TOTAL PTS use what’s on screen.",
     post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
     combined: "Career combined (regular + winners bracket) over scored seasons 2018–2025. Playoff teams add extra games; counting totals favor deeper runs.",
   };
@@ -63,6 +63,15 @@
       });
     });
   }
+  function careerGFor(oid) {
+    const id = canon(oid);
+    if (!id) return null;
+    const list = (A.data && A.data.franchises) || [];
+    const f = list.find((x) => canon(x.owner) === id);
+    if (!f) return null;
+    return (Number(f.wins) || 0) + (Number(f.losses) || 0) + (Number(f.ties) || 0);
+  }
+
   function decorateAll(teams) {
     return (teams || []).map((t) => {
       const oid = canon(t.ownerId);
@@ -71,6 +80,7 @@
         ownerId: oid,
         teamName: ft.name || t.teamName,
         logo: ft.logo || "",
+        careerG: careerGFor(oid),
       });
     });
   }
@@ -112,6 +122,7 @@
 
   function sortValue(t, key) {
     if (key === "team") return t.teamName || "";
+    if (key === "careerG") return t.careerG;
     if (key === "g") return t.games;
     if (key === "totalPts") return t.totalPts;
     const c = (t.categories || []).find((x) => x.key === key);
@@ -124,6 +135,7 @@
 
   function columnExists(key, cols) {
     if (key === "team" || key === "g" || key === "totalPts") return true;
+    if (key === "careerG") return !!(lastTable && lastTable.allMode);
     return (cols || []).some((c) => c.key === key);
   }
 
@@ -173,6 +185,7 @@
         <table class="tbl roto-tbl">
           <thead><tr>
             <th class="left ${thClass("team")}" data-k="team">Team</th>
+            ${allMode ? `<th class="${thClass("careerG")}" data-k="careerG" title="Career H2H games = franchise W+L+T (same as Franchise Records). Fat Cats 148 from 2015–2025; Feelers 161.">Career G</th>` : ""}
             <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored roto year (2018–2025). Not career H2H games." : "Sum of regular-season games in scored roto years only (2018–2025). Not career H2H — e.g. Fat Cats H2H is 148 from 2015–2025.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Scored G") : "G"}</th>
             ${cols.map((c) => `<th class="${thClass(c.key)}" data-k="${c.key}" title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
             <th class="${thClass("totalPts")}" data-k="totalPts">Total Pts</th>
@@ -181,6 +194,7 @@
             ${ranked.map((t) => `
               <tr data-oid="${esc(t.ownerId || "")}" class="${t.ownerId && t.ownerId === (selected && selected.ownerId) ? "on" : ""}">
                 <td class="left">${teamCell(t)}</td>
+                ${allMode ? `<td class="tnum mut">${t.careerG == null || Number.isNaN(Number(t.careerG)) ? "—" : t.careerG}</td>` : ""}
                 <td class="tnum mut">${R.formatGames(t.games, grain, allMode)}</td>
                 ${t.categories.map((c) => {
                   const miss = c.value == null || Number.isNaN(Number(c.value));
@@ -272,7 +286,7 @@
       focusOwner = selected.ownerId;
       const grainLabel = grain === "totals" ? "career totals" : "per-season averages";
       $("season-sub").textContent =
-        `All · ${grainLabel} · scored seasons ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
+        `All · ${grainLabel} · Career G = franchise H2H tenure · Scored G = roto sample ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
       renderTable(teams, selected, true);
       renderBreakdown(selected, teams.length, allMode);
       renderRadar(selected, teams);
@@ -461,7 +475,7 @@
   }
 
   $("lede").textContent =
-    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career roto covers 2018–2025 (full player category boxscores). 2014–2017 still show on Scoreboard but stay out of roto. All defaults to per-season averages so a long-running franchise does not win by existing.";
+    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career G is franchise H2H tenure (W+L+T, same as Franchise Records). Scored G is the roto sample 2018–2025. 2014–2017 still show on Scoreboard but stay out of roto. All defaults to per-season averages so a long-running franchise does not win by existing.";
 
   render();
 })();
