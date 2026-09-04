@@ -60,7 +60,7 @@
     <div class="week-picker" id="squad-picker"></div>
   </div>
 
-  <!-- Landing surfaces first (compare + usage + database) -->
+  <!-- Landing: Compare → WOPR → Database → Colleges (CHI-175) -->
   <section class="card" id="pl-compare">
     <div class="card-head">
       <div>
@@ -87,6 +87,18 @@
     <div class="chart-wrap tall" id="wopr-persist-wrap"><canvas id="wopr-persist-chart"></canvas></div>
   </section>
 
+  <div class="section-break" id="pl-db-break"><h2>The Database <span id="db-span">every rostered player</span></h2></div>
+  <section class="card" id="pl-db">
+    <div class="card-head">
+      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile</div></div>
+      <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
+    </div>
+    <div class="pp-filters" id="pp-filters"></div>
+    <div class="pp-filters" id="pp-sort"></div>
+    <div class="pp-grid" id="pp-grid"><p class="notice">Loading players…</p></div>
+    <button class="pp-more" id="pp-more">Show more</button>
+  </section>
+
   <section class="card" id="pl-colleges">
     <div class="card-head">
       <div>
@@ -101,18 +113,6 @@
       </table>
     </div>
     <p class="card-sub colleges-foot" id="pl-colleges-foot" hidden></p>
-  </section>
-
-  <div class="section-break" id="pl-db-break"><h2>The Database <span id="db-span">every rostered player</span></h2></div>
-  <section class="card" id="pl-db">
-    <div class="card-head">
-      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile</div></div>
-      <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
-    </div>
-    <div class="pp-filters" id="pp-filters"></div>
-    <div class="pp-filters" id="pp-sort"></div>
-    <div class="pp-grid" id="pp-grid"><p class="notice">Loading players…</p></div>
-    <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
   <!-- Profile-only (hidden on landing) -->
@@ -270,6 +270,6 @@
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=39"></script>
 <script src="chi114.js?v=6"></script>
-<script src="players.js?v=46"></script>
+<script src="players.js?v=47"></script>
 </body>
 </html>
