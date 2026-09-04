@@ -969,9 +969,9 @@
     hide("#pl-log-card", !profile);
     hide("#pl-money", !profile);
     hide("#pl-back", !profile);
-    // Advanced cards only when a player is open (profile). Landing = clean DB list.
-    hide("#pl-compare", true);
-    hide("#wopr-persist", true);
+    // CHI-175: Compare + WOPR stay on landing; hide only in profile.
+    hide("#pl-compare", profile);
+    hide("#wopr-persist", profile);
     hide("#pl-fg-strip", !profile);
     hide("#pl-custody", !profile);
     hide("#pl-achievements", !profile);
