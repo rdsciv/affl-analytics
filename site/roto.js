@@ -1,4 +1,4 @@
-/* Roto page — CHI-149 All grain, CHI-150 click-to-sort standings. Season All | year (default All). All = career over scored seasons 2018–2025. */
+/* Roto page — CHI-149 All grain, CHI-150 click-to-sort, CHI-162 scored 2014–2025 (2014–17 starter×nflverse). */
 (async function () {
   const A = window.AFFL;
   await A.boot();
@@ -11,9 +11,9 @@
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
   const phaseNoteAll = {
-    reg: "Career roto covers 2018–2025, the years with full player category boxscores (pass / rush / rec). Career G = franchise H2H tenure; Scored G = roto sample 2018–2025. 2014–2017 still show on Scoreboard (starters + fantasy points + team scores), but those years have no category lines for roto, so they stay out. Counting stats default to per-season averages, or career sums on Totals. Rates are pooled career rates (cmp/att, yards/carry, yards/reception) — never an average of yearly rates. Ranks and TOTAL PTS use what’s on screen.",
+    reg: "Career roto covers 2014–2025. 2018+ uses ESPN weekly category lines; 2014–17 joins AFFL weekly starters to nflverse week stats (NON_PPR, receptions = volume). Career G = franchise H2H tenure; Scored G = regular-season games in the scored window (Feelers 161, Cats 148 from 2015+, Thunder 13 in 2014 only). Counting stats default to per-season averages, or career sums on Totals. Rates are pooled (cmp/att, yards/carry, yards/reception). Ranks and TOTAL PTS use what’s on screen.",
     post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
-    combined: "Career combined (regular + winners bracket) over scored seasons 2018–2025. Playoff teams add extra games; counting totals favor deeper runs.",
+    combined: "Career combined (regular + winners bracket) over scored seasons 2014–2025. Playoff teams add extra games; counting totals favor deeper runs.",
   };
 
   const league = await fetch(root + "league.json").then((r) => r.json());
@@ -96,7 +96,7 @@
     $("stand-h2").textContent = "Roto Standings";
     $("season-sub").textContent = y + " · categories unavailable";
     $("season-table").innerHTML =
-      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Full player category boxscores (pass / rush / rec) start in 2018 — 2014–2017 still show on Scoreboard, but have no category lines for roto. This year is not scored as zeros.</div>`;
+      `<div class="empty roto-unavailable">Roto categories are unavailable for ${y}. Scored window is 2014–2025 (2014–17 = AFFL starters × nflverse week, NON_PPR). This year is not scored as zeros.</div>`;
     $("breakdown").innerHTML = "";
     $("radar-sub").textContent = "";
     $("radar-meta").innerHTML = "";
@@ -183,7 +183,7 @@
           <thead><tr>
             <th class="left ${thClass("team")}" data-k="team">Team</th>
             ${allMode ? `<th class="${thClass("careerG")}" data-k="careerG" title="Career H2H games = franchise wins + losses + ties (same source as Franchise Records). Fat Cats 148 from 2015–2025; Feelers 161.">Career G</th>` : ""}
-            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored roto year (2018–2025). Not career H2H games." : "Sum of regular-season games in scored roto years only (2018–2025). Not career H2H — e.g. Fat Cats H2H is 148 from 2015–2025.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Scored G") : "G"}</th>
+            <th class="${thClass("g")}" data-k="g" title="${allMode ? (grain === "averages" ? "Mean regular-season games per scored roto year (2014–2025). Not career H2H — see Career G." : "Sum of regular-season games in scored roto years (2014–2025). Cats 148 from 2015+; Feelers 161; Thunder 13 in 2014 only — see Career G for H2H tenure.") : "Eligible games in this phase"}">${allMode ? (grain === "averages" ? "G/yr" : "Scored G") : "G"}</th>
             ${cols.map((c) => `<th class="${thClass(c.key)}" data-k="${c.key}" title="${c.group} · ${c.label}">${c.label}</th>`).join("")}
             <th class="${thClass("totalPts")}" data-k="totalPts">Total Pts</th>
           </tr></thead>
@@ -283,7 +283,7 @@
       focusOwner = selected.ownerId;
       const grainLabel = grain === "totals" ? "career totals" : "per-season averages";
       $("season-sub").textContent =
-        `All · ${grainLabel} · Career G = franchise H2H tenure · Scored G = roto sample 2018–2025 · scored seasons ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
+        `All · ${grainLabel} · Career G = franchise H2H tenure · Scored G = scored window ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} (2014–17 starter×nflverse) · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
       renderTable(teams, selected, true);
       renderBreakdown(selected, teams.length, allMode);
       renderRadar(selected, teams);
@@ -472,7 +472,7 @@
   }
 
   $("lede").textContent =
-    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career G = franchise H2H tenure; Scored G = roto sample 2018–2025. 2014–2017 still show on Scoreboard but stay out of roto. All defaults to per-season averages so a long-running franchise does not win by existing.";
+    "AFFL is a head-to-head points league, but every team's underlying NFL production also scores the way a 10-category rotisserie league would — passing, rushing, and receiving stats ranked across the league, each category worth 1 (worst) to n (best) points. Career G = franchise H2H tenure; Scored G covers 2014–2025 (2014–17 = AFFL starters × nflverse week, NON_PPR). All defaults to per-season averages so a long-running franchise does not win by existing.";
 
   render();
 })();

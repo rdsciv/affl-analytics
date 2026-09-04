@@ -1,5 +1,5 @@
 /* Port of AFFL_Pillars category stats + CHI-149 All-grain career roto.
- * Season tables: one year, equal G. All: scored seasons 2018–2025 only.
+ * Season tables: one year, equal G. All: scored seasons 2014–2025 (2014–17 = AFFL starter × nflverse week, NON_PPR).
  * Rate cats on All are pooled (cmp/att, ry/car, recy/rec), never mean of yearly rates.
  */
 (function (global) {
@@ -18,8 +18,8 @@
 
   const COUNTING_KEYS = ["py", "ptd", "ry", "rtd", "recy", "retd", "rec"];
   const RATE_KEYS = ["compPct", "ypc", "ypr"];
-  const SCORED_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
-  const UNAVAILABLE_YEARS = [2014, 2015, 2016, 2017];
+  const SCORED_YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+  const UNAVAILABLE_YEARS = []; /* CHI-162: 2014–17 now scored via starter×nflverse */
   const PHASE_LABEL = { reg: "Regular", post: "Postseason", combined: "Combined" };
 
   function isConsolation(tier) {
@@ -54,18 +54,17 @@
   function scheduleG(year) {
     const y = +year;
     if (y >= 2021 && y <= 2025) return 14;
-    if (y >= 2018 && y <= 2020) return 13;
+    if (y >= 2014 && y <= 2020) return 13;
     return 0;
   }
 
   function isScoredYear(year) {
     const y = +year;
-    return y >= 2018 && y <= 2025;
+    return y >= 2014 && y <= 2025;
   }
 
   function isUnavailableYear(year) {
-    const y = +year;
-    return y >= 2014 && y <= 2017;
+    return false; /* CHI-162: 2014–17 scored */
   }
 
   function valuesFromRaw(raw) {
