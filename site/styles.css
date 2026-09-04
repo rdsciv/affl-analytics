@@ -1074,12 +1074,35 @@ a.tm-name:hover { color: var(--blue); }
 }
 .tm-toggle:hover { color: var(--blue); }
 .ncaa-logo { width: 44px; height: 44px; object-fit: contain; flex: 0 0 44px; }
-.pl-college-inner { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.pl-college-id { display: flex; align-items: center; gap: 12px; min-width: 180px; }
-.pl-college-name { font-size: 18px; font-weight: 800; letter-spacing: .01em; }
-.pl-college-line { font-size: 13px; color: var(--mut); font-weight: 600; margin-top: 2px; letter-spacing: .01em; }
-.pl-college-tiles { flex: 1; min-width: 280px; margin-bottom: 0 !important; grid-template-columns: repeat(5, 1fr); }
-@media (max-width: 800px) { .pl-college-tiles { grid-template-columns: repeat(2, 1fr); } }
+/* CHI-173 — pack College card: kill dead gutter between id and tiles. */
+.pl-college-inner {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 14px;
+  width: 100%;
+}
+.pl-college-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pl-college-name { font-size: 17px; font-weight: 800; letter-spacing: .01em; line-height: 1.15; }
+.pl-college-line { font-size: 12px; color: var(--mut); font-weight: 600; margin-top: 2px; letter-spacing: .01em; }
+.pl-college-tiles {
+  flex: unset;
+  min-width: 0 !important;
+  width: 100%;
+  margin-bottom: 0 !important;
+  gap: 8px !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.pl-college-tiles .pp-stat { padding: 8px 6px; }
+.pl-college-tiles .pp-stat b { font-size: 15px; }
+.pl-college-tiles .pp-stat span { font-size: 10px; }
+@media (max-width: 900px) {
+  .pl-college-inner { grid-template-columns: 1fr; }
+  .pl-college-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .pl-college-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 #team-draft-tbl th.s { cursor: pointer; user-select: none; }
 #team-draft-tbl th.s:hover { color: var(--ink); }

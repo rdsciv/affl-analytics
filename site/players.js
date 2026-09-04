@@ -983,7 +983,7 @@
     const early = (bio.earlyDeclare == null || bio.earlyDeclare === "")
       ? "—"
       : (bio.earlyDeclare ? "Yes" : "No");
-    const college = bio.college ? A.esc(bio.college) : "—";
+    const college = bio.college ? A.esc(bio.college) : "<span class=\"mut\">unavailable</span>";
     const logo = A.collegeLogoHTML(bio);
     const cached = collegeCacheRec(p && p.pid);
     let career = "";
