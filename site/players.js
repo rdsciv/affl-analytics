@@ -806,6 +806,155 @@
     renderChi114WeekNfl(pid);
   }
 
+
+  /* CHI-173 — Colleges leaderboard on landing. Aggregate AFFL start weeks by bio.college.
+     NFL FP / XFP / FPOE joined from year playerSeasonXfp (CHI-114 non-PPR) when present.
+     Missing college labeled unavailable and excluded from ranked rows (footnote only).
+     No luck / playoff-trip columns (franchise-grain only). */
+  let collegeYearCache = null;
+  async function ensureCollegeYears() {
+    if (collegeYearCache) return collegeYearCache;
+    const all = await A.loadAllYears();
+    collegeYearCache = all.map(({ year: y, data }) => {
+      const xfpBy = {};
+      const rows = (data && data.playerSeasonXfp && data.playerSeasonXfp.rows) || [];
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r && r.player_id != null) xfpBy[String(r.player_id)] = r;
+      }
+      return { y, players: (data && data.players) || [], xfpBy };
+    });
+    return collegeYearCache;
+  }
+
+  function collegeOfPid(pid) {
+    const bio = A.playerBio(pid, null, A.today()) || {};
+    const raw = (bio.college != null ? String(bio.college) : "").trim();
+    return { college: raw, bio };
+  }
+
+  async function buildCollegeRows() {
+    const bags = await ensureCollegeYears();
+    const wantY = scope === "cum" ? null : year;
+    const by = Object.create(null);
+    let missWks = 0, missPts = 0, missPlayers = 0;
+    const missSeen = Object.create(null);
+    let joinedXfp = 0;
+    for (let bi = 0; bi < bags.length; bi++) {
+      const bag = bags[bi];
+      if (wantY != null && bag.y !== wantY) continue;
+      for (let pi = 0; pi < bag.players.length; pi++) {
+        const p = bag.players[pi];
+        const starts = Number(p.starts) || 0;
+        if (!starts) continue;
+        const stPts = Number(p.stPts) || 0;
+        const info = collegeOfPid(p.pid);
+        const college = info.college;
+        if (!college) {
+          missWks += starts;
+          missPts += stPts;
+          if (!missSeen[p.pid]) { missSeen[p.pid] = 1; missPlayers += 1; }
+          continue;
+        }
+        let row = by[college];
+        if (!row) {
+          row = by[college] = {
+            college,
+            bio: info.bio,
+            wks: 0,
+            affl: 0,
+            nflFp: 0,
+            xfp: 0,
+            fpoe: 0,
+            hasXfp: false,
+            nPlayers: 0,
+            seen: Object.create(null),
+          };
+        }
+        row.wks += starts;
+        row.affl += stPts;
+        if (!row.seen[p.pid]) { row.seen[p.pid] = 1; row.nPlayers += 1; }
+        const xr = bag.xfpBy[String(p.pid)];
+        if (xr) {
+          joinedXfp += 1;
+          row.hasXfp = true;
+          if (xr.fp != null && Number.isFinite(Number(xr.fp))) row.nflFp += Number(xr.fp);
+          if (xr.xfp != null && Number.isFinite(Number(xr.xfp))) row.xfp += Number(xr.xfp);
+          if (xr.fpoe != null && Number.isFinite(Number(xr.fpoe))) row.fpoe += Number(xr.fpoe);
+        } else {
+          const nfl = nflSeasonPts(p.pid, bag.y);
+          if (nfl != null) row.nflFp += nfl;
+        }
+      }
+    }
+    const rows = Object.keys(by).map((k) => by[k]).sort((a, b) => {
+      if (b.affl !== a.affl) return b.affl - a.affl;
+      if (b.wks !== a.wks) return b.wks - a.wks;
+      return String(a.college).localeCompare(String(b.college));
+    });
+    return {
+      rows,
+      showXfp: joinedXfp > 0,
+      miss: { wks: missWks, pts: missPts, players: missPlayers },
+    };
+  }
+
+  async function renderColleges() {
+    const el = $("#pl-colleges");
+    const tbl = $("#pl-colleges-tbl");
+    const foot = $("#pl-colleges-foot");
+    const sub = $("#pl-colleges-sub");
+    if (!el || !tbl) return;
+    if (el.hidden) return;
+    const span = scope === "cum" ? "all seasons" : String(year);
+    if (sub) {
+      sub.textContent = "AFFL start weeks by school · non-PPR · " + span + " · sorted AFFL PTS · no luck / playoff trips";
+    }
+    tbl.querySelector("thead").innerHTML = "<tr><th colspan=\"8\">Loading colleges…</th></tr>";
+    tbl.querySelector("tbody").innerHTML = "";
+    let pack;
+    try { pack = await buildCollegeRows(); }
+    catch (e) {
+      console.error("colleges failed", e);
+      tbl.querySelector("thead").innerHTML = "";
+      tbl.querySelector("tbody").innerHTML = "<tr><td colspan=\"6\">Could not build college leaderboard.</td></tr>";
+      return;
+    }
+    const cols = ["#", "COLLEGE", "WKS", "AFFL PTS", "NFL FP"];
+    if (pack.showXfp) { cols.push("XFP", "FPOE"); }
+    tbl.querySelector("thead").innerHTML = "<tr>" + cols.map((c, i) => {
+      const cls = i <= 1 ? "left" : "";
+      return "<th class=\"" + cls + "\">" + c + "</th>";
+    }).join("") + "</tr>";
+    const body = pack.rows.map((r, i) => {
+      const logo = A.collegeLogoHTML(r.bio, "ncaa-logo colleges-ncaa");
+      const name = A.esc(r.college);
+      const cells = [
+        "<td class=\"rk\">" + (i + 1) + "</td>",
+        "<td class=\"left\"><div class=\"colleges-school\">" + logo + "<span class=\"colleges-name\">" + name + "</span></div></td>",
+        "<td>" + fmt(r.wks, 0) + "</td>",
+        "<td>" + fmt(r.affl, 1) + "</td>",
+        "<td>" + (r.nflFp ? fmt(r.nflFp, 1) : "<span class=\"mut\">unavailable</span>") + "</td>",
+      ];
+      if (pack.showXfp) {
+        cells.push("<td>" + (r.hasXfp ? fmt(r.xfp, 1) : "<span class=\"mut\">unavailable</span>") + "</td>");
+        cells.push("<td>" + (r.hasXfp ? fmt(r.fpoe, 1) : "<span class=\"mut\">unavailable</span>") + "</td>");
+      }
+      return "<tr>" + cells.join("") + "</tr>";
+    }).join("");
+    tbl.querySelector("tbody").innerHTML = body || "<tr><td colspan=\"" + cols.length + "\">No AFFL start weeks for this season.</td></tr>";
+    if (foot) {
+      if (pack.miss.wks > 0) {
+        foot.hidden = false;
+        foot.textContent = "unavailable college · " + fmt(pack.miss.players, 0) + " players · " +
+          fmt(pack.miss.wks, 0) + " start weeks · " + fmt(pack.miss.pts, 1) + " AFFL PTS (excluded from ranks)";
+      } else {
+        foot.hidden = true;
+        foot.textContent = "";
+      }
+    }
+  }
+
   function setPageMode(mode) {
     const profile = mode === "profile";
     const hide = (sel, on) => { const el = $(sel); if (el) el.hidden = !!on; };
@@ -830,6 +979,7 @@
     hide("#pl-chi114", !profile);
     hide("#pl-db-break", profile);
     hide("#pl-db", profile);
+    hide("#pl-colleges", profile);
     if (!profile) {
       const ngs = $("#pl-ngs-profile");
       if (ngs) { ngs.hidden = true; ngs.innerHTML = ""; }
@@ -3108,6 +3258,7 @@
       }
       paintChrome();
       renderGrid();
+      renderColleges();
     }, ylist);
     A.remountTeamSelect(document.getElementById("squad-picker"), squad, (s) => {
       squad = s || "";
@@ -3119,6 +3270,7 @@
       }
       paintChrome();
       renderGrid();
+      renderColleges();
     }, seasonYear);
   }
 
@@ -3143,6 +3295,7 @@
         await loadPlayer(pid, false);
       } else {
         setPageMode("landing");
+        await renderColleges();
       }
       renderGrid();
       const g2 = $("#pp-grid");

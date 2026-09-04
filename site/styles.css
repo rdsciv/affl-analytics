@@ -3406,3 +3406,49 @@ body.index-pack #franchise-tbl .team-cell {
 /* CHI-165 sticky franchise/year mismatch */
 .sb-drop-notice { margin: 0 0 8px; }
 .sb-drop-notice[hidden] { display: none !important; }
+
+/* CHI-173 — dense Colleges leaderboard on Players landing */
+#pl-colleges { padding: 8px 10px 10px; }
+#pl-colleges .card-head { margin-bottom: 6px; }
+#pl-colleges .card-sub { margin-top: 2px; }
+.colleges-scroll { margin: 0; }
+.colleges-tbl { font-size: 12.5px; width: 100%; table-layout: auto; }
+.colleges-tbl th {
+  height: 28px; padding: 0 8px; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--mut); white-space: nowrap;
+}
+.colleges-tbl td { height: 34px; padding: 0 8px; }
+.colleges-tbl th.left, .colleges-tbl td.left { text-align: left; }
+.colleges-tbl td.rk { text-align: center; width: 28px; color: var(--mut); font-weight: 700; }
+.colleges-tbl th:nth-child(2),
+.colleges-tbl td:nth-child(2) {
+  text-align: left;
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+.colleges-school {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 16rem;
+}
+.colleges-name {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+img.ncaa-logo.colleges-ncaa,
+.colleges-tbl .ncaa-logo {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  flex: 0 0 28px !important;
+  object-fit: contain !important;
+}
+.colleges-foot { margin: 6px 2px 0; font-size: 11px; }
+#pl-colleges[hidden] { display: none !important; }
