@@ -234,7 +234,7 @@
         b.boxGames += raw.games || 0;
         if (b.years.indexOf(year) < 0) {
           b.years.push(year);
-          if (year >= 2018 && year <= 2020) b.n13 += 1;
+          if (year >= 2014 && year <= 2020) b.n13 += 1;
           if (year >= 2021 && year <= 2025) b.n14 += 1;
         }
       }
