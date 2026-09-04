@@ -2379,7 +2379,9 @@
     const q = PP.q.toLowerCase();
     const src = enrichedPool();
     const rows = src.filter((p) => {
-      if (PP.pos !== "ALL" && p.pos !== PP.pos) return false;
+      if (PP.pos === "FLEX") {
+        if (p.pos !== "RB" && p.pos !== "WR" && p.pos !== "TE") return false;
+      } else if (PP.pos !== "ALL" && p.pos !== PP.pos) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
       if (squad) {
         const want = A.canon(squad);
@@ -2412,7 +2414,7 @@
   function renderGrid() {
     const rows = filtered();
     const sortDef = DB_SORTS.find((s) => s.key === PP.sort) || DB_SORTS[0];
-    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : PP.pos) + " · " + sortDef.short + " · " + (scope === "cum" ? "all seasons" : String(year));
+    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : (PP.pos === "FLEX" ? "FLEX (RB+WR+TE)" : PP.pos)) + " · " + sortDef.short + " · " + (scope === "cum" ? "all seasons" : String(year));
     $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => {
       const v = dbMetric(p, PP.sort);
       const shown = v == null ? "unavailable" : fmt(v, sortDef.digits);
@@ -2439,7 +2441,7 @@
       }));
   }
 
-  const POSES = ["ALL", "QB", "RB", "WR", "TE", "K", "DST"];
+  const POSES = ["ALL", "QB", "RB", "WR", "TE", "FLEX", "K", "DST"];
   function paintDbChips() {
     $("#pp-filters").innerHTML = POSES.map((p) =>
       `<button class="pp-chip${p === PP.pos ? " on" : ""}" data-pos="${p}">${p}</button>`).join("");
