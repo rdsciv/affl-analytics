@@ -111,6 +111,11 @@ window.AFFL = (function () {
     m10: "logos/8392c16acb8e.jpg",
   };
 
+  function isLocalLogo(src) {
+    // CHI-169: only site/logos/* — absolute http(s) remotes are treated as absent.
+    return !!(src && /^logos\//.test(String(src)));
+  }
+
   function franchiseLogo(id) {
     const c = canon(id);
     if (FRANCHISE_MARKS[c]) return FRANCHISE_MARKS[c];
@@ -119,7 +124,7 @@ window.AFFL = (function () {
     for (let i = 0; i < ys.length; i++) {
       const ts = ((DATA.seasons[String(ys[i])] || {}).teams) || [];
       for (let j = 0; j < ts.length; j++) {
-        if (canon(ts[j].owner) === c && ts[j].logo) return ts[j].logo;
+        if (canon(ts[j].owner) === c && isLocalLogo(ts[j].logo)) return ts[j].logo;
       }
     }
     return "";
@@ -161,7 +166,7 @@ window.AFFL = (function () {
     const oid = t && (t.owner != null && t.owner !== "" ? t.owner : t.oid);
     const src = (oid ? franchiseLogo(oid) : "") || (t && t.logo) || "";
     const sz = logoMarkSize(cls);
-    if (src && /^(https?:|logos\/)/.test(src)) {
+    if (isLocalLogo(src)) {
       return `<img class="${cls}" src="${src}" alt="" width="${sz}" height="${sz}" loading="lazy"
         style="max-width:${sz}px;max-height:${sz}px;width:${sz}px;height:${sz}px;object-fit:contain;background:transparent"
         onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} fb&quot;>${ini}</div>'">`;
@@ -963,6 +968,7 @@ window.AFFL = (function () {
 
   return { C, boot, loadYear, loadAllYears, years, yearInfo, teams, memberName, ownerId, ownerTeams,
            MERGE, canon, franchiseName, franchiseTeam, shortTeam, franchiseLogo,
+    isLocalLogo,
            squads, squadFromURL, squadInfo, squadYears, squadsForSeason, franchiseYears, franchisePlayedSeason, ownersForSeason, seasonScope, seasonFromURL, seasonSelect, seasonPicker, stampSeason, teamIdFor, sameId, squadPicker, teamSelect, remountTeamSelect, stampNav, clampYear, rememberSquad,
            isHistoric, showFormer, setShowFormer, visibleFranchises, mountHistoricToggle, SHOW_FORMER_KEY,
            CURRENT_2026, mountBrandStrip, FRANCHISE_MARKS,

@@ -70,7 +70,7 @@
 
   function mark(logo, name) {
     const ini = initials(name);
-    if (logo && /^(https?:|logos\/)/.test(logo)) {
+    if (logo && /^logos\//.test(String(logo))) {
       return `<img class="archive-mark" src="${logo}" alt="" width="28" height="28" loading="lazy"
         onerror="if(this.parentNode)this.outerHTML='<div class=&quot;archive-mark fb&quot;>${ini}</div>'">`;
     }

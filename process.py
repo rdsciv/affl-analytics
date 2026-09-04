@@ -21,7 +21,17 @@ if os.path.exists(_lm_path):
     LOGO_MAP = json.load(open(_lm_path))
 
 def local_logo(url):
-    return LOGO_MAP.get(url, url)
+    """Map ESPN/remote logo URLs to site/logos/*; never emit off-site URLs."""
+    if not url:
+        return ''
+    mapped = LOGO_MAP.get(url)
+    if mapped:
+        return mapped
+    s = str(url)
+    if s.startswith('logos/'):
+        return s
+    # Unmapped http(s) or other remotes → empty (monogram). CHI-169.
+    return ''
 
 def team_name(t):
     n = t.get('name')

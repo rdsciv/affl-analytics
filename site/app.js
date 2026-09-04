@@ -84,11 +84,11 @@
     let logo = team && team.logo;
     try {
       const oid = team && (team.owner != null && team.owner !== '' ? team.owner : team.oid);
-      if ((!logo || !/^(https?:|logos\/)/.test(logo)) && oid && window.AFFL && window.AFFL.franchiseLogo) {
+      if ((!logo || !(window.AFFL && window.AFFL.isLocalLogo ? window.AFFL.isLocalLogo(logo) : /^logos\//.test(logo))) && oid && window.AFFL && window.AFFL.franchiseLogo) {
         logo = window.AFFL.franchiseLogo(oid) || logo;
       }
     } catch (e) {}
-    if (logo && /^(https?:|logos\/)/.test(logo)) {
+    if (logo && (window.AFFL && window.AFFL.isLocalLogo ? window.AFFL.isLocalLogo(logo) : /^logos\//.test(String(logo)))) {
       return `<img class="${cls}" src="${logo}" alt="" width="${sz}" height="${sz}" loading="lazy"
         style="max-width:${sz}px;max-height:${sz}px;width:${sz}px;height:${sz}px;object-fit:contain;background:transparent"
         onerror="if(this.parentNode)this.outerHTML='<div class=&quot;${cls} ${size === 'mini' ? '' : 'fallback'}&quot;>${initial}</div>'">`;

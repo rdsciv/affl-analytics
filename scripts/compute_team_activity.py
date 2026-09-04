@@ -21,6 +21,7 @@ Transactions (X): count of ADD legs + count of trade-in legs (player arrivals).
 from __future__ import annotations
 
 import json
+import re
 import statistics
 import sqlite3
 from collections import defaultdict
@@ -33,6 +34,19 @@ DB = ROOT / "affl.db"
 SITE = ROOT / "site"
 CT = ZoneInfo("America/Chicago")
 DOW = ["TUE", "WED", "THU", "FRI", "SAT", "SUN", "MON"]  # col 0..6
+
+
+def local_only_logo(url):
+    """CHI-169: only keep logos/ paths; blank absolute http(s) remotes."""
+    if not url:
+        return ""
+    s = str(url)
+    if s.startswith("logos/"):
+        return s
+    if s.startswith("http://") or s.startswith("https://"):
+        return ""
+    return s if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", s) else ""
+
 
 
 def dow_col(ts_ms: int) -> int:
@@ -68,7 +82,7 @@ def main():
             "tid": r["team_id"],
             "member_id": r["member_id"],
             "name": r["name"],
-            "logo": r["logo"] or "",
+            "logo": local_only_logo(r["logo"] or ""),
         }
 
     # points by (season, week, player) — any team
