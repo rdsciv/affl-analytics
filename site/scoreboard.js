@@ -1,6 +1,6 @@
 /* ============ AFFL Scoreboard — all seasons ============ */
 (async function () {
-  // CHI-165 sticky v11
+  // CHI-165 sticky v12 — leftover/CERTAIN overlay for 2014–2017
   // goTeam: squad deep-links live on Teams; scoreboard filters in place.
 
   const A = window.AFFL;
@@ -16,7 +16,7 @@
   let scope = A.scopeFromURL();
   let squad = A.squadFromURL();
   let YD = null, T = {}, ALL = null;
-  let PRE_STARTS = {}, PRE_ROSTERS = {}, PINDEX = {};
+  let PRE_STARTS = {}, PRE_ROSTERS = {}, PRE_CAND = {}, PINDEX = {};
   let INJ = {}, DEPTH = {}, Y2025 = null;
   let dropNotice = ""; // CHI-165 persistent season/squad mismatch notice
   const urlDropSquad = (new URLSearchParams(location.search).get("squad") || "");
@@ -24,12 +24,13 @@
   await Promise.all([
     fetch("pre2018_starts.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
     fetch("pre2018_rosters.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
+    fetch("pre2018_candidates.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
     fetch("player_index.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
     fetch("injuries.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
     fetch("depthcharts.json?v=" + Date.now(), { cache: "no-store" }).then((r) => r.ok ? r.json() : {}).catch(() => ({})),
     A.loadYear(2025).catch(() => null),
-  ]).then(([s, r, i, inj, depth, y25]) => {
-    PRE_STARTS = s || {}; PRE_ROSTERS = r || {}; PINDEX = i || {};
+  ]).then(([s, r, c, i, inj, depth, y25]) => {
+    PRE_STARTS = s || {}; PRE_ROSTERS = r || {}; PRE_CAND = c || {}; PINDEX = i || {};
     INJ = inj || {}; DEPTH = depth || {}; Y2025 = y25;
   });
 
@@ -237,18 +238,71 @@
     return out;
   }
 
+  function sumWeekPts(nflWeeks, weekMap) {
+    const vals = nflWeeks.map((w) => weekMap[String(w)])
+      .filter((v) => v != null && v !== "");
+    if (vals.length === 2 && Number(vals[0]) === Number(vals[1])) return Number(vals[0]);
+    return vals.reduce((a, b) => a + Number(b || 0), 0);
+  }
+
+  function certainFills(y, tid, nflWeeks, startedPids) {
+    const ymap = PRE_CAND[String(y)] || {};
+    const byPid = {};
+    nflWeeks.forEach((wk) => {
+      const bucket = ((ymap[String(wk)] || {})[String(tid)]) || [];
+      bucket.forEach((row) => {
+        const pid = String(row.pid);
+        if (startedPids.has(pid)) return;
+        if (!byPid[pid]) {
+          byPid[pid] = { weeks: {}, slot: row.slot || "—", last: -1, evidence: row.evidence || "" };
+        }
+        byPid[pid].weeks[String(wk)] = Number(row.pts || 0);
+        if (wk >= byPid[pid].last) {
+          byPid[pid].slot = row.slot || byPid[pid].slot;
+          byPid[pid].last = wk;
+          byPid[pid].evidence = row.evidence || byPid[pid].evidence;
+        }
+      });
+    });
+    const rows = [];
+    Object.keys(byPid).forEach((pid) => {
+      const rec = byPid[pid];
+      rows.push([pid, rec.slot || "—", sumWeekPts(nflWeeks, rec.weeks), "CERTAIN", rec.evidence]);
+    });
+    rows.sort((a, b) => (SLOT_ORDER[a[1]] ?? 9) - (SLOT_ORDER[b[1]] ?? 9));
+    return rows;
+  }
+
   function enrichSide(y, period, side) {
-    if (y >= 2018) return { roster: side.roster || [], unrecovered: [] };
-    if (side.roster && side.roster.length) return { roster: side.roster, unrecovered: [] };
+    if (y >= 2018) {
+      return { roster: side.roster || [], unrecovered: [], leftover: 0, recoveredN: (side.roster || []).length };
+    }
+    if (side.roster && side.roster.length) {
+      return { roster: side.roster, unrecovered: [], leftover: 0, recoveredN: side.roster.length };
+    }
     const weeks = nflWeeksForPeriod(y, period);
     const roster = collectStarts(y, side.tid, weeks);
     const started = new Set(roster.map((r) => String(r[0])));
-    return { roster: roster, unrecovered: snapshotUnrecovered(y, side.tid, started) };
+    const certain = certainFills(y, side.tid, weeks, started);
+    const filled = roster.concat(certain);
+    const shown = new Set(filled.map((r) => String(r[0])));
+    const sum = filled.reduce((a, r) => a + Number(r[2] || 0), 0);
+    const leftover = Math.round((Number(side.pts || 0) - sum) * 10) / 10;
+    return {
+      roster: filled,
+      unrecovered: snapshotUnrecovered(y, side.tid, shown),
+      leftover: leftover,
+      recoveredN: filled.length
+    };
   }
 
   function starterRow(r) {
-    return `<div class="sb-row">
-        <span class="sb-slot">${A.esc(r[1])}</span>
+    const certain = r[3] === "CERTAIN";
+    const title = certain
+      ? ` title="Reconstructed ${A.esc(r[4] || "CERTAIN")} — not an official ESPN lineup"`
+      : "";
+    return `<div class="sb-row${certain ? " certain" : ""}"${title}>
+        <span class="sb-slot${certain ? " certain-slot" : ""}">${A.esc(r[1])}</span>
         ${playerCell(r[0])}
         <span class="sb-nfl">${A.esc(playerNfl(r[0]) || "")}</span>
         <span class="sb-pts">${Number(r[2] || 0).toFixed(1)}</span>
@@ -279,10 +333,15 @@
     const benchBlock = (year >= 2018 && bench.length)
       ? `<details class="sb-bench"><summary>Bench · ${benchPts.toFixed(1)} pts unused</summary>${bench.map(starterRow).join("")}</details>`
       : "";
-    const recBlock = unrecovered.length
-      ? `<details class="sb-bench sb-unrecovered"><summary>On roster (start not recovered)</summary>${unrecovered.map(unrecoveredRow).join("")}</details>`
+    const leftover = Number(extra.leftover || 0);
+    const recoveredN = extra.recoveredN != null ? extra.recoveredN : starters.length;
+    const hole = (year < 2018 && Math.abs(leftover) > 0.05)
+      ? `<div class="sb-hole">${recoveredN} recovered · <span class="unidentified">${leftover.toFixed(1)} unidentified</span></div>`
       : "";
-    return `${starters.map(starterRow).join("")}${benchBlock}${recBlock}`;
+    const recBlock = unrecovered.length
+      ? `<details class="sb-bench sb-unrecovered"><summary>Late-season snapshot (not this week's lineup)</summary>${unrecovered.map(unrecoveredRow).join("")}</details>`
+      : "";
+    return `${starters.map(starterRow).join("")}${hole}${benchBlock}${recBlock}`;
   }
 
   function gameCard(g, y, teams, yd, period) {
@@ -299,7 +358,7 @@
           <div class="sb-team-name">${A.esc(ident.name)}</div>
           <div class="sb-total${win ? " w" : ""}">${s.pts.toFixed(1)}</div>
         </div>
-        ${rosterHTML({ roster: filled.roster }, { unrecovered: filled.unrecovered })}
+        ${rosterHTML({ roster: filled.roster }, { unrecovered: filled.unrecovered, leftover: filled.leftover, recoveredN: filled.recoveredN })}
       </div>`;
     };
     const tier = TIER[g.tier] || "";
@@ -461,7 +520,7 @@
     let banner = "";
     if (!YD.hasRosters) {
       banner = A.notice(
-        `ESPN compacted weekly lineups for ${year}. Showing recovered starters where we have them; snapshot players without a start row are listed as start not recovered.`);
+        `ESPN compacted weekly lineups for ${year}. Showing recovered starters where we have them. Gold rows are reconstructed CERTAIN fills, not official ESPN lineups. The snapshot list is a late-season snapshot, not this week's lineup.`);
     }
 
     const note = weekViewSubtitle(year, week);

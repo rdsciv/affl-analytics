@@ -51,8 +51,26 @@ def main():
         fail("scoreboard.js missing pre2018_starts enrichment path")
     else:
         print("roster enrichment path: pre2018_starts")
-    if "start not recovered" not in js:
-        fail("scoreboard.js missing 'On roster (start not recovered)' block")
+    if "unidentified" not in js:
+        fail("scoreboard.js missing leftover/unidentified callout for pre-2018 holes")
+    if "pre2018_candidates" not in js:
+        fail("scoreboard.js missing CERTAIN candidate overlay")
+    if "Late-season snapshot" not in js:
+        fail("scoreboard.js must not present the undated snapshot as this week's roster")
+    cand_path = SITE / "pre2018_candidates.json"
+    if not cand_path.exists():
+        fail("site/pre2018_candidates.json missing")
+    else:
+        cand = json.loads(cand_path.read_text())
+        sliger = (((cand.get("2014") or {}).get("1") or {}).get("3") or [])
+        if not any(int(r.get("pid")) == 14993 and abs(float(r.get("pts") or 0) - 8) <= 0.05 for r in sliger):
+            fail("Sliger 2014 W1 CERTAIN sidecar missing Zuerlein 14993 at 8 pts")
+        else:
+            print("sidecar CERTAIN: Sliger 2014 W1 Zuerlein 8")
+        free = [r for weeks in cand.values() for teams in weeks.values()
+                for rows in teams.values() for r in rows if r.get("evidence") == "free"]
+        if free:
+            fail(f"{len(free)} free fills in CERTAIN sidecar")
     for phrase in ("not rostered", "not on an AFFL roster"):
         if phrase in js:
             fail(f"scoreboard.js uses banned phrase {phrase!r}")

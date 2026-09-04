@@ -1239,6 +1239,20 @@ button.award-count.on { color: var(--blue); }
 .sb-unrecovered summary { color: var(--mut); }
 .sb-unrecovered .sb-row { opacity: .75; }
 .sb-unrecovered .sb-pts { color: var(--mut); font-weight: 600; }
+.sb-row.certain { box-shadow: inset 3px 0 0 #d4a017; }
+.sb-slot.certain-slot {
+  color: #e6c56a;
+  border: 1px solid #d4a01766;
+  background: #d4a01714;
+}
+.sb-row.certain .sb-pts { color: var(--yellow); }
+.sb-hole {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--mut);
+  letter-spacing: .04em;
+}
+.sb-hole .unidentified { color: var(--yellow); font-weight: 700; }
 
 /* ---------- pre-2018 season roster (Teams) ---------- */
 .sr-src {
