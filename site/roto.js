@@ -7,12 +7,12 @@
 
   const phaseNoteSeason = {
     reg: "Regular season only — every team plays the same number of games, so category totals are directly comparable.",
-    post: "Winners-bracket games only. Teams play unequal numbers of playoff games (byes, 2- vs 3-game paths), so totals are not directly comparable — the games column shows each team’s sample.",
+    post: "Winners-bracket games only. Averages divide counting cats by playoff games played (not by seasons). Teams play unequal paths — G is the sample.",
     combined: "Regular season + winners bracket. Consolation games are excluded. Playoff teams play more games than eliminated ones, so counting totals favor deeper runs.",
   };
   const phaseNoteAll = {
     reg: "Career roto covers 2014–2025. 2018+ uses ESPN weekly category lines; 2014–17 joins AFFL weekly starters to nflverse week stats (NON_PPR, receptions = volume). Career G = franchise H2H tenure; Scored G = regular-season games in the scored window (Feelers 161, Cats 148 from 2015+, Thunder 13 in 2014 only). Counting stats default to per-season averages, or career sums on Totals. Rates are pooled (cmp/att, yards/carry, yards/reception). Ranks and TOTAL PTS use what’s on screen.",
-    post: "Career postseason roto over scored seasons that have winners-bracket games. Teams play unequal playoff paths — G is the sample, not a common schedule.",
+    post: "Career postseason roto over scored seasons with winners-bracket games. Averages = per playoff game (counting cats ÷ G), not per year — multi-week paths stay comparable. Rates stay pooled. Teams play unequal paths — G is the sample.",
     combined: "Career combined (regular + winners bracket) over scored seasons 2014–2025. Playoff teams add extra games; counting totals favor deeper runs.",
   };
 
@@ -281,7 +281,9 @@
       }
       const selected = teams.find((t) => t.ownerId && t.ownerId === canon(focusOwner)) || teams[0];
       focusOwner = selected.ownerId;
-      const grainLabel = grain === "totals" ? "career totals" : "per-season averages";
+      const grainLabel = grain === "totals"
+        ? "career totals"
+        : (phase === "post" ? "per-game averages" : "per-season averages");
       $("season-sub").textContent =
         `All · ${grainLabel} · Career G = franchise H2H tenure · Scored G = scored window ${built.scoredYears[0]}–${built.scoredYears[built.scoredYears.length - 1]} (2014–17 starter×nflverse) · ${R.PHASE_LABEL[phase]} · cells colored by rank on this grain · TOTAL PTS is the sum of category ranks of the displayed numbers · current franchise names`;
       renderTable(teams, selected, true);

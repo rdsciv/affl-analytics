@@ -196,10 +196,10 @@
   /* CHI-149 All grain.
    * ownerOf(year, teamId) -> franchise id (already canon). Skip owners with 0 scored years.
    * grain: "averages" (default) | "totals"
-   * Counting cats: total / nScoredYears (averages) or career sum (totals).
+   * Counting cats (reg/combined averages): total / nScoredYears; (post averages): total / boxGames (per playoff game).
    * Rate cats: always pooled from raw cmp/att, ry/car, recy/rec.
    * TOTAL PTS: ranks of the DISPLAYED numbers, not mean of yearly TOTAL PTS.
-   * G (reg): (13*n13 + 14*n14) / n  or the sum. Post/combined: mean/sum of actual games.
+   * G (reg): (13*n13 + 14*n14) / n  or the sum. Post/combined: mean/sum of actual playoff/box games.
    */
   function buildAllRoto(loads, phase, grain, opts) {
     phase = phase || "reg";
@@ -249,14 +249,23 @@
       const n = b.years.length;
       const raw = b.raw;
       const pooled = valuesFromRaw(raw);
+      // CHI-178: postseason averages are per playoff game (÷ boxGames), not ÷ years.
+      const avgDenom = (grain === "averages" && phase === "post")
+        ? (b.boxGames > 0 ? b.boxGames : 0)
+        : n;
+      const avgOf = (v) => {
+        if (grain === "totals") return v;
+        if (!avgDenom) return 0;
+        return v / avgDenom;
+      };
       const values = {
-        py: grain === "totals" ? raw.py : raw.py / n,
-        ptd: grain === "totals" ? raw.ptd : raw.ptd / n,
-        ry: grain === "totals" ? raw.ry : raw.ry / n,
-        rtd: grain === "totals" ? raw.rtd : raw.rtd / n,
-        recy: grain === "totals" ? raw.recy : raw.recy / n,
-        retd: grain === "totals" ? raw.retd : raw.retd / n,
-        rec: grain === "totals" ? raw.rec : raw.rec / n,
+        py: avgOf(raw.py),
+        ptd: avgOf(raw.ptd),
+        ry: avgOf(raw.ry),
+        rtd: avgOf(raw.rtd),
+        recy: avgOf(raw.recy),
+        retd: avgOf(raw.retd),
+        rec: avgOf(raw.rec),
         compPct: pooled.compPct,
         ypc: pooled.ypc,
         ypr: pooled.ypr,
