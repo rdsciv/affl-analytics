@@ -158,6 +158,8 @@
   let franSortDir = -1;
   let careerView = null;
   const PP = { q: "", pos: "QB", sort: "tot", limit: 24 };
+  let collegeView = "top10"; // CHI-177: top10 | all
+  let collegePackCache = null;
 
   function tName(id, y) {
     const t = A.teams(y || year)[id];
@@ -900,7 +902,6 @@
   }
 
   async function renderColleges() {
-    return; /* CHI-177: colleges off Players landing */
     const el = $("#pl-colleges");
     const tbl = $("#pl-colleges-tbl");
     const foot = $("#pl-colleges-foot");
@@ -927,7 +928,9 @@
       const cls = i <= 1 ? "left" : "";
       return "<th class=\"" + cls + "\">" + c + "</th>";
     }).join("") + "</tr>";
-    const body = pack.rows.map((r, i) => {
+    collegePackCache = pack;
+    const shown = collegeView === "all" ? pack.rows : pack.rows.slice(0, 10);
+    const body = shown.map((r, i) => {
       const logo = A.collegeLogoHTML(r.bio, "ncaa-logo colleges-ncaa");
       const name = A.esc(r.college);
       const cells = [
@@ -944,6 +947,30 @@
       return "<tr>" + cells.join("") + "</tr>";
     }).join("");
     tbl.querySelector("tbody").innerHTML = body || "<tr><td colspan=\"" + cols.length + "\">No AFFL start weeks for this season.</td></tr>";
+    if (sub) {
+      const n = pack.rows.length;
+      sub.textContent = "AFFL start weeks by school · non-PPR · " + span +
+        (collegeView === "all" ? (" · all " + n + " schools") : (" · top 10 of " + n)) +
+        " · sorted AFFL PTS · no luck / playoff trips";
+    }
+    const mode = $("#pl-colleges-mode");
+    if (mode && !mode.dataset.wired) {
+      mode.dataset.wired = "1";
+      mode.querySelectorAll("[data-college-view]").forEach((b) => {
+        b.addEventListener("click", () => {
+          collegeView = b.getAttribute("data-college-view") || "top10";
+          mode.querySelectorAll("[data-college-view]").forEach((x) => {
+            x.classList.toggle("on", x.getAttribute("data-college-view") === collegeView);
+          });
+          renderColleges();
+        });
+      });
+    }
+    if (mode) {
+      mode.querySelectorAll("[data-college-view]").forEach((x) => {
+        x.classList.toggle("on", x.getAttribute("data-college-view") === collegeView);
+      });
+    }
     if (foot) {
       if (pack.miss.wks > 0) {
         foot.hidden = false;
@@ -980,7 +1007,7 @@
     hide("#pl-chi114", !profile);
     hide("#pl-db-break", profile);
     hide("#pl-db", profile);
-    hide("#pl-colleges", true); /* CHI-177: colleges off landing */
+    hide("#pl-colleges", profile); /* CHI-177: colleges under leaders on landing */
     if (!profile) {
       const ngs = $("#pl-ngs-profile");
       if (ngs) { ngs.hidden = true; ngs.innerHTML = ""; }
@@ -3291,6 +3318,7 @@
     logYear = ly == null ? "all" : ly;
     // Force clean landing state immediately.
     setPageMode("landing");
+    renderColleges();
     const g = $("#pp-grid");
     if (g && !pid) g.innerHTML = A.notice("Loading players…");
     if (chart) { chart.destroy(); chart = null; }
@@ -3304,6 +3332,7 @@
         await loadPlayer(pid, false);
       } else {
         setPageMode("landing");
+        await renderColleges();
       }
       renderGrid();
       const g2 = $("#pp-grid");
@@ -3313,6 +3342,7 @@
       const g = $("#pp-grid");
       if (g) g.innerHTML = A.notice("Could not load player database. Check the console / network tab.");
       setPageMode("landing");
+      renderColleges();
     }
   }
 

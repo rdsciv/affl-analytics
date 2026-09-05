@@ -6,7 +6,7 @@
 <title>Stars, Scrubs, &amp; Duds — AFFL</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
 <link rel="apple-touch-icon" href="favicon.png?v=4">
-<link rel="stylesheet" href="styles.css?v=55">
+<link rel="stylesheet" href="styles.css?v=56">
 <link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
@@ -116,7 +116,27 @@
     <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
+  <section class="card" id="pl-colleges">
+    <div class="card-head">
+      <div>
+        <h2>Colleges</h2>
+        <div class="card-sub" id="pl-colleges-sub">AFFL start weeks by school · non-PPR · top 10 · expand for all</div>
+      </div>
+      <div class="cmp-controls" id="pl-colleges-mode">
+        <button type="button" class="season-chip on" data-college-view="top10">Top 10</button>
+        <button type="button" class="season-chip" data-college-view="all">Show all</button>
+      </div>
+    </div>
+    <div class="table-scroll colleges-scroll">
+      <table class="tbl colleges-tbl" id="pl-colleges-tbl">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="card-sub colleges-foot" id="pl-colleges-foot" hidden></p>
+  </section>
 
+  <!-- Profile-only (hidden on landing) -->
   <!-- Profile-only (hidden on landing) -->
   <section class="card pl-hero" id="pl-hero" hidden></section>
   <p class="pl-back" id="pl-back" hidden><a href="players.html">All players</a></p>
@@ -272,6 +292,6 @@
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=39"></script>
 <script src="chi114.js?v=6"></script>
-<script src="players.js?v=50"></script>
+<script src="players.js?v=51"></script>
 </body>
 </html>
