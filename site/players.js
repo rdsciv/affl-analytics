@@ -31,6 +31,9 @@
   const PRE2018_STARTS = await fetch("pre2018_starts.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : {}))
     .catch(() => ({}));
+  const CAREER_AFFL = await fetch("career_affl_starters.json?v=" + Date.now(), { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null);
   const NGS_PROFILES = await fetch("ngs_profiles.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : { players: {} }))
     .catch(() => ({ players: {} }));
@@ -2532,10 +2535,15 @@
     });
     careerList = Object.values(by).map((p) => {
       // CHI-180: leaders AFFL pts = career started pts (NON_PPR), never NFL FP.
-      const affl = Number(p.stPts) || 0;
+      // Prefer warehouse career_affl_starters (fact_roster_week started=1) over JSON folds.
+      const book = CAREER_AFFL && CAREER_AFFL.players && CAREER_AFFL.players[String(p.pid)];
+      const affl = book && book.stPts != null ? Number(book.stPts) : (Number(p.stPts) || 0);
+      const starts = book && book.starts != null ? Number(book.starts) : (Number(p.starts) || 0);
       return Object.assign({}, p, {
+        stPts: affl,
+        starts: starts,
         tot: affl,
-        ppg: p.starts ? +(affl / p.starts).toFixed(1) : 0,
+        ppg: starts ? +(affl / starts).toFixed(1) : 0,
       });
     }).sort((a, b) => b.tot - a.tot);
     return careerList;
