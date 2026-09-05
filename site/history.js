@@ -1,4 +1,4 @@
-/* CHI-120 real History book. All-Play on All = career 2014-2025. No remote core. */
+/* CHI-120 History book. CHI-179: All opens Franchise Records (no Career All-Play). */
 /* AFFL History — current name, leeger career, positional PPD. */
 (async function () {
   const A = window.AFFL;
@@ -704,29 +704,34 @@
       return (a.rank || 99) - (b.rank || 99);
     });
     const allMode = pickedYear == null;
+    const standBlock = document.getElementById("season-standings-block");
+    // CHI-179: All → Franchise Records only (no Career All-Play). Year → Season Standings.
+    if (standBlock) standBlock.hidden = !!allMode;
+    if (allMode) {
+      if (tb) tb.innerHTML = "";
+      return;
+    }
     const h2 = $("season-h2");
-    if (h2) h2.textContent = allMode ? "Career All-Play" : "Season Standings";
+    if (h2) h2.textContent = "Season Standings";
     const tbl = document.getElementById("season-tbl");
     if (tbl) {
-      tbl.classList.toggle("fit-all", allMode);
+      tbl.classList.remove("fit-all");
       tbl.classList.add("ready");
     }
     const wlTh = document.querySelector('#season-tbl thead th[data-k="wins"]');
-    if (wlTh) wlTh.textContent = allMode ? "RS W-L-T" : "W-L-T";
+    if (wlTh) wlTh.textContent = "W-L-T";
     tb.innerHTML = rows.map((r) => {
       const rec = (r.wins || 0) + "-" + (r.losses || 0) + (r.ties ? "-" + r.ties : "");
       const ap = (r.allW || 0) + "-" + (r.allL || 0);
       const mv = r.moves == null ? "—" : r.moves;
       const pillCls = r.rank === 1 ? "gold" : r.rank === 2 ? "slv" : r.rank === 3 ? "brz" : "";
-      const recCell = allMode ? rec : `<strong>${rec}</strong>`;
-      const apCell = allMode ? `<strong>${ap}</strong>` : ap;
       return `<tr>
         <td>${r.rank ? `<span class="rank-pill ${pillCls}">${r.rank}</span>` : "—"}</td>
         <td>${teamCell(r)}</td>
-        <td>${recCell}</td>
+        <td><strong>${rec}</strong></td>
         <td>${A.fmt(r.pf, 1)}</td>
         <td>${A.fmt(r.pa, 1)}</td>
-        <td>${apCell}</td>
+        <td>${ap}</td>
         <td>${mv}</td>
       </tr>`;
     }).join("");
@@ -736,9 +741,7 @@
     });
     const sub = $("season-sub");
     if (sub) {
-      sub.textContent = pickedYear == null
-        ? "All · career All-Play 2014–2025 · current franchise names"
-        : seasonYear + " · ESPN Moves · current franchise names";
+      sub.textContent = seasonYear + " · ESPN Moves · current franchise names";
     }
   }
 

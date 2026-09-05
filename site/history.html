@@ -6,7 +6,7 @@
 <title>AFFL History</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
 <link rel="apple-touch-icon" href="favicon.png?v=4">
-<link rel="stylesheet" href="styles.css?v=48">
+<link rel="stylesheet" href="styles.css?v=49">
 <link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
@@ -62,8 +62,53 @@
   <section class="card">
     <div class="card-head">
       <div>
-        <h2 id="season-h2">Career All-Play</h2>
-        <div class="card-sub" id="season-sub">All · career All-Play 2014–2025 · current franchise names</div>
+        <h2>Franchise Records</h2>
+        <div class="card-sub">current name · career totals · 2014–2025</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="tbl" id="franchise-tbl">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="s" data-k="name">Team</th>
+            <th class="s" data-k="seasons">Yrs</th>
+            <th class="s" data-k="wins">W-L-T</th>
+            <th class="s" data-k="winPct">Win%</th>
+            <th class="s" data-k="regWins">RS W</th>
+            <th class="s" data-k="titles">Titles</th>
+            <th class="s" data-k="runnerUps">2nd</th>
+            <th class="s" data-k="thirds">3rd</th>
+            <th class="s" data-k="scoreTitles">Point Title</th>
+            <th class="s" data-k="sackos">Sacko</th>
+            <th class="s" data-k="combined">Combined</th>
+            <th class="s" data-k="playoffs">Playoffs</th>
+            <th class="s" data-k="poPct">PO%</th>
+            <th class="s" data-k="bestFinish">Best</th>
+            <th class="s" data-k="worstFinish">Worst</th>
+            <th class="s" data-k="pf">PF</th>
+            <th class="s" data-k="pa">PA</th>
+            <th class="s" data-k="diff">+/-</th>
+            <th class="s" data-k="allW">All-Play</th>
+            <th class="s" data-k="allPct">AP%</th>
+            <th class="s" data-k="expWins">Exp W</th>
+            <th class="s" data-k="luck">Luck</th>
+            <th class="s" data-k="iq">IQ</th>
+            <th class="s" data-k="moves">Moves</th>
+            <th class="s" data-k="trades">Trade</th>
+            <th class="s" data-k="activate">Activate</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="season-standings-block">
+    <div class="card-head">
+      <div>
+        <h2 id="season-h2">Season Standings</h2>
+        <div class="card-sub" id="season-sub">pick a season for standings</div>
       </div>
     </div>
     <div class="table-scroll">
@@ -225,51 +270,6 @@
       <div class="week-picker" id="waiver-week-picker"></div>
     </div>
     <div id="waiver-body"></div>
-  </section>
-
-  <section class="card">
-    <div class="card-head">
-      <div>
-        <h2>Franchise Records</h2>
-        <div class="card-sub">current name · career totals · 2014–2025</div>
-      </div>
-    </div>
-    <div class="table-scroll">
-      <table class="tbl" id="franchise-tbl">
-        <thead>
-          <tr>
-            <th></th>
-            <th class="s" data-k="name">Team</th>
-            <th class="s" data-k="seasons">Yrs</th>
-            <th class="s" data-k="wins">W-L-T</th>
-            <th class="s" data-k="winPct">Win%</th>
-            <th class="s" data-k="regWins">RS W</th>
-            <th class="s" data-k="titles">Titles</th>
-            <th class="s" data-k="runnerUps">2nd</th>
-            <th class="s" data-k="thirds">3rd</th>
-            <th class="s" data-k="scoreTitles">Point Title</th>
-            <th class="s" data-k="sackos">Sacko</th>
-            <th class="s" data-k="combined">Combined</th>
-            <th class="s" data-k="playoffs">Playoffs</th>
-            <th class="s" data-k="poPct">PO%</th>
-            <th class="s" data-k="bestFinish">Best</th>
-            <th class="s" data-k="worstFinish">Worst</th>
-            <th class="s" data-k="pf">PF</th>
-            <th class="s" data-k="pa">PA</th>
-            <th class="s" data-k="diff">+/-</th>
-            <th class="s" data-k="allW">All-Play</th>
-            <th class="s" data-k="allPct">AP%</th>
-            <th class="s" data-k="expWins">Exp W</th>
-            <th class="s" data-k="luck">Luck</th>
-            <th class="s" data-k="iq">IQ</th>
-            <th class="s" data-k="moves">Moves</th>
-            <th class="s" data-k="trades">Trade</th>
-            <th class="s" data-k="activate">Activate</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
   </section>
 
 
@@ -563,7 +563,7 @@
 </div>
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=39"></script>
-<script src="history.js?v=28"></script>
+<script src="history.js?v=29"></script>
 <script src="score-trend.js?v=1"></script>
 </body>
 </html>
