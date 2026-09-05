@@ -31,9 +31,17 @@
   const PRE2018_STARTS = await fetch("pre2018_starts.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : {}))
     .catch(() => ({}));
-  const CAREER_AFFL = await fetch("career_affl_starters.json?v=" + Date.now(), { cache: "no-store" })
+  // CHI-180: Scrapr lean warehouse book (prefer) — fact_roster_week started=1.
+  const CAREER_AFFL = await fetch("affl_career_starts.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
+    .catch(() => null)
+    .then(async (d) => {
+      if (d && d.players) return d;
+      try {
+        const r = await fetch("career_affl_starters.json?v=" + Date.now(), { cache: "no-store" });
+        return r.ok ? await r.json() : null;
+      } catch (e) { return null; }
+    });
   const NGS_PROFILES = await fetch("ngs_profiles.json?v=" + Date.now(), { cache: "no-store" })
     .then((r) => (r.ok ? r.json() : { players: {} }))
     .catch(() => ({ players: {} }));
@@ -2535,7 +2543,7 @@
     });
     careerList = Object.values(by).map((p) => {
       // CHI-180: leaders AFFL pts = career started pts (NON_PPR), never NFL FP.
-      // Prefer warehouse career_affl_starters (fact_roster_week started=1) over JSON folds.
+      // Prefer affl_career_starts.json (fact_roster_week started=1) over year/pre2018 folds.
       const book = CAREER_AFFL && CAREER_AFFL.players && CAREER_AFFL.players[String(p.pid)];
       const affl = book && book.stPts != null ? Number(book.stPts) : (Number(p.stPts) || 0);
       const starts = book && book.starts != null ? Number(book.starts) : (Number(p.starts) || 0);
