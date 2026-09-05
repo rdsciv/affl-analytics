@@ -2469,8 +2469,13 @@
         if (!hasYear) return;
       }
       if (!by[id]) by[id] = stubPlayer(id);
-      const pts = scope === "cum" ? nflCareerPts(id) : nflSeasonPts(id, year);
-      if (pts != null) by[id].tot = pts;
+      // CHI-180: never overwrite AFFL tot with NFL FP. Cum pool already has stPts as tot.
+      if (scope !== "cum") {
+        const yp = (YD && YD.players || []).find((x) => +x.pid === id);
+        if (yp && yp.stPts != null) by[id].tot = Number(yp.stPts) || 0;
+      } else if (by[id].stPts != null) {
+        by[id].tot = Number(by[id].stPts) || 0;
+      }
     });
     return Object.values(by);
   }
@@ -2482,7 +2487,6 @@
     for (const { year: y, data } of all) {
       for (const p of data.players || []) {
         const a = by[p.pid] || Object.assign({}, p, { tot: 0, stPts: 0, starts: 0, years: [] });
-        a.tot += p.tot || 0;
         a.stPts += p.stPts || 0;
         a.starts += p.starts || 0;
         a.years.push(y);
@@ -2491,23 +2495,47 @@
         if (p.hs) a.hs = p.hs;
         if (p.name) a.name = p.name;
         if (p.pos) a.pos = p.pos;
+        if (p.nfl) a.nfl = p.nfl;
         by[p.pid] = a;
       }
     }
+    // CHI-180: 2014–17 year bundles have empty players[]; fold AFFL starts from pre2018_starts.
+    Object.keys(PRE2018_STARTS || {}).forEach((yStr) => {
+      const y = +yStr;
+      if (!Number.isFinite(y) || y >= 2018) return;
+      const yearBag = PRE2018_STARTS[yStr] || {};
+      Object.keys(yearBag).forEach((pidStr) => {
+        const pid = +pidStr;
+        const bag = yearBag[pidStr] || {};
+        const wks = Object.keys(bag);
+        if (!wks.length) return;
+        const stPts = wks.reduce((a, k) => a + (Number(bag[k] && bag[k].pts) || 0), 0);
+        const tid = bag[wks[0]] && bag[wks[0]].tid;
+        let a = by[pid];
+        if (!a) {
+          a = Object.assign({}, stubPlayer(pid), { tot: 0, stPts: 0, starts: 0, years: [], tids: {} });
+          by[pid] = a;
+        }
+        if (a.years.indexOf(y) >= 0) return; // already counted from years.json
+        a.stPts += stPts;
+        a.starts += wks.length;
+        a.years.push(y);
+        a.tids = a.tids || {};
+        if (tid != null) a.tids[y] = tid;
+      });
+    });
     Object.keys(INDEX).forEach((key) => {
       const id = +key;
       if (by[id]) return;
-      const pts = nflCareerPts(id);
-      if (pts == null && !(meta(id).years || []).length) return;
-      const stub = stubPlayer(id);
-      stub.tot = pts || 0;
-      by[id] = stub;
+      if (!(meta(id).years || []).length && !nflCareerPts(id)) return;
+      by[id] = Object.assign({}, stubPlayer(id), { tot: 0, stPts: 0, starts: 0, years: [] });
     });
     careerList = Object.values(by).map((p) => {
-      const nfl = nflCareerPts(p.pid);
+      // CHI-180: leaders AFFL pts = career started pts (NON_PPR), never NFL FP.
+      const affl = Number(p.stPts) || 0;
       return Object.assign({}, p, {
-        tot: nfl != null ? nfl : p.tot,
-        ppg: p.starts ? +(p.stPts / p.starts).toFixed(1) : 0,
+        tot: affl,
+        ppg: p.starts ? +(affl / p.starts).toFixed(1) : 0,
       });
     }).sort((a, b) => b.tot - a.tot);
     return careerList;
