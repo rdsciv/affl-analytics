@@ -3452,3 +3452,18 @@ img.ncaa-logo.colleges-ncaa,
 }
 .colleges-foot { margin: 6px 2px 0; font-size: 11px; }
 #pl-colleges[hidden] { display: none !important; }
+
+/* CHI-177 — dense position leaders on Players landing */
+#pl-db { padding: 8px 10px 10px; }
+#pl-db .card-head { margin-bottom: 6px; gap: 10px; align-items: center; }
+.leaders-scroll { margin: 0; }
+.leaders-tbl { font-size: 12.5px; width: 100%; table-layout: auto; }
+.leaders-tbl th { height: 28px; padding: 0 8px; white-space: nowrap; }
+.leaders-tbl td { height: 34px; padding: 0 8px; }
+.leaders-tbl th.left, .leaders-tbl td.left { text-align: left; }
+.leaders-tbl td.rk, .leaders-tbl th.rk { text-align: center; width: 28px; color: var(--mut); font-weight: 700; }
+.leaders-tbl td.mut { color: var(--mut); }
+.leaders-row { cursor: pointer; }
+.leaders-row:hover td { background: rgba(47, 123, 255, 0.08); }
+.leaders-row.cur td { background: rgba(255, 122, 0, 0.12); }
+#pl-db .pp-more { margin-top: 8px; }

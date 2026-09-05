@@ -900,6 +900,7 @@
   }
 
   async function renderColleges() {
+    return; /* CHI-177: colleges off Players landing */
     const el = $("#pl-colleges");
     const tbl = $("#pl-colleges-tbl");
     const foot = $("#pl-colleges-foot");
@@ -979,7 +980,7 @@
     hide("#pl-chi114", !profile);
     hide("#pl-db-break", profile);
     hide("#pl-db", profile);
-    hide("#pl-colleges", profile);
+    hide("#pl-colleges", true); /* CHI-177: colleges off landing */
     if (!profile) {
       const ngs = $("#pl-ngs-profile");
       if (ngs) { ngs.hidden = true; ngs.innerHTML = ""; }
@@ -2564,26 +2565,36 @@
   function renderGrid() {
     const rows = filtered();
     const sortDef = DB_SORTS.find((s) => s.key === PP.sort) || DB_SORTS[0];
-    $("#db-span").textContent = (PP.pos === "ALL" ? "all positions" : (PP.pos === "FLEX" ? "FLEX (RB+WR+TE)" : PP.pos)) + " · " + sortDef.short + " · " + (scope === "cum" ? "all seasons" : String(year));
-    $("#pp-grid").innerHTML = rows.slice(0, PP.limit).map((p) => {
-      const v = dbMetric(p, PP.sort);
-      const shown = v == null ? "unavailable" : fmt(v, sortDef.digits);
-      const fran = cardFranchise(p);
-      return `
-      <div class="pp-card${cur && p.pid === cur.pid ? " cur" : ""}" data-pid="${p.pid}">
-        ${A.headshotHTML(p, "pp-hs")}
-        <div class="pp-meta">
-          <div class="pp-nm">${A.playerLink(p.pid, p.name, { log: "all" })}</div>
-          <div class="pp-sub"><span class="badge pos-${p.pos}">${p.pos}</span> ${A.esc(p.nfl || "")} · <span class="pp-fran" title="${A.esc(fran)}">${A.esc(fran)}</span></div>
-        </div>
-        <div class="pp-pts"><b>${shown}</b><span>${sortDef.short}</span></div>
-      </div>`;
-    }).join("") ||
-      A.notice(enrichedPool().length ? "No players match." :
-        "No player profiles stored.");
-    $("#pp-more").style.display = rows.length > PP.limit ? "block" : "none";
-    document.querySelectorAll(".pp-card").forEach((el) =>
-      el.addEventListener("click", () => {
+    const posLabel = PP.pos === "ALL" ? "all positions" : (PP.pos === "FLEX" ? "FLEX (RB+WR+TE)" : PP.pos);
+    const span = $("#db-span");
+    if (span) {
+      span.textContent = posLabel + " · career AFFL pts · " + (scope === "cum" ? "all seasons" : String(year));
+    }
+    const body = $("#pp-grid");
+    if (!body) return;
+    const slice = rows.slice(0, PP.limit);
+    if (!slice.length) {
+      body.innerHTML = `<tr><td colspan="6">${enrichedPool().length ? "No players match." : "No player profiles stored."}</td></tr>`;
+    } else {
+      body.innerHTML = slice.map((p, i) => {
+        const pts = dbMetric(p, "tot");
+        const fran = cardFranchise(p);
+        const curCls = cur && p.pid === cur.pid ? " cur" : "";
+        return `<tr class="leaders-row${curCls}" data-pid="${p.pid}">
+          <td class="rk tnum">${i + 1}</td>
+          <td class="left"><span class="badge pos-${A.esc(p.pos || "")}">${A.esc(p.pos || "")}</span> ${A.playerLink(p.pid, p.name, { log: "all" })}</td>
+          <td class="left mut">${A.esc(p.nfl || "—")}</td>
+          <td class="left">${A.esc(fran || "—")}</td>
+          <td class="tnum">${pts == null ? "—" : fmt(pts, 1)}</td>
+          <td class="tnum">${p.starts ? fmt(p.starts, 0) : "—"}</td>
+        </tr>`;
+      }).join("");
+    }
+    const more = $("#pp-more");
+    if (more) more.style.display = rows.length > PP.limit ? "block" : "none";
+    body.querySelectorAll("tr[data-pid]").forEach((el) =>
+      el.addEventListener("click", (ev) => {
+        if (ev.target && ev.target.closest && ev.target.closest("a")) return;
         logYear = "all";
         loadPlayer(+el.dataset.pid, true);
         renderGrid();
@@ -3258,7 +3269,6 @@
       }
       paintChrome();
       renderGrid();
-      renderColleges();
     }, ylist);
     A.remountTeamSelect(document.getElementById("squad-picker"), squad, (s) => {
       squad = s || "";
@@ -3270,7 +3280,6 @@
       }
       paintChrome();
       renderGrid();
-      renderColleges();
     }, seasonYear);
   }
 
@@ -3295,7 +3304,6 @@
         await loadPlayer(pid, false);
       } else {
         setPageMode("landing");
-        await renderColleges();
       }
       renderGrid();
       const g2 = $("#pp-grid");

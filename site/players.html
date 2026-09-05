@@ -6,7 +6,7 @@
 <title>Stars, Scrubs, &amp; Duds — AFFL</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
 <link rel="apple-touch-icon" href="favicon.png?v=4">
-<link rel="stylesheet" href="styles.css?v=54">
+<link rel="stylesheet" href="styles.css?v=55">
 <link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body>
@@ -87,33 +87,35 @@
     <div class="chart-wrap tall" id="wopr-persist-wrap"><canvas id="wopr-persist-chart"></canvas></div>
   </section>
 
-  <div class="section-break" id="pl-db-break"><h2>The Database <span id="db-span">every rostered player</span></h2></div>
+  <div class="section-break" id="pl-db-break"><h2>All-time leaders <span id="db-span">career AFFL pts · non-PPR</span></h2></div>
   <section class="card" id="pl-db">
     <div class="card-head">
-      <div><h2>Find A Player</h2><div class="card-sub">click any card to load the full profile</div></div>
+      <div>
+        <h2>Position leaders</h2>
+        <div class="card-sub">career AFFL points · click a row for the profile · search any rostered player</div>
+      </div>
       <input id="pp-search" class="team-select" type="search" placeholder="Search players…" aria-label="Search players">
     </div>
     <div class="pp-filters" id="pp-filters"></div>
-    <div class="pp-filters" id="pp-sort"></div>
-    <div class="pp-grid" id="pp-grid"><p class="notice">Loading players…</p></div>
+    <div class="pp-filters" id="pp-sort" hidden></div>
+    <div class="table-scroll leaders-scroll">
+      <table class="tbl leaders-tbl" id="pl-leaders-tbl">
+        <thead>
+          <tr>
+            <th class="rk">#</th>
+            <th class="left">Player</th>
+            <th class="left">NFL</th>
+            <th class="left">Franchise</th>
+            <th>AFFL pts</th>
+            <th>Starts</th>
+          </tr>
+        </thead>
+        <tbody id="pp-grid"><tr><td colspan="6" class="notice">Loading players…</td></tr></tbody>
+      </table>
+    </div>
     <button class="pp-more" id="pp-more">Show more</button>
   </section>
 
-  <section class="card" id="pl-colleges">
-    <div class="card-head">
-      <div>
-        <h2>Colleges</h2>
-        <div class="card-sub" id="pl-colleges-sub">AFFL start weeks by school · non-PPR · Season All default · no luck / playoff trips</div>
-      </div>
-    </div>
-    <div class="table-scroll colleges-scroll">
-      <table class="tbl colleges-tbl" id="pl-colleges-tbl">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <p class="card-sub colleges-foot" id="pl-colleges-foot" hidden></p>
-  </section>
 
   <!-- Profile-only (hidden on landing) -->
   <section class="card pl-hero" id="pl-hero" hidden></section>
@@ -270,6 +272,6 @@
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=39"></script>
 <script src="chi114.js?v=6"></script>
-<script src="players.js?v=49"></script>
+<script src="players.js?v=50"></script>
 </body>
 </html>
