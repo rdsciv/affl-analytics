@@ -969,9 +969,9 @@
     hide("#pl-log-card", !profile);
     hide("#pl-money", !profile);
     hide("#pl-back", !profile);
-    // CHI-175: Compare + WOPR stay on landing; hide only in profile.
-    hide("#pl-compare", profile);
-    hide("#wopr-persist", profile);
+    // CHI-176: landing = Database → Colleges only (no Compare/WOPR).
+    hide("#pl-compare", true);
+    hide("#wopr-persist", true);
     hide("#pl-fg-strip", !profile);
     hide("#pl-custody", !profile);
     hide("#pl-achievements", !profile);
