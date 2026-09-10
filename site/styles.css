@@ -3495,7 +3495,7 @@ body.players-pack.profile-mode .card-sub { font-size: 11px; line-height: 1.35; }
 #pl-hero .pl-name { font-size: 22px; line-height: 1.1; }
 #pl-hero .pl-tags { gap: 8px; margin-top: 4px; flex-wrap: wrap; }
 #pl-hero .pl-tiles {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 6px;
   min-width: 0;
 }
@@ -3549,15 +3549,18 @@ body.players-pack img.nfl-logo {
   max-height: 22px;
   object-fit: contain;
 }
-body.players-pack .journey-logo,
-body.players-pack img.journey-logo {
-  width: 28px;
-  height: 28px;
-  max-width: 28px;
-  max-height: 28px;
-  object-fit: contain;
-  flex: 0 0 28px;
+body.players-pack.profile-mode .journey-logo,
+body.players-pack.profile-mode img.journey-logo {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  object-fit: contain !important;
+  flex: 0 0 28px !important;
 }
+#pl-db-break[hidden],
+#pl-custody-tl[hidden],
+#pp-sort[hidden] { display: none !important; }
 body.players-pack #pl-career img.mini,
 body.players-pack #pl-custody img.mini {
   width: 28px !important;
