@@ -115,7 +115,7 @@
     const bio = (A.playerBio(pid, bioY, A.today()) || {});
     return {
       pid: +pid,
-      name: m.name || md.name || ("#" + pid),
+      name: A.resolvePlayerName(pid, m.name || md.name || ""),
       pos: m.pos || md.pos || "",
       nfl: md.nfl || nflTeam(pid, bioY) || bio.nfl || "",
       hs: md.hs || "",
@@ -662,7 +662,7 @@
       const q = logYear === "all" ? `?pid=${p.pid}&log=all` : `?pid=${p.pid}&log=${logYear}`;
       history.pushState(null, "", q);
     }
-    document.title = `${p.name} — Stars, Scrubs, & Duds`;
+    document.title = `${A.resolvePlayerName(p.pid, p.name)} — Stars, Scrubs, & Duds`;
 
     renderYearChips(p.pid);
     setPageMode("profile");
@@ -673,8 +673,10 @@
     const rows = (logYear === "all")
       ? careerRows
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
+    /* CHI-95 / CHI-181: All keeps careerRows for log/journey; top weekly chart is latest year only. */
+    const latestY = playerYears(p.pid)[0];
     const chartRows = (logYear === "all")
-      ? careerRows
+      ? careerRows.filter((r) => Number(r.y) === Number(latestY))
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
     let focus = logYear === "all" ? p : ((rows[0] && rows[0].p) || p);
     if (isPre2018(logYear)) {
@@ -997,6 +999,9 @@
   function setPageMode(mode) {
     const profile = mode === "profile";
     const hide = (sel, on) => { const el = $(sel); if (el) el.hidden = !!on; };
+    document.body.classList.toggle("profile-mode", profile);
+    hide("#year-row", profile);
+    hide("#squad-row", profile);
     hide("#pl-hero", !profile);
     hide(".pl-detail", !profile);
     hide("#pl-college", !profile);
@@ -1126,23 +1131,15 @@
   }
 
   function renderOverview(p) {
-    let el = $("#pl-overview");
+    const el = $("#pl-overview");
     const rec = overviewRec(p && p.pid);
     const news = (rec && rec.news) || [];
     const note = (rec && rec.rotowire) || "";
+    if (!el) return;
     if (!rec || (!news.length && !note)) {
-      if (el) { el.hidden = true; el.innerHTML = ""; el.remove(); }
+      el.hidden = true;
+      el.innerHTML = "";
       return;
-    }
-    if (!el) {
-      el = document.createElement("section");
-      el.id = "pl-overview";
-      el.className = "card";
-      const chi = $("#pl-chi114");
-      const hero = $("#pl-hero");
-      const parent = (chi && chi.parentNode) || (hero && hero.parentNode);
-      if (!parent) return;
-      parent.insertBefore(el, chi || (hero && hero.nextSibling) || null);
     }
     const items = news.map((n) => {
       const when = fmtNewsPublished(n.published);
@@ -1453,7 +1450,7 @@
       <div class="pl-hero-inner">
         ${A.headshotHTML(heroP, "pl-hs")}
         <div class="pl-id">
-          <h2 class="pl-name">${p.name}</h2>
+          <h2 class="pl-name">${A.esc(A.resolvePlayerName(p.pid, p.name))}</h2>
           <div class="pl-tags">
             <span class="badge pos-${p.pos}">${p.pos}</span>
             <span class="pl-nfl">${A.nflLogoHTML(p.nfl, "nfl-logo")}${p.nfl || "NFL"}</span>
@@ -2274,6 +2271,13 @@
     return { bg: "#2a9d8c33", bd: "#2a9d8c", bw: 2 }; // outline / muted teal = NFL, not rostered (2018+)
   }
 
+  function weekLabel(r, career) {
+    const wk = (r && r.w && r.w[0] != null && r.w[0] !== "") ? r.w[0] : "—";
+    const y = (r && r.y != null && r.y !== "") ? String(r.y).slice(-2) : "";
+    if (career) return y ? (y + "-W" + wk) : ("W" + wk);
+    return "W" + wk;
+  }
+
   function renderChart(p, rows) {
     if (chart) chart.destroy();
     if (!rows.length) { chart = null; renderNgsChart(p, rows); return; }
@@ -2282,7 +2286,7 @@
     chart = new Chart($("#pl-chart"), {
       type: "bar",
       data: {
-        labels: rows.map((r) => (logYear === "all" ? String(r.y).slice(2) + "-W" + r.w[0] : "W" + r.w[0])),
+        labels: rows.map((r) => weekLabel(r, false)),
         datasets: [{
           type: "bar",
           label: "actual (started / benched / NFL / snapshot)",
@@ -2349,14 +2353,18 @@
   function renderCareerChart(p, rows) {
     if (careerChart) { careerChart.destroy(); careerChart = null; }
     const canvas = $("#pl-career-chart");
+    const block = $("#pl-career-chart-block");
     if (!canvas) return;
-    if (!rows.length) return;
+    const yearN = new Set((rows || []).map((r) => Number(r.y))).size;
+    /* Sitewide: hide the career canvas when it would reprint the same single season as #pl-chart. */
+    if (block) block.hidden = !rows.length || yearN <= 1;
+    if (!rows.length || yearN <= 1) return;
     const projData = rows.map((r) => weekProj(r.y, p.pid, r.w[0]));
     const styles = rows.map(barStyle);
     careerChart = new Chart(canvas, {
       type: "bar",
       data: {
-        labels: rows.map((r) => String(r.y).slice(2) + "-W" + r.w[0]),
+        labels: rows.map((r) => weekLabel(r, true)),
         datasets: [{
           type: "bar",
           label: "actual (started / benched / NFL / snapshot)",
@@ -2439,7 +2447,7 @@
     const has = series.some((s) => points.some((g) => g && g[s.key] != null));
     wrap.hidden = !has;
     if (!has) return;
-    const labels = rows.map((r) => (logYear === "all" ? String(r.y).slice(2) + "-W" + r.w[0] : "W" + r.w[0]));
+    const labels = rows.map((r) => weekLabel(r, logYear === "all"));
     ngsChart = new Chart(canvas, {
       type: "line",
       data: {

@@ -3467,3 +3467,111 @@ img.ncaa-logo.colleges-ncaa,
 .leaders-row:hover td { background: rgba(47, 123, 255, 0.08); }
 .leaders-row.cur td { background: rgba(255, 122, 0, 0.12); }
 #pl-db .pp-more { margin-top: 8px; }
+
+/* CHI-181 — player profile density. Landing Compare/WOPR/Colleges untouched. */
+body.players-pack.profile-mode .frame { padding: 10px 16px 36px; }
+body.players-pack.profile-mode .topbar { margin-bottom: 0; }
+body.players-pack.profile-mode #year-row,
+body.players-pack.profile-mode #squad-row { display: none !important; }
+body.players-pack.profile-mode .card {
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+body.players-pack.profile-mode .card-head { margin-bottom: 8px; gap: 8px; }
+body.players-pack.profile-mode .card-sub { font-size: 11px; line-height: 1.35; }
+
+#pl-hero.pl-hero { margin-bottom: 10px; }
+#pl-hero .pl-hero-inner { gap: 14px 16px; align-items: flex-start; }
+#pl-hero .pl-hs,
+#pl-hero img.pl-hs,
+#pl-hero .pl-hs.fb {
+  width: 72px;
+  height: 72px;
+  max-width: 72px;
+  max-height: 72px;
+  flex: 0 0 72px;
+  object-fit: cover;
+}
+#pl-hero .pl-name { font-size: 22px; line-height: 1.1; }
+#pl-hero .pl-tags { gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+#pl-hero .pl-tiles {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+#pl-hero .pl-tiles .pp-stat,
+#pl-fg-strip-tiles .pp-stat {
+  padding: 6px 7px;
+  border-radius: 8px;
+}
+#pl-hero .pl-tiles .pp-stat b,
+#pl-fg-strip-tiles .pp-stat b { font-size: 14px; }
+#pl-hero .pl-tiles .pp-stat span,
+#pl-fg-strip-tiles .pp-stat span { font-size: 9px; }
+#pl-fg-strip { margin-bottom: 10px; }
+#pl-fg-strip .pp-stats {
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 0;
+}
+.pl-back { margin: 0 0 8px; }
+
+body.players-pack.profile-mode .pl-detail { margin-bottom: 10px; }
+body.players-pack.profile-mode .pl-detail .second-grid { gap: 10px; margin-bottom: 10px; }
+body.players-pack.profile-mode .pl-detail .chart-wrap { height: 220px; }
+body.players-pack.profile-mode .ngs-wrap { height: 120px; }
+body.players-pack.profile-mode .pl-career-chart-card { margin-bottom: 10px; }
+body.players-pack.profile-mode .pl-career-chart-card .chart-wrap.tall { height: 220px; }
+#pl-career-chart-block[hidden] { display: none !important; }
+
+/* CHI-114 sits below the packed first screen; three panes, not three runways. */
+body.players-pack.profile-mode #pl-chi114 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+body.players-pack.profile-mode #pl-chi114[hidden] { display: none !important; }
+body.players-pack.profile-mode #pl-chi114 .card-head {
+  grid-column: 1 / -1;
+  margin-bottom: 2px;
+}
+body.players-pack.profile-mode #pl-chi114 .chi114-pane { margin-top: 0; }
+body.players-pack.profile-mode #pl-chi114 .chart-wrap.tall { height: 200px; }
+body.players-pack.profile-mode #pl-fg-charts .chart-wrap.tall { height: 220px; }
+body.players-pack.profile-mode #pl-fg-charts .second-grid .chart-wrap.xtall { height: 240px; }
+
+/* Profile logos stay capped — never unconstrained. */
+body.players-pack .pl-nfl .nfl-logo,
+body.players-pack img.nfl-logo {
+  width: 22px;
+  height: 22px;
+  max-width: 22px;
+  max-height: 22px;
+  object-fit: contain;
+}
+body.players-pack .journey-logo,
+body.players-pack img.journey-logo {
+  width: 28px;
+  height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  object-fit: contain;
+  flex: 0 0 28px;
+}
+body.players-pack #pl-career img.mini,
+body.players-pack #pl-custody img.mini {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+}
+
+@media (max-width: 1100px) {
+  #pl-hero .pl-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  #pl-fg-strip .pp-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (max-width: 980px) {
+  body.players-pack.profile-mode #pl-chi114 { grid-template-columns: 1fr; }
+  #pl-hero .pl-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); min-width: 0; }
+  #pl-fg-strip .pp-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
