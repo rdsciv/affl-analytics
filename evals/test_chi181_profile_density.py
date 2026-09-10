@@ -95,6 +95,10 @@ def main():
         fail("styles.css missing CHI-181 density block")
     if "profile-mode #year-row" not in css:
         fail("CSS does not hide landing pickers on profile")
+    if "#pl-db-break[hidden]" not in css:
+        fail("All-time leaders break still leaks on every profile ([hidden] without display:none)")
+    if "#pl-custody-tl[hidden]" not in css:
+        fail("custody timeline [hidden] still takes vertical space")
     if "#pl-chi114 .chart-wrap.tall { height: 200px; }" not in css and "height: 200px" not in css:
         fail("CHI-114 profile charts were not shortened")
     for needle in ("max-width: 72px", "max-height: 72px", "max-width: 28px", "max-height: 22px"):
