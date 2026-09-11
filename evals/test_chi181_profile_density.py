@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CHI-181: sitewide player profile densify (shared template). Adams is QA only."""
+"""CHI-181 redo: leftover player-profile waste (shared template). Adams is QA only."""
 import re
 import sys
 import urllib.error
@@ -24,11 +24,11 @@ def main():
     bust_css = re.search(r"styles\.css\?v=(\d+)", html)
     if not bust_js:
         fail("players.html missing players.js cache-bust")
-    elif int(bust_js.group(1)) < 55:
+    elif int(bust_js.group(1)) < 56:
         fail(f"players.js cache still v={bust_js.group(1)}")
     if not bust_css:
         fail("players.html missing styles.css cache-bust")
-    elif int(bust_css.group(1)) < 57:
+    elif int(bust_css.group(1)) < 59:
         fail(f"styles.css cache still v={bust_css.group(1)}")
 
     # Landing locks stay: Compare, WOPR, Database, Colleges in that source order.
@@ -39,26 +39,29 @@ def main():
         fail("Compare / WOPR / Database / Colleges source order changed")
 
     load_fn = js.split("async function loadPlayer", 1)[-1].split("function renderYearChips", 1)[0]
-    if re.search(r"renderChart\s*\(\s*focus\s*,\s*careerRows\s*\)", load_fn):
-        fail("loadPlayer still paints careerRows on the top weekly chart (duplicate All-games)")
-    if re.search(r"renderChart\s*\(\s*focus\s*,\s*rows\s*\)", load_fn):
-        fail("loadPlayer still passes rows (All=careerRows) to renderChart")
-    if not re.search(r"playerYears\s*\([^)]*\)\s*\[\s*0\s*\]", load_fn):
-        fail("All-years top chart is not latest year (playerYears(...)[0])")
-    if "renderCareerChart(focus, careerRows)" not in load_fn:
-        fail("career weekly chart must still receive careerRows")
-    if "renderChart(focus, chartRows)" not in load_fn:
-        fail("top weekly chart must use chartRows")
+    if "renderCareerChart" in js:
+        fail("duplicate career chart renderer is still present")
+    if 'id="pl-career-chart"' in html:
+        fail("players.html still has the redundant #pl-career-chart")
+    if re.search(r"playerYears\s*\([^)]*\)\s*\[\s*0\s*\]", load_fn):
+        fail("All-years top chart is still latest year (playerYears(...)[0])")
+    if "chartRows" in load_fn:
+        fail("loadPlayer still builds a latest-year chartRows subset")
+    if "renderChart(focus, rows)" not in load_fn and not re.search(
+        r"renderChart\s*\(\s*focus\s*,\s*rows\s*\)", load_fn
+    ):
+        fail("one weekly chart must receive rows (All = career weeks)")
+    if "careerRows" not in load_fn:
+        fail("loadPlayer must still gather careerRows for log/journey")
 
     hero = html.find('id="pl-hero"')
     strip = html.find('id="pl-fg-strip"')
     weekly = html.find('id="pl-chart"')
-    career = html.find('id="pl-career-chart"')
     chi = html.find('id="pl-chi114"')
-    if min(hero, strip, weekly, career, chi) < 0:
-        fail("profile sections missing hero / strip / weekly / career / chi114")
-    elif not (hero < strip < weekly < career < chi):
-        fail("first screen order must be hero → career strip → weekly → career chart → CHI-114 later")
+    if min(hero, strip, weekly, chi) < 0:
+        fail("profile sections missing hero / strip / weekly / chi114")
+    elif not (hero < strip < weekly < chi):
+        fail("first screen order must be hero → career strip (merged/hidden) → weekly → CHI-114 later")
 
     if 'class="players-pack"' not in html:
         fail("players.html body missing players-pack")
@@ -85,11 +88,17 @@ def main():
         fail("Compare/WOPR must stay hidden on landing")
     if "hide(\"#pl-colleges\", profile)" not in js and "hide('#pl-colleges', profile)" not in js:
         fail("Colleges must remain landing-only (under leaders)")
-    if "yearN <= 1" not in js and "years.size <= 1" not in js:
-        fail("single-season profiles must hide the duplicate career chart")
 
     if "function weekLabel" not in js:
         fail("players.js missing weekLabel (blank chart ticks)")
+    if "weekLabel(r, logYear === \"all\")" not in js and "weekLabel(r, logYear === 'all')" not in js:
+        fail("weekly chart does not year-prefix All/career ticks")
+
+    ngs_fn = js.split("function renderNgsProfile", 1)[-1].split("function heroTeamLine", 1)[0]
+    if "pl-ngs-mix-solo" not in ngs_fn:
+        fail("renderNgsProfile does not drop the empty Run-scheme pane")
+    if "Run scheme" not in ngs_fn:
+        fail("renderNgsProfile lost the Run scheme label for when holes exist")
 
     if "CHI-181" not in css:
         fail("styles.css missing CHI-181 density block")
@@ -101,14 +110,39 @@ def main():
         fail("custody timeline [hidden] still takes vertical space")
     if "#pl-chi114 .chart-wrap.tall { height: 200px; }" not in css and "height: 200px" not in css:
         fail("CHI-114 profile charts were not shortened")
+    chi181 = css.split("CHI-181", 1)[-1]
     for needle in ("max-width: 72px", "max-height: 72px", "max-width: 28px", "max-height: 22px"):
-        if needle not in css.split("CHI-181", 1)[-1]:
+        if needle not in chi181:
             fail(f"CHI-181 density block missing logo cap {needle}")
+    if "align-items: start" not in chi181:
+        fail("profile .second-grid missing align-items: start")
+    if "max-height: 60px" not in chi181:
+        fail("weekly card head is not capped at 60px")
+    if "flex-wrap: nowrap" not in chi181:
+        fail("year chips are not forced to one horizontal row")
+    if "height: 44px" not in chi181:
+        fail("merged hero tiles are not ~44px tall")
+    if "height: 28px" not in chi181:
+        fail("game log rows were not cut to 28px")
+    if "max-height: 64px" not in chi181 and "height: 64px" not in chi181:
+        fail("players footer banner is not capped ~64px")
+    if "grid-template-rows: 32px 32px 32px 200px" not in chi181:
+        fail("CHI-114 panes are not row-aligned (stair-step remains)")
+    if "max-height: 240px" not in chi181:
+        fail("NGS routes/scheme not height-capped at 240px")
+    if not re.search(
+        r"#pl-compare\s*,\s*#wopr-persist\s*\{[^}]*display:\s*none\s*!important",
+        css,
+    ):
+        fail("Compare/WOPR are not CSS-hidden by default (landing flash)")
 
-    for i in ("pl-hero", "pl-chart", "pl-career-chart", "pl-journey", "pl-fg-strip",
+    for i in ("pl-hero", "pl-chart", "pl-journey", "pl-fg-strip",
               "pl-custody", "pl-achievements", "pl-avg-line", "pl-compare", "wopr-persist"):
         if f'id="{i}"' not in html:
             fail(f"existing #{i} was removed")
+
+    if "PPR" in html and "non-PPR" not in html:
+        fail("players.html lost the non-PPR label")
 
     for path in (
         "/players.html?pid=16800&log=all",
@@ -121,8 +155,10 @@ def main():
             body = r.read().decode("utf-8", "replace")
             if code != 200:
                 fail(f"{path} HTTP {code}")
-            elif 'id="pl-chart"' not in body or "players.js?v=55" not in body:
-                fail(f"8765 {path} missing weekly canvas or v=55")
+            elif 'id="pl-chart"' not in body or "players.js?v=56" not in body:
+                fail(f"8765 {path} missing weekly canvas or v=56")
+            elif 'id="pl-career-chart"' in body:
+                fail(f"8765 {path} still ships the redundant career chart")
             elif 'id="pl-db"' not in body or 'id="pl-colleges"' not in body:
                 fail(f"8765 {path} lost landing leaders/colleges chrome")
             else:
@@ -136,7 +172,7 @@ def main():
             print(" -", f)
         return 1
     print("PASS")
-    print("CHI-181: latest-year top chart; career chart kept; first-screen order packed; cache v=55/57")
+    print("CHI-181 redo: one weekly chart All=career; empty NGS scheme hidden; cache v=56/59")
     return 0
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CHI-51 / CHI-95 weekly bars: #pl-chart is latest year on All; #pl-career-chart is career."""
+"""CHI-51 / CHI-181: one weekly bar chart; year chips switch range; All = career weeks."""
 import re
 import sys
 import urllib.error
@@ -21,18 +21,15 @@ def main():
 
     if 'id="pl-chart"' not in html:
         fail("players.html missing #pl-chart")
-    if 'id="pl-career-chart"' not in html:
-        fail("players.html missing #pl-career-chart")
-    if html.find('id="pl-career-chart"') < html.find('id="pl-chart"'):
-        fail("#pl-career-chart must sit under the weekly #pl-chart card, not replace it")
+    if 'id="pl-career-chart"' in html:
+        fail("redundant #pl-career-chart is still in players.html")
 
     if "function renderChart" not in js:
         fail("players.js missing renderChart")
-    if "function renderCareerChart" not in js:
-        fail("players.js missing renderCareerChart")
+    if "function renderCareerChart" in js:
+        fail("players.js still has renderCareerChart")
 
-    chart_fn = js.split("function renderChart", 1)[-1].split("function renderCareerChart", 1)[0]
-    career_fn = js.split("function renderCareerChart", 1)[-1].split("function ngsSeries", 1)[0]
+    chart_fn = js.split("function renderChart", 1)[-1].split("function ngsSeries", 1)[0]
     load_fn = js.split("async function loadPlayer", 1)[-1].split("function renderYearChips", 1)[0]
     chips_fn = js.split("function renderYearChips", 1)[-1].split("function seasonXtd", 1)[0]
 
@@ -40,6 +37,8 @@ def main():
         fail("renderChart is gated to A.years()[0] (latest year only)")
     if "logYear" not in chart_fn and "rows" not in chart_fn:
         fail("renderChart does not use the year-chip rows")
+    if "weekLabel(r, logYear === \"all\")" not in chart_fn and "weekLabel(r, logYear === 'all')" not in chart_fn:
+        fail("All/career weeks are not year-prefixed on the weekly chart")
     if "loadPlayer" not in chips_fn:
         fail("year chips do not reload the player (weekly bars will not repaint)")
     if "data-y" not in chips_fn:
@@ -48,37 +47,19 @@ def main():
         fail("loadPlayer missing setPageMode or renderChart")
     elif load_fn.find("setPageMode") > load_fn.find("renderChart"):
         fail("renderChart runs before setPageMode(profile); hidden canvas stays blank")
-    if "renderCareerChart" not in load_fn:
-        fail("loadPlayer does not paint the career bar chart")
     if "careerRows" not in load_fn:
-        fail("loadPlayer does not keep an all-years row set for the career chart")
-    if "#pl-career-chart" not in career_fn and "pl-career-chart" not in career_fn:
-        fail("renderCareerChart does not target #pl-career-chart")
-    if "barStyle" not in career_fn:
-        fail("career chart does not reuse started/benched/nfl colors")
-
-    # CHI-95: All-years top chart is latest season, not careerRows
-    if re.search(r"renderChart\s*\(\s*focus\s*,\s*rows\s*\)", load_fn):
-        fail("loadPlayer still does renderChart(focus, rows); All would paint careerRows")
-    if re.search(r"renderChart\s*\(\s*focus\s*,\s*careerRows\s*\)", load_fn):
-        fail("loadPlayer passes careerRows to renderChart")
-    if "chartRows" not in load_fn:
-        fail("loadPlayer missing chartRows for the top weekly chart")
-    if not re.search(r"playerYears\s*\([^)]*\)\s*\[\s*0\s*\]", load_fn):
-        fail("All-years top chart is not filtered to playerYears(...)[0]")
-    if "renderChart(focus, chartRows)" not in load_fn and not re.search(
-        r"renderChart\s*\(\s*focus\s*,\s*chartRows\s*\)", load_fn
+        fail("loadPlayer does not keep an all-years row set")
+    if re.search(r"playerYears\s*\([^)]*\)\s*\[\s*0\s*\]", load_fn):
+        fail("All still filters the weekly chart to the latest year")
+    if "chartRows" in load_fn:
+        fail("loadPlayer still builds chartRows (latest-year subset)")
+    if "renderChart(focus, rows)" not in load_fn and not re.search(
+        r"renderChart\s*\(\s*focus\s*,\s*rows\s*\)", load_fn
     ):
-        fail("renderChart is not called with chartRows")
-    if "renderCareerChart(focus, careerRows)" not in load_fn and not re.search(
-        r"renderCareerChart\s*\(\s*focus\s*,\s*careerRows\s*\)", load_fn
-    ):
-        fail("renderCareerChart must still get careerRows")
-    # rows itself may still be careerRows on All (journey/log); that is required
+        fail("renderChart is not called with rows (All = career weeks)")
     if "logYear === \"all\"" not in load_fn and "logYear === 'all'" not in load_fn:
         fail("loadPlayer no longer branches on All")
 
-    # FG extras must still be present
     for i in ("pl-fg-strip", "pl-custody", "pl-achievements", "pl-avg-line"):
         if f'id="{i}"' not in html:
             fail(f"FG extra #{i} was removed")
@@ -95,8 +76,10 @@ def main():
         body = r.read().decode("utf-8", "replace")
         if code != 200:
             fail(f"players.html HTTP {code}")
-        elif 'id="pl-chart"' not in body or 'id="pl-career-chart"' not in body:
-            fail("8765 players.html missing one of the bar canvases")
+        elif 'id="pl-chart"' not in body:
+            fail("8765 players.html missing the weekly canvas")
+        elif 'id="pl-career-chart"' in body:
+            fail("8765 players.html still has the redundant career canvas")
         else:
             print("players.html HTTP 200")
     except (urllib.error.URLError, TimeoutError, OSError) as e:
@@ -108,7 +91,7 @@ def main():
             print(" -", f)
         return 1
     print("PASS")
-    print("both canvases present; All-years top chart is latest year; career chart exists")
+    print("one weekly canvas; All = career weeks; year chips reload the chart")
     return 0
 
 

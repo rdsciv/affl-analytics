@@ -154,7 +154,7 @@
   if (year == null) year = A.years()[0];
   let scope = A.seasonFromURL() == null ? "cum" : "season";
   let squad = A.squadFromURL();
-  let YD = null, T = {}, cur = null, chart = null, ngsChart = null, careerChart = null, careerList = null;
+  let YD = null, T = {}, cur = null, chart = null, ngsChart = null, careerList = null;
   const YEAR_META = {};
   let logYear = null; // number or "all"
   let logSortKey = "week";
@@ -634,7 +634,6 @@
       $("#player-year-row").hidden = true;
       if (chart) { chart.destroy(); chart = null; }
       if (ngsChart) { ngsChart.destroy(); ngsChart = null; }
-      if (careerChart) { careerChart.destroy(); careerChart = null; }
       return;
     }
     cur = p;
@@ -673,11 +672,7 @@
     const rows = (logYear === "all")
       ? careerRows
       : careerRows.filter((r) => Number(r.y) === Number(logYear));
-    /* CHI-95 / CHI-181: All keeps careerRows for log/journey; top weekly chart is latest year only. */
-    const latestY = playerYears(p.pid)[0];
-    const chartRows = (logYear === "all")
-      ? careerRows.filter((r) => Number(r.y) === Number(latestY))
-      : careerRows.filter((r) => Number(r.y) === Number(logYear));
+    /* CHI-181 redo: one weekly chart. Year chips switch the range; All = full career weeks. */
     let focus = logYear === "all" ? p : ((rows[0] && rows[0].p) || p);
     if (isPre2018(logYear)) {
       focus = Object.assign({}, focus, {
@@ -688,10 +683,8 @@
     const m = meta(p.pid);
     renderHero(focus, m, rows);
     renderOverview(focus);
-    renderChart(focus, chartRows);
-    renderCareerChart(focus, careerRows);
+    renderChart(focus, rows);
     if (chart) chart.resize();
-    if (careerChart) careerChart.resize();
     renderJourney(focus, rows);
     renderCollege(focus);
     renderNgsProfile(focus);
@@ -1016,7 +1009,7 @@
     // CHI-176: landing = Database → Colleges only (no Compare/WOPR).
     hide("#pl-compare", true);
     hide("#wopr-persist", true);
-    hide("#pl-fg-strip", !profile);
+    hide("#pl-fg-strip", true); /* merged into hero tile strip */
     hide("#pl-custody", !profile);
     hide("#pl-achievements", !profile);
     hide("#pl-fg-charts", !profile);
@@ -1377,6 +1370,33 @@
     const stat = (v, l) => `<div class="pp-stat"><b>${v == null || v === "" ? "—" : fmt(v, 2)}</b><span>${l}</span></div>`;
     const tree = renderNgsRouteTree(routes, pos);
     const scheme = renderNgsHoleScheme(holes, pos);
+    let mix = "";
+    if (tree && scheme) {
+      mix = `<div class="pl-ngs-mix">
+        <div>
+          <div class="card-sub">Routes</div>
+          ${tree}
+        </div>
+        <div>
+          <div class="card-sub">Run scheme</div>
+          ${scheme}
+        </div>
+      </div>`;
+    } else if (tree) {
+      mix = `<div class="pl-ngs-mix pl-ngs-mix-solo">
+        <div>
+          <div class="card-sub">Routes</div>
+          ${tree}
+        </div>
+      </div>`;
+    } else if (scheme) {
+      mix = `<div class="pl-ngs-mix pl-ngs-mix-solo">
+        <div>
+          <div class="card-sub">Run scheme</div>
+          ${scheme}
+        </div>
+      </div>`;
+    }
     el.innerHTML = `
       <div class="card-head">
         <div>
@@ -1391,16 +1411,7 @@
         ${stat(rec.rec_2025_sep, "sep")}
         ${stat(rec.rec_2025_yacoe, "YACoE")}
       </div>
-      <div class="pl-ngs-mix">
-        <div>
-          <div class="card-sub">Routes</div>
-          ${tree}
-        </div>
-        <div>
-          <div class="card-sub">Run scheme</div>
-          ${scheme}
-        </div>
-      </div>`;
+      ${mix}`;
   }
 
   function heroTeamLine(p, y, m) {
@@ -1418,19 +1429,19 @@
 
   function renderHero(p, m, rows) {
     const y = logYear;
-    const xs = seasonXtd(m, y);
-    const caps = capFor(m, y);
-    const capHit = caps.reduce((a, c) => a + (c.hit || 0), 0) || null;
-    const tot = rows.reduce((a, r) => a + (r.w[1] || 0), 0);
-    const starts = rows.filter((r) => r.state === "started" || (r.state == null && r.w[2])).length;
-    const stPts = rows.filter((r) => r.state === "started" || (r.state == null && r.w[2])).reduce((a, r) => a + (r.w[1] || 0), 0);
-    const epa = rows.reduce((a, r) => a + (r.w[9] || 0), 0);
-    const hasEpa = rows.some((r) => r.w[9] != null);
+    const rostered = rosteredRows(rows);
+    const started = startedRows(rows);
+    const games = rostered.length;
+    const starts = started.length;
+    const seasons = new Set(rostered.map((r) => r.y)).size || afflYears(p.pid).length;
+    const stPts = started.reduce((a, r) => a + (Number(r.w[1]) || 0), 0);
+    const ppg = starts ? stPts / starts : null;
+    const startPct = games ? starts / games : null;
+    const wl = wlForRows(started);
+    const rec = wl.n ? (wl.w + "-" + wl.l + (wl.t ? "-" + wl.t : "")) : "—";
     const stat = (v, l, tip) => `<div class="pp-stat"${tip ? ` title="${A.esc(tip)}"` : ""}><b>${v}</b><span>${l}</span></div>`;
     const yrLabel = y === "all" ? "career" : String(y);
     const teamLine = heroTeamLine(p, y, m);
-    const bio = A.playerBio(p.pid, y === "all" ? (m.years || [])[0] : y, A.today());
-    const bioAge = bio && bio.ageText ? bio.ageText : (bio && bio.age);
     const yo = YOFF[String(p.pid)] || {};
     const nYoff = yo.nYoff || 0;
     const graded = nYoff >= 3 && yo.yoffstud != null;
@@ -1446,6 +1457,7 @@
     const pr = ranks.pos[String(p.pid)];
     const bw = bestWeek(rows);
     const heroP = Object.assign({}, p, { hs: heroHeadshotUrl(p) });
+    /* One ~12-tile strip: career-strip + hero, duplicates (pts/ppg/starts) dropped. */
     $("#pl-hero").innerHTML = `
       <div class="pl-hero-inner">
         ${A.headshotHTML(heroP, "pl-hs")}
@@ -1459,25 +1471,20 @@
           </div>
           ${overviewBioHTML(p)}
         </div>
-        <div class="pp-stats pl-tiles">
-          ${stat(fmt(tot, 1), y === "all" ? "career pts" : "season pts")}
-          ${stat(fmt(stPts, 1), "affl started pts")}
-          ${stat(starts ? fmt(stPts / starts, 1) : "—", "ppg started")}
-          ${stat(starts, "affl starts")}
-          ${stat(p.cons != null && y !== "all" ? Math.round(p.cons * 100) + "%" : "—", "consistency")}
-          ${stat(bioAge != null && bioAge !== "" ? bioAge : "—", "age today")}
-          ${stat(hasEpa ? (epa >= 0 ? "+" : "") + fmt(epa, 1) : "—", "nfl epa")}
-          ${stat(xs ? fmt(xs.xtd, 2) : "—", "xTD")}
-          ${stat(xs ? ((xs.res >= 0 ? "+" : "") + fmt(xs.res, 2)) : "—", "TD − xTD")}
-          ${stat(capHit != null ? money(capHit) : "—", y === "all" ? "spotrac cap (sum)" : "spotrac cap")}
-          ${stat(graded ? fmt(yo.yoffstud, 1) : "—", "yoffstud", yoffTip)}
-          ${stat(graded ? fmt(yo.yoffdud, 1) : "—", "yoffdud", yoffTip)}
-          ${stat(draftPo + "/" + draftN, "drafted → yoff", draftPo + " of " + draftN + " drafts made the playoffs")}
-          ${stat(rings, "AFFL titles", ringYears || "no AFFL titles")}
-          ${stat(ar ? ("#" + ar.rank) : "—", "all-time", ar ? ("#" + ar.rank + " of " + ar.n + " AFFL players by career NFL pts") : "no career points")}
-          ${stat(pr ? ("#" + pr.rank + " " + (p.pos || "")) : "—", "pos rank", pr ? ("#" + pr.rank + " of " + pr.n + " " + (p.pos || "") + "s") : "no position rank")}
-          ${stat(bw ? fmt(bw.w[1], 1) : "—", "best week", bw ? (bw.y + " W" + bw.w[0] + (bw.w[5] ? " vs " + bw.w[5] : "")) : "no scored week")}
-        </div>
+      </div>
+      <div class="pp-stats pl-tiles">
+        ${stat(seasons || "—", "seasons")}
+        ${stat(games || "—", "games")}
+        ${stat(starts || "—", "starts", startPct == null ? "" : Math.round(startPct * 100) + "% start %")}
+        ${stat(starts ? fmt(stPts, 1) : "—", "started pts")}
+        ${stat(ppg == null ? "—" : fmt(ppg, 1), "ppg")}
+        ${stat(rec, "team W-L", wl.pct == null ? "" : Math.round(wl.pct * 100) + "% AFFL win%")}
+        ${stat(graded ? fmt(yo.yoffstud, 1) : "—", "yoffstud", yoffTip)}
+        ${stat(draftPo + "/" + draftN, "drafted → yoff", draftPo + " of " + draftN + " drafts made the playoffs")}
+        ${stat(rings, "AFFL titles", ringYears || "no AFFL titles")}
+        ${stat(ar ? ("#" + ar.rank) : "—", "all-time", ar ? ("#" + ar.rank + " of " + ar.n + " AFFL players by career NFL pts") : "no career points")}
+        ${stat(pr ? ("#" + pr.rank + " " + (p.pos || "")) : "—", "pos rank", pr ? ("#" + pr.rank + " of " + pr.n + " " + (p.pos || "") + "s") : "no position rank")}
+        ${stat(bw ? fmt(bw.w[1], 1) : "—", "best week", bw ? (bw.y + " W" + bw.w[0] + (bw.w[5] ? " vs " + bw.w[5] : "")) : "no scored week")}
       </div>`;
   }
 
@@ -1758,32 +1765,10 @@
   }
 
   function renderFgStrip(p, rows) {
+    const card = $("#pl-fg-strip");
+    if (card) card.hidden = true;
     const el = $("#pl-fg-strip-tiles");
-    if (!el) return;
-    const rostered = rosteredRows(rows);
-    const started = startedRows(rows);
-    const games = rostered.length;
-    const starts = started.length;
-    const seasons = new Set(rostered.map((r) => r.y)).size || afflYears(p.pid).length;
-    const tot = started.reduce((a, r) => a + (Number(r.w[1]) || 0), 0);
-    const ppg = starts ? tot / starts : null;
-    const startPct = games ? starts / games : null;
-    const nflN = (rows || []).filter((r) => r.state === "nfl").length;
-    const ownedPct = (games + nflN) ? games / (games + nflN) : null;
-    const wl = wlForRows(started);
-    const rec = wl.n ? (wl.w + "-" + wl.l + (wl.t ? "-" + wl.t : "")) : "—";
-    const stat = (v, l) => `<div class="pp-stat"><b>${v}</b><span>${l}</span></div>`;
-    el.innerHTML = [
-      stat(seasons || "—", "seasons"),
-      stat(games || "—", "games"),
-      stat(starts || "—", "starts"),
-      stat(startPct == null ? "—" : Math.round(startPct * 100) + "%", "start %"),
-      stat(starts ? fmt(tot, 1) : "—", "total pts"),
-      stat(ppg == null ? "—" : fmt(ppg, 1), "avg PPG"),
-      stat(wl.pct == null ? "—" : Math.round(wl.pct * 100) + "%", "AFFL win%"),
-      stat(rec, "team W-L"),
-      stat(ownedPct == null ? "—" : Math.round(ownedPct * 100) + "%", "owned %"),
-    ].join("");
+    if (el) el.innerHTML = "";
   }
 
   function renderCustody(p, rows) {
@@ -2286,7 +2271,7 @@
     chart = new Chart($("#pl-chart"), {
       type: "bar",
       data: {
-        labels: rows.map((r) => weekLabel(r, false)),
+        labels: rows.map((r) => weekLabel(r, logYear === "all")),
         datasets: [{
           type: "bar",
           label: "actual (started / benched / NFL / snapshot)",
@@ -2294,7 +2279,7 @@
           backgroundColor: styles.map((x) => x.bg),
           borderColor: styles.map((x) => x.bd),
           borderWidth: styles.map((x) => x.bw),
-          borderRadius: 3, maxBarThickness: 26,
+          borderRadius: 3, maxBarThickness: logYear === "all" ? 12 : 26,
           order: 1,
         }, {
           type: "line",
@@ -2348,76 +2333,6 @@
       },
     });
     renderNgsChart(p, rows);
-  }
-
-  function renderCareerChart(p, rows) {
-    if (careerChart) { careerChart.destroy(); careerChart = null; }
-    const canvas = $("#pl-career-chart");
-    const block = $("#pl-career-chart-block");
-    if (!canvas) return;
-    const yearN = new Set((rows || []).map((r) => Number(r.y))).size;
-    /* Sitewide: hide the career canvas when it would reprint the same single season as #pl-chart. */
-    if (block) block.hidden = !rows.length || yearN <= 1;
-    if (!rows.length || yearN <= 1) return;
-    const projData = rows.map((r) => weekProj(r.y, p.pid, r.w[0]));
-    const styles = rows.map(barStyle);
-    careerChart = new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: rows.map((r) => weekLabel(r, true)),
-        datasets: [{
-          type: "bar",
-          label: "actual (started / benched / NFL / snapshot)",
-          data: rows.map((r) => r.w[1]),
-          backgroundColor: styles.map((x) => x.bg),
-          borderColor: styles.map((x) => x.bd),
-          borderWidth: styles.map((x) => x.bw),
-          borderRadius: 3, maxBarThickness: 18,
-          order: 1,
-        }, {
-          type: "line",
-          label: "ESPN proj",
-          data: projData,
-          borderColor: C.gold,
-          backgroundColor: C.gold,
-          pointBackgroundColor: C.gold,
-          pointBorderColor: "#0b0e14",
-          pointRadius: 1.5,
-          pointHoverRadius: 3,
-          borderWidth: 1.5,
-          tension: 0.2,
-          spanGaps: false,
-          order: 0,
-        }],
-      },
-      options: {
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-          legend: { display: true, labels: { boxWidth: 10, boxHeight: 10 } },
-          tooltip: {
-            filter: (item) => item.datasetIndex === 0,
-            callbacks: {
-              label: (c) => {
-                const r = rows[c.dataIndex];
-                const actual = r.w[1];
-                const state = r.state || (r.w[2] ? "started" : "benched");
-                let who;
-                if (state === "snapshot") who = `on AFFL roster (weekly lineup not recovered) · ${tName(r.w[3], r.y)}`;
-                else if (state === "unrecovered") who = `${r.y} AFFL weekly rosters not recovered`;
-                else if (state === "nfl") who = "NFL week, not on an AFFL roster";
-                else who = `${state} by ${tName(r.w[3], r.y)}`;
-                return `${r.y} W${r.w[0]} · actual ${fmt(actual, 1)} pts · ${who}`;
-              },
-            },
-          },
-        },
-        scales: {
-          y: { grid: { color: C.grid }, border: { display: false } },
-          x: { grid: { display: false }, border: { display: false } },
-        },
-      },
-    });
   }
 
   function ngsSeries(pos) {
@@ -3375,7 +3290,6 @@
     if (g && !pid) g.innerHTML = A.notice("Loading players…");
     if (chart) { chart.destroy(); chart = null; }
     if (ngsChart) { ngsChart.destroy(); ngsChart = null; }
-    if (careerChart) { careerChart.destroy(); careerChart = null; }
     try {
       await careerPlayers();
       YD = await A.loadYear(year);

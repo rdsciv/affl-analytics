@@ -6,7 +6,7 @@
 <title>Stars, Scrubs, &amp; Duds — AFFL</title>
 <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=4">
 <link rel="apple-touch-icon" href="favicon.png?v=4">
-<link rel="stylesheet" href="styles.css?v=57">
+<link rel="stylesheet" href="styles.css?v=59">
 <link rel="stylesheet" href="logo.css?v=3">
 </head>
 <body class="players-pack">
@@ -60,7 +60,7 @@
     <div class="week-picker" id="squad-picker"></div>
   </div>
 
-  <!-- Landing: Compare → WOPR → Database → Colleges (CHI-175) -->
+  <!-- Landing: Compare / WOPR / Database / Colleges (CHI-175); Compare+WOPR CSS-hidden (CHI-176/181) -->
   <section class="card" id="pl-compare">
     <div class="card-head">
       <div>
@@ -142,7 +142,7 @@
 
   <section class="card" id="pl-fg-strip" hidden>
     <div class="card-head">
-      <div><h2>Career Strip</h2><div class="card-sub">AFFL seasons · games · starts · start % · pts · PPG · team W-L when matchups exist</div></div>
+      <div><h2>Career Strip</h2><div class="card-sub">merged into the hero tile strip</div></div>
     </div>
     <div class="pp-stats" id="pl-fg-strip-tiles"></div>
   </section>
@@ -150,9 +150,12 @@
   <div class="pl-detail" hidden>
     <section class="second-grid">
       <div class="card">
-        <div class="card-head">
-          <div><h2>Weekly Fantasy Production</h2><div class="card-sub">All = latest season on this chart · career weeks live below · blue = started (2018+ weekly and 2014–2017 recovered) &middot; gray = benched &middot; teal = NFL week not on an AFFL roster (2018+) &middot; gold = on AFFL roster (weekly lineup not recovered, 2014–2017) &middot; amber = ESPN weekly projection · non-PPR</div></div>
-          <div class="week-picker chi114-year-chips" id="player-year-picker"></div>
+        <div class="card-head pl-week-head">
+          <div>
+            <h2>Weekly Fantasy Production</h2>
+            <div class="card-sub">year chips switch the weeks · All = career · blue started · gray benched · teal NFL · gold snapshot · amber proj · non-PPR</div>
+          </div>
+          <div class="week-picker chi114-year-chips pl-week-chips" id="player-year-picker"></div>
         </div>
         <div class="chart-wrap"><canvas id="pl-chart"></canvas></div>
         <div class="pl-ngs" id="pl-ngs" hidden>
@@ -166,10 +169,6 @@
         </div>
         <div class="journey" id="pl-journey"></div>
       </div>
-    </section>
-    <section class="card pl-career-chart-card" id="pl-career-chart-block">
-      <div class="card-sub">Career weekly production · every NFL week · not a second All-games copy of the chart above · blue / gray / teal / gold same as weekly</div>
-      <div class="chart-wrap tall"><canvas id="pl-career-chart"></canvas></div>
     </section>
   </div>
 
@@ -294,6 +293,6 @@
 <script src="chart.umd.min.js?v=1"></script>
 <script src="common.js?v=39"></script>
 <script src="chi114.js?v=6"></script>
-<script src="players.js?v=55"></script>
+<script src="players.js?v=56"></script>
 </body>
 </html>
