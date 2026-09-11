@@ -1073,7 +1073,7 @@ a.tm-name:hover { color: var(--blue); }
   color: var(--mut); font: inherit; cursor: pointer; vertical-align: middle;
 }
 .tm-toggle:hover { color: var(--blue); }
-.ncaa-logo { width: 44px; height: 44px; object-fit: contain; flex: 0 0 44px; }
+.ncaa-logo { width: 44px; height: 44px; max-width: 44px; max-height: 44px; object-fit: contain; flex: 0 0 44px; }
 /* CHI-173 — pack College card: kill dead gutter between id and tiles. */
 .pl-college-inner {
   display: grid;
