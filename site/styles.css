@@ -3550,7 +3550,8 @@ body.players-pack.profile-mode #player-year-picker {
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
-  max-width: min(560px, 58%);
+  max-width: min(420px, 100%);
+  min-width: 0;
   margin: 0;
   white-space: nowrap;
 }
@@ -3559,6 +3560,11 @@ body.players-pack.profile-mode .pl-detail { margin-bottom: 10px; }
 body.players-pack.profile-mode .second-grid {
   align-items: start;
   gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+body.players-pack.profile-mode .second-grid > .card,
+body.players-pack.profile-mode .pl-detail .second-grid > .card {
+  min-width: 0;
 }
 body.players-pack.profile-mode .pl-detail .second-grid { margin-bottom: 10px; }
 body.players-pack.profile-mode #pl-career.second-grid { gap: 10px; }

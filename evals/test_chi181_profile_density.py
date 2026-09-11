@@ -28,7 +28,7 @@ def main():
         fail(f"players.js cache still v={bust_js.group(1)}")
     if not bust_css:
         fail("players.html missing styles.css cache-bust")
-    elif int(bust_css.group(1)) < 58:
+    elif int(bust_css.group(1)) < 59:
         fail(f"styles.css cache still v={bust_css.group(1)}")
 
     # Landing locks stay: Compare, WOPR, Database, Colleges in that source order.
@@ -172,7 +172,7 @@ def main():
             print(" -", f)
         return 1
     print("PASS")
-    print("CHI-181 redo: one weekly chart All=career; empty NGS scheme hidden; cache v=56/58")
+    print("CHI-181 redo: one weekly chart All=career; empty NGS scheme hidden; cache v=56/59")
     return 0
 
 
