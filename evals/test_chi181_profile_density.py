@@ -153,10 +153,13 @@ def main():
             r = urllib.request.urlopen("http://127.0.0.1:8765" + path, timeout=5)
             code = getattr(r, "status", None) or r.getcode()
             body = r.read().decode("utf-8", "replace")
+            bust = re.search(r"players\.js\?v=(\d+)", body)
             if code != 200:
                 fail(f"{path} HTTP {code}")
-            elif 'id="pl-chart"' not in body or "players.js?v=56" not in body:
-                fail(f"8765 {path} missing weekly canvas or v=56")
+            elif 'id="pl-chart"' not in body:
+                fail(f"8765 {path} missing weekly canvas")
+            elif not bust or int(bust.group(1)) < 56:
+                fail(f"8765 {path} missing players.js cache >= v=56")
             elif 'id="pl-career-chart"' in body:
                 fail(f"8765 {path} still ships the redundant career chart")
             elif 'id="pl-db"' not in body or 'id="pl-colleges"' not in body:
@@ -172,7 +175,7 @@ def main():
             print(" -", f)
         return 1
     print("PASS")
-    print("CHI-181 redo: one weekly chart All=career; empty NGS scheme hidden; cache v=56/59")
+    print("CHI-181 redo: one weekly chart All=career; empty NGS scheme hidden; cache v>=56/59")
     return 0
 
 

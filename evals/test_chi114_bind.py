@@ -218,12 +218,28 @@ def main() -> int:
 
     if "chi114.js" not in players_html or "chi114.js" not in teams_html:
         fail("html files must load chi114.js")
-    if "players.js?v=39" not in players_html and "players.js?v=38" not in players_html and "players.js?v=37" not in players_html and "players.js?v=36" not in players_html:
-        fail("players.js cache bust not bumped")
-    if "teams.js?v=22" not in teams_html and "teams.js?v=21" not in teams_html and "teams.js?v=16" not in teams_html:
-        fail("teams.js cache bust not bumped to v=22")
-    if "chi114.js?v=5" not in players_html or "chi114.js?v=5" not in teams_html:
-        fail("chi114.js cache bust not bumped to v=5")
+
+    def cache_v(html: str, name: str):
+        m = re.search(re.escape(name) + r"\?v=(\d+)", html)
+        return int(m.group(1)) if m else None
+
+    pj = cache_v(players_html, "players.js")
+    if pj is None or pj < 57:
+        fail(f"players.js cache bust not bumped past v=56 (got {pj})")
+    cj_p, cj_t = cache_v(players_html, "chi114.js"), cache_v(teams_html, "chi114.js")
+    if cj_p is None or cj_p < 7 or cj_t is None or cj_t < 7:
+        fail(f"chi114.js cache bust not bumped to v=7 (players={cj_p} teams={cj_t})")
+    css_v = cache_v(players_html, "styles.css")
+    if css_v is None or css_v < 63:
+        fail(f"styles.css cache bust not bumped past v=62 (got {css_v})")
+    if "chi114-filter" not in chi_js:
+        fail("chi114.js missing compact year/week <select> filter")
+    if "yearsAvail[yearsAvail.length - 1]" not in chi_js:
+        fail("week pane must default to the latest available year")
+    if "function pruneSet" not in chi_js:
+        fail("missing pruneSet for stale year/week chip state")
+    if ".chi114-filter" not in styles:
+        fail("styles.css missing .chi114-filter compact control")
 
     # 2025 Josh Allen bind
     y25 = json.loads((SITE / "years" / "2025.json").read_text())

@@ -2792,7 +2792,32 @@ a.team-link:hover { color: var(--blue2); text-decoration: underline; text-underl
 .chi114-block { margin-top: 16px; }
 .chi114-pane { margin-top: 14px; }
 .chi114-pane .card-sub { margin-bottom: 6px; }
-.chi114-year-chips, .chi114-week-chips { margin: 4px 0 10px; }
+.chi114-year-chips, .chi114-week-chips { margin: 4px 0 10px; min-width: 0; max-width: 100%; }
+.chi114-filter {
+  background: var(--card2, #121722);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  height: 26px;
+  max-width: 112px;
+  min-width: 72px;
+  outline: none;
+  cursor: pointer;
+}
+.chi114-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--mut);
+  font-size: 12px;
+  pointer-events: none;
+  padding: 12px;
+  text-align: center;
+}
 .chi114-marks {
   display: flex;
   flex-wrap: wrap;
@@ -3661,6 +3686,9 @@ body.players-pack.profile-mode #pl-chi114 .chi114-marks {
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
 }
 body.players-pack.profile-mode #pl-chi114 .chart-wrap.tall { height: 200px; }
 body.players-pack.profile-mode #pl-fg-charts .chart-wrap.tall { height: 220px; }

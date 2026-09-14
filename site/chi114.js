@@ -2,7 +2,9 @@
    playerSeasonXfp = season+player_id → FP / XFP on pane 1, FPOE on its own pane.
    playerWeekNfl   = season+week+gsis_id → yards / TDs / volume only.
    2013 skips BOTH season panels (no XFP/FPOE). Receptions are volume, not PPR.
-   Do not alias pass_air_yards / rec_air_yards as yards. */
+   Do not alias pass_air_yards / rec_air_yards as yards.
+   Week pane defaults to the latest year. Year/week filters use All + select
+   so they stay reachable in the 32px nowrap profile row. */
 (function () {
   const A = window.AFFL;
   const C = (A && A.C) || {
@@ -248,17 +250,62 @@
     }
   }
 
+  function setEmpty(canvas, msg) {
+    const wrap = canvas && canvas.parentElement;
+    if (!wrap) return;
+    let note = wrap.querySelector(".chi114-empty");
+    if (!msg) {
+      if (note) note.remove();
+      return;
+    }
+    if (!note) {
+      note = document.createElement("div");
+      note.className = "chi114-empty";
+      wrap.appendChild(note);
+    }
+    note.textContent = msg;
+  }
+
+  function pruneSet(sel, values, fallbackLast) {
+    const keep = {};
+    (values || []).forEach(function (v) { keep[v] = 1; });
+    Array.from(sel).forEach(function (v) {
+      if (!keep[v]) sel.delete(v);
+    });
+    if (!sel.size && values && values.length) {
+      if (fallbackLast) sel.add(values[values.length - 1]);
+      else values.forEach(function (v) { sel.add(v); });
+    }
+  }
+
+  /* All + <select> when the chip strip cannot fit a 32px nowrap pane.
+     Hidden overflow-x scroll made year/week filters unreachable on profile. */
   function chips(el, values, selected, onPick, allLabel) {
     if (!el) return;
     const sel = selected instanceof Set ? selected : new Set(selected || values);
     const allOn = values.length > 0 && values.every(function (v) { return sel.has(v); });
+    const picked = values.filter(function (v) { return sel.has(v); });
+    const single = !allOn && picked.length === 1 ? picked[0] : "";
+    const compact = values.length > 4;
+    const pickLabel = /week/i.test(allLabel || "") ? "Week" : "Year";
     const bits = [];
     if (allLabel) {
       bits.push('<button type="button" class="season-chip' + (allOn ? " on" : "") + '" data-all="1">' + allLabel + "</button>");
     }
-    values.forEach(function (v) {
-      bits.push('<button type="button" class="season-chip' + (!allOn && sel.has(v) ? " on" : "") + '" data-v="' + v + '">' + v + "</button>");
-    });
+    if (compact) {
+      bits.push('<select class="chi114-filter" aria-label="' + pickLabel + '">');
+      if (allOn || single === "") {
+        bits.push('<option value="" disabled selected hidden>' + pickLabel + "</option>");
+      }
+      values.forEach(function (v) {
+        bits.push('<option value="' + v + '"' + (single !== "" && Number(v) === Number(single) ? " selected" : "") + ">" + v + "</option>");
+      });
+      bits.push("</select>");
+    } else {
+      values.forEach(function (v) {
+        bits.push('<button type="button" class="season-chip' + (!allOn && sel.has(v) ? " on" : "") + '" data-v="' + v + '">' + v + "</button>");
+      });
+    }
     el.innerHTML = bits.join("");
     el.querySelectorAll("button").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -271,6 +318,16 @@
         onPick(sel);
       });
     });
+    const select = el.querySelector("select.chi114-filter");
+    if (select) {
+      select.addEventListener("change", function () {
+        const v = +select.value;
+        if (!Number.isFinite(v)) return;
+        sel.clear();
+        sel.add(v);
+        onPick(sel);
+      });
+    }
   }
 
   function renderMarks(el, items) {
@@ -312,6 +369,7 @@
     kill(canvas.id);
     if (!rowsIn.length) {
       if (pane) pane.hidden = true;
+      setEmpty(canvas, "");
       return;
     }
     if (pane) pane.hidden = false;
@@ -328,6 +386,7 @@
     const state = canvas._chi114s || { years: new Set(yearsAvail), iso: null };
     canvas._chi114s = state;
     yearsAvail.forEach(function (y) { if (!XFP_YEARS.includes(y)) state.years.delete(y); });
+    pruneSet(state.years, yearsAvail, false);
 
     chips(opts.chips, yearsAvail, state.years, function (sel) {
       state.years = sel;
@@ -337,8 +396,10 @@
     const rows = series.filter(function (r) { return state.years.has(r.season); });
     if (!rows.length) {
       kill(canvas.id);
+      setEmpty(canvas, "No season FP / XFP for these years.");
       return;
     }
+    setEmpty(canvas, "");
 
     const labels = rows.map(function (r) { return String(r.season); });
     const datasets = XFP_PLOT_KEYS.map(function (k) {
@@ -420,6 +481,7 @@
     kill(canvas.id);
     if (!rowsIn.length) {
       if (pane) pane.hidden = true;
+      setEmpty(canvas, "");
       return;
     }
     if (pane) pane.hidden = false;
@@ -436,6 +498,7 @@
     const state = canvas._chi114f || { years: new Set(yearsAvail), iso: null };
     canvas._chi114f = state;
     yearsAvail.forEach(function (y) { if (!XFP_YEARS.includes(y)) state.years.delete(y); });
+    pruneSet(state.years, yearsAvail, false);
 
     chips(opts.chips, yearsAvail, state.years, function (sel) {
       state.years = sel;
@@ -445,8 +508,10 @@
     const rows = series.filter(function (r) { return state.years.has(r.season); });
     if (!rows.length) {
       kill(canvas.id);
+      setEmpty(canvas, "No season FPOE for these years.");
       return;
     }
+    setEmpty(canvas, "");
 
     const labels = rows.map(function (r) { return String(r.season); });
     const datasets = FPOE_PLOT_KEYS.map(function (k) {
@@ -541,6 +606,7 @@
     kill(canvas.id);
     if (!rowsIn.length) {
       if (pane) pane.hidden = true;
+      setEmpty(canvas, "");
       return;
     }
     if (pane) pane.hidden = false;
@@ -555,22 +621,32 @@
     });
     yearsAvail.sort(function (a, b) { return a - b; });
 
+    const state = canvas._chi114w || {
+      years: new Set(),
+      weeks: new Set(),
+      iso: null,
+      primed: false,
+    };
+    canvas._chi114w = state;
+    if (!state.primed) {
+      state.primed = true;
+      if (yearsAvail.length) state.years = new Set([yearsAvail[yearsAvail.length - 1]]);
+    }
+    pruneSet(state.years, yearsAvail, true);
+
+    const yearRows = series.filter(function (r) { return state.years.has(r.season); });
     const weeksAvail = [];
     const seenW = {};
-    series.forEach(function (r) {
+    yearRows.forEach(function (r) {
       if (!seenW[r.week]) { seenW[r.week] = 1; weeksAvail.push(r.week); }
     });
     weeksAvail.sort(function (a, b) { return a - b; });
-
-    const state = canvas._chi114w || {
-      years: new Set(yearsAvail),
-      weeks: new Set(weeksAvail),
-      iso: null,
-    };
-    canvas._chi114w = state;
+    if (!state.weeks.size) weeksAvail.forEach(function (w) { state.weeks.add(w); });
+    pruneSet(state.weeks, weeksAvail, false);
 
     chips(opts.yearChips, yearsAvail, state.years, function (sel) {
       state.years = sel;
+      state.weeks = new Set(); /* re-fill from the year-scoped week list */
       drawWeekNfl(opts);
     }, "All years");
     chips(opts.weekChips, weeksAvail, state.weeks, function (sel) {
@@ -578,10 +654,13 @@
       drawWeekNfl(opts);
     }, "All weeks");
 
-    const rows = series.filter(function (r) {
-      return state.years.has(r.season) && state.weeks.has(r.week);
-    });
-    if (!rows.length) return;
+    const rows = yearRows.filter(function (r) { return state.weeks.has(r.week); });
+    if (!rows.length) {
+      kill(canvas.id);
+      setEmpty(canvas, "No weekly yards / volume for this year.");
+      return;
+    }
+    setEmpty(canvas, "");
 
     const multiYear = state.years.size > 1;
     const labels = rows.map(function (r) {
