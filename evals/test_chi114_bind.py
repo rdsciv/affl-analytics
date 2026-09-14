@@ -227,11 +227,14 @@ def main() -> int:
     if pj is None or pj < 57:
         fail(f"players.js cache bust not bumped past v=56 (got {pj})")
     cj_p, cj_t = cache_v(players_html, "chi114.js"), cache_v(teams_html, "chi114.js")
-    if cj_p is None or cj_p < 7 or cj_t is None or cj_t < 7:
-        fail(f"chi114.js cache bust not bumped to v=7 (players={cj_p} teams={cj_t})")
+    if cj_p is None or cj_p < 8 or cj_t is None or cj_t < 8:
+        fail(f"chi114.js cache bust not bumped to v=8 (players={cj_p} teams={cj_t})")
     css_v = cache_v(players_html, "styles.css")
-    if css_v is None or css_v < 63:
-        fail(f"styles.css cache bust not bumped past v=62 (got {css_v})")
+    if css_v is None or css_v < 65:
+        fail(f"styles.css cache bust not bumped to v=65 (got {css_v})")
+    css_t = cache_v(teams_html, "styles.css")
+    if css_t is None or css_t < 65:
+        fail(f"teams.html styles.css cache bust not bumped to v=65 (got {css_t})")
     if "chi114-filter" not in chi_js:
         fail("chi114.js missing compact year/week <select> filter")
     if "yearsAvail[yearsAvail.length - 1]" not in chi_js:
@@ -240,6 +243,37 @@ def main() -> int:
         fail("missing pruneSet for stale year/week chip state")
     if ".chi114-filter" not in styles:
         fail("styles.css missing .chi114-filter compact control")
+    if ".chi114-year-filter" not in styles:
+        fail("styles.css missing .chi114-year-filter (season/FPOE All + select)")
+
+    # Season / FPOE filters: All + select containers, not the chip scroller.
+    chips_fn = brace_after(chi_js, "function chips")
+    if "chi114-filter" not in chips_fn:
+        fail("chips() does not render compact <select>")
+    if 'data-v="' in chips_fn:
+        fail("chips() still renders per-year season-chip buttons")
+    for label, html, prefix in (
+        ("players.html", players_html, "pl"),
+        ("teams.html", teams_html, "tm"),
+    ):
+        for pane in ("season", "fpoe"):
+            m = re.search(rf'<div[^>]*id="{prefix}-chi114-{pane}-years"[^>]*>', html)
+            if not m:
+                fail(f"{label} missing {prefix}-chi114-{pane}-years")
+                continue
+            tag = m.group(0)
+            if "chi114-year-chips" in tag:
+                fail(f"{label} {pane} years still uses chi114-year-chips scroller")
+            if "chi114-year-filter" not in tag:
+                fail(f"{label} {pane} years must use chi114-year-filter (All + select)")
+    if "All years" not in draw_s:
+        fail("drawSeasonXfp must label the filter All years")
+    if "pruneSet(state.years, yearsAvail, false)" not in draw_s:
+        fail("season FP/XFP must default to All years (pruneSet fallbackLast=false)")
+    if "All years" not in draw_f:
+        fail("drawSeasonFpoe must label the filter All years")
+    if "pruneSet(state.years, yearsAvail, false)" not in draw_f:
+        fail("season FPOE must default to All years (pruneSet fallbackLast=false)")
 
     # 2025 Josh Allen bind
     y25 = json.loads((SITE / "years" / "2025.json").read_text())

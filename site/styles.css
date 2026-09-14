@@ -2792,7 +2792,7 @@ a.team-link:hover { color: var(--blue2); text-decoration: underline; text-underl
 .chi114-block { margin-top: 16px; }
 .chi114-pane { margin-top: 14px; }
 .chi114-pane .card-sub { margin-bottom: 6px; }
-.chi114-year-chips, .chi114-week-chips { margin: 4px 0 10px; min-width: 0; max-width: 100%; }
+.chi114-year-chips, .chi114-week-chips, .chi114-year-filter { margin: 4px 0 10px; min-width: 0; max-width: 100%; }
 .chi114-filter {
   background: var(--card2, #121722);
   color: var(--ink);
@@ -3686,6 +3686,17 @@ body.players-pack.profile-mode #pl-chi114 .chi114-marks {
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+/* Season/FPOE: All + select only — no overflow-x chip trap. */
+body.players-pack.profile-mode #pl-chi114 .chi114-year-filter {
+  min-height: 28px;
+  max-height: 32px;
+  margin: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
   min-width: 0;
   max-width: 100%;
   width: 100%;

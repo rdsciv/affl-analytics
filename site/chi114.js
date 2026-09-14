@@ -3,8 +3,9 @@
    playerWeekNfl   = season+week+gsis_id → yards / TDs / volume only.
    2013 skips BOTH season panels (no XFP/FPOE). Receptions are volume, not PPR.
    Do not alias pass_air_yards / rec_air_yards as yards.
-   Week pane defaults to the latest year. Year/week filters use All + select
-   so they stay reachable in the 32px nowrap profile row. */
+   Week pane defaults to the latest year. Season FP/XFP and FPOE default to
+   All years (career series). Every pane uses All + compact <select> — never
+   a year-chip scroller in the 32px nowrap profile row. */
 (function () {
   const A = window.AFFL;
   const C = (A && A.C) || {
@@ -278,21 +279,19 @@
     }
   }
 
-  /* All + <select> when the chip strip cannot fit a 32px nowrap pane.
-     Hidden overflow-x scroll made year/week filters unreachable on profile. */
+  /* Always All + compact <select>. Per-year chips overflow the 32px profile row. */
   function chips(el, values, selected, onPick, allLabel) {
     if (!el) return;
     const sel = selected instanceof Set ? selected : new Set(selected || values);
     const allOn = values.length > 0 && values.every(function (v) { return sel.has(v); });
     const picked = values.filter(function (v) { return sel.has(v); });
     const single = !allOn && picked.length === 1 ? picked[0] : "";
-    const compact = values.length > 4;
     const pickLabel = /week/i.test(allLabel || "") ? "Week" : "Year";
     const bits = [];
     if (allLabel) {
       bits.push('<button type="button" class="season-chip' + (allOn ? " on" : "") + '" data-all="1">' + allLabel + "</button>");
     }
-    if (compact) {
+    if (values.length) {
       bits.push('<select class="chi114-filter" aria-label="' + pickLabel + '">');
       if (allOn || single === "") {
         bits.push('<option value="" disabled selected hidden>' + pickLabel + "</option>");
@@ -301,10 +300,6 @@
         bits.push('<option value="' + v + '"' + (single !== "" && Number(v) === Number(single) ? " selected" : "") + ">" + v + "</option>");
       });
       bits.push("</select>");
-    } else {
-      values.forEach(function (v) {
-        bits.push('<button type="button" class="season-chip' + (!allOn && sel.has(v) ? " on" : "") + '" data-v="' + v + '">' + v + "</button>");
-      });
     }
     el.innerHTML = bits.join("");
     el.querySelectorAll("button").forEach(function (b) {
@@ -312,8 +307,6 @@
         sel.clear();
         if (b.dataset.all) {
           values.forEach(function (v) { sel.add(v); });
-        } else {
-          sel.add(+b.dataset.v);
         }
         onPick(sel);
       });
@@ -383,6 +376,7 @@
     });
     yearsAvail.sort(function (a, b) { return a - b; });
 
+    /* Career season series: All years is the readable default (not latest-only). */
     const state = canvas._chi114s || { years: new Set(yearsAvail), iso: null };
     canvas._chi114s = state;
     yearsAvail.forEach(function (y) { if (!XFP_YEARS.includes(y)) state.years.delete(y); });
@@ -391,7 +385,7 @@
     chips(opts.chips, yearsAvail, state.years, function (sel) {
       state.years = sel;
       drawSeasonXfp(opts);
-    }, "All");
+    }, "All years");
 
     const rows = series.filter(function (r) { return state.years.has(r.season); });
     if (!rows.length) {
@@ -495,6 +489,7 @@
     });
     yearsAvail.sort(function (a, b) { return a - b; });
 
+    /* Career FPOE series: All years (same default as FP/XFP, not latest-only). */
     const state = canvas._chi114f || { years: new Set(yearsAvail), iso: null };
     canvas._chi114f = state;
     yearsAvail.forEach(function (y) { if (!XFP_YEARS.includes(y)) state.years.delete(y); });
@@ -503,7 +498,7 @@
     chips(opts.chips, yearsAvail, state.years, function (sel) {
       state.years = sel;
       drawSeasonFpoe(opts);
-    }, "All");
+    }, "All years");
 
     const rows = series.filter(function (r) { return state.years.has(r.season); });
     if (!rows.length) {
