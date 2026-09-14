@@ -495,7 +495,7 @@ body.sv .brand .sub {
   letter-spacing: 0;
   text-transform: none;
 }
-body.sv .brand-logo { height: 36px; width: 36px; }
+body.sv .brand-logo { height: 36px; width: 36px; max-width: 36px; max-height: 36px; }
 
 .sv-qb { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 14px; }
 .sv-qb-row {

@@ -17,7 +17,13 @@
   max-height: 64px !important;
   object-fit: contain !important;
 }
-img.brand-logo,
+img.brand-logo {
+  max-width: min(460px, 62vw) !important;
+  max-height: 64px !important;
+  object-fit: contain !important;
+}
 .foot-banner {
+  max-width: 100% !important;
+  max-height: 160px !important;
   object-fit: contain !important;
 }
