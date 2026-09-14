@@ -109,6 +109,8 @@ window.AFFL = (function () {
     m14: "logos/pollywogs.png",
     m22: "logos/gabagooners.png",
     m10: "logos/8392c16acb8e.jpg",
+    // CHI-83: no recoverable Chewbacca artwork — locally baked CC badge only
+    m04: "logos/cc-badge.png",
   };
 
   function isLocalLogo(src) {
@@ -152,6 +154,7 @@ window.AFFL = (function () {
 
   function logoMarkSize(cls) {
     const c = String(cls || "");
+    if (/\bw1-award-logo\b/.test(c)) return 64;
     if (/\bth-logo\b/.test(c)) return 64;
     if (/\bfr-logo\b/.test(c) || /\bavatar\b/.test(c)) return 40;
     if (/\btcomp-logo\b/.test(c)) return 36;
@@ -646,7 +649,7 @@ window.AFFL = (function () {
     { owner: "m19", name: "Pasco Pounders", logo: "logos/pounders.png" },
     { owner: "m14", name: "Poulsbo Pollywogs", logo: "logos/pollywogs.png" },
     { owner: "m10", name: "Winston-Salem Wake Snakes", logo: "logos/8392c16acb8e.jpg" },
-    { owner: "m04", name: "Charleston Chewbacca", logo: "" },
+    { owner: "m04", name: "Charleston Chewbacca", logo: "logos/cc-badge.png" },
     { owner: "m16", name: "L.O.B. Thunder", logo: "logos/33f819dd7168.jpg" },
     { owner: "m09", name: "Pawtucket Patriots", logo: "logos/99752fbc7928.gif" },
     { owner: "m12", name: "Muck City Mad Dawgs", logo: "logos/9f4a09db5abc.jpg" },
