@@ -693,13 +693,15 @@
    * beside career 92. Season rows keep season starts + that year's club. */
   function tableCols() {
     const careerBook = isAll() && !state.franchise;
-    return [
+    const cols = [
       ["name", "Player"], ["pos", "Pos"], ["team", "Team"], ["g", "G"],
       ["opp", "Opp"], ["tgt", "Tgt"], ["car", "Car"], ["att", "Att"],
       ["fpts", "FPts"], ["fppg", "FP/G"], ["epa", "EPA"],
       ["starts", careerBook ? "Career starts" : "AFFL starts"],
-      ["fr", "Franchise"], ["bid", "Auction $"],
     ];
+    if (!careerBook) cols.push(["fr", "Franchise"]);
+    cols.push(["bid", "Auction $"]);
+    return cols;
   }
 
   function tableStarts(r) {
@@ -751,6 +753,7 @@
       return;
     }
 
+    const showFr = TCOLS.some(([k]) => k === "fr");
     $("sv-body").innerHTML = sorted.map((r) => `<tr>
       <td>${esc(displayName(r))}</td>
       <td><span class="sv-pos">${esc(r.pos)}</span></td>
@@ -764,7 +767,7 @@
       <td>${fmt(r.fppg, { nd: 2 })}</td>
       <td>${fmt(r.epa, { nd: 1 })}</td>
       <td>${tableStarts(r) || "—"}</td>
-      <td class="sv-fr">${esc(tableFranchise(r) || "—")}</td>
+      ${showFr ? `<td class="sv-fr">${esc(tableFranchise(r) || "—")}</td>` : ""}
       <td>${r.bid == null ? "—" : fmtBid(r.bid)}</td>
     </tr>`).join("");
   }

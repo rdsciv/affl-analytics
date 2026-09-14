@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -157,10 +158,68 @@ def test_source_gates(js: str, html: str) -> None:
     bust = re.search(r"savant\.js\?v=(\d+)", html)
     if not bust:
         fail("savant.html savant.js not cache-busted")
-    elif int(bust.group(1)) < 9:
+    elif int(bust.group(1)) < 14:
         fail(f"savant.js cache still v={bust.group(1)}")
-    if 'src="savant.js?v=9"' not in html:
-        fail("savant.html pin is not savant.js?v=9")
+    if 'src="savant.js?v=14"' not in html:
+        fail("savant.html pin is not savant.js?v=14")
+
+
+def table_col_labels(js: str, is_all: bool, franchise: str | None) -> list[str]:
+    """Evaluate tableCols() headers under a career-book or team-filter state."""
+    fn = re.search(r"function tableCols\(\) \{([\s\S]*?)\n  \}", js)
+    if not fn:
+        fail("cannot parse tableCols")
+        return []
+    season = "all" if is_all else 2025
+    fr_js = "null" if not franchise else json.dumps(franchise)
+    src = (
+        "const ALL = 'all';\n"
+        f"const state = {{ season: {json.dumps(season)}, franchise: {fr_js} }};\n"
+        "function isAll() { return state.season === ALL || state.season == null; }\n"
+        f"function tableCols() {{{fn.group(1)}}}\n"
+        "process.stdout.write(JSON.stringify(tableCols().map((c) => c[1])));\n"
+    )
+    try:
+        out = subprocess.check_output(["node", "-e", src], text=True, timeout=10)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        fail(f"tableCols eval failed: {exc}")
+        return []
+    try:
+        labels = json.loads(out)
+    except json.JSONDecodeError:
+        fail(f"tableCols eval produced non-JSON: {out!r}")
+        return []
+    if not isinstance(labels, list):
+        fail(f"tableCols labels not a list: {labels!r}")
+        return []
+    return [str(x) for x in labels]
+
+
+def test_career_book_omits_franchise(js: str) -> None:
+    career = table_col_labels(js, is_all=True, franchise=None)
+    team = table_col_labels(js, is_all=True, franchise="Westeros Warlords")
+    season = table_col_labels(js, is_all=False, franchise=None)
+    print("career-book headers:", career)
+    print("team-filter headers:", team)
+    print("season headers:", season)
+    if not career:
+        return
+    if "Franchise" in career:
+        fail(f"career-book header list still includes Franchise: {career}")
+    if "Career starts" not in career:
+        fail(f"career-book lost Career starts label: {career}")
+    if "Franchise" not in team:
+        fail(f"team-filter header list missing Franchise: {team}")
+    if "Franchise" not in season:
+        fail(f"season header list missing Franchise: {season}")
+    if "Career starts" in team or "Career starts" in season:
+        fail("Career starts leaked onto a franchise-scoped or season table")
+    if js.count('["fr", "Franchise"]') != 1:
+        fail("tableCols Franchise column is not a single gated push")
+    if "if (!careerBook) cols.push([\"fr\", \"Franchise\"])" not in js:
+        fail("tableCols no longer omits Franchise on career book")
+    if 'class="sv-fr"' in js and "showFr" not in js:
+        fail("renderTable still paints Franchise cells on career book")
 
 
 def test_synthetic_mixup() -> None:
@@ -193,6 +252,7 @@ def main() -> int:
     test_wilson_data(w)
     test_source_gates(js, html)
     test_synthetic_mixup()
+    test_career_book_omits_franchise(js)
 
     if fails:
         print("FAIL")
