@@ -24,6 +24,8 @@ img.brand-logo {
 }
 .foot-banner {
   max-width: 100% !important;
-  max-height: 160px !important;
+  max-height: 64px !important;
+  height: 64px !important;
+  width: auto !important;
   object-fit: contain !important;
 }
